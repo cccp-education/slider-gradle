@@ -1,0 +1,106 @@
+---
+subject: "Reveal.js Upgrade Demo — Transitions & Auto-Animate"
+audience: "Slider Plugin Developers & Contributors"
+duration: 15
+language: "en"
+outputFile: "revealjs-upgrade-demo_en-deck.adoc"
+author:
+  name: "cheroliv"
+  email: "cheroliv@mail.com"
+revealjs:
+  theme: "sky"
+  transition: "slide"
+  slideNumber: "c/t"
+  width: 1408
+  height: 792
+  controls: true
+  controlsLayout: "edges"
+  history: true
+  fragmentInURL: true
+notes:
+  speakerNotes: true
+  pageNotes: true
+  pageNotesStyle: "DETAILED"
+slides:
+- title: "Agenda"
+  speakerHint: "Introduce the demo: we validate reveal.js 5.2.1 transitions, per-slide overrides, and Auto-Animate."
+  pageNotesHint: "This slide uses the global 'slide' transition (default). No regression expected."
+
+- title: "Transition 'slide' (Default)"
+  speakerHint: "Navigate forward to experience the default slide transition. Smooth 3D slide movement using CSS transforms."
+  pageNotesHint: "The old reveal.js 3.9.1 used 'linear' — a flat 1D glide. Now we have smooth 3D transforms."
+  transition: "slide"
+
+- title: "Transition 'zoom' Override"
+  speakerHint: "This slide overrides the global transition to zoom. Notice the dramatic zoom-in effect."
+  pageNotesHint: "Check HTML: data-transition='zoom' attribute on the section element."
+  transition: "zoom"
+
+- title: "Transition 'fade' Override"
+  speakerHint: "A subtle fade-in transition. Clean and professional."
+  pageNotesHint: "Transitions: none, fade, slide, convex, concave, zoom are all supported."
+  transition: "fade"
+
+- title: "Transition 'convex' Override"
+  speakerHint: "Convex gives a 3D rotation feel. Try navigating back to see the reverse effect."
+  pageNotesHint: "Per-slide transitions override the global setting from revealjs.transition."
+  transition: "convex"
+
+- title: "Transition 'concave' Override"
+  speakerHint: "Concave is the inverse of convex. Each transition has a unique visual signature."
+  pageNotesHint: "Available via the transition field in SlideHint data class (models.kt:77)."
+  transition: "concave"
+
+- title: "Auto-Animate — Introduction"
+  speakerHint: "Starting from v4.0, reveal.js supports Auto-Animate. Elements with matching IDs animate automatically between adjacent slides."
+  pageNotesHint: "Auto-Animate is exposed in SlideHint: autoAnimate, autoAnimateEasing, autoAnimateDuration."
+  autoAnimate: true
+  autoAnimateEasing: "ease-in-out"
+  autoAnimateDuration: 1.0
+
+- title: "Auto-Animate — Benefits"
+  speakerHint: "Notice how elements animate smoothly without manual CSS. Matching elements between slides morph automatically."
+  pageNotesHint: "The AsciiDoc uses [%auto-animate] role on both slides. reveal.js handles the rest."
+  autoAnimate: true
+  autoAnimateEasing: "ease-in-out"
+  autoAnimateDuration: 1.0
+
+- title: "Auto-Animate — Code Evolution"
+  speakerHint: "Auto-Animate is great for showing code changes step by step."
+  pageNotesHint: "Use auto-animate pairs for: code evolution (add/remove lines), list growth, element repositioning, style transitions."
+  autoAnimate: true
+  autoAnimateEasing: "ease-in-out"
+  autoAnimateDuration: 0.8
+
+- title: "Auto-Animate — Result"
+  speakerHint: "See how new lines appear, removed lines fade out, and structure changes smoothly."
+  pageNotesHint: "Both slides must have [%auto-animate] to form a valid pair."
+  autoAnimate: true
+  autoAnimateEasing: "ease-in-out"
+  autoAnimateDuration: 0.8
+
+- title: "Mixed: Slide + Auto-Animate"
+  speakerHint: "Standard slide without auto-animate. Used as a section separator."
+  pageNotesHint: "No autoAnimate here — this is a normal section break between auto-animate groups."
+
+- title: "Mixed: Auto-Animate Group Start"
+  speakerHint: "Back to auto-animate for a new sequence. You can mix normal slides and auto-animate groups freely."
+  pageNotesHint: "Auto-animate only triggers between adjacent slides that both have it enabled."
+  autoAnimate: true
+  autoAnimateEasing: "ease-in-out"
+  autoAnimateDuration: 1.2
+
+- title: "Mixed: Auto-Animate Group End"
+  speakerHint: "End of the second auto-animate group."
+  pageNotesHint: "No restriction on how many auto-animate groups a deck contains."
+  autoAnimate: true
+  autoAnimateEasing: "ease-in-out"
+  autoAnimateDuration: 1.2
+
+- title: "Regression Check"
+  speakerHint: "This slide has no custom transition and no auto-animate. It should behave exactly like pre-upgrade slides."
+  pageNotesHint: "Verification: no data-transition override, no [%auto-animate] role, standard slide rendering."
+
+- title: "Summary & Validation Results"
+  speakerHint: "What we validated: smooth CSS transform transitions (no more 1D glide), per-slide transition overrides, Auto-Animate visual continuity, zero regression on default slides."
+  pageNotesHint: "EPIC SLD-1 complete: reveal.js 5.2.1 + gem 5.0.0 + transitions + auto-animate = modern slide experience."

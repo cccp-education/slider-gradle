@@ -1,0 +1,281 @@
+= Introduction à Kotlin
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Pourquoi Kotlin ?
+
+[%step]
+* Moins de boilerplate que Java
+* Null safety intégrée au compilateur
+* Interopérable à 100% avec Java
+* Adopté par Google pour Android (langage officiel depuis 2019)
+* Utilisé par Netflix, Uber, Pinterest, Trello...
+
+[NOTE.speaker]
+--
+Partir du ressenti quotidien Java : boilerplate, NPE, verbosité.
+Kotlin répond à chacun de ces problèmes.
+--
+
+[.notes]
+Statistiques adoption Kotlin JetBrains 2023 : 60%+ des développeurs
+Android utilisent Kotlin. Interopérabilité Java garantie.
+
+[%auto-animate,auto-animate-easing="ease-in-out",auto-animate-duration=1.0]
+== Null Safety
+
+Le problème en Java :
+
+[source,java]
+----
+String name = null;
+System.out.println(name.length()); // NullPointerException !
+----
+
+*C'est l'erreur la plus coûteuse de l'histoire de Java* (Tony Hoare : "my billion-dollar mistake").
+
+[NOTE.speaker]
+--
+Montrer un NPE classique Java puis la même logique en Kotlin.
+Le compilateur devient le filet de sécurité.
+--
+
+[.notes]
+Tony Hoare a inventé les références nulles en 1965.
+En 2009, il s'en excuse publiquement.
+
+[%auto-animate,auto-animate-easing="ease-in-out",auto-animate-duration=1.0]
+== Null Safety — La Solution Kotlin
+
+En Kotlin :
+
+[source,kotlin]
+----
+var name: String = "Hello"  // non-nullable
+var maybeNull: String? = null  // nullable — explicite !
+
+println(name.length)     // OK
+println(maybeNull.length) // ERREUR DE COMPILATION — pas d'exception !
+----
+
+[%step]
+* `String` = jamais null (garanti par le compilateur)
+* `String?` = peut être null (on doit le traiter explicitement)
+* `?` et `?:` pour accéder/protéger en sécurité
+
+[NOTE.speaker]
+--
+Avec Kotlin, le compilateur refuse de compiler un appel nullable
+non sécurisé. Zéro NPE au runtime.
+--
+
+[.notes]
+Comparer la vérification au compile-time vs le risque runtime en Java.
+Exercice : migrer un POJO Java nullable en data class Kotlin.
+
+[.slide,data-transition="convex"]
+== Data Classes
+
+=== Java POJO (40+ lignes)
+
+[source,java]
+----
+public class Person {
+    private String name;
+    private int age;
+    public Person(String name, int age) { /* ... */ }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public int getAge() { return age; }
+    public void setAge(int age) { this.age = age; }
+    public boolean equals(Object o) { /* ... */ }
+    public int hashCode() { /* ... */ }
+    public String toString() { /* ... */ }
+}
+----
+
+[NOTE.speaker]
+--
+Comparer le ratio lignes Java POJO vs data class Kotlin.
+equals/hashCode/toString/copy sont gratuits.
+--
+
+[.notes]
+Exemple Java POJO complet. Exercice : vérifier equals/copy après migration.
+
+=== Data Class Kotlin (1 ligne)
+
+[source,kotlin]
+----
+data class Person(val name: String, val age: Int)
+----
+
+*C'est tout.* `equals()`, `hashCode()`, `toString()`, `copy()` sont générés automatiquement.
+
+[%auto-animate,auto-animate-easing="ease-in-out",auto-animate-duration=0.8]
+== Extension Functions
+
+Au lieu d'écrire une classe utilitaire Java :
+
+[source,java]
+----
+public class StringUtils {
+    public static String capitalize(String s) {
+        if (s == null || s.isEmpty()) return s;
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+}
+// Usage : StringUtils.capitalize("hello")
+----
+
+[NOTE.speaker]
+--
+On n'hérite pas, on n'enveloppe pas — on étend. Les extensions remplacent
+les classes utilitaires statiques Java type StringUtils.
+--
+
+[.notes]
+Exemple de remplacement d'une méthode statique utilitaire par une
+extension function Kotlin sur le même type.
+
+[%auto-animate,auto-animate-easing="ease-in-out",auto-animate-duration=0.8]
+== Extension Functions — Exemple Kotlin
+
+On étend directement `String` :
+
+[source,kotlin]
+----
+fun String.capitalize(): String {
+    if (isEmpty()) return this
+    return this[0].uppercaseChar() + substring(1)
+}
+// Usage : "hello".capitalize()  // beaucoup plus naturel !
+----
+
+[%step]
+* Ajoute des méthodes à des classes existantes *sans héritage*
+* Résolution *statique* — pas de monkey patching
+* Pas d'accès aux membres privés de la classe cible
+
+[NOTE.speaker]
+--
+Voyez comme une classe StringUtils Java se transforme en une simple
+extension function Kotlin.
+--
+
+[.notes]
+Exercice : réécrire une classe *Utils Java du projet en extension functions.
+
+== Extension Functions — Scope et Limites
+
+[%step]
+* Pas d'accès aux membres `private` de la classe étendue
+* Résolution statique (compile-time), pas dynamique (runtime)
+* Ne remplace pas les membres existants de la classe
+* Ce n'est pas du monkey patching !
+
+[source,kotlin]
+----
+// Une extension ne peut PAS accéder à un champ private
+fun String.secretLength(): Int = this.secretField // ❌ ERREUR
+----
+
+[NOTE.speaker]
+--
+Clarifier : pas d'accès aux membres privés, résolution statique.
+Ce n'est pas du monkey patching — c'est du sucre syntaxique puissant.
+--
+
+[.notes]
+Différence entre extension function et membre de classe : limites d'accès.
+Réf : kotlinlang.org/docs/extensions.html
+
+[.slide,data-transition="fade"]
+== Lambdas et Fonctions d'Ordre Supérieur
+
+=== En Java (Streams)
+
+[source,java]
+----
+List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+List<String> upper = names.stream()
+    .filter(n -> n.length() > 3)
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+----
+
+=== En Kotlin
+
+[source,kotlin]
+----
+val names = listOf("Alice", "Bob", "Charlie")
+val upper = names
+    .filter { it.length > 3 }
+    .map { it.uppercase() }
+// Trailing lambda : plus lisible, moins de bruit !
+----
+
+[NOTE.speaker]
+--
+Connecter avec les streams Java 8 que le public connaît.
+La syntaxe trailing lambda allège l'écriture.
+--
+
+[.notes]
+Exemple filter/map Kotlin vs stream Java équivalent.
+Exercice : remplacer une boucle for Java par une chaîne filter/map Kotlin.
+
+[.slide,data-transition="concave"]
+== Coroutines — Aperçu
+
+*Planter la graine uniquement — le sujet mérite une formation dédiée.*
+
+[%step]
+* Les coroutines sont des *threads légers* pour l'asynchrone
+* `suspend fun` = fonction qui peut se mettre en pause sans bloquer le thread
+* Remplacent les callback hell et CompletableFuture complexes
+
+[source,kotlin]
+----
+suspend fun fetchUser(id: String): User {
+    val data = httpClient.get("/users/$id")  // suspend — non bloquant
+    return parseUser(data)
+}
+----
+
+[NOTE.speaker]
+--
+Comparaison conceptuelle CompletableFuture Java vs coroutine Kotlin
+sur le même cas d'usage asynchrone. Plus simple, plus lisible.
+--
+
+[.notes]
+Réf : kotlinlang.org/docs/coroutines-overview.html
+
+== Synthèse et Prochaines Étapes
+
+Ce qu'on a vu :
+
+[%step]
+* *Null Safety* — fin des NPE au runtime
+* *Data Classes* — 1 ligne vs 40 lignes Java
+* *Extension Functions* — étendre sans hériter
+* *Lambdas* — concises et expressives
+* *Coroutines* — l'asynchrone simplifié
+
+[NOTE.speaker]
+--
+Tour de table : qu'est-ce qui était surprenant ?
+Qu'est-ce qui donne envie d'essayer maintenant ?
+--
+
+[.notes]
+Ressources : Kotlin in Action (livre), play.kotlinlang.org (bac à sable),
+kotlinlang.org/docs/idioms.html. Quiz formatif 5 questions null safety +
+extension functions. Projet fil rouge : migrer un module Java → Kotlin.

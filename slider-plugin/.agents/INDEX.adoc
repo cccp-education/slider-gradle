@@ -5,7 +5,7 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-05-10
-_Session en cours_ : 002 TERMINE — Prochaine 003
+_Session en cours_ : 003 TERMINE — Prochaine 004
 
 '''
 == REGLES ABSOLUES (resume)
@@ -24,7 +24,7 @@ _Session en cours_ : 002 TERMINE — Prochaine 003
 | # | Date | Type | Sujet | Score
 | 001 | 2026-05-10 | feat | EPIC SLD-1 — US-1.1 + US-1.2 (Upgrade reveal.js + Transition) | ✅ TERMINE
 | 002 | 2026-05-10 | feat | EPIC SLD-1 — US-1.3 + US-1.4 (Auto-Animate + Tests) | ✅ TERMINE
-| 003 | 2026-05-10 | feat | EPIC SLD-1 — US-1.5 (Validation dogfooding) | 🔴 A DEMARRER
+| 003 | 2026-05-10 | feat | EPIC SLD-1 — US-1.5 (Validation dogfooding) | ✅ TERMINE
 |===
 
 '''
@@ -33,7 +33,7 @@ _Session en cours_ : 002 TERMINE — Prochaine 003
 |===
 | EPIC | Description | Statut | Priorite
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
-| SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | 🟡 EN COURS (4/5 US) | P0
+| SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
 |===
 
 '''
@@ -49,7 +49,7 @@ le DeckContext YAML.
 | US-1.2 | Exposer `transition` dans `RevealJsContext` + `data-transition` per-slide | ✅ TERMINE
 | US-1.3 | Exposer Auto-Animate dans `SlideHint` + system prompt | ✅ TERMINE
 | US-1.4 | Tests Cucumber — scenarios transition + auto-animate (17/17 PASS) | ✅ TERMINE
-| US-1.5 | Validation dogfooding — deck avec transitions custom + auto-animate | 🔴 TODO
+| US-1.5 | Validation dogfooding — deck avec transitions custom + auto-animate | ✅ TERMINE
 |===
 
 '''

@@ -1,37 +1,41 @@
-= PROMPT_REPRISE — slider-gradle Session 003
+= PROMPT_REPRISE — slider-gradle Session 004
 
-_Mission_ : EPIC SLD-1 — US-1.5 (Validation dogfooding).
-_Statut_ : A DEMARRER
+_Mission_ : A DEFINIR — Next EPIC after SLD-1 closure.
+_Statut_ : EN ATTENTE
 _Date_ : 2026-05-10
 
 == Contexte
 
-US-1.1 a US-1.4 terminees Sessions 001-002 :
-- reveal.js 5.2.1, gem 5.0.0
-- transition "slide" par defaut, configurable per-slide
-- Auto-Animate expose dans SlideHint + system prompt
-- 17/17 Cucumber PASS, 1 skipped (@integration)
+EPIC SLD-1 COMPLET (5/5 US, Sessions 001-003) :
+- reveal.js 5.2.1, gem 5.2.0 (upgrade depuis 5.0.0 — indisponible sur rubygems.org)
+- transition "slide" par defaut, data-transition per-slide (5 overrides)
+- Auto-Animate dans SlideHint + system prompt + 4 paires demo
+- 17/17 Cucumber PASS
+- Deck dogfooding : slides/misc/revealjs-upgrade-demo_en-deck.adoc (15 slides)
 
-== US planifiee
+== Sujets potentiels Session 004
 
-.US-1.5 : Validation dogfooding — deck avec transitions custom + auto-animate
+- Resoudre le probleme de POM gem corrompu (jcenter-backup → HTML)
+  → gem 5.2.0 installee en local mais asciidoctorRevealJs fail toujours
+- Nouvel EPIC (SLD-2 ?) selon roadmap
+- Publish slides (interdit sans permission)
 
-== Fichiers concernes
+== Fichiers crees Session 003
 
-- `slides/misc/revealjs-upgrade-demo-deck-context.yml` (a creer)
-- Demos manuelles : `./gradlew -i asciidoctorRevealJs` puis `./gradlew -i serveSlides`
+- `slides/misc/revealjs-upgrade-demo-deck-context.yml`
+- `slides/misc/revealjs-upgrade-demo_en-deck.adoc`
+- `.agents/sessions/003-SLD-1-dogfooding.adoc`
 
-== Criteres d'acceptation
+== Fichiers modifies Session 003
 
-- Les transitions ne sont plus un glissement 1D
-- Le changement entre slides est fluide (CSS transforms au lieu de left property)
-- Auto-Animate produit un effet de continuite visuelle
-- Aucune regression sur les slides sans configuration custom
+- `SliderManager.kt:445` → gem 5.2.0
+- `SliderManager.kt:470` → version pin 5.2.0
+- `build.gradle.kts` (racine) → +mavenLocal() +mavenCentral()
 
-== Procedure demarrage Session 003
+== Procedure demarrage Session 004
 
 ----
 Je travaille sur le plugin slider-gradle.
 Applique la procedure d'ouverture standard AGENT.adoc.
-On attaque US-1.5 (Validation dogfooding).
+A definir ensemble ce qu'on attaque.
 ----

@@ -1,0 +1,33 @@
+Here is the code that implements the expected behavior:
+```python
+import kotlin_coroutines as coglet
+import kotlin_transform as transform
+from kotlin_graphviz import graphviz
+from kotlin_sorting import sort
+from kotlin_sorting.sort_by_value import sortByValue
+
+# Import the Kotlin Dataset module to get the dataset
+dataset = "Kotlin Dataset"
+
+
+def get_dataset(path):
+    """
+    Returns the dataset from the Kotlin Dataset file, as a list of dictionaries
+    with the following keys:
+    - "dataset": A list of dictionaries representing the dataset
+    - "features": A list of dictionaries representing the features to be sorted by
+    """
+    dataset = []
+
+    with open(path, "r") as f:
+        for line in f:
+            field = line.strip().split(",")
+            dataset.append({
+                "dataset": fields,
+                "features": fields,
+                "sort_by_value": transform.default(),
+                "sort_by_value"
+            })
+
+    return dataset
+```

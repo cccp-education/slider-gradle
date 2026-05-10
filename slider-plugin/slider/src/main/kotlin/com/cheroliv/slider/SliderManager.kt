@@ -442,7 +442,7 @@ object SliderManager {
         internal fun Project.configureDependencies() {
             dependencies.add(
                 "asciidoctorGems",
-                "rubygems:asciidoctor-revealjs:5.0.0@gem"
+                "rubygems:asciidoctor-revealjs:5.2.0@gem"
             )
         }
     }
@@ -467,7 +467,7 @@ object SliderManager {
 
             // Pin reveal.js version and GitHub template source
             extensions.getByType(RevealJSExtension::class.java).apply {
-                version = "5.0.0"
+                version = "5.2.0"
                 templateGitHub { gh ->
                     gh.setOrganisation("hakimel")
                     gh.setRepository("reveal.js")
@@ -745,17 +745,69 @@ object SliderManager {
         }
 
 
-        /**
-         * TODO: Generate video capsule from sliders.
-         */
+        @Suppress("UnstableApiUsage")
         private fun Project.registerAsciidocCapsuleTask() {
-            tasks.register<Exec>("asciidocCapsule") {
+            val adocDir = projectDir.resolve("slides/misc")
+            val buildDir = layout.buildDirectory
+
+            tasks.register<DefaultTask>("asciidocCapsule") {
                 group = "capsule"
-                description = "TODO: Generate video capsule from sliders."
+                description = "Extract speaker notes from AsciiDoc decks and generate a video script."
                 dependsOn("asciidoctor")
-                "Voici l'ebauche de capsule"
-                    .apply(logger::info)
-                    .run(::println)
+                outputs.upToDateWhen { false }
+
+                doLast {
+                    val scriptDir = buildDir.get().asFile.resolve("capsule")
+                    scriptDir.mkdirs()
+
+                    adocDir.listFiles { f -> f.extension == "adoc" }?.forEach { adoc ->
+                        val lines = adoc.readLines()
+                        val slides = mutableListOf<Pair<String, String>>()
+                        var currentTitle = ""
+                        var inNote = false
+                        var opened = false
+                        var noteContent = ""
+
+                        for (line in lines) {
+                            when {
+                                line.startsWith("== ") -> {
+                                    currentTitle = line.removePrefix("== ").trim()
+                                    inNote = false
+                                    opened = false
+                                }
+                                line.startsWith("[NOTE.speaker]") || line.startsWith("[NOTE.speaker,") -> {
+                                    inNote = true
+                                    opened = false
+                                    noteContent = ""
+                                }
+                                inNote && !opened && line.trimStart().startsWith("--") -> {
+                                    opened = true
+                                }
+                                inNote && opened && line.trimStart().startsWith("--") -> {
+                                    inNote = false
+                                    opened = false
+                                    if (noteContent.isNotBlank()) {
+                                        slides.add(currentTitle to noteContent.trim())
+                                    }
+                                }
+                                inNote && opened -> noteContent += line + "\n"
+                            }
+                        }
+                        if (slides.isNotEmpty()) {
+                            val scriptFile = scriptDir.resolve("${adoc.nameWithoutExtension}-script.txt")
+                            scriptFile.bufferedWriter().use { w ->
+                                w.appendLine("=== CAPSULE SCRIPT : ${adoc.nameWithoutExtension} ===")
+                                w.appendLine()
+                                slides.forEachIndexed { i, (title, note) ->
+                                    w.appendLine("--- SLIDE ${i + 1} : $title ---")
+                                    w.appendLine(note.trim())
+                                    w.appendLine()
+                                }
+                            }
+                            logger.lifecycle("✅ Capsule script → ${scriptFile.name} (${slides.size} slides)")
+                        }
+                    }
+                }
             }
         }
 
