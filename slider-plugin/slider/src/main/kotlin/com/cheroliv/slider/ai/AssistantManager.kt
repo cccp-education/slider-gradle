@@ -470,6 +470,7 @@ no explanation, no preamble:
   "author": { "name": "string", "email": "string" },
   "revealjs": {
     "theme": "string",
+    "transition": "slide",
     "slideNumber": "c/t",
     "width": 1408,
     "height": 792,
@@ -536,6 +537,7 @@ Output raw AsciiDoc ONLY — no markdown, no explanations, no code fences around
 = <subject>
 <author name> <<author email>>
 :revealjs_theme: <theme>
+:revealjs_transition: <transition>
 :revealjs_slideNumber: <slideNumber>
 :revealjs_width: <width>
 :revealjs_height: <height>
@@ -549,6 +551,9 @@ Output raw AsciiDoc ONLY — no markdown, no explanations, no code fences around
 Each slide: == Slide Title
 Speaker notes (if speakerNotes=true): [NOTE.speaker] -- … --
 Page notes   (if pageNotes=true):     [.notes] -- … --
+
+Per-slide transition override: [.slide, data-transition="zoom"]
+Add this line right after the == heading on any slide.
 
 pageNotesStyle controls [.notes] depth:
   MINIMAL        → one reference line
@@ -585,6 +590,7 @@ pageNotesStyle controls [.notes] depth:
             appendLine()
             appendLine("Reveal.js configuration:")
             appendLine("  theme        : ${ctx.revealjs.theme}")
+            appendLine("  transition   : ${ctx.revealjs.transition}")
             appendLine("  slideNumber  : ${ctx.revealjs.slideNumber}")
             appendLine("  width        : ${ctx.revealjs.width}")
             appendLine("  height       : ${ctx.revealjs.height}")
@@ -600,6 +606,7 @@ pageNotesStyle controls [.notes] depth:
                 appendLine("Slide hints (follow this order and these titles exactly):")
                 ctx.slides.forEach { hint ->
                     appendLine("  - title: ${hint.title}")
+                    hint.transition?.let   { appendLine("    transition: $it") }
                     hint.speakerHint?.let  { appendLine("    speakerHint: $it") }
                     hint.pageNotesHint?.let { appendLine("    pageNotesHint: $it") }
                 }

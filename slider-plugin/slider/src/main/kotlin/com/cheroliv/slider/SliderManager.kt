@@ -442,7 +442,7 @@ object SliderManager {
         internal fun Project.configureDependencies() {
             dependencies.add(
                 "asciidoctorGems",
-                "rubygems:asciidoctor-revealjs:3.1.0@gem"
+                "rubygems:asciidoctor-revealjs:5.0.0@gem"
             )
         }
     }
@@ -467,11 +467,11 @@ object SliderManager {
 
             // Pin reveal.js version and GitHub template source
             extensions.getByType(RevealJSExtension::class.java).apply {
-                version = "3.1.0"
+                version = "5.0.0"
                 templateGitHub { gh ->
                     gh.setOrganisation("hakimel")
                     gh.setRepository("reveal.js")
-                    gh.setTag("3.9.1")
+                    gh.setTag("5.2.1")
                 }
             }
         }
@@ -590,7 +590,7 @@ object SliderManager {
                             RevealJsSlides.IDSEPARATOR_KEY to "-",
                             RevealJsSlides.DOCINFO_KEY to "shared",
                             RevealJsSlides.REVEALJS_THEME_KEY to "black",
-                            RevealJsSlides.REVEALJS_TRANSITION_KEY to "linear",
+                            RevealJsSlides.REVEALJS_TRANSITION_KEY to "slide",
                             RevealJsSlides.REVEALJS_HISTORY_KEY to "true",
                             RevealJsSlides.REVEALJS_SLIDENUMBER_KEY to "true"
                         )

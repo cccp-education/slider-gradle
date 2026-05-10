@@ -1,0 +1,41 @@
+= AGENT.adoc — Slider Gradle
+
+_Produit_ : Slide Deck Generator comme plugin Gradle
+_Licence_ : Apache 2.0 (OSS)
+_DAG_ : N2 — Plugin Gradle de generation de presentations
+_Reveal.js_ : 3.9.1 (cible upgrade 5.2.1)
+
+== Principe
+
+Le plugin `slider` genere automatiquement des slides Reveal.js
+a partir de fichiers AsciiDoc + contexte DeckContext (YAML).
+Il integre generation LLM (Gemini/HuggingFace/Mistral) pour
+la creation de contenu structure.
+
+== Regles Absolues
+
+=== 1. COMMITS/GIT — INTERDICTION FORMELLE sans permission
+=== 2. PUBLISH — INTERDICTION FORMELLE sans permission
+=== 3. DAG N2 — importable par N3 engine, jamais importe N3
+=== 4. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES (voir `.agents/SESSION_PROCEDURE.adoc`)
+=== 5. HOOK OUVERTURE — Checklist `.agents/SESSION_CHECKLIST.adoc` obligatoire
+=== 6. ZERO secret/token/api key en dur dans le code source
+
+== Taches Principales
+
+  ./gradlew -i asciidoctorRevealJs  → build les slides
+  ./gradlew -i serveSlides          → preview local
+  ./gradlew publishSlides           → deploy GitHub Pages
+  ./gradlew check                   → tous les tests (unitaire + fonctionnel + Cucumber)
+
+== Tests
+
+Le projet utilise JUnit5, GradleTestKit et Cucumber BDD.
+Toute modification de code source DOIT passer `./gradlew check`
+(sauf permission contraire).
+
+== Ne remplace PAS opencode
+
+Le plugin est invoque PAR opencode (via tool use).
+Il automatise la generation de slides, mais la validation
+reste humaine.

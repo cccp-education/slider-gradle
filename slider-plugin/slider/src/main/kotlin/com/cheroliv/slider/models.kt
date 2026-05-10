@@ -72,6 +72,7 @@ data class SlideHint(
     val title: String,
     val speakerHint: String? = null,
     val pageNotesHint: String? = null,
+    val transition: String? = null,
 )
 
 data class AuthorContext(
@@ -81,6 +82,7 @@ data class AuthorContext(
 
 data class RevealJsContext(
     val theme: String = "sky",
+    val transition: String = "slide",
     val slideNumber: String = "c/t",
     val width: Int = 1408,
     val height: Int = 792,

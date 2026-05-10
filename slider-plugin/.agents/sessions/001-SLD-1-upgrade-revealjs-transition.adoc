@@ -1,0 +1,30 @@
+= Session 001 — EPIC SLD-1 — US-1.1 + US-1.2
+:author: cheroliv + opencode (deepseek-v4-pro)
+:date: 2026-05-10
+:status: TERMINE
+
+== Résumé
+
+US-1.1 (Upgrade reveal.js + gem) et US-1.2 (Exposer transition)
+terminées en 1 session. Compilation OK ✅.
+
+== Fichiers modifiés
+
+[cols="2,2,5"]
+|===
+| Fichier | Ligne(s) | Changement
+| `models.kt` | 75, 84 | `SlideHint.transition: String?`, `RevealJsContext.transition: String = "slide"`
+| `SliderManager.kt` | 445, 470-475, 593 | Gem 5.0.0, reveal.js 5.2.1, transition "slide"
+| `AssistantManager.kt` | 473, 539, 552-553, 590, 605 | JSON schema + system prompts + user messages
+|===
+
+== US livrées
+
+- [x] *US-1.1* — reveal.js 3.9.1→5.2.1, gem asciidoctor-revealjs 3.1.0→5.0.0
+- [x] *US-1.2* — `transition` dans RevealJsContext + SlideHint + propagation complète
+
+== Vérifications
+
+- CompileKotlin: PASS ✅
+- Secret scan: OK (faux positifs dev pgvector)
+- Git: clean, sur main
