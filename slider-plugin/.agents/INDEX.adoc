@@ -12,7 +12,7 @@ _Session en cours_ : 004 EN COURS — SLD-2 Playwright + Rendu Visuel
 
 === 1. COMMITS/GIT — INTERDICTION FORMELLE sans permission
 === 2. PUBLISH — INTERDICTION FORMELLE sans permission (publishSlides inclus)
-=== 3. DAG N2 — importable par N3 engine, jamais importe N3
+=== 3. DAG N2 — importable par N3 runner-gradle, jamais importe N3
 === 4. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES
 === 5. HOOK OUVERTURE — Checklist SESSION_CHECKLIST.adoc obligatoire
 === 6. ZERO secret/token/api key en dur dans le code source
