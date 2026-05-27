@@ -1,0 +1,37 @@
+= PROMPT_REPRISE — slider-gradle
+:session: 004
+:date: 2026-05-27
+:status: EN COURS
+
+== Contexte
+
+Dernière session terminée : *003* — EPIC SLD-1 US-1.5 (Validation dogfooding) ✅
+Session *004* en cours — EPIC SLD-2 Playwright + Rendu Visuel.
+
+EPIC SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US)
+EPIC SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS
+
+US-2.1 à US-2.4 terminées :
+- US-2.1 : Playwright via node-gradle ✅
+- US-2.2 : Tâche slider:visualTest — screenshot chaque slide ✅
+- US-2.3 : Theme CSS pro (typo, palette Talaria, header/footer, barre progression) ✅
+- US-2.4 : Tests validation visuelle Playwright — 10 contraintes P0/P1/P2 ✅
+
+Reste à faire :
+- *US-2.5* : Feed capsule — Playwright screenshots → JSON attendu par capsule-gradle 🔴 A FAIRE
+
+== Prochaine Mission
+
+Terminer l'EPIC SLD-2 en implémentant l'US-2.5 :
+- Capturer les screenshots Playwright au format JSON
+- Exporter un feed structuré consommable par capsule-gradle
+- Valider l'intégration cross-borough slider → capsule
+
+== Rappels
+
+- GroupId : `education.cccp`
+- Plugin ID : `education.cccp.slider`
+- Version : 0.0.6
+- DAG : N2 — Plugin Gradle de génération de présentations
+- Tests : `./gradlew check` (unit + functionalTest + cucumberTest)
+- Build slides : `./gradlew -i asciidoctorRevealJs`
