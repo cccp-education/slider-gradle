@@ -1,7 +1,8 @@
 = Test Coverage Analysis — Slider Gradle
 
-_Statut session 005_ : SLD-3a Playwright-jvm e2e foundations. 1 nouveau test (SliderPlaywrightE2eTest.kt, 177 lignes). GradleRunner BUILD SUCCESSFUL ✅, Playwright navigate ⚠️ file:// CDN.
+_Statut session 006_ : SLD-3a Playwright E2E fix. 3 bugs corrigés, test unitaire Playwright PASSED (49s). 1 fichier modifié : `SliderPlaywrightE2eTest.kt`.
 
 | Session | Fichiers testés | Couverture | Notes
+| 006 | `SliderPlaywrightE2eTest.kt` (242 lignes, 1 test + 1 helper) — GradleRunner mavenLocal → asciidoctorRevealJs BUILD SUCCESSFUL, HTTP local (npx serve) navigate, Playwright assertions title/slides/h2/bounding box/screenshot PASS | 1/1 Gradle ✅, 1/1 Playwright ✅ | 3 bugs corrigés : (1) file:// → HTTP npx serve + startHttpServer polling, (2) chemin output build/docs/asciidocRevealJs/intro.html, (3) strict mode .first() sur 4 sections. Screenshot > 10 KB, bbox viewport contrainte OK.
 | 005 | `SliderPlaywrightE2eTest.kt` (177 lignes, 1 test) — GradleRunner mavenLocal → asciidoctorRevealJs BUILD SUCCESSFUL, HTML généré ✅, Playwright navigate ⚠️ file:// + reveal.js CDN ne charge pas en headless | 1/1 Gradle ✅, 0/1 Playwright ⚠️ | TODO session 006 : servir HTML via HTTP local (npx serve) avant Playwright navigate. Assertions UX/UI viewport déjà codées. |
 | 002 | `RevealJsTransitionSteps.kt`, `MinimalSteps.kt` — Cucumber | 17/17 PASS | Cucumber BDD — parsing transitions + auto-animate model validation |

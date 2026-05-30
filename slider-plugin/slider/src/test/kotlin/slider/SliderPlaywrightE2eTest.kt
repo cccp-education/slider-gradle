@@ -8,24 +8,30 @@ import org.assertj.core.api.Assertions.assertThat
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 
 /**
  * E2E test Playwright-jvm pour le pipeline slider-gradle.
  *
- * 3 assertions :
+ * 5 assertions :
  * - generateSlides BUILD SUCCESSFUL
  * - index.html contient reveal.js (.reveal .slides)
+ * - Titre, slide visible, h2 visible
+ * - Bounding box slide dans le viewport
  * - Screenshot > 10 KB (page non-vide)
+ *
+ * Le HTML généré est servi via HTTP local (npx serve)
+ * pour permettre la résolution des dépendances CDN externes
+ * (reveal.js, bootstrap, jquery) que file:// bloque.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SliderPlaywrightE2eTest {
@@ -47,6 +53,48 @@ class SliderPlaywrightE2eTest {
     fun closeBrowser() {
         browser.close()
         playwright.close()
+    }
+
+    /**
+     * Démarre `npx serve` sur [port] en servant [serveRoot] et attend que le serveur
+     * soit prêt (HTTP 200 sur la racine). Retourne le [Process] démarré.
+     *
+     * @throws RuntimeException si le serveur ne répond pas dans les 15 secondes.
+     */
+    private fun startHttpServer(serveRoot: Path, port: Int = 4333): Process {
+        val process = ProcessBuilder(
+            "npx", "serve", serveRoot.toAbsolutePath().toString(),
+            "--listen", port.toString(),
+            "--no-clipboard",      // désactive la copie auto dans le presse-papier
+            "--no-port-switching"  // ne change pas de port si occupé
+        )
+            .directory(serveRoot.toFile())
+            .redirectErrorStream(true)
+            .start()
+
+        // Attend que le serveur réponde (max 15s)
+        val deadline = System.currentTimeMillis() + 15_000
+        val url = URI("http://localhost:$port").toURL()
+        while (System.currentTimeMillis() < deadline) {
+            if (!process.isAlive) {
+                val stderr = process.inputStream.bufferedReader().readText()
+                throw RuntimeException("npx serve exited prematurely: $stderr")
+            }
+            try {
+                val conn = url.openConnection() as HttpURLConnection
+                conn.connectTimeout = 500
+                conn.readTimeout = 500
+                conn.requestMethod = "GET"
+                if (conn.responseCode in 200..399) {
+                    return process
+                }
+            } catch (_: Exception) {
+                // pas encore prêt
+            }
+            Thread.sleep(500)
+        }
+        process.destroyForcibly()
+        throw RuntimeException("npx serve did not respond within 15s on port $port")
     }
 
     @Test
@@ -122,56 +170,75 @@ class SliderPlaywrightE2eTest {
             .`as`("asciidoctorRevealJs should succeed")
             .isEqualTo(org.gradle.testkit.runner.TaskOutcome.SUCCESS)
 
-        // ── 3. Vérifier le HTML généré — index.html (Reveal.js) ──
-        val slideHtml = tempDir.resolve("slides/misc/index.html").toFile()
-        assertThat(slideHtml.exists()).`as`("index.html should exist in slides/misc/").isTrue()
-        assertThat(slideHtml.length()).`as`("index.html should not be empty").isGreaterThan(100)
+        // ── 3. Vérifier le HTML généré ──
+        // Asciidoctor-gradle produit les slides reveal.js dans build/docs/asciidocRevealJs/
+        // (pas dans slides/misc/ qui contient les sources .adoc + le template index.html)
+        val slideOutputDir = tempDir.resolve("build/docs/asciidocRevealJs")
+        val slideHtml = slideOutputDir.resolve("intro.html")
+        assertThat(slideHtml.toFile().exists())
+            .`as`("intro.html should exist in $slideOutputDir").isTrue()
+        assertThat(slideHtml.toFile().length()).`as`("intro.html should not be empty").isGreaterThan(100)
 
-        // ── 4. Playwright — ouvrir le slide et screenshot ─────────────
-        val fileUrl = "file://${slideHtml.absolutePath}"
-        val context: BrowserContext = browser.newContext()
-        val page = context.newPage()
-        page.navigate(fileUrl)
-        page.waitForSelector(".reveal .slides")
+        // ── 4. Démarrer HTTP serveur local ─────────────────────
+        // file:// ne peut pas résoudre les CDN externes (reveal.js, bootstrap, jquery).
+        // On sert le tempDir via npx serve pour que Playwright charge
+        // correctement toutes les dépendances.
+        val httpPort = 4333
+        val httpServer = startHttpServer(tempDir, httpPort)
 
-        val screenshotPath = tempDir.resolve("build/e2e-screenshot.png")
-        Files.createDirectories(screenshotPath.parent)
-        page.screenshot(
-            com.microsoft.playwright.Page.ScreenshotOptions()
-                .setPath(screenshotPath)
-                .setFullPage(false)
-        )
+        var context: BrowserContext? = null
+        try {
+            // ── 5. Playwright — ouvrir le slide reveal.js via HTTP ─────────────
+            // intro.html dans build/docs/asciidocRevealJs (output d'asciidoctor)
+            val httpUrl = "http://localhost:$httpPort/build/docs/asciidocRevealJs/intro.html"
+            context = browser.newContext()
+            val page = context.newPage()
+            page.navigate(httpUrl)
+            page.waitForSelector(".reveal .slides")
 
-        // ── 5. Assertions Playwright — UX/UI ────────────────────────────
-        PlaywrightAssertions.assertThat(page).hasTitle("E2E Test Playwright")
+            val screenshotPath = tempDir.resolve("build/e2e-screenshot.png")
+            Files.createDirectories(screenshotPath.parent)
+            page.screenshot(
+                com.microsoft.playwright.Page.ScreenshotOptions()
+                    .setPath(screenshotPath)
+                    .setFullPage(false)
+            )
 
-        val slideElement = page.locator(".reveal .slides section")
-        PlaywrightAssertions.assertThat(slideElement).isVisible()
+            // ── 6. Assertions Playwright — UX/UI ────────────────────────────
+            PlaywrightAssertions.assertThat(page).hasTitle("E2E Test Playwright")
 
-        val h2 = page.locator(".reveal .slides section section h2")
-        PlaywrightAssertions.assertThat(h2).isVisible()
+            // Reveal.js génère 4+ <section> dans .reveal .slides (title + stack parent + nested slides).
+            // .first() cible la première slide visible (title slide) pour éviter le strict mode violation.
+            val firstSlide = page.locator(".reveal .slides section").first()
+            PlaywrightAssertions.assertThat(firstSlide).isVisible()
 
-        // UX/UI : tout le contenu de la slide est visible dans le viewport
-        val slideBox = slideElement.boundingBox()
-        assertThat(slideBox).`as`("Slide bounding box should exist").isNotNull()
-        val viewport = page.viewportSize()
-        assertThat(viewport).`as`("Viewport should be set").isNotNull()
+            val h2 = page.locator(".reveal .slides section section h2").first()
+            PlaywrightAssertions.assertThat(h2).isVisible()
 
-        assertThat(slideBox!!.x).`as`("Slide left edge should be >= 0").isGreaterThanOrEqualTo(0.0)
-        assertThat(slideBox.y).`as`("Slide top edge should be >= 0").isGreaterThanOrEqualTo(0.0)
-        assertThat(slideBox.x + slideBox.width)
-            .`as`("Slide right edge should fit within viewport width (${viewport!!.width})")
-            .isLessThanOrEqualTo(viewport.width.toDouble())
-        assertThat(slideBox.y + slideBox.height)
-            .`as`("Slide bottom edge should fit within viewport height (${viewport.height})")
-            .isLessThanOrEqualTo(viewport.height.toDouble())
+            // UX/UI : tout le contenu de la slide est visible dans le viewport
+            val slideBox = firstSlide.boundingBox()
+            assertThat(slideBox).`as`("Slide bounding box should exist").isNotNull()
+            val viewport = page.viewportSize()
+            assertThat(viewport).`as`("Viewport should be set").isNotNull()
 
-        // Screenshot visible proof
+            assertThat(slideBox!!.x).`as`("Slide left edge should be >= 0").isGreaterThanOrEqualTo(0.0)
+            assertThat(slideBox.y).`as`("Slide top edge should be >= 0").isGreaterThanOrEqualTo(0.0)
+            assertThat(slideBox.x + slideBox.width)
+                .`as`("Slide right edge should fit within viewport width (${viewport!!.width})")
+                .isLessThanOrEqualTo(viewport.width.toDouble())
+            assertThat(slideBox.y + slideBox.height)
+                .`as`("Slide bottom edge should fit within viewport height (${viewport.height})")
+                .isLessThanOrEqualTo(viewport.height.toDouble())
 
-        assertThat(screenshotPath.toFile().length())
-            .`as`("Screenshot should be non-trivial (> 10 KB)")
-            .isGreaterThan(10_000)
+            // Screenshot visible proof
+            assertThat(screenshotPath.toFile().length())
+                .`as`("Screenshot should be non-trivial (> 10 KB)")
+                .isGreaterThan(10_000)
 
-        context.close()
+        } finally {
+            context?.close()
+            httpServer.destroyForcibly()
+            httpServer.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+        }
     }
 }

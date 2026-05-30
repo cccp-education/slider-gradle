@@ -261,7 +261,7 @@ class SliderWorld {
     // -------------------------------------------------------------------------
 
     fun createGradleProject(configFileName: String = "slides-context.yml"): File {
-        val pluginId = "com.cheroliv.slider"
+        val pluginId = "education.cccp.slider"
         val buildScriptContent = "slider { configPath = file(\"$configFileName\").absolutePath }"
         createTempFile("gradle-test-", "").apply {
             delete()

@@ -1,0 +1,110 @@
+= Session 006 — SLD-3a Playwright E2E Fix (file:// → HTTP serve)
+:date: 2026-05-30
+:session: 006
+:duree: ~2h
+:score: 9/10
+:artefact_modifie: `slider/src/test/kotlin/slider/SliderPlaywrightE2eTest.kt`
+:status: TERMINE
+
+== Contexte
+
+Session 005 avait bloqué car `file://` ne peut pas résoudre les CDN externes
+de reveal.js (bootstrap, jquery, reveal.js depuis cdnjs.cloudflare.com).
+Le `waitForSelector(".reveal .slides")` échouait avec TimeoutError.
+
+== Problèmes identifiés et corrigés
+
+=== 1. file:// → HTTP local (npx serve)
+
+Le HTML généré par asciidoctor-gradle reference des ressources CDN externes
+(`<script src="//cdnjs.cloudflare.com/...">`, `<link href="...">`).
+Le protocole `file://` ne peut pas les charger → le DOM reveal.js n'est pas
+construit → le waitForSelector timeout.
+
+**Solution** : démarrer `npx serve` sur le tempDir, naviguer via
+`http://localhost:4333/build/docs/asciidocRevealJs/intro.html`.
+
+Méthode `startHttpServer()` ajoutée : lance `npx serve` en Process séparé,
+attend HTTP 200 dans un délai de 15s avec polling 500ms, lève une exception
+si le serveur ne répond pas.
+
+=== 2. Chemin HTML incorrect
+
+L'asciidoctor-gradle produit les slides dans `build/docs/asciidocRevealJs/`,
+pas dans `slides/misc/`. Le chemin a été corrigé :
+- Avant : `slides/misc/intro.html` (n'existe pas)
+- Après : `build/docs/asciidocRevealJs/intro.html`
+
+=== 3. Strict mode violation — 4 sections
+
+`.reveal .slides section` match 4+ `<section>` (title slide, stack parent,
+Playwright E2E, Features Tested). PlaywrightAssertions en strict mode
+refuse `isVisible()` sur plus d'un élément.
+
+**Solution** : `.first()` pour cibler uniquement la première slide visible.
+
+=== 4. Nettoyage des imports
+
+Import `kotlin.math.absoluteValue` inutilisé retiré.
+
+== Résultat
+
+Toutes les assertions passent :
+- asciidoctorRevealJs → BUILD SUCCESSFUL (32s)
+- intro.html existe dans `build/docs/asciidocRevealJs/`
+- Navigation HTTP → `.reveal .slides` trouvé
+- Title = "E2E Test Playwright"
+- `.reveal .slides section` visible
+- h2 visible
+- Bounding box slide dans le viewport
+- Screenshot > 10 KB
+
+== Tests unitaires
+
+[source]
+----
+./gradlew :slider:test --tests "slider.SliderPlaywrightE2eTest" → PASSED (49s)
+----
+
+== Non-régression constatée
+
+- SliderPluginTest → OK
+- CucumberTest → 16/17 FAIL (préexistant — plugin ID `com.cheroliv.slider`
+  non migré vers `education.cccp.slider`, hors scope session 006)
+- functionalTest → FAIL (même cause, hors scope)
+
+== Diff résumé
+
+[source,diff]
+----
+- import java.io.File  (retiré)
++ import java.net.HttpURLConnection
++ import java.net.URI
+
++ private fun startHttpServer(serveRoot: Path, port: Int = 4333): Process
+  // Démarre npx serve, attend HTTP 200, max 15s
+
+- val fileUrl = "file://${slideHtml.absolutePath}"
++ val httpPort = 4333
++ val httpServer = startHttpServer(tempDir, httpPort)
++ val httpUrl = "http://localhost:$httpPort/build/docs/asciidocRevealJs/intro.html"
+
+- val slideElement = page.locator(".reveal .slides section")
+- PlaywrightAssertions.assertThat(slideElement).isVisible()
++ val firstSlide = page.locator(".reveal .slides section").first()
++ PlaywrightAssertions.assertThat(firstSlide).isVisible()
+
+- val h2 = page.locator(".reveal .slides section section h2")
++ val h2 = page.locator(".reveal .slides section section h2").first()
+
++ finally { context?.close(); httpServer.destroyForcibly(); ... }
+----
+
+== Prochaine session (007)
+
+Option A : Migrer les tests Cucumber/functionalTest du plugin ID
+`com.cheroliv.slider` → `education.cccp.slider` pour rétablir
+la suite complète.
+
+Option B : US-2.5 Feed capsule — Playwright screenshots → JSON
+attendu par capsule-gradle (dernière US de l'EPIC SLD-2).

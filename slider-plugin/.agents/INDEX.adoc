@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-05-30
-_Session en cours_ : 005 CLOTUREE — SLD-3a Playwright-jvm e2e test foundations
-_Session suivante_ : 006 — SLD-3a Playwright e2e fix (file:// → HTTP serve)
+_Session en cours_ : 007 CLOTUREE — Migration plugin ID com.cheroliv.slider → education.cccp.slider
+_Session suivante_ : 008 — Option A: US-2.5 Feed capsule (fermer EPIC SLD-2) OU Option B: Infra proposeDeckContext
 
 '''
 == REGLES ABSOLUES (resume)
@@ -23,6 +23,8 @@ _Session suivante_ : 006 — SLD-3a Playwright e2e fix (file:// → HTTP serve)
 
 |===
 | # | Date | Type | Sujet | Score
+| 007 | 2026-05-30 | refactor | Migration plugin ID com.cheroliv.slider → education.cccp.slider — 5 fichiers corrigés (4 tests + 1 source : SliderWorld.kt, ProposeDeckContextSteps.kt, 2× logback-test.xml, SliderManager.kt). Zéro référence restante. test ✅, functionalTest ✅, cucumberTest 6/17 PASS (10 FAIL: proposeDeckContext, infra préexistante) | 9/10
+| 006 | 2026-05-30 | fix+tests | SLD-3a Playwright E2E fix — 3 bugs corrigés : file:// → HTTP local (npx serve + startHttpServer polling 15s), chemin output corrigé (build/docs/asciidocRevealJs/intro.html), strict mode .first() sur 4 sections reveal.js. Test unitaire Playwright PASSED : navigate OK, title/slides/h2 visibles, bounding box viewport contraint, screenshot > 10 KB. | 9/10
 | 005 | 2026-05-30 | feat+tests+refactor | SLD-3a Playwright-jvm e2e foundations — renommage package com.cheroliv.slider→slider (20 fichiers), fix bug dormant TASK_ASCIIDOCTOR_REVEALJS="generateSlides"→"asciidoctorRevealJs", implementationClass="slider.SliderPlugin", playwright-jvm 1.52.0 en testImplementation, SliderPlaywrightE2eTest.kt (GradleRunner mavenLocal → asciidoctorRevealJs BUILD SUCCESSFUL, HTML généré ✅), Playwright navigate ⚠️ file:// CDN (TODO HTTP serve session 006) | 8/10
 | 001 | 2026-05-10 | feat | EPIC SLD-1 — US-1.1 + US-1.2 (Upgrade reveal.js + Transition) | ✅ TERMINE
 | 002 | 2026-05-10 | feat | EPIC SLD-1 — US-1.3 + US-1.4 (Auto-Animate + Tests) | ✅ TERMINE
@@ -36,7 +38,7 @@ _Session suivante_ : 006 — SLD-3a Playwright e2e fix (file:// → HTTP serve)
 | EPIC | Description | Statut | Priorite
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
-| SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS (Session 004) | P0
+| SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS — 4/5 US terminées, reste US-2.5 | P0
 |===
 
 '''

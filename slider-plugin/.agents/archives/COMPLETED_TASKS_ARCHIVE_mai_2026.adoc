@@ -14,4 +14,6 @@
 | 004 | 2026-05-17 | SLD-2 | US-2.3 | Theme CSS talaria.css + `revealjs_customcss` attribute
 | 004 | 2026-05-17 | SLD-2 | US-2.4 | 10 contraintes validation P0/P1/P2 dans slider-visual.spec.ts
 | 005 | 2026-05-30 | SLD-3a | SLD-3a | Renommage package com.cheroliv.slider→slider (20 fichiers) + fix bug TASK_ASCIIDOCTOR_REVEALJS + playwright-jvm 1.52.0 + SliderPlaywrightE2eTest.kt (GradleRunner BUILD SUCCESSFUL ✅, Playwright ⚠️ file:// CDN) | 8/10
+| 006 | 2026-05-30 | SLD-3a | SLD-3a (fix) | Fix Playwright E2E : file:// → HTTP local (npx serve), chemin output corrigé (build/docs/asciidocRevealJs/), strict mode .first(). Test unitaire PASSED (49s). | 9/10
+| 007 | 2026-05-30 | refactor | Migration ID | Migration plugin ID com.cheroliv.slider → education.cccp.slider dans 5 fichiers (SliderWorld.kt, ProposeDeckContextSteps.kt, 2× logback-test.xml, SliderManager.kt). Zéro référence restante. | 9/10
 |===

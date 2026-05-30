@@ -1,0 +1,54 @@
+= Session 007 — Migrer plugin ID com.cheroliv.slider → education.cccp.slider
+:date: 2026-05-30
+:session: 007
+:duree: ~30min
+:score: 9/10
+:fichiers_modifies: 4 test files + 1 source file
+:status: TERMINE
+
+== Contexte
+
+Session 006 avait fixé le Playwright E2E mais les tests Cucumber/functionalTest
+échouaient avec `UnknownPluginException: Plugin [id: 'com.cheroliv.slider'] was not found`.
+La session 005 avait renommé le package `com.cheroliv.slider` → `slider` et le plugin ID
+`com.cheroliv.slider` → `education.cccp.slider`, mais les tests n'avaient pas été migrés.
+
+== Modifications
+
+=== Fichiers de test (4 fichiers)
+
+1. `SliderWorld.kt:264` : `val pluginId = "com.cheroliv.slider"` → `"education.cccp.slider"`
+2. `ProposeDeckContextSteps.kt:33` : KDoc `[com.cheroliv.slider.DeckContext]` → `[slider.DeckContext]`
+3. `src/test/resources/logback-test.xml:19` : `<logger name="com.cheroliv.slider">` → `"slider"`
+4. `src/functionalTest/resources/logback-test.xml:19` : idem
+
+=== Fichier source (1 fichier)
+
+5. `SliderManager.kt` — 2 occurrences :
+   - L145 : message d'erreur `"com.cheroliv.slider requires Java 23+"` → `"education.cccp.slider"`
+   - L285 : KDoc `[com.cheroliv.slider.DeckContext]` → `[slider.DeckContext]`
+
+== Résultat
+
+[cols="2,5"]
+|===
+| Tâche | Résultat
+| `:slider:test` (unitaires) | ✅ TOUS PASS (Playwright E2E inclus)
+| `:slider:functionalTest` | ✅ PASS
+| `:slider:cucumberTest` | 6 PASS (transition + auto-animate), 10 FAIL (proposeDeckContext — infra Ollama/pgvector absente), 1 SKIP
+|===
+
+Les 10 échecs Cucumber sont **tous** des scénarios `proposeDeckContext` qui nécessitent
+Ollama + pgvector. Aucune régression introduite par cette migration.
+
+== Vérification post-migration
+
+[source]
+----
+grep -rn "com.cheroliv.slider" src/ → ✅ Aucune référence restante
+----
+
+== Prochaine session (008)
+
+Option A : US-2.5 Feed capsule — JSON pour capsule-gradle (dernière US EPIC SLD-2)
+Option B : Démarrer les tests Cucumber proposeDeckContext avec infra Ollama/pgvector

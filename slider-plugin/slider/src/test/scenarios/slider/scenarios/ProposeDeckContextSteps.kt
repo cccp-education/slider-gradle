@@ -30,7 +30,7 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     /**
      * Returns a minimal valid DeckContext JSON for the given [subject].
      * The LLM mock always returns this — it is structurally valid and parseable
-     * by Jackson into a [com.cheroliv.slider.DeckContext].
+     * by Jackson into a [slider.DeckContext].
      */
     private fun validDeckContextJson(subject: String, language: String = "fr"): String {
         val slug = subject.lowercase()

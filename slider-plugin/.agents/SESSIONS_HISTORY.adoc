@@ -6,6 +6,8 @@ _Date creation_ : 2026-05-10
 
 |===
 | # | Date | Type | Sujet | Score
+| 007 | 2026-05-30 | refactor | Migration plugin ID com.cheroliv.slider → education.cccp.slider — 5 fichiers (SliderWorld.kt, ProposeDeckContextSteps.kt, 2× logback-test.xml, SliderManager.kt). test ✅, functionalTest ✅, cucumber 6/17. | 9/10
+| 006 | 2026-05-30 | fix+tests | SLD-3a Playwright E2E fix — 3 bugs corrigés : file:// → HTTP local (npx serve), chemin output (build/docs/asciidocRevealJs/), strict mode .first(). Test unitaire Playwright PASSED (49s). | 9/10
 | 005 | 2026-05-30 | feat+tests+refactor | SLD-3a Playwright-jvm e2e foundations — renommage package com.cheroliv.slider→slider (20 fichiers), fix bug dormant TASK_ASCIIDOCTOR_REVEALJS, implementationClass fix, playwright-jvm 1.52.0, GradleRunner e2e BUILD SUCCESSFUL, Playwright navigate ⚠️ file:// CDN | 8/10
 | 004 | 2026-05-17 | feat | EPIC SLD-2 — US-2.1+2.2+2.3 (Playwright integration, visualTest task, talaria.css theme pro, 17/17 Cucumber PASS) | ✅ TERMINE
 |===

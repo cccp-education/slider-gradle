@@ -1,30 +1,38 @@
 = PROMPT_REPRISE — slider-gradle
-:session: 006
+:session: 008
 :date: 2026-05-30
 :status: PRET
-:prerequis: SLD-3a package rename + playwright-jvm foundations ✅ (session 005)
+:prerequis: Migration plugin ID com.cheroliv.slider → education.cccp.slider ✅ (session 007)
 
 == Contexte
 
-Session 005 terminée — renommage package + fix bug nom tâche + playwright-jvm ajouté.
-Prochaine session : compléter le test e2e Playwright.
+Session 007 terminée — migration complète du plugin ID.
+5 fichiers corrigés (4 tests + 1 source). Zéro référence restante à `com.cheroliv.slider`.
+Résultat : test ✅, functionalTest ✅, cucumberTest 6/17 (transition/auto-animate PASS,
+10 proposeDeckContext FAIL — infra Ollama/pgvector absente, préexistant).
 
-== Prochaine Mission — Session 006
+== Prochaine Mission — Session 008
 
-Résoudre le blocage file:// + CDN reveal.js → servir via HTTP local.
-Activer les assertions UX/UI viewport complètes.
+=== Option A — US-2.5 Feed capsule (EPIC SLD-2)
 
-=== P0 — Fix Playwright e2e navigate
-- Servir HTML via npx serve (port local) avant Playwright navigate
-- Ou utiliser Playwright route interception pour simuler CDN reveal.js
-- Une fois le navigate OK : valider title, slides visibles, viewport contraint
+Dernière US de l'EPIC SLD-2 : fermer l'EPIC.
+- JSON capsule feed : slide name, ordre, timing, transition, dimensions viewport
+- Format attendu par capsule-gradle
+- Playwright screenshots déjà capturés dans le test E2E (réutilisables)
+- Tâche Gradle `slider:capsuleFeed` générant le JSON
 
-=== P1 — Screenshot + assertions
-- Screenshot > 10 KB
-- UX/UI : bounding box slide dans viewport (déjà codé)
+=== Option B — Infrastructure proposeDeckContext
+
+Réactiver les 10 tests Cucumber `proposeDeckContext` :
+- Docker pgvector (testcontainers)
+- Mock Ollama ou Ollama local
+- Cible : 17/17 PASS cucumberTest
 
 == Rappels
 - GroupId : `education.cccp`
 - Plugin ID : `education.cccp.slider`, impl class `slider.SliderPlugin`
 - Version : 0.0.6
-- Package source : `slider` (ex com.cheroliv.slider)
+- Package source : `slider`
+- Aucune référence restante à `com.cheroliv.slider` dans tout le code source
+- **Publié dans mavenLocal** : `~/.m2/repository/education/cccp/slider/0.0.6/` (jar + sources + javadoc + asc) et marker `education.cccp.slider.gradle.plugin/0.0.6/`
+- Les tests consommateurs (E2E, Cucumber, functionalTest) résolvent le plugin via `mavenLocal()`

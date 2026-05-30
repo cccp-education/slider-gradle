@@ -142,7 +142,7 @@ object SliderManager {
             .toInt()
             .run {
                 require(JavaVersion.current().majorVersion.toInt() >= 23) {
-                    "com.cheroliv.slider requires Java 23+. Current: Java $this"
+                    "education.cccp.slider requires Java 23+. Current: Java $this"
                 }
             }
     }
@@ -282,7 +282,7 @@ object SliderManager {
          * Generates a default example-deck-context.yml in slides/misc/
          * if the file does not already exist.
          *
-         * The default configuration is built from a typed [com.cheroliv.slider.DeckContext] instance
+         * The default configuration is built from a typed [slider.DeckContext] instance
          * and serialized to YAML via [SliderManager.Configuration.yamlMapper], providing a
          * ready-to-use template for the generateDeck task.
          */
