@@ -1,7 +1,7 @@
-package com.cheroliv.slider.translate
+package slider.translate
 
-import com.cheroliv.slider.translate.TranslatorManager.createDisplaySupportedLanguagesTask
-import com.cheroliv.slider.translate.TranslatorManager.createTranslationTasks
+import slider.translate.TranslatorManager.createDisplaySupportedLanguagesTask
+import slider.translate.TranslatorManager.createTranslationTasks
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

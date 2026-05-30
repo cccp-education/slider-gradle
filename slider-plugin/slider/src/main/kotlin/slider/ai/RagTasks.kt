@@ -1,9 +1,9 @@
-package com.cheroliv.slider.ai
+package slider.ai
 
-import com.cheroliv.slider.DeckContext
-import com.cheroliv.slider.SliderManager.Configuration.yamlMapper
-import com.cheroliv.slider.ai.AssistantManager.aiProvider
-import com.cheroliv.slider.ai.AssistantManager.resolveModel
+import slider.DeckContext
+import slider.SliderManager.Configuration.yamlMapper
+import slider.ai.AssistantManager.aiProvider
+import slider.ai.AssistantManager.resolveModel
 import com.fasterxml.jackson.module.kotlin.readValue
 import dev.langchain4j.data.message.SystemMessage
 import dev.langchain4j.data.message.UserMessage

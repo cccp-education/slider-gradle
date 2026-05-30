@@ -1,5 +1,5 @@
 //@file:Suppress("FunctionName")
-package com.cheroliv.slider
+package slider
 //
 //
 //import com.cheroliv.bakery.FuncTestsConstants.BAKERY_GROUP

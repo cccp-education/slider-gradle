@@ -1,8 +1,8 @@
 @file:Suppress("unused")
 
-package com.cheroliv.slider.scenarios
+package slider.scenarios
 
-import com.cheroliv.slider.SliderManager.Configuration.yamlMapper
+import slider.SliderManager.Configuration.yamlMapper
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then

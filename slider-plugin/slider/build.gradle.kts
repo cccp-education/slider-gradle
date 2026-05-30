@@ -63,6 +63,9 @@ dependencies {
 
     // Cucumber dependencies
     testImplementation(libs.bundles.cucumber)
+
+    // Playwright E2E tests
+    testImplementation(libs.playwright)
 }
 
 
@@ -209,7 +212,7 @@ gradlePlugin {
         website = "https://cheroliv.com"
         create("slider") {
             id = libs.plugins.slider.get().pluginId
-            implementationClass = "${libs.plugins.slider.get().pluginId}.SliderPlugin"
+            implementationClass = "slider.SliderPlugin"
             displayName = "Slider Plugin"
             description = "Gradle plugin for slider generation."
             listOf(

@@ -1,4 +1,4 @@
-package com.cheroliv.slider
+package slider
 
 //import com.cheroliv.bakery.FileSystemManager.createCnameFile
 //import com.cheroliv.bakery.FileSystemManager.yamlMapper

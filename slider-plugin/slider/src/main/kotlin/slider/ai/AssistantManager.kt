@@ -1,13 +1,13 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
 
-package com.cheroliv.slider.ai
+package slider.ai
 
 import arrow.core.Either
 import arrow.core.Either.Companion.catch
 import arrow.core.Either.Left
 import arrow.core.Either.Right
-import com.cheroliv.slider.DeckContext
-import com.cheroliv.slider.SliderManager.Configuration.localConf
+import slider.DeckContext
+import slider.SliderManager.Configuration.localConf
 import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.chat.StreamingChatModel
 import dev.langchain4j.model.chat.response.ChatResponse

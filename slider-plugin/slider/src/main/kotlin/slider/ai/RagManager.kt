@@ -1,4 +1,4 @@
-package com.cheroliv.slider.ai
+package slider.ai
 
 import dev.langchain4j.data.document.Document
 import dev.langchain4j.data.document.DocumentSplitter

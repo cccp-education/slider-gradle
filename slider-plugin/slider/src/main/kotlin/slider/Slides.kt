@@ -1,9 +1,9 @@
-package com.cheroliv.slider
+package slider
 
 object Slides {
     object RevealJsSlides {
         const val GROUP_TASK_SLIDER = "slider"
-        const val TASK_ASCIIDOCTOR_REVEALJS = "generateSlides"
+        const val TASK_ASCIIDOCTOR_REVEALJS = "asciidoctorRevealJs"
         const val TASK_CLEAN_SLIDES_BUILD = "cleanBuild"
         const val TASK_DASHBOARD_SLIDES_BUILD = "generateDashboard"
         const val TASK_PUBLISH_SLIDES = "deploySlides"

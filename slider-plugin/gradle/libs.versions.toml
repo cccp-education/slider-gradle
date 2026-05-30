@@ -27,6 +27,7 @@ docker-java = "3.7.0"
 testcontainers-pg = "1.21.4"
 logback = "1.5.32"
 codebase = "0.0.1"
+playwright = "1.52.0"
 
 [libraries]
 asciidoctor-gradle-jvm-slides = { module = "org.asciidoctor:asciidoctor-gradle-jvm-slides", version.ref = "asciidoctor-gradle" }
@@ -73,6 +74,7 @@ docker-java-transport-httpclient5 = { module = "com.github.docker-java:docker-ja
 testcontainers-pg = { module = "org.testcontainers:postgresql", version.ref = "testcontainers-pg" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

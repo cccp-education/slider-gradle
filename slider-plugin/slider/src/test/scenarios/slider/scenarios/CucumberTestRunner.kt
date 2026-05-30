@@ -1,4 +1,4 @@
-package com.cheroliv.slider.scenarios
+package slider.scenarios
 
 import io.cucumber.junit.platform.engine.Constants.*
 import org.junit.platform.suite.api.ConfigurationParameter
@@ -16,7 +16,7 @@ import org.junit.platform.suite.api.Suite
 @Suite
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
-@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.cheroliv.slider.scenarios")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.scenarios")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
     value = "pretty, html:build/reports/cucumber.html, json:build/reports/cucumber.json"

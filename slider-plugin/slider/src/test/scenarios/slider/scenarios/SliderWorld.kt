@@ -1,4 +1,4 @@
-package com.cheroliv.slider.scenarios
+package slider.scenarios
 
 import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.*

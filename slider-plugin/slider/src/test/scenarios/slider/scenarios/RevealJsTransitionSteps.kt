@@ -1,8 +1,8 @@
-package com.cheroliv.slider.scenarios
+package slider.scenarios
 
-import com.cheroliv.slider.DeckContext
-import com.cheroliv.slider.RevealJsContext
-import com.cheroliv.slider.SlideHint
+import slider.DeckContext
+import slider.RevealJsContext
+import slider.SlideHint
 import io.cucumber.java.en.Then
 import org.assertj.core.api.Assertions.assertThat
 import kotlin.reflect.KClass

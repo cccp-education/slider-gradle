@@ -1,4 +1,4 @@
-package com.cheroliv.slider.ai
+package slider.ai
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.command.CreateContainerResponse

@@ -1,4 +1,4 @@
-package com.cheroliv.slider.ai
+package slider.ai
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property

@@ -13,4 +13,5 @@
 | 004 | 2026-05-17 | SLD-2 | US-2.2 | Taches Gradle `visualTest` + `installPlaywright` via NpxTask
 | 004 | 2026-05-17 | SLD-2 | US-2.3 | Theme CSS talaria.css + `revealjs_customcss` attribute
 | 004 | 2026-05-17 | SLD-2 | US-2.4 | 10 contraintes validation P0/P1/P2 dans slider-visual.spec.ts
+| 005 | 2026-05-30 | SLD-3a | SLD-3a | Renommage package com.cheroliv.slider→slider (20 fichiers) + fix bug TASK_ASCIIDOCTOR_REVEALJS + playwright-jvm 1.52.0 + SliderPlaywrightE2eTest.kt (GradleRunner BUILD SUCCESSFUL ✅, Playwright ⚠️ file:// CDN) | 8/10
 |===

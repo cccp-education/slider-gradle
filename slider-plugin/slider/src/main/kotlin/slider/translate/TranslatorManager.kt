@@ -1,14 +1,14 @@
 @file:Suppress("MemberVisibilityCanBePrivate")
 
-package com.cheroliv.slider.translate
+package slider.translate
 
 import arrow.core.Either.Left
 import arrow.core.Either.Right
-import com.cheroliv.slider.ai.AssistantManager.createOllamaChatModel
-import com.cheroliv.slider.ai.AssistantManager.createOllamaStreamingChatModel
-import com.cheroliv.slider.ai.AssistantManager.generateStreamingResponse
-import com.cheroliv.slider.ai.AssistantManager.localModels
-import com.cheroliv.slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessage
+import slider.ai.AssistantManager.createOllamaChatModel
+import slider.ai.AssistantManager.createOllamaStreamingChatModel
+import slider.ai.AssistantManager.generateStreamingResponse
+import slider.ai.AssistantManager.localModels
+import slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessage
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project

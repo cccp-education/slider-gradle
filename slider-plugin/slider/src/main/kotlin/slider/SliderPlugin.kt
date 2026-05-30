@@ -1,15 +1,15 @@
-package com.cheroliv.slider
+package slider
 
-import com.cheroliv.slider.SliderManager.Dependencies.configureDependencies
-import com.cheroliv.slider.SliderManager.Extensions.configureExtensions
-import com.cheroliv.slider.SliderManager.Plugins.applyPlugins
-import com.cheroliv.slider.SliderManager.Prerequisites.checkJavaVersion
-import com.cheroliv.slider.SliderManager.Repositories.configureRepositories
-import com.cheroliv.slider.SliderManager.Scaffold.scaffoldDeckContextIfAbsent
-import com.cheroliv.slider.SliderManager.Scaffold.scaffoldSlidesContextIfAbsent
-import com.cheroliv.slider.SliderManager.Scaffold.scaffoldSlidesIfAbsent
-import com.cheroliv.slider.SliderManager.Tasks.registerTasks
-import com.cheroliv.slider.ai.AssistantManager.createChatTasks
+import slider.SliderManager.Dependencies.configureDependencies
+import slider.SliderManager.Extensions.configureExtensions
+import slider.SliderManager.Plugins.applyPlugins
+import slider.SliderManager.Prerequisites.checkJavaVersion
+import slider.SliderManager.Repositories.configureRepositories
+import slider.SliderManager.Scaffold.scaffoldDeckContextIfAbsent
+import slider.SliderManager.Scaffold.scaffoldSlidesContextIfAbsent
+import slider.SliderManager.Scaffold.scaffoldSlidesIfAbsent
+import slider.SliderManager.Tasks.registerTasks
+import slider.ai.AssistantManager.createChatTasks
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory

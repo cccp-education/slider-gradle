@@ -1,4 +1,4 @@
-package com.cheroliv.slider
+package slider
 
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.transport.PushResult

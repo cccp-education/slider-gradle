@@ -1,0 +1,58 @@
+= Session 005 — SLD-3a Playwright-jvm e2e test foundations
+:date: 2026-05-30
+:score: 8/10
+:type: feat+tests+refactor
+:prerequis: SLD-1 ✅, SLD-2 partiel (US-2.1→2.4 ✅, US-2.5 🔴)
+
+== Résumé
+
+Renommage package `com.cheroliv.slider` → `slider` (20 fichiers) + fix bug dormant
+`TASK_ASCIIDOCTOR_REVEALJS = "asciidoctorRevealJs"` (était mal nommée "generateSlides").
+Playwright-jvm (`com.microsoft.playwright:playwright:1.52.0`) ajouté comme testImplementation.
+Test e2e GradleRunner + Playwright partiellement fonctionnel.
+
+== Actions
+
+=== Renommage package
+- `com.cheroliv.slider` → `slider` (20 fichiers source)
+- `implementationClass = "slider.SliderPlugin"` dans build.gradle.kts
+- Glue Cucumber `slider.scenarios` dans CucumberTestRunner.kt
+
+=== Fix bug dormant — nom de tâche asciidoctor
+- `TASK_ASCIIDOCTOR_REVEALJS = "generateslides"` → `"asciidoctorRevealJs"`
+- Bug jamais détecté car jamais testé en e2e auparavant
+
+=== Playwright-jvm
+- `libs.versions.toml` : `playwright = "1.52.0"`
+- `build.gradle.kts` : `testImplementation(libs.playwright)`
+- `SliderPlaywrightE2eTest.kt` : GradleRunner (mavenLocal) → asciidoctorRevealJs → Playwright
+
+=== Test e2e
+- `gradle assemble` : ✅ BUILD SUCCESSFUL, HTML généré, slides listées
+- `HTML exists + size > 100` : ✅
+- `Playwright navigate` : ⚠️ file:// + reveal.js CDN ne charge pas en headless
+  → TODO : servir via HTTP local (npx serve) avant playwright navigate
+- `UX/UI viewport` : assertions bounding box vs viewport size prêtes, activées quand Playwright navigate OK
+
+== Résultats
+
+| Livrable | Statut |
+| Renommage package 20 fichiers | ✅ compile + publish OK |
+| Fix bug nom tâche asciidoctor | ✅ |
+| Playwright-jvm dans catalog | ✅ |
+| Test e2e Gradle | ✅ BUILD SUCCESSFUL |
+| Test e2e Playwright | ⚠️ file:// CDN blocage (TODO HTTP serve) |
+| publishToMavenLocal | ✅ |
+
+== Fichiers modifiés
+- `slider-plugin/gradle/libs.versions.toml` (+2 : version + lib playwright)
+- `slider-plugin/slider/build.gradle.kts` (+2 : implementationClass fix + testImplementation playwright)
+- 20 fichiers source renommés `com/cheroliv/slider/` → `slider/`
+
+== Fichiers créés
+- `slider/src/test/kotlin/slider/SliderPlaywrightE2eTest.kt` (177 lignes)
+
+== TODO Session 006
+- Servir le HTML via HTTP local (npx serve) avant Playwright navigate
+- Activer assertions UX/UI viewport complètes
+- Screenshot > 10 KB assertion

@@ -1,4 +1,4 @@
-package com.cheroliv.slider
+package slider
 //
 //import com.cheroliv.bakery.BakeryPluginFunctionalTests.Companion.VERSION
 //import com.cheroliv.bakery.FuncTestsConstants.BUILD_FILE_PATH

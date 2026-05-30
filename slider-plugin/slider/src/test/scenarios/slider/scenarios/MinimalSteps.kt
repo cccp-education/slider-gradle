@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.cheroliv.slider.scenarios
+package slider.scenarios
 
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
