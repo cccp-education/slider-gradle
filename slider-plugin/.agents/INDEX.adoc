@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-05-30
-_Session en cours_ : 007 CLOTUREE — Migration plugin ID com.cheroliv.slider → education.cccp.slider
-_Session suivante_ : 008 — Option A: US-2.5 Feed capsule (fermer EPIC SLD-2) OU Option B: Infra proposeDeckContext
+_Derniere mise a jour_ : 2026-06-02
+_Session terminee_ : 008 — Borough-isation : slider-gradle devient MIAMI 🌴, 21ème borough
+_Session en cours_ : 009 — Option A: US-2.5 Feed capsule (fermer EPIC SLD-2) OU Option B: Infra proposeDeckContext
 
 '''
 == REGLES ABSOLUES (resume)
