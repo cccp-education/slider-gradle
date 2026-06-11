@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-06-02
-_Session terminee_ : 008 — Borough-isation : slider-gradle devient MIAMI 🌴, 21ème borough
-_Session en cours_ : 009 — Option A: US-2.5 Feed capsule (fermer EPIC SLD-2) OU Option B: Infra proposeDeckContext
+_Derniere mise a jour_ : 2026-06-11
+_Session terminee_ : 009 — Publication Maven Central 0.0.1 ✅
+_Prochaine session_ : 010 — Backlog (SLD-2 US-2.5 ou infra proposeDeckContext)
 
 '''
 == REGLES ABSOLUES (resume)
@@ -23,6 +23,8 @@ _Session en cours_ : 009 — Option A: US-2.5 Feed capsule (fermer EPIC SLD-2) O
 
 |===
 | # | Date | Type | Sujet | Score
+| 009 | 2026-06-11 | publish | Publication Maven Central 0.0.1 — version 0.0.6→0.0.1 hardcodé, POM sans guard, Sonatype→nmcp, settings nmcp, publié avec -x cucumberTest -x functionalTest | 9/10
+| 008 | 2026-06-02 | governance | Borough-isation — slider-gradle devient MIAMI 🌴, 21ème borough | 10/10
 | 007 | 2026-05-30 | refactor | Migration plugin ID com.cheroliv.slider → education.cccp.slider — 5 fichiers corrigés (4 tests + 1 source : SliderWorld.kt, ProposeDeckContextSteps.kt, 2× logback-test.xml, SliderManager.kt). Zéro référence restante. test ✅, functionalTest ✅, cucumberTest 6/17 PASS (10 FAIL: proposeDeckContext, infra préexistante) | 9/10
 | 006 | 2026-05-30 | fix+tests | SLD-3a Playwright E2E fix — 3 bugs corrigés : file:// → HTTP local (npx serve + startHttpServer polling 15s), chemin output corrigé (build/docs/asciidocRevealJs/intro.html), strict mode .first() sur 4 sections reveal.js. Test unitaire Playwright PASSED : navigate OK, title/slides/h2 visibles, bounding box viewport contraint, screenshot > 10 KB. | 9/10
 | 005 | 2026-05-30 | feat+tests+refactor | SLD-3a Playwright-jvm e2e foundations — renommage package com.cheroliv.slider→slider (20 fichiers), fix bug dormant TASK_ASCIIDOCTOR_REVEALJS="generateSlides"→"asciidoctorRevealJs", implementationClass="slider.SliderPlugin", playwright-jvm 1.52.0 en testImplementation, SliderPlaywrightE2eTest.kt (GradleRunner mavenLocal → asciidoctorRevealJs BUILD SUCCESSFUL, HTML généré ✅), Playwright navigate ⚠️ file:// CDN (TODO HTTP serve session 006) | 8/10
@@ -39,6 +41,7 @@ _Session en cours_ : 009 — Option A: US-2.5 Feed capsule (fermer EPIC SLD-2) O
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
 | SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS — 4/5 US terminées, reste US-2.5 | P0
+| Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
 |===
 
 '''

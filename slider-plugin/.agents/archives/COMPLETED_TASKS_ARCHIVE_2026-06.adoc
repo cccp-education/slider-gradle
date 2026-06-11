@@ -1,0 +1,6 @@
+= COMPLETED_TASKS_ARCHIVE — slider-gradle — Juin 2026
+
+|===
+| Session | Date | EPIC | US | Description
+| 009 | 2026-06-11 | Publication Maven Central | 0.0.1 | Publication Maven Central 0.0.1 — version 0.0.6→0.0.1 hardcodé, POM sans guard, Sonatype→nmcp, settings nmcp, publié avec -x cucumberTest -x functionalTest
+|===

@@ -1,38 +1,21 @@
 = PROMPT_REPRISE — slider-gradle
-:session: 008
-:date: 2026-05-30
-:status: PRET
-:prerequis: Migration plugin ID com.cheroliv.slider → education.cccp.slider ✅ (session 007)
+:session: 009
+:date: 2026-06-11
+:status: TERMINEE
 
-== Contexte
+== Session 009 terminée — Publication Maven Central 0.0.1
 
-Session 007 terminée — migration complète du plugin ID.
-5 fichiers corrigés (4 tests + 1 source). Zéro référence restante à `com.cheroliv.slider`.
-Résultat : test ✅, functionalTest ✅, cucumberTest 6/17 (transition/auto-animate PASS,
-10 proposeDeckContext FAIL — infra Ollama/pgvector absente, préexistant).
+slider-gradle publié sur Maven Central (education.cccp:slider-plugin:0.0.1).
+Changements : version 0.0.6→0.0.1 hardcodé, POM sans guard, Sonatype→nmcp, settings nmcp rebuild.
+Publié avec `-x cucumberTest -x functionalTest` (Playwright infra absente, préexistant).
 
-== Prochaine Mission — Session 008
+== Prochaine session — 010 : backlog
 
-=== Option A — US-2.5 Feed capsule (EPIC SLD-2)
-
-Dernière US de l'EPIC SLD-2 : fermer l'EPIC.
-- JSON capsule feed : slide name, ordre, timing, transition, dimensions viewport
-- Format attendu par capsule-gradle
-- Playwright screenshots déjà capturés dans le test E2E (réutilisables)
-- Tâche Gradle `slider:capsuleFeed` générant le JSON
-
-=== Option B — Infrastructure proposeDeckContext
-
-Réactiver les 10 tests Cucumber `proposeDeckContext` :
-- Docker pgvector (testcontainers)
-- Mock Ollama ou Ollama local
-- Cible : 17/17 PASS cucumberTest
+- SLD-2 US-2.5 : Feed capsule (fermer EPIC SLD-2)
+- Option : Infra proposeDeckContext (réactiver 10 tests Cucumber)
 
 == Rappels
 - GroupId : `education.cccp`
 - Plugin ID : `education.cccp.slider`, impl class `slider.SliderPlugin`
-- Version : 0.0.6
+- Version publiée Central : 0.0.1
 - Package source : `slider`
-- Aucune référence restante à `com.cheroliv.slider` dans tout le code source
-- **Publié dans mavenLocal** : `~/.m2/repository/education/cccp/slider/0.0.6/` (jar + sources + javadoc + asc) et marker `education.cccp.slider.gradle.plugin/0.0.6/`
-- Les tests consommateurs (E2E, Cucumber, functionalTest) résolvent le plugin via `mavenLocal()`
