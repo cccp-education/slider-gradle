@@ -6,6 +6,7 @@ _Date creation_ : 2026-05-10
 
 |===
 | # | Date | Type | Sujet | Score
+| 010 | 2026-06-14 | governance | Backlog + Cadrage SLD-3 i18n — synchronisation INDEX.adoc/BACKLOG.adoc, ajout EPIC SLD-3 i18n (7 US, ~15 pts, pattern bakery BKY-I18N, dependance i18n-contracts N0) | 8/10
 | 009 | 2026-06-11 | publish | Publication Maven Central 0.0.1 — version 0.0.6→0.0.1 hardcodé, POM sans guard, Sonatype→nmcp, settings nmcp, publié avec -x cucumberTest -x functionalTest | 9/10
 | 008 | 2026-06-02 | governance | Borough-isation — slider-gradle devient MIAMI 🌴, 21ème borough | 10/10
 | 007 | 2026-05-30 | refactor | Migration plugin ID com.cheroliv.slider → education.cccp.slider — 5 fichiers (SliderWorld.kt, ProposeDeckContextSteps.kt, 2× logback-test.xml, SliderManager.kt). test ✅, functionalTest ✅, cucumber 6/17. | 9/10

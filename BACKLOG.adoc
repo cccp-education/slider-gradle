@@ -1,50 +1,65 @@
 = Backlog — MIAMI (slider-gradle)
-:description: Backlog de publication Maven Central — EPIC PUB
-:date: 2026-06-08
+:description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
+:date: 2026-06-14
 :toc: left
 :sectnums:
 
-_Source : configuration/EPIC_PUB.adoc (Session 096)_
+_Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
-== EPIC PUB — Publication Maven Central
+== EPIC PUB — Publication Maven Central ✅ TERMINE
 
 Plugin N2 de generation de presentations Reveal.js (AsciiDoc → HTML). VAGUE 4 (plugins metier).
 
-=== PUB-3.12 — slider-plugin
+=== PUB-3.12 — slider-plugin ✅ TERMINE (Session 009, 2026-06-11)
 **Priorite** : P0
 **Estimation** : 1 pt
-**Dependances** : PUB-0 et PUB-1 complets (DNS TXT + GPG)
 
-. `cd foundry/public/slider-gradle && ./gradlew publish closeAndRelease`
-. Plugin ID : `education.cccp.slider`
-. Artefact : `education.cccp:slider-plugin`
-. Verifier sur https://central.sonatype.com/artifact/education.cccp/slider-plugin
+. Artefact : `education.cccp:slider-plugin:0.0.1`
+. URL : https://central.sonatype.com/artifact/education.cccp/slider-plugin
+. Methode : nmcp, POM sans guard, version 0.0.1 hardcodee
 
-=== PUB-2.2 — Mise a jour commentaire relocation dans build.gradle.kts
-**Priorite** : P1
-**Estimation** : 1 pt
-**Dependances** : Aucune
-
-Dans le `build.gradle.kts` de slider-plugin, remplacer le commentaire :
-
-```kotlin
-// RELOCATION : prepare la migration du groupId education.cccp →
-// <futur-domaine>. Activer avec -Prem relocationGroup="io.github.cccp-education"
-```
-
-Par :
-
-```kotlin
-// RELOCATION : garde comme echappatoire future.
-// Activable avec -Prem relocationGroup="<futur-namespace>"
-```
-
-'''
-== EPIC PUB-5 — Verification
-
-=== PUB-5.1 — Verifier Maven Central
+=== PUB-5.1 — Verifier Maven Central ✅ TERMINE (2026-06-11)
 
 | Artefact | URL |
 |---|---|
 | slider-plugin | https://central.sonatype.com/artifact/education.cccp/slider-plugin |
+
+'''
+== EPIC SLD-2 — Restant
+
+_Vision_ : Rendu visuel professionnel valide par Playwright, theme reveal.js pro,
+transitions fluides, feed capsule pour capsule-gradle.
+
+|===
+| US | Description | Statut
+| US-2.1 | Playwright via node-gradle | ✅ TERMINE
+| US-2.2 | Tache `slider:visualTest` | ✅ TERMINE
+| US-2.3 | Theme CSS reveal.js pro (Talaria) | ✅ TERMINE
+| US-2.4 | Tests validation visuelle Playwright | ✅ TERMINE
+| US-2.5 | Feed capsule — Playwright screenshots → JSON pour capsule-gradle | 🔴 A FAIRE
+|===
+
+_Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-2-detail-us[INDEX → EPIC SLD-2].
+
+'''
+== EPIC SLD-3 — i18n 10 langues ☐ NOUVEAU
+
+_Vision_ : Internationalisation 10 langues via contrats N0 `education.cccp:i18n-contracts:0.0.1`.
+Pattern aligne sur bakery BKY-I18N. RTL pour arabe/ourdou.
+
+_Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication Central en attente).
+
+|===
+| US | Description | Statut | Estimation
+| SLD-3.0 | Dependance i18n-contracts + DeckContext.language ISO 639-1 | ☐ A FAIRE | 2 pts
+| SLD-3.1 | Configuration layer DSL + cascade 5 couches | ☐ A FAIRE | 3 pts
+| SLD-3.2 | TranslatorManager 2→10 langues + LLM prompt adaptatif | ☐ A FAIRE | 3 pts
+| SLD-3.3 | Reveal.js UI i18n — messages_{code}.js 10 langues | ☐ A FAIRE | 2 pts
+| SLD-3.4 | RTL support arabe/ourdou + validation Playwright | ☐ A FAIRE | 2 pts
+| SLD-3.5 | Tests Cucumber BDD i18n | ☐ A FAIRE | 2 pts
+| SLD-3.6 | Documentation + deck multilingue demo | ☐ A FAIRE | 1 pt
+|===
+
+_Total_ : 7 US, ~15 pts.
+_Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-3-detail-us[INDEX → EPIC SLD-3].

@@ -1,21 +1,47 @@
 = PROMPT_REPRISE — slider-gradle
-:session: 009
-:date: 2026-06-11
-:status: TERMINEE
+:session: 011
+:date: 2026-06-14
+:status: A VENIR
 
-== Session 009 terminée — Publication Maven Central 0.0.1
+== Session 011 — SLD-3 i18n US-3.0 + US-3.1
 
-slider-gradle publié sur Maven Central (education.cccp:slider-plugin:0.0.1).
-Changements : version 0.0.6→0.0.1 hardcodé, POM sans guard, Sonatype→nmcp, settings nmcp rebuild.
-Publié avec `-x cucumberTest -x functionalTest` (Playwright infra absente, préexistant).
+=== Contexte
 
-== Prochaine session — 010 : backlog
+Session 010 — Backlog synchronise, EPIC SLD-3 i18n cadre (7 US, ~15 pts).
+BACKLOG.adoc racine = resume, INDEX.adoc = source de verite.
 
-- SLD-2 US-2.5 : Feed capsule (fermer EPIC SLD-2)
-- Option : Infra proposeDeckContext (réactiver 10 tests Cucumber)
+=== Priorite session 011
 
-== Rappels
+. US-3.0 — Ajouter dependance `i18n-contracts` + remplacer `DeckContext.language` (String "French" → ISO 639-1) + valider contre `LanguageCatalog.supportedCodes()`
+. US-3.1 — Configuration layer DSL `language`/`supportedLanguages` + cascade 5 couches (CLI `-Planguage` > gradle.properties > DSL > deck-context.yml > default "fr") + `I18nConfig.validate()`
+
+=== Pattern de reference
+
+- bakery-gradle BKY-I18N (US-I18N-0 config layer + US-I18N-1 JBake injection)
+- i18n-contracts N0 (workspace-bom MEM-3, 5 classes, 28/28 PASS, mavenLocal)
+- Dependency : `implementation(libs.i18n.contracts)` en version 0.0.1
+
+=== Architecture US-3.0
+
+- Ajouter `libraries { i18n-contracts }` dans `gradle/libs.versions.toml`
+- Ajouter `implementation(libs.i18n.contracts)` dans `slider/build.gradle.kts`
+- Remplacer `DeckContext.language: String = "French"` par `DeckContext.languageCode: String = "fr"`
+- Valider languageCode contre `LanguageCatalog.supportedCodes()`
+- Propager dans `RagTasks.kt` (`-Planguage` → valide)
+- Propager dans `TranslatorManager.kt` (system prompt)
+
+=== Architecture US-3.1
+
+- Ajouter `CapsuleExtension.language` + `CapsuleExtension.supportedLanguages` DSL properties
+- Creer `I18nConfigResolver` (ou integrer dans `ConfigResolver` existant)
+- Cascade 5 couches : `-Planguage` > gradle.properties > DSL > deck-context.yml > default "fr"
+- Valider avec `I18nConfig.validate()`
+- Tests unitaires TDD (5 tests : cascade, fallback, validation)
+
+=== Rappels
+
 - GroupId : `education.cccp`
 - Plugin ID : `education.cccp.slider`, impl class `slider.SliderPlugin`
-- Version publiée Central : 0.0.1
+- Version publiee Central : 0.0.1
 - Package source : `slider`
+- i18n-contracts : mavenLocal seulement (publication Central en attente MEM-3.6)

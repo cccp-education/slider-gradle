@@ -1,0 +1,28 @@
+= Rapport — Session 010 — Backlog + Cadrage SLD-3 i18n
+:session: 010
+:date: 2026-06-14
+:type: governance
+
+== Modifications
+
+- INDEX.adoc : ajout EPIC SLD-3 i18n (7 US, ~15 pts) dans roadmap + section detail
+- BACKLOG.adoc racine : ajout EPIC SLD-3 i18n resume + lien croise INDEX
+- PROMPT_REPRISE : mise a jour session 010 (contexte, architecture US-2.5, resume SLD-3)
+- SESSIONS_HISTORY : entree session 010 ajoutee
+
+== Decouvertes
+
+- Capsule-gradle INDEX.adoc etait desynchronise (sessions 029/030 manquantes, CAP-18/CAP-21 absents)
+- Synchronise en cours de session (INDEX + BACKLOG capsule)
+- i18n-contracts N0 existe (workspace-bom MEM-3, 5 classes, 28/28 PASS, mavenLocal)
+- Bakery BKY-I18N est le pattern de reference (config cascade 5 couches, MessageBundle, LocaleResolver)
+
+== EPIC SLD-2 US-2.5
+
+Non implemente. Bloque par : besoin de definir le contrat JSON avec capsule-gradle
+avant de produire un format orphelin. Reporte apres SLD-3 i18n.
+
+== Prochaine session : 011
+
+- SLD-3 i18n : US-3.0 (dependance i18n-contracts + DeckContext.language ISO) + US-3.1 (config layer)
+- Ou SLD-2 US-2.5 si contrat JSON defini avec capsule

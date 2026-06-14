@@ -4,9 +4,10 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-06-11
-_Session terminee_ : 009 — Publication Maven Central 0.0.1 ✅
-_Prochaine session_ : 010 — Backlog (SLD-2 US-2.5 ou infra proposeDeckContext)
+_Derniere mise a jour_ : 2026-06-14
+_Session terminee_ : 010 — Backlog + Cadrage SLD-3 i18n (7 US, ~15 pts, P1)
+_Prochaine session_ : 011 — SLD-3 i18n US-3.0 (dependance i18n-contracts) + US-3.1 (config layer)
+_Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
 == REGLES ABSOLUES (resume)
@@ -41,6 +42,7 @@ _Prochaine session_ : 010 — Backlog (SLD-2 US-2.5 ou infra proposeDeckContext)
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
 | SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS — 4/5 US terminées, reste US-2.5 | P0
+| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | ☐ NOUVEAU — Cadrage Session 010 | P1
 | Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
 |===
 
@@ -76,6 +78,31 @@ transitions fluides, feed capsule pour capsule-gradle.
 |===
 
 '''
+== EPIC SLD-3 — Detail US
+
+_Vision_ : Internationalisation 10 langues (en, zh, hi, es, fr, ar, bn, pt, ru, ur)
+via les contrats N0 `education.cccp:i18n-contracts:0.0.1`. Pattern aligné sur
+bakery BKY-I18N (config cascade 5 couches, MessageBundle, LocaleResolver).
+RTL support pour arabe (ar) et ourdou (ur) via Reveal.js `rtl: true`.
+
+_Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication Central en attente).
+
+|===
+| US | Description | Statut | Estimation
+| SLD-3.0 | Ajouter dépendance `i18n-contracts` + remplacer `DeckContext.language` (String "French" → ISO 639-1) + valider contre `LanguageCatalog.supportedCodes()` | ☐ A FAIRE | 2 pts
+| SLD-3.1 | Configuration layer — DSL `language`/`supportedLanguages` + cascade 5 couches (CLI `-Planguage` > gradle.properties > DSL > deck-context.yml > default "fr") + `I18nConfig.validate()` | ☐ A FAIRE | 3 pts
+| SLD-3.2 | TranslatorManager modernisation — remplacer `setOf(FRENCH, ENGLISH)` par `LanguageCatalog.ALL` (2→10 langues) + system prompt LLM adaptatif par langue | ☐ A FAIRE | 3 pts
+| SLD-3.3 | Reveal.js UI i18n — générer `messages_{code}.js` pour 10 langues (navigation, contrôles, tooltips) + injecter `lang: {code}` dans config Reveal.js | ☐ A FAIRE | 2 pts
+| SLD-3.4 | RTL support — slides arabe/ourdou avec `rtl: true` + layout CSS RTL + validation visuelle Playwright | ☐ A FAIRE | 2 pts
+| SLD-3.5 | Tests Cucumber BDD — scénarios i18n (génération par langue, RTL, fallback, validation config) | ☐ A FAIRE | 2 pts
+| SLD-3.6 | Documentation + dogfooding — deck multilingue de démonstration (fr+en+ar) | ☐ A FAIRE | 1 pt
+|===
+
+_Total_ : 7 US, ~15 pts.
+_Pattern de référence_ : bakery-gradle BKY-I18N (US-I18N-0→6, 23 pts).
+_Prérequis_ : i18n-contracts publié sur Maven Central (US-MEM-3.6).
+
+'''
 == Fichiers Associes
 
 |===
@@ -88,5 +115,6 @@ transitions fluides, feed capsule pour capsule-gradle.
 | `.agents/SESSIONS_HISTORY.adoc` | Historique complet des sessions | EAGER
 | `.agents/sessions/` | Archives par session | LAZY
 | `.agents/archives/` | Archives taches terminees | LAZY
+| `../../BACKLOG.adoc` | Resume public du backlog (source de verite = cet INDEX) | LAZY
 | `slider-plugin/doc/SLD-1_UPGRADE_REVEALJS_AUTO_ANIMATE.adoc` | Spec technique EPIC SLD-1 | LAZY
 |===
