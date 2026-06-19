@@ -124,7 +124,7 @@ class SliderPlaywrightE2eTest {
               subtitle: "Slider Gradle Plugin"
               author:
                 name: "CCCP Education"
-                email: "cccp.education@gmail.com"
+                email: "cccp.edu@gmail.com"
             revealjs:
               theme: "black"
               transition: "slide"
