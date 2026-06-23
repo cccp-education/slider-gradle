@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-06-14
-_Session terminee_ : 010 — Backlog + Cadrage SLD-3 i18n (7 US, ~15 pts, P1)
-_Prochaine session_ : 011 — SLD-3 i18n US-3.0 (dependance i18n-contracts) + US-3.1 (config layer)
+_Derniere mise a jour_ : 2026-06-24
+_Session terminee_ : 011 — README i18n 10 langues (consommateur + plugin) : 20 fichiers créés, switcher i18n, badges, markers v0.0.1, RTL ar/ur
+_Prochaine session_ : 012 — SLD-3 i18n US-3.0 (dependance i18n-contracts) + US-3.1 (config layer)
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 011 | 2026-06-24 | docs+i18n | README i18n 10 langues (consommateur + plugin) — 20 fichiers Markdown créés (README.consommateurs/ + README.plugin/), switcher i18n cross-langue, badges Maven Central/Plugin Portal, markers version 0.0.1, RTL ar/ur. Socle doc SLD-3.6. | 9/10
 | 009 | 2026-06-11 | publish | Publication Maven Central 0.0.1 — version 0.0.6→0.0.1 hardcodé, POM sans guard, Sonatype→nmcp, settings nmcp, publié avec -x cucumberTest -x functionalTest | 9/10
 | 008 | 2026-06-02 | governance | Borough-isation — slider-gradle devient MIAMI 🌴, 21ème borough | 10/10
 | 007 | 2026-05-30 | refactor | Migration plugin ID com.cheroliv.slider → education.cccp.slider — 5 fichiers corrigés (4 tests + 1 source : SliderWorld.kt, ProposeDeckContextSteps.kt, 2× logback-test.xml, SliderManager.kt). Zéro référence restante. test ✅, functionalTest ✅, cucumberTest 6/17 PASS (10 FAIL: proposeDeckContext, infra préexistante) | 9/10
@@ -42,7 +43,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
 | SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS — 4/5 US terminées, reste US-2.5 | P0
-| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | ☐ NOUVEAU — Cadrage Session 010 | P1
+| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | 🔴 EN COURS — README i18n 10 langues créés (S-011), US-3.0→3.5 restantes | P1
 | Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
 |===
 
@@ -95,7 +96,7 @@ _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication C
 | SLD-3.3 | Reveal.js UI i18n — générer `messages_{code}.js` pour 10 langues (navigation, contrôles, tooltips) + injecter `lang: {code}` dans config Reveal.js | ☐ A FAIRE | 2 pts
 | SLD-3.4 | RTL support — slides arabe/ourdou avec `rtl: true` + layout CSS RTL + validation visuelle Playwright | ☐ A FAIRE | 2 pts
 | SLD-3.5 | Tests Cucumber BDD — scénarios i18n (génération par langue, RTL, fallback, validation config) | ☐ A FAIRE | 2 pts
-| SLD-3.6 | Documentation + dogfooding — deck multilingue de démonstration (fr+en+ar) | ☐ A FAIRE | 1 pt
+| SLD-3.6 | Documentation + dogfooding — deck multilingue de démonstration (fr+en+ar) | 🟡 PARTIEL — README i18n 10 langues créés (S-011), deck demo reste à faire | 1 pt
 |===
 
 _Total_ : 7 US, ~15 pts.

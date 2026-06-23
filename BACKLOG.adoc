@@ -1,6 +1,6 @@
 = Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-:date: 2026-06-14
+:date: 2026-06-24
 :toc: left
 :sectnums:
 
@@ -43,12 +43,15 @@ transitions fluides, feed capsule pour capsule-gradle.
 _Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-2-detail-us[INDEX → EPIC SLD-2].
 
 '''
-== EPIC SLD-3 — i18n 10 langues ☐ NOUVEAU
+== EPIC SLD-3 — i18n 10 langues 🔴 EN COURS
 
 _Vision_ : Internationalisation 10 langues via contrats N0 `education.cccp:i18n-contracts:0.0.1`.
 Pattern aligne sur bakery BKY-I18N. RTL pour arabe/ourdou.
 
 _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication Central en attente).
+
+_Session 011 (2026-06-24)_ : 20 README i18n créés (consommateur + plugin,
+10 langues, switcher, badges, markers v0.0.1, RTL ar/ur). Socle doc SLD-3.6 posé.
 
 |===
 | US | Description | Statut | Estimation
@@ -58,7 +61,7 @@ _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication C
 | SLD-3.3 | Reveal.js UI i18n — messages_{code}.js 10 langues | ☐ A FAIRE | 2 pts
 | SLD-3.4 | RTL support arabe/ourdou + validation Playwright | ☐ A FAIRE | 2 pts
 | SLD-3.5 | Tests Cucumber BDD i18n | ☐ A FAIRE | 2 pts
-| SLD-3.6 | Documentation + deck multilingue demo | ☐ A FAIRE | 1 pt
+| SLD-3.6 | Documentation + deck multilingue demo | 🟡 PARTIEL (README i18n S-011, deck reste) | 1 pt
 |===
 
 _Total_ : 7 US, ~15 pts.

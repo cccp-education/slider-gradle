@@ -1,0 +1,146 @@
+= Session 011 — README i18n 10 langues (consommateur + plugin)
+:date: 2026-06-24
+:type: docs+i18n
+:score: 9/10
+:epic: SLD-3 (documentation)
+:status: TERMINE
+
+== Objectif initial
+
+Session 010 avait cadré SLD-3 i18n (7 US, ~15 pts) et planifié la session 011
+sur US-3.0 (dépendance i18n-contracts) + US-3.1 (configuration layer DSL).
+
+Mission effective de la session 011 : créer la documentation README
+multilingue (10 langues) en amont de l'implémentation SLD-3, pour
+poser le socle éditorial i18n avant le câblage code.
+
+== Réalisations
+
+=== 20 fichiers README créés
+
+2 variantes × 10 langues = 20 fichiers Markdown :
+
+.Variante « consommateur » — `README.consommateurs/`
+[cols="2,3,2"]
+|===
+| Code | Langue | RTL
+| en | Anglais (master source) | non
+| fr | Français | non
+| zh | Chinois | non
+| hi | Hindi | non
+| es | Espagnol | non
+| ar | Arabe | *oui (RTL)*
+| bn | Bengali | non
+| pt | Portugais | non
+| ru | Russe | non
+| ur | Ourdou | *oui (RTL)*
+|===
+
+.Variante « plugin » — `README.plugin/`
+[cols="2,3,2"]
+|===
+| Code | Langue | RTL
+| en | Anglais (master source) | non
+| fr | Français | non
+| zh | Chinois | non
+| hi | Hindi | non
+| es | Espagnol | non
+| ar | Arabe | *oui (RTL)*
+| bn | Bengali | non
+| pt | Portugais | non
+| ru | Russe | non
+| ur | Ourdou | *oui (RTL)*
+|===
+
+*Chemin* :
+- `foundry/public/slider-gradle/README.consommateurs/README.{code}.md`
+- `foundry/public/slider-gradle/README.plugin/README.{code}.md`
+
+=== Contenu
+
+. **Master source** : `README.md` (en) marqué en en-tête
+   `<!-- master source — other languages are translations of this file -->`
+. **Traductions** : les 9 autres langues portent l'en-tête
+   `<!-- translated from README.md rev 0.0.1 -->`
+. **Badges** : Maven Central, Gradle Plugin Portal, CI, Coverage, License
+   (alignés sur le master, identiques dans toutes les langues)
+. **Markers version** : `0.0.1` dans le bandeau métadonnées
+   (Version · Group · Plugin ID) de chaque README
+. **Switcher i18n** : ligne de liens croisés en haut de chaque README
+  (ex. `🌐 Languages: **EN** | [Français](README.fr.md) | [العربية](README.ar.md) …`)
+  permettant la navigation entre les 10 langues
+. **RTL** : arabe (`ar`) et ourdou (`ur`) utilisent la direction RTL
+  native du Markdown (rendu dépendant du viewer — GitHub/IDE)
+. **Métadonnées techniques** : Java 24 · Kotlin 2.3.20 · Gradle 9.5.1
+  (consommateur) / Gradle 9.5.1 (plugin interne)
+
+=== Alignement
+
+- Couverture linguistique identique à SLD-3 (10 langues cibles).
+- Les README consommateur décrivent l'usage du plugin
+  (`education.cccp.slider`, tâche `asciidoctorRevealJs`).
+- Les README plugin décrivent l'intérieur du plugin
+  (module layout, dépendances, tâches, tests).
+- Pattern de référence : bakery-gradle BKY-I18N (README traduits first,
+  câblage code ensuite).
+
+== Impact sur la roadmap
+
+Cette session ne cloture pas une US formelle de SLD-3 mais pose le
+socle documentation i18n attendu par SLD-3.6 (Documentation +
+dogfooding). La traduction des README est un prérequis implicite de
+SLD-3.6. À ce titre :
+
+- SLD-3.6 passe en *partiellement amorcé* (README i18n réalisés,
+  deck multilingue de démonstration reste à faire).
+- SLD-3.0 → 3.5 restent inchangés (☐ A FAIRE).
+
+== Fichiers
+
+.Créés (20)
+[cols="3,2"]
+|===
+| Fichier | Taille
+| `README.consommateurs/README.md` | ~9.5 KB (en, master)
+| `README.consommateurs/README.fr.md` | ~10 KB
+| `README.consommateurs/README.zh.md` | ~9.7 KB
+| `README.consommateurs/README.hi.md` | ~13.8 KB
+| `README.consommateurs/README.es.md` | ~10.1 KB
+| `README.consommateurs/README.ar.md` | ~10.9 KB
+| `README.consommateurs/README.bn.md` | ~13.6 KB
+| `README.consommateurs/README.pt.md` | ~10 KB
+| `README.consommateurs/README.ru.md` | ~12.1 KB
+| `README.consommateurs/README.ur.md` | ~11.6 KB
+| `README.plugin/README.md` | ~10.8 KB (en, master)
+| `README.plugin/README.fr.md` | ~11.3 KB
+| `README.plugin/README.zh.md` | ~11.1 KB
+| `README.plugin/README.hi.md` | ~14.1 KB
+| `README.plugin/README.es.md` | ~11.4 KB
+| `README.plugin/README.ar.md` | ~12.1 KB
+| `README.plugin/README.bn.md` | ~14 KB
+| `README.plugin/README.pt.md` | ~11.3 KB
+| `README.plugin/README.ru.md` | ~13 KB
+| `README.plugin/README.ur.md` | ~12.4 KB
+|===
+
+.Modifiés (gouvernance)
+[cols="3,2"]
+|===
+| Fichier | Action
+| `.agents/INDEX.adoc` | session 011 ajoutée, SLD-3.6 statut MAJ
+| `.agents/SESSIONS_HISTORY.adoc` | entrée 011 ajoutée
+| `PROMPT_REPRISE.adoc` | réécrit pour session 012 (SLD-3.0+3.1)
+| `BACKLOG.adoc` (racine) | SLD-3.6 statut MAJ
+|===
+
+== Prochaine session (012)
+
+Reprise du plan initial SLD-3 : US-3.0 (dépendance i18n-contracts) +
+US-3.1 (configuration layer DSL). Les README i18n serviront de
+support de validation dogfooding pour US-3.6.
+
+== Notes
+
+- Aucun test lancé (session pure documentation, zéro code).
+- Aucun commit effectué (règle AGENTS.adoc respectée).
+- Zéro secret/token introduit (README publics).
