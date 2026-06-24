@@ -1,20 +1,14 @@
-= PROMPT_REPRISE — slider-gradle
-:session: 012
+= PROMPT_REPRISE — slider-gradle — Session 013
+:session: 013
 :date: 2026-06-24
-:status: A VENIR
 
-== Session 012 — SLD-3 i18n US-3.0 + US-3.1
+== Session 012 terminée — Architecture README Plugin + Consommateur
 
-=== Contexte
+Déplacement README.plugin → slider-plugin/README.plugin/ (README.md master
+remonté à racine plugin). Déplacement README.consommateurs → racine borough.
+Liens i18n recréés (10 langues).
 
-Session 011 — 20 README i18n créés (consommateur + plugin, 10 langues,
-switcher cross-langue, badges, markers v0.0.1, RTL ar/ur). Socle
-documentation SLD-3.6 posé. Zéro code modifié.
-
-Session 010 — SLD-3 i18n cadré (7 US, ~15 pts). BACKLOG.adoc racine =
-résumé, INDEX.adoc = source de vérité.
-
-=== Priorité session 012
+== Prochaine session — 013 : SLD-3 i18n US-3.0 + US-3.1
 
 . US-3.0 — Dépendance `i18n-contracts` + remplacer `DeckContext.language`
   (String "French" → ISO 639-1 `languageCode`) + valider contre
@@ -23,39 +17,13 @@ résumé, INDEX.adoc = source de vérité.
   cascade 5 couches (CLI `-Planguage` > gradle.properties > DSL >
   deck-context.yml > default "fr") + `I18nConfig.validate()`
 
-=== Pattern de référence
+== Pattern de référence
 
 - bakery-gradle BKY-I18N (US-I18N-0 config layer + US-I18N-1 JBake injection)
 - i18n-contracts N0 (workspace-bom MEM-3, 5 classes, 28/28 PASS, mavenLocal)
 - Dépendance : `implementation(libs.i18n.contracts)` version 0.0.1
 
-=== Architecture US-3.0
-
-- Ajouter `libraries { i18n-contracts }` dans `gradle/libs.versions.toml`
-- Ajouter `implementation(libs.i18n.contracts)` dans `slider/build.gradle.kts`
-- Remplacer `DeckContext.language: String = "French"` par
-  `DeckContext.languageCode: String = "fr"`
-- Valider `languageCode` contre `LanguageCatalog.supportedCodes()`
-- Propager dans `RagTasks.kt` (`-Planguage` → valide)
-- Propager dans `TranslatorManager.kt` (system prompt)
-
-=== Architecture US-3.1
-
-- Ajouter `SliderExtension.language` + `SliderExtension.supportedLanguages` DSL
-- Créer `I18nConfigResolver` (ou intégrer dans `ConfigResolver`)
-- Cascade 5 couches : `-Planguage` > gradle.properties > DSL >
-  deck-context.yml > default "fr"
-- Valider avec `I18nConfig.validate()`
-- Tests unitaires TDD (5 tests : cascade, fallback, validation)
-
-=== Validation dogfooding
-
-- Les README i18n créés en S-011 servent de support de validation
-  pour US-3.6 (deck multilingue démo fr+en+ar).
-- Vérifier que les 10 codes ISO (en, fr, zh, hi, es, ar, bn, pt, ru, ur)
-  sont reconnus par `LanguageCatalog.supportedCodes()`.
-
-=== Rappels
+== Rappels
 
 - GroupId : `education.cccp`
 - Plugin ID : `education.cccp.slider`, impl class `slider.SliderPlugin`

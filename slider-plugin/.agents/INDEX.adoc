@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-06-24
-_Session terminee_ : 011 — README i18n 10 langues (consommateur + plugin) : 20 fichiers créés, switcher i18n, badges, markers v0.0.1, RTL ar/ur
-_Prochaine session_ : 012 — SLD-3 i18n US-3.0 (dependance i18n-contracts) + US-3.1 (config layer)
+_Session terminee_ : 012 — Architecture README Plugin + Consommateur (déplacement README.plugin → slider-plugin/, README.consommateurs → racine, liens i18n recréés) ✅
+_Prochaine session_ : 013 — SLD-3 i18n US-3.0 (dependance i18n-contracts) + US-3.1 (config layer)
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
