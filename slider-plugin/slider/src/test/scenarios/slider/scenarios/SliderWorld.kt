@@ -85,14 +85,13 @@ class SliderWorld {
 
     /**
      * Ensures an Ollama instance is available:
-     * - If Ollama is running locally on port 11434, uses it directly.
-     * - Otherwise starts a Testcontainers Ollama container.
+     * - If Ollama is running locally on port 11439, uses it directly.
      *
      * Exposes [ollamaBaseUrl] for injection as -Pollama.baseUrl.
      */
     fun ensureOllama() {
         if (isOllamaLocal()) {
-            ollamaBaseUrl = "http://localhost:11434"
+            ollamaBaseUrl = "http://localhost:11439"
             log.info("Ollama detected locally at $ollamaBaseUrl")
         } else {
             log.info("Ollama not found locally — starting Testcontainers Ollama...")
@@ -109,7 +108,7 @@ class SliderWorld {
     }
 
     private fun isOllamaLocal(): Boolean = runCatching {
-        val conn = URI("http://localhost:11434/api/tags").toURL().openConnection() as HttpURLConnection
+        val conn = URI("http://localhost:11439/api/tags").toURL().openConnection() as HttpURLConnection
         conn.connectTimeout = 1_000
         conn.readTimeout = 1_000
         conn.requestMethod = "GET"

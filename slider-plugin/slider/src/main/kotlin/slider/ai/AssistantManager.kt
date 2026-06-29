@@ -232,7 +232,7 @@ object AssistantManager {
 
     fun Project.createOllamaChatModel(model: String = "smollm:135m"): OllamaChatModel =
         OllamaChatModel.builder().apply {
-            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11434")
+            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
             modelName(findProperty("ollama.modelName") as? String ?: model)
             temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
             timeout(ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000))
@@ -242,7 +242,7 @@ object AssistantManager {
 
     fun Project.createOllamaStreamingChatModel(model: String = "smollm:135m"): OllamaStreamingChatModel =
         OllamaStreamingChatModel.builder().apply {
-            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11434")
+            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
             modelName(findProperty("ollama.modelName") as? String ?: model)
             temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
             timeout(ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000))
