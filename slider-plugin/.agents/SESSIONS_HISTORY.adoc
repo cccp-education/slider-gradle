@@ -2,10 +2,15 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 013 (2026-07-03) — CNV-6 Migration
+
+Migration du `build.gradle.kts` (sous-module `slider/`) vers les convention plugins `education.cccp.build.gradle-plugin` (0.0.1) + `education.cccp.build.publishing` (0.0.1), pattern bakery. build.gradle.kts 301→205 lignes (-96). compileKotlin SUCCESS. Variantes gardées : buildscript annotations force, exclusions logback, extendsFrom legacy, compatibility configurationCache=false.
+
 == Sessions
 
 |===
 | # | Date | Type | Sujet | Score
+| 013 | 2026-07-03 | dev | CNV-6 Migration — convention plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing), build.gradle.kts 301→205 (-96), compileKotlin SUCCESS. Variantes : buildscript annotations force, exclusions logback, extendsFrom legacy, configurationCache=false | ✅ TERMINÉ
 | 012 | 2026-06-24 | refactor README | Architecture README Plugin + Consommateur — déplacement README.plugin → slider-plugin/, README.consommateurs → racine, liens i18n recréés (10 langues) | 8/10
 | 011 | 2026-06-24 | docs+i18n | README i18n 10 langues (consommateur + plugin) — 20 fichiers Markdown créés (README.consommateurs/ + README.plugin/), switcher i18n cross-langue, badges Maven Central/Plugin Portal, markers version 0.0.1, RTL ar/ur. Socle doc SLD-3.6. | 9/10
 | 010 | 2026-06-14 | governance | Backlog + Cadrage SLD-3 i18n — synchronisation INDEX.adoc/BACKLOG.adoc, ajout EPIC SLD-3 i18n (7 US, ~15 pts, pattern bakery BKY-I18N, dependance i18n-contracts N0) | 8/10

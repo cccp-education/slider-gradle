@@ -1,14 +1,18 @@
-= PROMPT_REPRISE — slider-gradle — Session 013
-:session: 013
-:date: 2026-06-24
+= PROMPT_REPRISE — slider-gradle — Session 014
+:session: 014
+:date: 2026-07-03
 
-== Session 012 terminée — Architecture README Plugin + Consommateur
+== Session 013 terminée — CNV-6 Migration conventions plugins
 
-Déplacement README.plugin → slider-plugin/README.plugin/ (README.md master
-remonté à racine plugin). Déplacement README.consommateurs → racine borough.
-Liens i18n recréés (10 langues).
+Migration du `build.gradle.kts` (sous-module `slider/`) vers les convention
+plugins `education.cccp.build.gradle-plugin` (0.0.1) + `education.cccp.build.publishing`
+(0.0.1), pattern bakery. build.gradle.kts 301→205 lignes (-96). compileKotlin
+SUCCESS. Variantes gardées : buildscript annotations force, exclusions logback,
+extendsFrom legacy, compatibility configurationCache=false.
 
-== Prochaine session — 013 : SLD-3 i18n US-3.0 + US-3.1
+CNV-6 ✅ TERMINÉ pour slider-gradle.
+
+== Prochaine session — 014 : SLD-3 i18n US-3.0 + US-3.1
 
 . US-3.0 — Dépendance `i18n-contracts` + remplacer `DeckContext.language`
   (String "French" → ISO 639-1 `languageCode`) + valider contre

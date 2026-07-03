@@ -13,17 +13,14 @@ import org.gradle.plugin.compatibility.compatibility
 
 plugins {
     `java-library`
-    signing
-    `maven-publish`
-    `java-gradle-plugin`
-    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.publish)
     alias(libs.plugins.codebase)
+    id("education.cccp.build.gradle-plugin") version "0.0.1"
+    id("education.cccp.build.publishing") version "0.0.1"
 }
 
 group = "education.cccp"
 version = "0.0.1"
-kotlin.jvmToolchain(JavaVersion.VERSION_24.ordinal)
 
 repositories {
     mavenCentral()
@@ -66,15 +63,6 @@ dependencies {
 
     // Playwright E2E tests
     testImplementation(libs.playwright)
-}
-
-
-tasks.withType<Test> {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStandardStreams = true
-    }
 }
 
 tasks.named<Test>("test") {
@@ -243,59 +231,18 @@ gradlePlugin {
     testSourceSets(functionalTest)
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
+publishingConventions {
+    publicationType = "PLUGIN"
 }
 
 publishing {
-    publications {
-        withType<MavenPublication> {
-            pom {
-                name.set(gradlePlugin.plugins.getByName("slider").displayName)
-                description.set(gradlePlugin.plugins.getByName("slider").description)
-                url.set(gradlePlugin.website.get())
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("cccp-education")
-                        name.set("CCCP Education")
-                        email.set("cccp.edu@gmail.com")
-                    }
-                }
-                scm {
-                    connection.set(gradlePlugin.vcsUrl.get())
-                    developerConnection.set(gradlePlugin.vcsUrl.get())
-                    url.set(gradlePlugin.vcsUrl.get())
-                }
-                project.findProperty("relocationGroup")?.let { targetGroup ->
-                    withXml {
-                        val pom = asElement()
-                        val doc = pom.ownerDocument
-                        val distMgmt = doc.createElement("distributionManagement")
-                        val relocation = doc.createElement("relocation")
-                        relocation.appendChild(doc.createElement("groupId")).also { it.textContent = targetGroup.toString() }
-                        relocation.appendChild(doc.createElement("artifactId")).also { it.textContent = project.name }
-                        distMgmt.appendChild(relocation)
-                        pom.appendChild(distMgmt)
-                    }
-                }
-            }
+    publications.withType<MavenPublication> {
+        pom {
+            name.set("Slider Gradle Plugin")
+            description.set("Gradle plugin for slider generation.")
         }
     }
     repositories {
         mavenCentral()
     }
-}
-
-signing {
-    if (System.getenv("CI") != "true" && !version.toString().endsWith("-SNAPSHOT")) {
-        sign(publishing.publications)
-    }
-    useGpgCmd()
 }
