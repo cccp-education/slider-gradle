@@ -2,6 +2,14 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 015 (2026-07-06) — SLD-3 i18n US-3.1
+
+US-3.1 TERMINÉ : Config layer DSL `language`/`supportedLanguages` + cascade 5 couches
+(CLI > gradle.properties > DSL > YAML > default "fr") via `I18nConfigResolver` (object
+pur, testable sans Gradle). `SliderExtension` étendue avec 2 propriétés. `RagTasks`
+câblé via `I18nConfigResolver.resolve(...)`. 9/9 `I18nConfigResolverTest` PASS.
+22 tests PASS au total, 10 échecs Cucumber préexistants (infra GradleRunner S007).
+
 == Session 014 (2026-07-06) — SLD-3 i18n US-3.0
 
 US-3.0 TERMINÉ : dépendance `i18n-contracts:0.0.2` (N0) ajoutée, `DeckContext.language`
@@ -19,6 +27,7 @@ Migration du `build.gradle.kts` (sous-module `slider/`) vers les convention plug
 
 |===
 | # | Date | Type | Sujet | Score
+| 015 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.1 — I18nConfigResolver (cascade 5 couches) + SliderExtension.language/supportedLanguages + RagTasks câblé. 9/9 I18nConfigResolverTest PASS. | ✅ TERMINÉ
 | 014 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.0 — dépendance i18n-contracts:0.0.2 + DeckContext.languageCode ("fr" ISO 639-1) + requireValidLanguage(). 5/5 DeckContextLanguageTest PASS. 3 sites corrigés. 10 échecs Cucumber préexistants. | ✅ TERMINÉ
 | 013 | 2026-07-03 | dev | CNV-6 Migration — convention plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing), build.gradle.kts 301→205 (-96), compileKotlin SUCCESS. Variantes : buildscript annotations force, exclusions logback, extendsFrom legacy, configurationCache=false | ✅ TERMINÉ
 | 012 | 2026-06-24 | refactor README | Architecture README Plugin + Consommateur — déplacement README.plugin → slider-plugin/, README.consommateurs → racine, liens i18n recréés (10 langues) | 8/10

@@ -2,8 +2,10 @@ package slider.ai
 
 import slider.DeckContext
 import slider.SliderManager.Configuration.yamlMapper
+import slider.SliderPlugin.SliderExtension
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel
+import slider.i18n.I18nConfigResolver
 import com.fasterxml.jackson.module.kotlin.readValue
 import dev.langchain4j.data.message.SystemMessage
 import dev.langchain4j.data.message.UserMessage
@@ -68,8 +70,23 @@ abstract class ProposeDeckContextTask : RagTask() {
                         "Usage: ./gradlew proposeDeckContext -Psubject=\"Introduction to Kotlin\""
             )
 
-        // Language: -Planguage=fr|en|… (default: fr)
-        val language = (project.findProperty("language") as? String ?: "fr").lowercase().trim()
+        // Language: cascade 5 couches — CLI -Planguage > gradle.properties > DSL > deck-context.yml > default "fr"
+        val ext = project.extensions.findByType(SliderExtension::class.java)
+        val cliProps = mapOf<String, String>(
+            "language" to ((project.findProperty("language") as? String) ?: ""),
+        ).filterValues { it.isNotBlank() }
+        val gradleProps = mapOf<String, String>(
+            "language" to ((project.findProperty("language") as? String) ?: ""),
+        ).filterValues { it.isNotBlank() }
+        val i18nConfig = I18nConfigResolver.resolve(
+            cliProps = cliProps,
+            gradleProperties = gradleProps,
+            dslLanguage = ext?.language?.orNull ?: "",
+            dslSupportedLanguages = emptyList(),
+            yamlLanguageCode = null,
+            defaultLanguage = "fr",
+        )
+        val language = i18nConfig.activeLanguage
 
         // Author: -Pauthor.name / -Pauthor.email
         // Falls back to git config user.name / user.email if not provided

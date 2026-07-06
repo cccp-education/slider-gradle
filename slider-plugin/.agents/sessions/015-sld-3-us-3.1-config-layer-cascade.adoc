@@ -1,0 +1,64 @@
+= Session 015 — SLD-3 i18n US-3.1 (Config layer DSL + cascade 5 couches)
+:date: 2026-07-06
+:session: 015
+:epic: SLD-3
+:us: US-3.1
+
+== Objectif
+
+US-3.1 : Configuration layer DSL `language`/`supportedLanguages` + cascade 5 couches
+(CLI `-Planguage` > gradle.properties > DSL > deck-context.yml > default "fr")
++ `I18nConfig.validate()` (contrat N0).
+
+== Méthode — Baby-step TDD (RED → GREEN → REFACTOR)
+
+=== RED
+Création de `I18nConfigResolverTest.kt` (9 tests) :
+. `cascade layer 1 CLI -Planguage wins` — CLI bat tout
+. `cascade layer 2 gradle properties wins over DSL YAML default`
+. `cascade layer 3 DSL wins over YAML and default`
+. `cascade layer 4 YAML languageCode wins over default`
+. `cascade layer 5 default fr when nothing is set`
+. `resolved I18nConfig should validate successfully` (I18nValidationResult.Valid)
+. `supportedLanguages falls back to activeLanguage singleton when empty`
+. `invalid CLI language code should fall back to default`
+. `fallback language should always be default`
+
+Échec compilation : `Unresolved reference 'I18nConfigResolver'`.
+
+=== GREEN
+. `slider/i18n/I18nConfigResolver.kt` — object avec `resolve(...)` retournant
+  `I18nConfig` (contrat N0). Cascade explicite via liste de candidats ordonnée.
+  Validation via `LanguageCatalog.supportedCodes()`. `fallbackLanguage = defaultLanguage`.
+. `SliderPlugin.kt` — ajout `language: Property<String>` +
+  `supportedLanguages: Property<String>` au `SliderExtension`.
+. `RagTasks.kt` — résolution `language` via `I18nConfigResolver.resolve(...)` :
+  cliProps + gradleProps (project.findProperty), dslLanguage (SliderExtension.language),
+  yamlLanguageCode=null (deck-context.yml non lu à la génération), default "fr".
+
+=== REFACTOR
+`I18nConfigResolver` est un object pur (testable sans Gradle), isolé du DSL Gradle.
+L'extension `SliderExtension` expose les 2 propriétés sans logique. La tâche
+`ProposeDeckContextTask` ne contient que le mapping project → resolver.
+
+== Vérification
+
+. `./gradlew :slider:compileKotlin` → BUILD SUCCESSFUL
+. `./gradlew :slider:test --tests "slider.i18n.I18nConfigResolverTest"` → 9/9 PASSED
+. `./gradlew :slider:test` → 22 PASS, 10 FAIL (préexistants : `Task 'proposeDeckContext'
+   not found` — infra GradleRunner documentée S007), 1 SKIP
+
+Aucune régression. Les 10 échecs Cucumber `proposeDeckContext` sont **préexistants**
+(infra GradleRunner, pas liés à US-3.1).
+
+== Fichiers modifiés
+
+. `slider/src/main/kotlin/slider/i18n/I18nConfigResolver.kt` — NEW (cascade 5 couches)
+. `slider/src/main/kotlin/slider/SliderPlugin.kt` — language + supportedLanguages DSL
+. `slider/src/main/kotlin/slider/ai/RagTasks.kt` — I18nConfigResolver.resolve(...) câblé
+. `slider/src/test/kotlin/slider/i18n/I18nConfigResolverTest.kt` — NEW (9 tests)
+
+== Prochaine session — 016 : US-3.2
+
+TranslatorManager modernisation — remplacer `setOf(FRENCH, ENGLISH)` par
+`LanguageCatalog.ALL` (2→10 langues) + system prompt LLM adaptatif par langue.

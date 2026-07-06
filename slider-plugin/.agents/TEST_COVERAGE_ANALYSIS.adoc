@@ -23,3 +23,20 @@ Nouveau test unitaire `DeckContextLanguageTest.kt` (5 tests JUnit5 + AssertJ) :
 Résultat : 5/5 PASS. Couverture `DeckContext.languageCode` + `requireValidLanguage()`.
 Tests Cucumber modifiés (RevealJsTransitionSteps, ProposeDeckContextSteps, feature) —
 10 échecs préexistants (infra GradleRunner `proposeDeckContext not found`, S007).
+
+== Session 015 — SLD-3 i18n US-3.1 (2026-07-06)
+
+Nouveau test unitaire `I18nConfigResolverTest.kt` (9 tests JUnit5 + AssertJ) :
+. `cascade layer 1 CLI -Planguage wins` — CLI bat toutes les couches
+. `cascade layer 2 gradle properties wins over DSL YAML default`
+. `cascade layer 3 DSL wins over YAML and default`
+. `cascade layer 4 YAML languageCode wins over default`
+. `cascade layer 5 default fr when nothing is set`
+. `resolved I18nConfig should validate successfully` — I18nValidationResult.Valid
+. `supportedLanguages falls back to activeLanguage singleton when empty`
+. `invalid CLI language code should fall back to default`
+. `fallback language should always be default`
+
+Résultat : 9/9 PASS. Couverture cascade 5 couches + validation I18nConfig.
+Total : 22 tests PASS (5 DeckContextLanguageTest + 9 I18nConfigResolverTest + 6 Cucumber
+transition/auto-animate + 1 SliderPluginTest + 1 PlaywrightE2E).

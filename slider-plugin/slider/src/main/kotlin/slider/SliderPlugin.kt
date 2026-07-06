@@ -66,5 +66,11 @@ class SliderPlugin : Plugin<Project> {
     open class SliderExtension @Inject constructor(objects: ObjectFactory) {
         @Suppress("unused")
         val configPath: Property<String> = objects.property(String::class.java)
+
+        @Suppress("unused")
+        val language: Property<String> = objects.property(String::class.java)
+
+        @Suppress("unused")
+        val supportedLanguages: Property<String> = objects.property(String::class.java)
     }
 }

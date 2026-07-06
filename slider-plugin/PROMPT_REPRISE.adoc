@@ -1,37 +1,34 @@
-= PROMPT_REPRISE — slider-gradle — Session 015
-:session: 015
+= PROMPT_REPRISE — slider-gradle — Session 016
+:session: 016
 :date: 2026-07-06
 
-== Session 014 terminée — SLD-3 i18n US-3.0
+== Sessions 014-015 terminées — SLD-3 i18n US-3.0 + US-3.1
 
-US-3.0 TERMINÉ : dépendance `i18n-contracts:0.0.2` ajoutée, `DeckContext.language`
-("French") → `DeckContext.languageCode` ("fr" ISO 639-1) + `requireValidLanguage()`
-validant contre `LanguageCatalog.supportedCodes()`. 5/5 tests unitaires PASS
-(`DeckContextLanguageTest`). 3 sites appelants corrigés (SliderManager,
-AssistantManager, steps Cucumber). 10 échecs Cucumber préexistants (infra
-GradleRunner `proposeDeckContext not found`, documentés S007) — aucune régression.
+US-3.0 ✅ : Dépendance `i18n-contracts:0.0.2` + `DeckContext.languageCode` ("fr"
+ISO 639-1) + `requireValidLanguage()`. 5/5 `DeckContextLanguageTest` PASS.
 
-== Prochaine session — 015 : SLD-3 i18n US-3.1
+US-3.1 ✅ : Config layer DSL `language`/`supportedLanguages` + cascade 5 couches
+(CLI > gradle.properties > DSL > YAML > default "fr") via `I18nConfigResolver`.
+9/9 `I18nConfigResolverTest` PASS. `SliderExtension` étendue. `RagTasks` câblé.
 
-. Configuration layer — DSL `language`/`supportedLanguages` sur l'extension slider
-. Cascade 5 couches : CLI `-Planguage` > `gradle.properties` > DSL >
-  `deck-context.yml` > default "fr"
-. `I18nConfig.validate()` (contrat N0) — activer la validation dans la chaîne
-. Bridge : `DeckContext.languageCode` ← `I18nConfig.activeLanguage`
+22 tests PASS au total, 10 échecs Cucumber préexistants (infra GradleRunner S007).
+
+== Prochaine session — 016 : SLD-3 i18n US-3.2
+
+. TranslatorManager modernisation — remplacer `setOf(FRENCH, ENGLISH)` par
+  `LanguageCatalog.ALL` (2→10 langues)
+. System prompt LLM adaptatif par langue (prompt traduction localisé)
+. Utiliser `I18nConfig.supportedLanguages` pour générer les tâches de traduction
 
 == Pattern de référence
 
-- bakery-gradle BKY-I18N US-I18N-0 (config layer + cascade)
-- document-gradle `DocumentI18nBridge.kt` (bridge SupportedLanguage → pipeline)
-- i18n-contracts N0 : `I18nConfig(activeLanguage, supportedLanguages, fallbackLanguage).validate()`
+- bakery-gradle BKY-I18N (TranslatorManager équivalent)
+- i18n-contracts N0 : `LanguageCatalog.ALL`, `SupportedLanguage`, `TranslationRequest`
 
 == Rappels
 
-- GroupId : `education.cccp`
-- Plugin ID : `education.cccp.slider`, impl class `slider.SliderPlugin`
+- GroupId : `education.cccp`, Plugin ID : `education.cccp.slider`
 - Version publiée Central : 0.0.1
-- Package source : `slider`
-- i18n-contracts : mavenLocal 0.0.2 (publication Central en attente MEM-3.6)
+- i18n-contracts : mavenLocal 0.0.2
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
-- RTL : ar + ur (Reveal.js `rtl: true`)
-- Baby-step TDD : RED (test config cascade) → GREEN (DSL + resolve) → REFACTOR
+- Baby-step TDD : RED (test TranslatorManager 10 langues) → GREEN → REFACTOR

@@ -56,7 +56,7 @@ _Session 011 (2026-06-24)_ : 20 README i18n créés (consommateur + plugin,
 |===
 | US | Description | Statut | Estimation
 | SLD-3.0 | Dependance i18n-contracts + DeckContext.language ISO 639-1 | ✅ TERMINÉ (S-014) | 2 pts
-| SLD-3.1 | Configuration layer DSL + cascade 5 couches | ☐ A FAIRE | 3 pts
+| SLD-3.1 | Configuration layer DSL + cascade 5 couches | ✅ TERMINÉ (S-015) | 3 pts
 | SLD-3.2 | TranslatorManager 2→10 langues + LLM prompt adaptatif | ☐ A FAIRE | 3 pts
 | SLD-3.3 | Reveal.js UI i18n — messages_{code}.js 10 langues | ☐ A FAIRE | 2 pts
 | SLD-3.4 | RTL support arabe/ourdou + validation Playwright | ☐ A FAIRE | 2 pts
