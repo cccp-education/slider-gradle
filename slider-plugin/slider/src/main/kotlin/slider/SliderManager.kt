@@ -26,6 +26,8 @@ import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
 import slider.Slides.RevealJsSlides.TASK_SERVE_SLIDES
 import slider.Slides.RevealJsSlides.TASK_VISUAL_TEST
 import slider.Slides.RevealJsSlides.TASK_INSTALL_PLAYWRIGHT
+import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
+import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
 import slider.Slides.Serve.SERVE_DEP
 import slider.Slides.Slide.DEFAULT_SLIDES_FOLDER
 import slider.Slides.Slide.IMAGES
@@ -515,6 +517,7 @@ object SliderManager {
             registerReportFunctionalTestsTask()
             registerVisualTestTask()
             registerInstallPlaywrightTask()
+            registerGenerateRevealUiMessagesTask()
         }
 
         /**
@@ -563,6 +566,13 @@ object SliderManager {
                 setExecutionMode(OUT_OF_PROCESS)
                 dependsOn(TASK_CLEAN_SLIDES_BUILD)
                 finalizedBy(TASK_DASHBOARD_SLIDES_BUILD)
+                // RTL — driven by -Planguage=<code> when the resolved
+                // language is a RTL one (Arabic, Urdu). Defaults to LTR.
+                val resolvedLanguage = project.findProperty("language") as? String
+                    ?: ""
+                if (slider.i18n.RevealRtlResolver.resolveRtl(resolvedLanguage)) {
+                    revealjsOptions.setRightToLeft(true)
+                }
                 doFirst {
                     val cssOutput = layout.buildDirectory.get().asFile
                         .resolve("docs")
@@ -893,6 +903,31 @@ object SliderManager {
                     "--config", "${playwrightDir()}/playwright.config.ts"
                 ))
                 workingDir.set(file(playwrightDir()))
+            }
+        }
+
+        /**
+         * Generates `messages_{code}.js` files for every supported language
+         * under `build/reveal-i18n/`. Each file declares a
+         * `RevealI18n.messages["{code}"] = { ... }` assignment exposing the
+         * navigation and control labels consumed by the Reveal.js i18n plugin.
+         *
+         * The generated files are loaded as `<script>` tags in the deck HTML
+         * and combined with the `lang` Reveal.js config option to localise the
+         * on-screen UI (prev/next/up/help tooltips, overview, speaker notes,
+         * fullscreen). RTL languages (ar, ur) emit a `rtl: true` flag so the
+         * Reveal.js layout can flip direction.
+         */
+        private fun Project.registerGenerateRevealUiMessagesTask() {
+            tasks.register<DefaultTask>(TASK_GENERATE_REVEAL_UI_MESSAGES) {
+                group = GROUP_TASK_SLIDER
+                description = "Generate Reveal.js UI i18n messages_{code}.js files for all 10 supported languages."
+                doLast {
+                    val outputDir = layout.buildDirectory.get().asFile.resolve(REVEAL_I18N_OUTPUT_DIR)
+                    outputDir.mkdirs()
+                    val written = slider.i18n.RevealUiMessagesWriter.writeAll(outputDir)
+                    logger.lifecycle("✅ ${written.size} Reveal.js i18n message files written to {}", outputDir.absolutePath)
+                }
             }
         }
     }

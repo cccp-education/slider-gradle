@@ -66,6 +66,91 @@ Result: 33 unit PASS + 4 functional PASS + 23 cucumber PASS / 1 SKIP (Ollama).
 Coverage: TranslatorManager.supportedLanguages, translationTasks, getTranslatePromptMessage,
 createDisplaySupportedLanguagesTask, TranslatorPlugin task registration.
 
+== Session 019 — SLD-3 i18n US-3.3/3.4/3.5 (2026-07-06)
+
+New unit tests (30 total, +9 over session 018):
+
+`RevealUiMessagesTest.kt` (4 tests JUnit5 + AssertJ) :
+. `RevealUiMessages should expose the language ISO code` — languageCode field
+. `RevealUiMessages for Arabic should expose the ISO code and rtl flag` — ar rtl true
+. `RevealUiMessages for French should not be rtl` — fr rtl false
+. `RevealUiMessages isRtl should derive from LanguageCatalog` — all 10 codes match
+
+`RevealUiMessageCatalogTest.kt` (9 tests JUnit5 + AssertJ) :
+. `catalog should expose one RevealUiMessages per LanguageCatalog entry` — size 10
+. `catalog should cover all 10 ISO codes from LanguageCatalog` — all codes present
+. `catalog findByCode should return the matching RevealUiMessages` — fr lookup
+. `catalog findByCode should return null for unknown code` — xx null
+. `catalog French messages should use French tooltips for navigation` — Diapositive précédente
+. `catalog English messages should use English tooltips for navigation` — Previous slide
+. `catalog Arabic messages should be rtl` — ar isRtl true
+. `catalog Urdu messages should be rtl` — ur isRtl true
+. `catalog all messages should have non blank nav and controls labels` — no blanks
+
+`RevealUiMessagesWriterTest.kt` (8 tests JUnit5 + AssertJ + TempDir) :
+. `writeAll should create one messages_{code} js file per supported language` — 10 files
+. `written file should contain RevealI18n messages assignment for the matching code` — RevealI18n + fr
+. `written file for Arabic should embed rtl true flag` — rtl: true
+. `written file for English should not embed rtl flag set to true` — no rtl: true
+. `written file should expose nav messages as a nested nav object` — nav/prev/next/up/help
+. `written file should expose controls messages as a nested controls object` — controls/overview/speakerNotes/fullscreen
+. `writeAll should return the list of written files` — 10 files
+. `written files should be valid JavaScript opening with a statement` — starts with RevealI18n
+
+`RevealRtlResolverTest.kt` (9 tests JUnit5 + AssertJ) :
+. `resolveRtl should return true for Arabic` — ar true
+. `resolveRtl should return true for Urdu` — ur true
+. `resolveRtl should return false for French` — fr false
+. `resolveRtl should return false for English` — en false
+. `resolveRtl should return false for every LTR LanguageCatalog entry` — all LTR
+. `resolveRtl should return true for every RTL LanguageCatalog entry` — all RTL
+. `resolveRtl should return false for unknown language code` — xx false
+. `rtlLanguages should contain exactly Arabic and Urdu` — {ar, ur}
+. `rtlLanguages size should match LanguageCatalog RTL count` — size 2
+
+New functional test:
+
+`RevealUiMessagesFunctionalTest.kt` (3 tests GradleRunner + AssertJ) :
+. `generateRevealUiMessages task should be registered and run successfully` — task SUCCESS
+. `generateRevealUiMessages should produce one messages_{code} js file per supported language` — 10 files in build/reveal-i18n
+. `generateRevealUiMessages task should belong to the slider group` — tasks --group slider
+
+New Cucumber BDD (22 scenarios across 3 features):
+
+`6_reveal_ui_i18n.feature` (10 scenarios, English Gherkin) + `RevealUiI18nSteps.kt` (11 step defs) :
+. RevealUiMessageCatalog exposes one entry per LanguageCatalog language
+. RevealUiMessageCatalog covers all 10 ISO codes
+. Reveal UI messages for Arabic should be RTL
+. Reveal UI messages for Urdu should be RTL
+. Reveal UI messages for French should not be RTL
+. Reveal UI messages writer produces one file per supported language
+. Written messages_fr js file contains French navigation labels
+. Written messages_ar js file embeds the RTL flag
+. Written messages_en js file does not embed the RTL flag
+. Each written file starts with the RevealI18n assignment
+
+`7_rtl_layout.feature` (6 scenarios, English Gherkin) + `RtlLayoutSteps.kt` (5 step defs) :
+. Arabic language code resolves to RTL layout
+. Urdu language code resolves to RTL layout
+. French language code resolves to LTR layout
+. English language code resolves to LTR layout
+. Unknown language code defaults to LTR layout
+. RTL languages are exactly Arabic and Urdu
+
+`8_i18n_fallback.feature` (6 scenarios, English Gherkin) + `I18nFallbackSteps.kt` (6 step defs) :
+. I18nConfig fallback language should always be the default
+. Invalid CLI language code should fall back to default
+. Unknown CLI language code falls back to default when gradle properties are empty
+. Empty CLI language code falls back to gradle properties
+. Supported languages fall back to active language singleton when empty
+. Resolved i18n config for supported code should validate successfully
+
+Result: 57 unit PASS (0 fail, 0 skip) + 3 functional PASS + 46 cucumber PASS / 0 FAIL / 1 SKIP.
+Coverage: RevealUiMessages (value object), RevealUiMessageCatalog (10 languages),
+RevealUiMessagesWriter (JS generation), RevealRtlResolver (RTL decision),
+generateRevealUiMessages task, I18nConfigResolver fallback cascade,
+asciidoctorRevealJs RTL wiring (setRightToLeft).
+
 == Session 015 — SLD-3 i18n US-3.1 (2026-07-06)
 
 Nouveau test unitaire `I18nConfigResolverTest.kt` (9 tests JUnit5 + AssertJ) :

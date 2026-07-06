@@ -26,6 +26,8 @@ object Slides {
         const val TASK_SERVE_SLIDES = "serveSlides"
         const val TASK_VISUAL_TEST = "visualTest"
         const val TASK_INSTALL_PLAYWRIGHT = "installPlaywright"
+        const val TASK_GENERATE_REVEAL_UI_MESSAGES = "generateRevealUiMessages"
+        const val REVEAL_I18N_OUTPUT_DIR = "reveal-i18n"
     }
 
     object Serve {

@@ -2,6 +2,35 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 019 (2026-07-06) — SLD-3 i18n US-3.3/3.4/3.5 Reveal.js UI + RTL + BDD
+
+US-3.3 TERMINÉ : Reveal.js UI i18n — `RevealUiMessages` value object (languageCode,
+nav prev/next/up/help, controls overview/speakerNotes/fullscreen, isRtl from
+LanguageCatalog), `RevealUiMessageCatalog` 10 languages factory (en, zh, hi, es, fr,
+ar, bn, pt, ru, ur with native tooltips), `RevealUiMessagesWriter` writes
+`RevealI18n.messages["{code}"] = {…};` JS files with basic escaping, RTL flag only
+when true. `generateRevealUiMessages` task (group=slider, build/reveal-i18n/).
+21 unit (4+9+8) + 3 functional + 10 cucumber (6_reveal_ui_i18n.feature).
+
+US-3.4 TERMINÉ : RTL support ar/ur — `RevealRtlResolver` (resolveRtl via
+LanguageCatalog, rtlLanguages = {ar, ur}). Câblage `asciidoctorRevealJs` :
+`-Planguage=ar|ur` → `revealjsOptions.setRightToLeft(true)` (Groovy-Kotlin interop :
+explicit setter, `rightToLeft =` fails on private Optional<Boolean> field).
+9 unit (RevealRtlResolver) + 6 cucumber (7_rtl_layout.feature).
+
+US-3.5 TERMINÉ : Cucumber BDD i18n fallback — `8_i18n_fallback.feature` (6 scenarios)
++ `I18nFallbackSteps.kt`. Fallback default, invalid CLI falls back, empty CLI falls
+to gradle properties, supportedLanguages singleton, validation success. Correction :
+fallback must be in supportedLanguages (I18nValidationResult.Invalid sinon, contract
+N0 confirmé). 6 cucumber scenarios.
+
+Tests globaux : 57 unit PASS (was 48, +9), 46 cucumber PASS / 0 FAIL / 1 SKIP
+(was 34, +12), 3 functional PASS. `./gradlew :slider:test :slider:cucumberTest` green.
+
+New bounded context `slider.i18n` : RevealUiMessages, RevealUiMessageCatalog,
+RevealUiMessagesWriter, RevealRtlResolver. Pattern aligned on bakery BKY-I18N.
+i18n-contracts N0 consumed (LanguageCatalog, SupportedLanguage).
+
 == Session 018 (2026-07-06) — SLD-3 i18n US-3.2 + English Only governance
 
 US-3.2 TERMINÉ : TranslatorManager modernised from 2 hardcoded languages (FRENCH, ENGLISH)

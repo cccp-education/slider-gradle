@@ -1,31 +1,41 @@
-= PROMPT_REPRISE — slider-gradle — Session 019
-:session: 019
+= PROMPT_REPRISE — slider-gradle — Session 020
+:session: 020
 :date: 2026-07-06
 
-== Session 018 terminée — SLD-3 US-3.2 + English Only governance ✅
+== Session 019 terminée — SLD-3 US-3.3/3.4/3.5 i18n Reveal.js UI + RTL + BDD ✅
 
-A — SLD-3 i18n US-3.2 TERMINÉ :
-- `TranslatorManager.kt` : `setOf(FRENCH, ENGLISH)` → `LanguageCatalog.supportedCodes()` (2→10 langues)
-- `getTranslatePromptMessage()` : adaptive prompt with native names via `LanguageCatalog.findByCode()`
-- `createDisplaySupportedLanguagesTask` : native name display (Français, العربية, 中文, اردو…)
-- `slider.translator` plugin registered in `gradlePlugin` block
-- Baby-step TDD: 11 unit tests (TranslatorManagerLanguageTest + TranslatorPromptTest),
-  4 functional tests (TranslatorFunctionalTest), 7 Cucumber scenarios (5_translator_i18n.feature)
-- `./gradlew :slider:check` green (33 unit + 4 functional + 23 cucumber PASS / 1 SKIP)
+A — SLD-3 i18n US-3.3 TERMINÉ (Reveal.js UI i18n) :
+- `RevealUiMessages.kt` — value object (languageCode, nav prev/next/up/help, controls
+  overview/speakerNotes/fullscreen, isRtl derived from LanguageCatalog)
+- `RevealUiMessageCatalog.kt` — 10 languages factory (en, zh, hi, es, fr, ar, bn, pt, ru, ur)
+  with native navigation tooltips (Français, العربية, 中文, اردو…)
+- `RevealUiMessagesWriter.kt` — writes `RevealI18n.messages["{code}"] = {…};` JS files
+  with basic escaping, RTL flag only when true
+- `generateRevealUiMessages` task (group=slider, writes to build/reveal-i18n/)
+- Baby-step TDD: 21 unit (4+9+8) + 3 functional + 10 cucumber (6_reveal_ui_i18n.feature)
 
-B — English Only governance fix :
-- Rule 7 added to `AGENT.adoc` (slider + conventions-gradle)
-- Transverse rule added to workspace `AGENTS.adoc` (all boroughs)
-- `logback-exclusion-conventions.feature` migrated FR→EN
-- `SignUp.feature` (plantuml) migrated FR→EN
-- Zero `# language: fr` remaining in foundry
+B — SLD-3 i18n US-3.4 TERMINÉ (RTL support ar/ur) :
+- `RevealRtlResolver.kt` — resolveRtl(code) via LanguageCatalog, rtlLanguages() = {ar, ur}
+- Câblage `asciidoctorRevealJs` : `-Planguage=ar|ur` → `revealjsOptions.setRightToLeft(true)`
+  (Groovy-Kotlin interop : explicit setter call, `rightToLeft =` fails on private Optional)
+- Baby-step TDD: 9 unit (RevealRtlResolver) + 6 cucumber (7_rtl_layout.feature)
 
-== Prochaine session — 019
+C — SLD-3 i18n US-3.5 TERMINÉ (Cucumber BDD i18n fallback) :
+- `8_i18n_fallback.feature` (6 scenarios) — fallback default, invalid CLI falls back,
+  empty CLI falls to gradle properties, supportedLanguages singleton, validation
+- Correction scénario validation : fallback doit être dans supportedLanguages
+  (I18nValidationResult.Invalid sinon — contract N0 confirmé)
 
-. SLD-3 US-3.3: Reveal.js UI i18n — `messages_{code}.js` for 10 languages + `lang: {code}` in config
-. SLD-3 US-3.4: RTL support arabe/ourdou + Playwright validation
-. SLD-3 US-3.5: Cucumber BDD i18n scenarios (generation per language, RTL, fallback)
+D — Tests globaux session 019 :
+- test: 57 PASS (0 fail, 0 skip) — was 48, +9 (RevealRtlResolver)
+- cucumberTest: 46 PASS / 0 FAIL / 1 SKIP (Ollama) — was 34, +12 (3 new features)
+- functionalTest: 3 PASS (RevealUiMessagesFunctionalTest)
+
+== Prochaine session — 020
+
 . SLD-2 US-2.5: Feed capsule (Playwright screenshots → JSON for capsule-gradle)
+. SLD-3 US-3.6: Documentation + dogfooding deck multilingue demo (fr+en+ar)
+. Validation visuelle Playwright complète RTL (deck arabe généré + navigateur)
 
 == Rappels
 

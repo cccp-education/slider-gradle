@@ -1,0 +1,160 @@
+= Session 019 — slider-gradle — SLD-3 US-3.3/3.4/3.5 i18n Reveal.js UI + RTL + BDD
+:session: 019
+:date: 2026-07-06
+
+== Mission
+
+SLD-3 i18n US-3.3 (Reveal.js UI i18n messages_{code}.js) + US-3.4 (RTL support ar/ur) +
+US-3.5 (Cucumber BDD i18n scenarios — generation, RTL, fallback). Baby-step DDD/TDD/BDD,
+agile software craftsmanship.
+
+== Baby-step TDD/BDD (RED → GREEN → REFACTOR)
+
+=== US-3.3 — Reveal.js UI i18n messages_{code}.js
+
+==== Step 1-2 — Unit: RevealUiMessages value object
+
+RED: `RevealUiMessagesTest.kt` (4 tests) — languageCode, isRtl derived from LanguageCatalog,
+Arabic rtl=true, French rtl=false, all 10 codes match LanguageCatalog rtl flag.
+
+GREEN: `RevealUiMessages.kt` — immutable value object with languageCode, nav messages
+(prev/next/up/help), controls messages (overview/speakerNotes/fullscreen), isRtl
+derived from LanguageCatalog.findByCode(code)?.rtl.
+
+==== Step 3-4 — Unit: RevealUiMessageCatalog (10 languages)
+
+RED: `RevealUiMessageCatalogTest.kt` (9 tests) — one entry per LanguageCatalog language,
+covers all 10 ISO codes, findByCode returns matching, findByCode null for unknown,
+French/English/Arabic/Urdu specific nav labels, all messages non-blank.
+
+GREEN: `RevealUiMessageCatalog.kt` — factory object with `all()` returning 10
+RevealUiMessages (en, zh, hi, es, fr, ar, bn, pt, ru, ur) and `findByCode(code)`.
+Each language has native navigation tooltips (e.g. "Diapositive précédente" for fr,
+"Previous slide" for en, "الشريحة السابقة" for ar).
+
+==== Step 5-6 — Unit: RevealUiMessagesWriter (JS file generation)
+
+RED: `RevealUiMessagesWriterTest.kt` (8 tests) — writeAll creates one messages_{code}.js
+per language, contains RevealI18n assignment, Arabic embeds rtl:true, English does not,
+nav and controls nested objects, returns list of files, valid JS opening statement.
+
+GREEN: `RevealUiMessagesWriter.kt` — writes `RevealI18n.messages["{code}"] = { nav: {…},
+controls: {…}, rtl: true };` per language. Basic JS string escaping (backslash, quote,
+newline). RTL flag only emitted when true.
+
+==== Step 7-8 — Functional: generateRevealUiMessages task
+
+RED: `RevealUiMessagesFunctionalTest.kt` (3 tests via GradleRunner) — task registered
+and runs successfully, produces 10 messages_{code}.js under build/reveal-i18n/,
+belongs to slider group.
+
+GREEN: `SliderManager.kt` — added `registerGenerateRevealUiMessagesTask()` (DefaultTask,
+group=slider, writes all 10 files via RevealUiMessagesWriter.writeAll into
+build/reveal-i18n/). Added constants TASK_GENERATE_REVEAL_UI_MESSAGES and
+REVEAL_I18N_OUTPUT_DIR in Slides.kt.
+
+==== Step 9-10 — BDD Cucumber: 6_reveal_ui_i18n.feature (English)
+
+RED→GREEN: `6_reveal_ui_i18n.feature` (10 scenarios) + `RevealUiI18nSteps.kt`
+(11 step defs). Covers catalog size, ISO codes coverage, RTL for ar/ur/fr, writer
+file generation, French/Arabic/English file content, rtl:true presence/absence,
+RevealI18n prefix.
+
+=== US-3.4 — RTL support ar/ur
+
+==== Step 11-12 — Unit: RevealRtlResolver
+
+RED: `RevealRtlResolverTest.kt` (9 tests) — resolveRtl true for ar/ur, false for fr/en
+and every LTR LanguageCatalog entry, true for every RTL entry, false for unknown,
+rtlLanguages contains exactly ar+ur, size matches LanguageCatalog RTL count.
+
+GREEN: `RevealRtlResolver.kt` — object with `resolveRtl(languageCode)` returning
+LanguageCatalog.findByCode(code)?.rtl == true, and `rtlLanguages()` returning
+the set of RTL ISO codes (ar, ur).
+
+==== Step 13 — Câblage RTL dans asciidoctorRevealJs
+
+`SliderManager.kt` — in `registerAsciidoctorRevealJsTask()`, added RTL wiring:
+reads `project.findProperty("language")`, resolves via RevealRtlResolver.resolveRtl,
+calls `revealjsOptions.setRightToLeft(true)` when RTL. LTR default unchanged.
+Groovy-Kotlin interop resolved via explicit `revealjsOptions.setRightToLeft(true)`
+(the Kotlin property syntax `rightToLeft = true` fails due to private Optional<Boolean>
+field vs Boolean setter).
+
+==== Step 14 — BDD Cucumber: 7_rtl_layout.feature (English)
+
+RED→GREEN: `7_rtl_layout.feature` (6 scenarios) + `RtlLayoutSteps.kt` (5 step defs).
+Arabic/Urdu → RTL enabled, French/English/unknown → disabled, RTL languages exactly
+ar+ur.
+
+=== US-3.5 — Cucumber BDD i18n fallback
+
+==== Step 15 — BDD Cucumber: 8_i18n_fallback.feature (English)
+
+RED→GREEN: `8_i18n_fallback.feature` (6 scenarios) + `I18nFallbackSteps.kt`
+(6 step defs). Fallback language always default, invalid CLI code falls back,
+empty CLI falls to gradle properties, supportedLanguages singleton fallback,
+validation success for supported code. Initial scenario "en with default fr"
+corrected to "fr with default fr" — fallback must be in supportedLanguages for
+validation to pass (contract behaviour confirmed by I18nValidationResult.Invalid
+when fallback not in supported).
+
+=== Final verification
+
+`./gradlew :slider:test :slider:cucumberTest` BUILD SUCCESSFUL.
+- test: 57 PASS (0 failures, 0 skipped) — was 48, +9 (RevealRtlResolver)
+- cucumberTest: 46 PASS / 0 FAIL / 1 SKIP (Ollama) — was 34, +12 (3 new features)
+- functionalTest: 3 PASS (RevealUiMessagesFunctionalTest)
+
+== US Status
+
+| US | Status | Tests |
+| US-3.3 | ✅ TERMINÉ | 21 unit (4+9+8) + 3 functional + 10 cucumber |
+| US-3.4 | ✅ TERMINÉ | 9 unit (RevealRtlResolver) + 6 cucumber + RTL câblage |
+| US-3.5 | ✅ TERMINÉ | 6 cucumber (i18n_fallback feature) |
+| US-2.5 | 🔴 REPORTÉ | Feed capsule — next session |
+
+== Files Modified
+
+Production (new):
+- `slider/src/main/kotlin/slider/i18n/RevealUiMessages.kt` (value object + nav/controls)
+- `slider/src/main/kotlin/slider/i18n/RevealUiMessageCatalog.kt` (10 languages factory)
+- `slider/src/main/kotlin/slider/i18n/RevealUiMessagesWriter.kt` (JS file writer)
+- `slider/src/main/kotlin/slider/i18n/RevealRtlResolver.kt` (RTL resolution)
+
+Production (modified):
+- `slider/src/main/kotlin/slider/SliderManager.kt` (registerGenerateRevealUiMessagesTask,
+  RTL wiring in asciidoctorRevealJs via setRightToLeft)
+- `slider/src/main/kotlin/slider/Slides.kt` (constants TASK_GENERATE_REVEAL_UI_MESSAGES,
+  REVEAL_I18N_OUTPUT_DIR)
+
+Tests (new):
+- `slider/src/test/kotlin/slider/i18n/RevealUiMessagesTest.kt` (4 unit tests)
+- `slider/src/test/kotlin/slider/i18n/RevealUiMessageCatalogTest.kt` (9 unit tests)
+- `slider/src/test/kotlin/slider/i18n/RevealUiMessagesWriterTest.kt` (8 unit tests)
+- `slider/src/test/kotlin/slider/i18n/RevealRtlResolverTest.kt` (9 unit tests)
+- `slider/src/functionalTest/kotlin/slider/RevealUiMessagesFunctionalTest.kt` (3 functional)
+- `slider/src/test/features/6_reveal_ui_i18n.feature` (10 cucumber scenarios)
+- `slider/src/test/features/7_rtl_layout.feature` (6 cucumber scenarios)
+- `slider/src/test/features/8_i18n_fallback.feature` (6 cucumber scenarios)
+- `slider/src/test/scenarios/slider/scenarios/RevealUiI18nSteps.kt` (11 step defs)
+- `slider/src/test/scenarios/slider/scenarios/RtlLayoutSteps.kt` (5 step defs)
+- `slider/src/test/scenarios/slider/scenarios/I18nFallbackSteps.kt` (6 step defs)
+
+== DDD Architecture
+
+New bounded context `slider.i18n` (Reveal.js UI i18n):
+- Domain: RevealUiMessages (value object), RevealUiNavMessages, RevealUiControlsMessages
+- Catalog: RevealUiMessageCatalog (factory, 10 languages single source of truth)
+- Service: RevealUiMessagesWriter (JS file generation, pure function)
+- Resolver: RevealRtlResolver (RTL decision from LanguageCatalog)
+- Task: generateRevealUiMessages (Gradle task, delegates to writer)
+
+Pattern aligned on bakery BKY-I18N (config cascade, MessageBundle, LocaleResolver).
+i18n-contracts N0 consumed (LanguageCatalog, SupportedLanguage).
+
+== Next Session — 020
+
+- SLD-2 US-2.5: Feed capsule (Playwright screenshots → JSON for capsule-gradle)
+- SLD-3 US-3.6: Documentation + dogfooding deck multilingue demo (fr+en+ar)
+- Validation visuelle Playwright complète pour RTL (deck arabe généré + navigateur)

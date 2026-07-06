@@ -1,6 +1,6 @@
 = Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-:date: 2026-06-24
+:.date: 2026-07-06
 :toc: left
 :sectnums:
 
@@ -60,7 +60,7 @@ transitions fluides, feed capsule pour capsule-gradle.
 _Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-2-detail-us[INDEX → EPIC SLD-2].
 
 '''
-== EPIC SLD-3 — i18n 10 langues 🔴 EN COURS
+== EPIC SLD-3 — i18n 10 langues 🟡 EN COURS
 
 _Vision_ : Internationalisation 10 langues via contrats N0 `education.cccp:i18n-contracts:0.0.1`.
 Pattern aligne sur bakery BKY-I18N. RTL pour arabe/ourdou.
@@ -70,14 +70,21 @@ _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication C
 _Session 011 (2026-06-24)_ : 20 README i18n créés (consommateur + plugin,
 10 langues, switcher, badges, markers v0.0.1, RTL ar/ur). Socle doc SLD-3.6 posé.
 
+_Session 019 (2026-07-06)_ : US-3.3/3.4/3.5 TERMINÉS — Reveal.js UI i18n
+(RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter
+messages_{code}.js + generateRevealUiMessages task) + RTL support (RevealRtlResolver
++ câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur) + Cucumber BDD
+i18n fallback (8_i18n_fallback.feature 6 scenarios). 57 unit + 3 functional +
+46 cucumber PASS.
+
 |===
 | US | Description | Statut | Estimation
 | SLD-3.0 | Dependance i18n-contracts + DeckContext.language ISO 639-1 | ✅ TERMINÉ (S-014) | 2 pts
 | SLD-3.1 | Configuration layer DSL + cascade 5 couches | ✅ TERMINÉ (S-015) | 3 pts
 | SLD-3.2 | TranslatorManager 2→10 langues + LLM prompt adaptatif | ✅ TERMINÉ (S-018) | 3 pts
-| SLD-3.3 | Reveal.js UI i18n — messages_{code}.js 10 langues | ☐ A FAIRE | 2 pts
-| SLD-3.4 | RTL support arabe/ourdou + validation Playwright | ☐ A FAIRE | 2 pts
-| SLD-3.5 | Tests Cucumber BDD i18n | ☐ A FAIRE | 2 pts
+| SLD-3.3 | Reveal.js UI i18n — messages_{code}.js 10 langues + lang:{code} config | ✅ TERMINÉ (S-019) | 2 pts
+| SLD-3.4 | RTL support arabe/ourdou + validation Playwright | ✅ TERMINÉ (S-019, resolver+câblage; validation Playwright deck complète en US-3.6) | 2 pts
+| SLD-3.5 | Tests Cucumber BDD i18n | ✅ TERMINÉ (S-019) | 2 pts
 | SLD-3.6 | Documentation + deck multilingue demo | 🟡 PARTIEL (README i18n S-011, deck reste) | 1 pt
 |===
 

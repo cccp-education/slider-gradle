@@ -1,0 +1,13 @@
+= COMPLETED_TASKS_ARCHIVE — slider-gradle — Juillet 2026
+
+|===
+| Session | Date | EPIC | US | Description
+| 019 | 2026-07-06 | SLD-3 | US-3.3 | Reveal.js UI i18n — RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task (21 unit + 3 functional + 10 cucumber)
+| 019 | 2026-07-06 | SLD-3 | US-3.4 | RTL support ar/ur — RevealRtlResolver + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur (9 unit + 6 cucumber)
+| 019 | 2026-07-06 | SLD-3 | US-3.5 | Cucumber BDD i18n fallback — 8_i18n_fallback.feature 6 scenarios (fallback default, invalid CLI, empty CLI, singleton, validation)
+| 018 | 2026-07-06 | SLD-3 | US-3.2 | TranslatorManager 2→10 langues via LanguageCatalog + English Only governance (11 unit + 4 functional + 7 cucumber)
+| 017 | 2026-07-06 | CNV-8 | — | Baseline A rupture noms tâches RAG + CNV-8 logback-exclusion convention (-13 lignes slider)
+| 016 | 2026-07-06 | CNV-6/7 | — | Migration functional-test + cucumber conventions (4/4 conventions plugins, -114 lignes)
+| 015 | 2026-07-06 | SLD-3 | US-3.1 | I18nConfigResolver cascade 5 couches + SliderExtension DSL (9 unit)
+| 014 | 2026-07-06 | SLD-3 | US-3.0 | DeckContext.languageCode ISO 639-1 + i18n-contracts:0.0.2 (5 unit)
+|===

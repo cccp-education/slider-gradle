@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-07-06
-_Session terminee_ : 018 — SLD-3 i18n US-3.2 (TranslatorManager 2→10 langues via LanguageCatalog, adaptive prompt native names, slider.translator plugin registered, 11 unit + 4 functional + 7 cucumber tests) + English Only governance fix (Rule 7, Gherkin FR purge cross-borough) ✅
-_Prochaine session_ : 019 — SLD-3 US-3.3 (Reveal.js UI i18n) + US-3.4 (RTL) + US-3.5 (Cucumber BDD i18n) + US-2.5 (Feed capsule)
+_Session terminee_ : 019 — SLD-3 i18n US-3.3 (RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task) + US-3.4 (RevealRtlResolver + câblage setRightToLeft -Planguage=ar|ur) + US-3.5 (Cucumber BDD i18n fallback + validation). 57 unit + 3 functional + 46 cucumber PASS ✅
+_Prochaine session_ : 020 — SLD-2 US-2.5 (Feed capsule) + SLD-3 US-3.6 (dogfooding deck multilingue) + validation Playwright RTL
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 019 | 2026-07-06 | feat+tests+bdd | SLD-3 i18n US-3.3 (RevealUiMessages value object + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task group=slider) + US-3.4 (RevealRtlResolver resolveRtl/rtlLanguages + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur Groovy-Kotlin interop) + US-3.5 (8_i18n_fallback.feature 6 scenarios fallback/validation cascade) — 57 unit (was 48, +9 RevealRtlResolver) + 3 functional + 46 cucumber (was 34, +12: 6_reveal_ui_i18n 10 + 7_rtl_layout 6 + 8_i18n_fallback 6) PASS, ./gradlew check green | ✅ TERMINÉ
 | 018 | 2026-07-06 | feat+tests+governance | SLD-3 i18n US-3.2 (TranslatorManager 2→10 langues via LanguageCatalog.supportedCodes, adaptive prompt with native names via LanguageCatalog.findByCode, slider.translator plugin registered, 90 translation tasks, displaySupportedLanguages native names) + English Only governance (Rule 7 AGENT.adoc, workspace AGENTS.adoc transverse rule, Gherkin FR purge cross-borough: logback-exclusion-conventions.feature + SignUp.feature migrated EN) — 11 unit + 4 functional + 7 cucumber PASS, ./gradlew check green | ✅ TERMINÉ
 | 017 | 2026-07-06 | fix+feat+tests | Baseline A (rupture noms tâches RAG collectRagIndex→reindexRag, generateDeckContext→proposeDeckContext, cucumberTest 6→16 PASS) + CNV-8 logback-exclusion convention (conventions-gradle TDD feature fr + plugin 24 lignes, migration slider -13 lignes, ./gradlew check vert) | ✅ TERMINÉ
 | 016 | 2026-07-06 | refactor | CNV-6/7 Migration functional-test + cucumber conventions — 4/4 conventions plugins appliquées (gradle-plugin + publishing + functional-test + cucumber), build.gradle.kts 251→157 lignes (-114, -45%). functionalTest ✅, cucumberTest stable (10 FAIL préexistants), test 22 PASS (bug filtre package S-007 résolu). | ✅ TERMINÉ
@@ -49,7 +50,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
 | SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS — 4/5 US terminées, reste US-2.5 | P0
-| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | 🔴 EN COURS — US-3.0 ✅ + US-3.1 ✅ + US-3.2 ✅ TERMINÉS (S-014/015/018), US-3.3→3.5 restantes, README i18n 10 langues (S-011) | P1
+| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | 🟡 EN COURS — US-3.0 ✅ + US-3.1 ✅ + US-3.2 ✅ + US-3.3 ✅ + US-3.4 ✅ + US-3.5 ✅ TERMINÉS (S-014/015/018/019), reste US-3.6 deck multilingue demo, README i18n 10 langues (S-011) | P1
 | CNV-6 | Migration conventions plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing) | ✅ TERMINÉ (session 013, -96 lignes) | P1
 | CNV-7 | Migration functional-test + cucumber conventions (4/4 conventions) | ✅ TERMINÉ (session 016, -114 lignes) | P1
 | CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
@@ -102,9 +103,9 @@ _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication C
 | SLD-3.0 | Ajouter dépendance `i18n-contracts` + remplacer `DeckContext.language` (String "French" → ISO 639-1) + valider contre `LanguageCatalog.supportedCodes()` | ✅ TERMINÉ (S-014) | 2 pts
 | SLD-3.1 | Configuration layer — DSL `language`/`supportedLanguages` + cascade 5 couches (CLI `-Planguage` > gradle.properties > DSL > deck-context.yml > default "fr") + `I18nConfig.validate()` | ✅ TERMINÉ (S-015) | 3 pts
 | SLD-3.2 | TranslatorManager modernisation — remplacer `setOf(FRENCH, ENGLISH)` par `LanguageCatalog.ALL` (2→10 langues) + system prompt LLM adaptatif par langue | ✅ TERMINÉ (S-018) | 3 pts
-| SLD-3.3 | Reveal.js UI i18n — générer `messages_{code}.js` pour 10 langues (navigation, contrôles, tooltips) + injecter `lang: {code}` dans config Reveal.js | ☐ A FAIRE | 2 pts
-| SLD-3.4 | RTL support — slides arabe/ourdou avec `rtl: true` + layout CSS RTL + validation visuelle Playwright | ☐ A FAIRE | 2 pts
-| SLD-3.5 | Tests Cucumber BDD — scénarios i18n (génération par langue, RTL, fallback, validation config) | ☐ A FAIRE | 2 pts
+| SLD-3.3 | Reveal.js UI i18n — générer `messages_{code}.js` pour 10 langues (navigation, contrôles, tooltips) + injecter `lang: {code}` dans config Reveal.js | ✅ TERMINÉ (S-019) | 2 pts
+| SLD-3.4 | RTL support — slides arabe/ourdou avec `rtl: true` + layout CSS RTL + validation visuelle Playwright | ✅ TERMINÉ (S-019, resolver + câblage, validation Playwright deck complète restante US-3.6) | 2 pts
+| SLD-3.5 | Tests Cucumber BDD — scénarios i18n (génération par langue, RTL, fallback, validation config) | ✅ TERMINÉ (S-019) | 2 pts
 | SLD-3.6 | Documentation + dogfooding — deck multilingue de démonstration (fr+en+ar) | 🟡 PARTIEL — README i18n 10 langues créés (S-011), deck demo reste à faire | 1 pt
 |===
 
