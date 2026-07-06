@@ -35,9 +35,10 @@ conflit JRuby (asciidoctor-gradle) vs logback. slf4j-api préservé (API de logg
 
 === Baby-step TDD (conventions-gradle/conventions-plugin)
 
-. **RED** — `logback-exclusion-conventions.feature` (Gherkin français, `# language: fr`)
+. **RED** — `logback-exclusion-conventions.feature` (Gherkin, `# language: fr`)
    + `LogbackExclusionConventionsSteps.kt` (3 step defs GradleRunner dependencies --configuration)
    → 2 scénarios FAIL (plugin inexistant), 17 autres PASS
+   NOTE: S017 used French Gherkin — deprecated. Rule 7 (AGENT.adoc) mandates English only.
 . **GREEN** — `LogbackExclusionConventionsPlugin.kt` (24 lignes) :
    `configurations.configureEach { if (name in EXCLUDED_CONFIGURATIONS) exclude(mapOf("group" to "ch.qos.logback", "module" to "logback-classic")) }`
    + enregistrement `gradlePlugin.plugins.register("logbackExclusion")` dans build.gradle.kts

@@ -2,6 +2,23 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 018 (2026-07-06) — SLD-3 i18n US-3.2 + English Only governance
+
+US-3.2 TERMINÉ : TranslatorManager modernised from 2 hardcoded languages (FRENCH, ENGLISH)
+to 10 ISO codes via `LanguageCatalog.supportedCodes()`. Translation prompt rewritten to use
+`LanguageCatalog.findByCode()` for native names (Français, العربية, 中文, اردو…).
+`createDisplaySupportedLanguagesTask` displays native names. `slider.translator` plugin
+registered in `gradlePlugin` block (id `slider.translator`, 90 translation tasks).
+Baby-step TDD: 11 unit tests (TranslatorManagerLanguageTest + TranslatorPromptTest),
+4 functional tests (TranslatorFunctionalTest via GradleRunner), 7 Cucumber scenarios
+(5_translator_i18n.feature + TranslatorI18nSteps.kt, English Gherkin).
+`./gradlew :slider:check` green (33 unit + 4 functional + 23 cucumber PASS / 1 SKIP).
+
+English Only governance fix: Rule 7 added to slider AGENT.adoc + conventions-gradle
+AGENT.adoc. Transverse "English Only" rule added to workspace AGENTS.adoc (all boroughs).
+Gherkin FR purge: `logback-exclusion-conventions.feature` + `LogbackExclusionConventionsSteps.kt`
+migrated FR→EN, `SignUp.feature` (plantuml) migrated FR→EN. Zero `# language: fr` remaining.
+
 == Session 015 (2026-07-06) — SLD-3 i18n US-3.1
 
 US-3.1 TERMINÉ : Config layer DSL `language`/`supportedLanguages` + cascade 5 couches

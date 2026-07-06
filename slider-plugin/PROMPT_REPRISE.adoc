@@ -1,29 +1,31 @@
-= PROMPT_REPRISE — slider-gradle — Session 018
-:session: 018
+= PROMPT_REPRISE — slider-gradle — Session 019
+:session: 019
 :date: 2026-07-06
 
-== Session 017 terminée — Baseline A + CNV-8 logback-exclusion ✅
+== Session 018 terminée — SLD-3 US-3.2 + English Only governance ✅
 
-A — Baseline restaurée :
-- `AssistantManager.kt` rupture propre noms tâches RAG :
-  `collectRagIndex` → `reindexRag`, `generateDeckContext` → `proposeDeckContext`
-- `slider/build.gradle.kts` : conventions `0.0.2` (publiée Central, fix SCM `.git`)
-- `cucumberTest` : 16 PASS / 0 FAIL / 2 SKIP (vs 6 PASS / 10 FAIL avant)
-- `./gradlew :slider:check` vert
+A — SLD-3 i18n US-3.2 TERMINÉ :
+- `TranslatorManager.kt` : `setOf(FRENCH, ENGLISH)` → `LanguageCatalog.supportedCodes()` (2→10 langues)
+- `getTranslatePromptMessage()` : adaptive prompt with native names via `LanguageCatalog.findByCode()`
+- `createDisplaySupportedLanguagesTask` : native name display (Français, العربية, 中文, اردو…)
+- `slider.translator` plugin registered in `gradlePlugin` block
+- Baby-step TDD: 11 unit tests (TranslatorManagerLanguageTest + TranslatorPromptTest),
+  4 functional tests (TranslatorFunctionalTest), 7 Cucumber scenarios (5_translator_i18n.feature)
+- `./gradlew :slider:check` green (33 unit + 4 functional + 23 cucumber PASS / 1 SKIP)
 
-B — CNV-8 logback-exclusion convention :
-- Nouveau plugin `education.cccp.build.logback-exclusion` (conventions-gradle)
-- TDD : feature Gherkin français + steps + LogbackExclusionConventionsPlugin (24 lignes)
-- `conventions-gradle cucumberTest` 19/19 PASS, `publishToMavenLocal` 0.0.2
-- Migration slider : -13 lignes (bloc exclusion inline supprimé)
+B — English Only governance fix :
+- Rule 7 added to `AGENT.adoc` (slider + conventions-gradle)
+- Transverse rule added to workspace `AGENTS.adoc` (all boroughs)
+- `logback-exclusion-conventions.feature` migrated FR→EN
+- `SignUp.feature` (plantuml) migrated FR→EN
+- Zero `# language: fr` remaining in foundry
 
-== Prochaine session — 018
+== Prochaine session — 019
 
-. Option C reportée : publication Maven Central conventions-gradle 0.0.2
-   avec nouveau plugin logback-exclusion (nécessite permission publish)
-. Migration des 6 autres boroughs (bakery, capsule, plantuml, readme, flow,
-   workspace-bom) vers `education.cccp.build.logback-exclusion` (~84 lignes)
-. SLD-3 i18n US-3.2 (TranslatorManager 10 langues) — reprendre roadmap
+. SLD-3 US-3.3: Reveal.js UI i18n — `messages_{code}.js` for 10 languages + `lang: {code}` in config
+. SLD-3 US-3.4: RTL support arabe/ourdou + Playwright validation
+. SLD-3 US-3.5: Cucumber BDD i18n scenarios (generation per language, RTL, fallback)
+. SLD-2 US-2.5: Feed capsule (Playwright screenshots → JSON for capsule-gradle)
 
 == Rappels
 
@@ -33,4 +35,4 @@ B — CNV-8 logback-exclusion convention :
 - i18n-contracts : mavenLocal 0.0.2
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR
-- Gherkin en français, code en anglais, pas de commentaires
+- English only: code, Gherkin, comments — no French

@@ -1,0 +1,109 @@
+= Session 018 — slider-gradle — SLD-3 i18n US-3.2 + English Only governance
+:session: 018
+:date: 2026-07-06
+
+== Mission
+
+SLD-3 i18n US-3.2 — TranslatorManager modernisation (2→10 langues via LanguageCatalog)
++ English Only governance fix (Gherkin français purge cross-borough).
+
+== Baby-step TDD/BDD (RED → GREEN → REFACTOR)
+
+=== Step 1-2 — Unit: supportedLanguages 10 ISO codes
+
+RED: `TranslatorManagerLanguageTest.kt` (5 tests) — supportedLanguages contains
+all 10 LanguageCatalog ISO codes, no legacy display names, 90 permutations (N×N-1),
+no identity permutations.
+
+GREEN: `TranslatorManager.kt` — replaced `setOf(FRENCH, ENGLISH).map { it.language }`
+with `LanguageCatalog.supportedCodes()`. 2→10 languages, 2→90 translation tasks.
+Removed `java.util.Locale.*` import (zero legacy Locale dependency).
+
+=== Step 3-4 — Unit: adaptive translation prompt with native names
+
+RED: `TranslatorPromptTest.kt` (6 tests) — prompt must mention target/source
+language native names (Français, العربية, 中文, اردو), contain source text,
+contain target ISO code.
+
+GREEN: `getTranslatePromptMessage()` rewritten to use `LanguageCatalog.findByCode()`
+for native names. Prompt format: `Translate this sentence from {nativeName} ({code})
+to {nativeName} / {englishName} ({code}) :`. Removed `forLanguageTag().getDisplayLanguage(ENGLISH)`
+legacy.
+
+=== Step 5-6 — Functional: TranslatorPlugin registration + displaySupportedLanguages
+
+RED: `TranslatorFunctionalTest.kt` (4 tests via GradleRunner) —
+displaySupportedLanguages lists 10 ISO codes, native names (not English display
+names), no legacy "French(fr)", translate tasks registered for 10×9 permutations.
+
+GREEN: `build.gradle.kts` — added `gradlePlugin.plugins.create("slider-translator")`
+with id `slider.translator`, implementationClass `slider.translate.TranslatorPlugin`.
+`createDisplaySupportedLanguagesTask` refactored to use `LanguageCatalog.findByCode()`
+for native name display. All 4 functional tests PASS direct.
+
+=== Step 7-8 — BDD Cucumber: 5_translator_i18n.feature (English)
+
+RED: `5_translator_i18n.feature` (7 scenarios, English Gherkin) — 7 scenarios
+FAILED (no step defs).
+
+GREEN: `TranslatorI18nSteps.kt` (8 step defs, io.cucumber.java8.En) —
+domain-pure steps querying TranslatorManager directly (no GradleRunner).
+7/7 scenarios PASS.
+
+=== Final verification
+
+`./gradlew :slider:check` BUILD SUCCESSFUL.
+- test: 33 PASS (5 DeckContext + 9 I18nConfigResolver + 5 TranslatorManagerLanguage
+  + 6 TranslatorPrompt + 1 SliderPlugin + 7 other)
+- functionalTest: 4 PASS (TranslatorFunctionalTest)
+- cucumberTest: 23 PASS / 0 FAIL / 1 SKIP (Ollama integration skipped)
+
+== English Only Governance Fix
+
+Triggered by user feedback: French Gherkin is unprofessional for OSS projects.
+
+Files corrected:
+1. `workspace/AGENTS.adoc` — added transverse "English Only" rule (all boroughs)
+2. `slider-gradle/slider-plugin/AGENT.adoc` — added Rule 7 "English Only"
+3. `slider-gradle/slider-plugin/PROMPT_REPRISE.adoc` — lines 16, 36 corrected
+4. `conventions-gradle/conventions-plugin/AGENT.adoc` — added "English Only" rule
+5. `plantuml-gradle/plantuml-plugin/.agents/ARCHITECTURE.adoc` — line 4 corrected
+6. `conventions-gradle/.../logback-exclusion-conventions.feature` — migrated FR→EN
+7. `conventions-gradle/.../LogbackExclusionConventionsSteps.kt` — migrated FR→EN
+8. `plantuml-gradle/.../SignUp.feature` — migrated FR→EN
+9. `slider-gradle/.../017-baseline-cnv-8-logback-exclusion.adoc` — annotated deprecation note
+
+Final check: `grep -rln "# language: fr" foundry/ --include="*.feature"` → zero results.
+
+== US-3.2 Status
+
+✅ TERMINÉ — TranslatorManager modernised (2→10 languages via LanguageCatalog.ALL),
+adaptive prompt with native names, 90 translation tasks registered, displaySupportedLanguages
+shows native names. Plugin id `slider.translator` registered in gradlePlugin block.
+
+== Files Modified
+
+Production:
+- `slider/src/main/kotlin/slider/translate/TranslatorManager.kt` (supportedLanguages, getTranslatePromptMessage, createDisplaySupportedLanguagesTask, imports)
+- `slider/build.gradle.kts` (gradlePlugin block: added slider-translator plugin)
+
+Tests:
+- `slider/src/test/kotlin/slider/translate/TranslatorManagerLanguageTest.kt` (NEW, 5 tests)
+- `slider/src/test/kotlin/slider/translate/TranslatorPromptTest.kt` (NEW, 6 tests)
+- `slider/src/functionalTest/kotlin/slider/TranslatorFunctionalTest.kt` (NEW, 4 tests)
+- `slider/src/test/features/5_translator_i18n.feature` (NEW, 7 scenarios)
+- `slider/src/test/scenarios/slider/scenarios/TranslatorI18nSteps.kt` (NEW, 8 step defs)
+
+Governance:
+- `slider-plugin/AGENT.adoc` (Rule 7 added)
+- `slider-plugin/PROMPT_REPRISE.adoc` (lines 16, 36)
+- `.agents/sessions/017-baseline-cnv-8-logback-exclusion.adoc` (deprecation note)
+- Cross-borough: AGENTS.adoc, conventions-gradle AGENT.adoc + feature + steps,
+  plantuml ARCHITECTURE.adoc + SignUp.feature
+
+== Next Session — 019
+
+- SLD-3 US-3.3: Reveal.js UI i18n — messages_{code}.js for 10 languages
+- SLD-3 US-3.4: RTL support arabe/ourdou + Playwright validation
+- SLD-3 US-3.5: Cucumber BDD i18n scenarios (generation per language, RTL, fallback)
+- SLD-2 US-2.5: Feed capsule (Playwright screenshots → JSON for capsule-gradle)

@@ -20,6 +20,10 @@ la creation de contenu structure.
 === 4. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES (voir `.agents/SESSION_PROCEDURE.adoc`)
 === 5. HOOK OUVERTURE — Checklist `.agents/SESSION_CHECKLIST.adoc` obligatoire
 === 6. ZERO secret/token/api key en dur dans le code source
+=== 7. ENGLISH ONLY — code, Gherkin features, comments, tests names, commit messages
+    This is an OSS project (Apache 2.0, groupId `education.cccp`).
+    No French in source files. No French Gherkin. No French comments.
+    Professional coding standard — English is the lingua franca of OSS.
 
 == Taches Principales
 

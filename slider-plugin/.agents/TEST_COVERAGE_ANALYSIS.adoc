@@ -24,6 +24,48 @@ Résultat : 5/5 PASS. Couverture `DeckContext.languageCode` + `requireValidLangu
 Tests Cucumber modifiés (RevealJsTransitionSteps, ProposeDeckContextSteps, feature) —
 10 échecs préexistants (infra GradleRunner `proposeDeckContext not found`, S007).
 
+== Session 018 — SLD-3 i18n US-3.2 + English Only governance (2026-07-06)
+
+New unit tests:
+
+`TranslatorManagerLanguageTest.kt` (5 tests JUnit5 + AssertJ) :
+. `supportedLanguages should contain all 10 LanguageCatalog ISO codes` — 10 codes
+. `supportedLanguages should not contain legacy display names` — no "French"/"English"
+. `supportedLanguages size should match LanguageCatalog ALL size` — size 10
+. `translationTasks should exclude identity permutations` — no frToFr
+. `translationTasks should produce N times N minus 1 permutations for 10 languages` — 90 tasks
+
+`TranslatorPromptTest.kt` (6 tests JUnit5 + AssertJ) :
+. `prompt should contain the source text to translate` — text preserved
+. `prompt should mention target language native name for Arabic` — العربية
+. `prompt should mention target language native name for Chinese` — 中文
+. `prompt should mention source language native name` — Français
+. `prompt should contain both source and target native names for fr to ur` — Français + اردو
+. `prompt should contain target ISO code for clarity` — code in prompt
+
+New functional test:
+
+`TranslatorFunctionalTest.kt` (4 tests GradleRunner + AssertJ) :
+. `displaySupportedLanguages should list all 10 ISO codes` — en, zh, hi, es, fr, ar, bn, pt, ru, ur
+. `displaySupportedLanguages should list native names not English display names` — Français, العربية, 中文
+. `displaySupportedLanguages should not contain legacy English-only display names` — no "French(fr)"
+. `translate task should be registered for all 10 languages permutations` — translateFrToEn, translateEnToZh, etc.
+
+New Cucumber BDD:
+
+`5_translator_i18n.feature` (7 scenarios, English Gherkin) + `TranslatorI18nSteps.kt` (8 step defs) :
+. `Supported languages match LanguageCatalog ISO codes`
+. `Supported languages do not contain legacy display names`
+. `Translation tasks exclude identity permutations`
+. `Translation tasks produce N times N minus 1 permutations`
+. `Translation prompt mentions target language native name`
+. `Translation prompt mentions source language native name`
+. `Translation prompt contains the source text`
+
+Result: 33 unit PASS + 4 functional PASS + 23 cucumber PASS / 1 SKIP (Ollama).
+Coverage: TranslatorManager.supportedLanguages, translationTasks, getTranslatePromptMessage,
+createDisplaySupportedLanguagesTask, TranslatorPlugin task registration.
+
 == Session 015 — SLD-3 i18n US-3.1 (2026-07-06)
 
 Nouveau test unitaire `I18nConfigResolverTest.kt` (9 tests JUnit5 + AssertJ) :

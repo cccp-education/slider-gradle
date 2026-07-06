@@ -9,6 +9,7 @@ import slider.ai.AssistantManager.createOllamaStreamingChatModel
 import slider.ai.AssistantManager.generateStreamingResponse
 import slider.ai.AssistantManager.localModels
 import slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessage
+import contracts.i18n.LanguageCatalog
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -17,7 +18,6 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import java.lang.System.getProperty
-import java.util.Locale.*
 
 object TranslatorManager {
     @JvmStatic
@@ -42,13 +42,7 @@ object TranslatorManager {
     }
 
     @JvmStatic
-    val supportedLanguages: Set<String> = setOf(
-        FRENCH, ENGLISH/*, GERMAN,
-        ITALIAN, SIMPLIFIED_CHINESE,
-        forLanguageTag("ru"),
-        forLanguageTag("es"),
-        forLanguageTag("pt"),*/
-    ).map { it.language }.toSet()
+    val supportedLanguages: Set<String> = LanguageCatalog.supportedCodes()
 
     @JvmStatic
     fun Set<String>.translationTasks()
@@ -75,11 +69,13 @@ object TranslatorManager {
         val fromLanguage = getProperty("user.language")!!
 
         @JvmStatic
-        fun Pair<String, String>.getTranslatePromptMessage(text: String): String = Pair(
-            forLanguageTag(first).getDisplayLanguage(ENGLISH).lowercase(),
-            forLanguageTag(second).getDisplayLanguage(ENGLISH).lowercase()
-        ).run {
-            """Translate this sentence from $first to $second :
+        fun Pair<String, String>.getTranslatePromptMessage(text: String): String {
+            val source = LanguageCatalog.findByCode(first)
+            val target = LanguageCatalog.findByCode(second)
+            val sourceName = source?.nativeName ?: first
+            val targetName = target?.nativeName ?: second
+            val targetEnglish = target?.name ?: second
+            return """Translate this sentence from $sourceName ($first) to $targetName / $targetEnglish ($second) :
 $text""".trimMargin()
         }
     }
@@ -90,7 +86,10 @@ $text""".trimMargin()
             group = "translator"
             description = "Dislpay supported languages"
             doFirst {
-                supportedLanguages.map { "${forLanguageTag(it).displayLanguage}($it) " }
+                supportedLanguages
+                    .mapNotNull { code ->
+                        LanguageCatalog.findByCode(code)?.let { "${it.nativeName}(${it.code})" }
+                    }
                     .run { "supportedLanguages : $this" }
                     .run(::println)
             }

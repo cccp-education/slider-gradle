@@ -126,6 +126,13 @@ gradlePlugin {
                 }
             }
         }
+        create("slider-translator") {
+            id = "slider.translator"
+            implementationClass = "slider.translate.TranslatorPlugin"
+            displayName = "Slider Translator Plugin"
+            description = "Gradle plugin for slide translation across 10 languages."
+            tags.set(listOf("translation", "i18n", "llm", "ollama", "kotlin-DSL"))
+        }
     }
 }
 
