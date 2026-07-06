@@ -1,19 +1,21 @@
-= PROMPT_REPRISE — slider-gradle — Session 016
-:session: 016
+= PROMPT_REPRISE — slider-gradle — Session 017
+:session: 017
 :date: 2026-07-06
 
-== Sessions 014-015 terminées — SLD-3 i18n US-3.0 + US-3.1
+== Session 016 terminée — CNV-6/7 Migration functional-test + cucumber
 
-US-3.0 ✅ : Dépendance `i18n-contracts:0.0.2` + `DeckContext.languageCode` ("fr"
-ISO 639-1) + `requireValidLanguage()`. 5/5 `DeckContextLanguageTest` PASS.
+CNV-6/7 ✅ TERMINÉ : 4/4 conventions plugins appliquées (gradle-plugin + publishing +
+functional-test + cucumber). `build.gradle.kts` 251→157 lignes (-114, -45%).
 
-US-3.1 ✅ : Config layer DSL `language`/`supportedLanguages` + cascade 5 couches
-(CLI > gradle.properties > DSL > YAML > default "fr") via `I18nConfigResolver`.
-9/9 `I18nConfigResolverTest` PASS. `SliderExtension` étendue. `RagTasks` câblé.
+. `functionalTest` : BUILD SUCCESSFUL (convention + failOnNoDiscoveredTests=false, tests commentés)
+. `cucumberTest` : 17 tests, 10 FAIL préexistants (proposeDeckContext), 1 skip, 6 PASS — stable
+. `test` : 22 PASS, 0 FAIL — **bug filtre package résolu** (effet de bord convention cucumber :
+  `excludeTestsMatching("*.scenarios.*")` remplace l'ancien `com.cheroliv.slider.scenarios.**` S-007)
 
-22 tests PASS au total, 10 échecs Cucumber préexistants (infra GradleRunner S007).
+Variants préservées : buildscript annotations force, exclusions logback,
+additionalDependencies mockito/coroutines/slf4j, compatibility configurationCache=false.
 
-== Prochaine session — 016 : SLD-3 i18n US-3.2
+== Prochaine session — 017 : SLD-3 i18n US-3.2
 
 . TranslatorManager modernisation — remplacer `setOf(FRENCH, ENGLISH)` par
   `LanguageCatalog.ALL` (2→10 langues)
@@ -32,3 +34,4 @@ US-3.1 ✅ : Config layer DSL `language`/`supportedLanguages` + cascade 5 couche
 - i18n-contracts : mavenLocal 0.0.2
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED (test TranslatorManager 10 langues) → GREEN → REFACTOR
+- CNV-6/7 complet : 4/4 conventions (ne plus toucher le build.gradle.kts sauf nécessité)

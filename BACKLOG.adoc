@@ -26,6 +26,22 @@ Plugin N2 de generation de presentations Reveal.js (AsciiDoc → HTML). VAGUE 4 
 | slider-plugin | https://central.sonatype.com/artifact/education.cccp/slider-plugin |
 
 '''
+== EPIC CNV-6/7 — Conventions plugins ✅ TERMINE
+
+Migration vers les 4 convention plugins education.cccp.build.* v0.0.1
+(gradle-plugin + publishing + functional-test + cucumber) publiées par le borough
+conventions-gradle (ABIDJAN).
+
+|===
+| US | Description | Statut
+| CNV-6 | gradle-plugin + publishing (session 013, -96 lignes) | ✅ TERMINE
+| CNV-7 | functional-test + cucumber (session 016, -114 lignes) | ✅ TERMINE
+|===
+
+Build.gradle.kts slider : 301 → 157 lignes (-144 net, -48%).
+Test results : functionalTest ✅, cucumberTest stable (10 FAIL preexistants), test 22 PASS.
+
+'''
 == EPIC SLD-2 — Restant
 
 _Vision_ : Rendu visuel professionnel valide par Playwright, theme reveal.js pro,

@@ -17,6 +17,8 @@ plugins {
     alias(libs.plugins.codebase)
     id("education.cccp.build.gradle-plugin") version "0.0.1"
     id("education.cccp.build.publishing") version "0.0.1"
+    id("education.cccp.build.functional-test") version "0.0.1"
+    id("education.cccp.build.cucumber") version "0.0.1"
 }
 
 group = "education.cccp"
@@ -52,149 +54,55 @@ dependencies {
     // Coroutines - IMPORTANT for the asynchronous tests
     testImplementation(libs.bundles.coroutines)
 
-    testImplementation(kotlin("test-junit5"))
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.slf4j)
     testRuntimeOnly(libs.logback)
 
-    testImplementation(libs.assertj.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockito.junit.jupiter)
 
-    // Cucumber dependencies
+    // Cucumber dependencies (runner + steps)
     testImplementation(libs.bundles.cucumber)
 
     // Playwright E2E tests
     testImplementation(libs.playwright)
-}
 
-tasks.named<Test>("test") {
-    filter {
-        // Exclure les classes dans le package 'com.cheroliv.slider.scenarios' (tests Cucumber)
-        excludeTestsMatching("com.cheroliv.slider.scenarios.**")
-        // Exclure également les classes de functionalTest
-        excludeTestsMatching("com.cheroliv.slider.SliderPluginFunctionalTests")
+    // functionalTest additional deps (convention fournit gradleTestKit + junit + assertj)
+    functionalTestConventions {
+        additionalDependencies = listOf(
+            "org.slf4j:slf4j-api:2.0.17",
+            "ch.qos.logback:logback-classic:1.5.26",
+            libs.mockito.kotlin.get().toString(),
+            libs.mockito.junit.jupiter.get().toString()
+        )
     }
 }
 
-
-// 1. Créer le SourceSet functionalTest
-val functionalTest: SourceSet by sourceSets.creating {
-    java.srcDirs("src/functionalTest/kotlin")
-    resources.srcDirs("src/functionalTest/resources")
-}
-
-// 2. Ajouter GradleTestKit à functionalTest (SANS hériter de testImplementation)
-dependencies {
-    add(functionalTest.implementationConfigurationName, gradleTestKit())
-    add(functionalTest.implementationConfigurationName, kotlin("stdlib-jdk8"))
-    add(functionalTest.implementationConfigurationName, kotlin("test-junit5"))
-
-    // Ajouter les dépendances nécessaires explicitement
-    add(functionalTest.implementationConfigurationName, "org.slf4j:slf4j-api:2.0.17")
-    add(functionalTest.runtimeOnlyConfigurationName, "ch.qos.logback:logback-classic:1.5.26")
-    add(functionalTest.runtimeOnlyConfigurationName, "org.junit.platform:junit-platform-launcher")
-
-    // CORRECTION: Ajouter AssertJ pour les assertions
-    add(functionalTest.implementationConfigurationName, libs.assertj.core)
-
-    // Ajouter Mockito si nécessaire
-    add(functionalTest.implementationConfigurationName, libs.mockito.kotlin)
-    add(functionalTest.implementationConfigurationName, libs.mockito.junit.jupiter)
-
-    libs.bundles.coroutines.get().forEach { dep ->
-        add(functionalTest.implementationConfigurationName, dep)
-    }
-}
-
-// 3. Tâche pour les tests fonctionnels
-val functionalTestTask = tasks.register<Test>("functionalTest") {
-    description = "Runs functional tests."
-    group = "verification"
-    testClassesDirs = functionalTest.output.classesDirs
-    classpath = configurations[functionalTest.runtimeClasspathConfigurationName] + functionalTest.output
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStandardStreams = true
-    }
-    failOnNoDiscoveredTests = false
-}
-
-// CORRECTION: Gérer les duplications de ressources pour functionalTest
-tasks.named<ProcessResources>(functionalTest.processResourcesTaskName) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-// 4. Configurer les sources sets pour Cucumber (test standard)
-sourceSets.test {
-    resources.srcDir("src/test/features")
-    java.srcDir("src/test/scenarios")  // Steps dans scenarios/
-}
-
-
-// 5. Faire hériter testImplementation de functionalTest (pas l'inverse !)
-configurations.named("testImplementation").configure {
-    extendsFrom(configurations.named(functionalTest.implementationConfigurationName).get())
-}
-
-configurations.named("testRuntimeOnly").configure {
-    extendsFrom(configurations.named(functionalTest.runtimeOnlyConfigurationName).get())
-}
-
-// 6. Ajouter les classes compilées de functionalTest au classpath de test
-dependencies {
-    testImplementation(functionalTest.output)
+// Cucumber features/scenarios dirs (scenarios deja en src/test/scenarios)
+cucumberConventions {
+    featuresDir = "src/test/features"
+    scenariosDir = "src/test/scenarios"
 }
 
 configurations {
-    // Exclure logback-classic du classpath de test
+    // Exclure logback-classic du classpath de test (conflit asciidoctor JRuby)
     named("testRuntimeClasspath") {
         exclude(group = "ch.qos.logback", module = "logback-classic")
     }
     named("testImplementation") {
         exclude(group = "ch.qos.logback", module = "logback-classic")
     }
-    // Exclure logback-classic du classpath de functionalTest
-    named(functionalTest.runtimeClasspathConfigurationName) {
+    named("functionalTestRuntimeClasspath") {
         exclude(group = "ch.qos.logback", module = "logback-classic")
     }
-}
-
-// 7. Tâche dédiée aux tests Cucumber
-val cucumberTest = tasks.register<Test>("cucumberTest") {
-    description = "Runs Cucumber BDD tests"
-    group = "verification"
-    testClassesDirs = sourceSets.test.get().output.classesDirs
-    classpath = configurations.testRuntimeClasspath.get() +
-            sourceSets.test.get().output +
-            functionalTest.output +
-            sourceSets.main.get().output
-    useJUnitPlatform {
-        // CORRECTION: Ne pas filtrer par tag ici, ça filtre les engines JUnit
-        // Le filtrage des scénarios Cucumber se fait dans le runner via FILTER_TAGS_PROPERTY_NAME
-        excludeEngines("junit-jupiter")
-    }
-    systemProperty("cucumber.junit-platform.naming-strategy", "long")
-    testLogging {
-        events("passed", "skipped", "failed")
-        showStandardStreams = true
-        exceptionFormat = FULL
-    }
-    outputs.upToDateWhen { false }
-    // S'assurer que functionalTest et main sont compilés avant
-    dependsOn(functionalTest.classesTaskName)
-    dependsOn(tasks.classes)
 }
 
 tasks.withType<Test>().configureEach {
     // Permet de masquer l'avertissement relatif au chargement dynamique d'agents
     jvmArgs("-XX:+EnableDynamicAgentLoading")
-}
-
-tasks.check {
-    dependsOn(functionalTestTask)
-    dependsOn(cucumberTest)
+    testLogging {
+        exceptionFormat = FULL
+    }
+    failOnNoDiscoveredTests = false
 }
 
 gradlePlugin {
@@ -231,7 +139,6 @@ gradlePlugin {
             }
         }
     }
-    testSourceSets(functionalTest)
 }
 
 publishingConventions {

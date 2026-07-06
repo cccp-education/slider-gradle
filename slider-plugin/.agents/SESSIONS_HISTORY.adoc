@@ -27,6 +27,7 @@ Migration du `build.gradle.kts` (sous-module `slider/`) vers les convention plug
 
 |===
 | # | Date | Type | Sujet | Score
+| 016 | 2026-07-06 | refactor | CNV-6/7 Migration functional-test + cucumber conventions — 4/4 conventions plugins (gradle-plugin + publishing + functional-test + cucumber), build.gradle.kts 251→157 (-114, -45%). functionalTest ✅, cucumberTest stable (10 FAIL préexistants), test 22 PASS (bug filtre package S-007 résolu). | ✅ TERMINÉ
 | 015 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.1 — I18nConfigResolver (cascade 5 couches) + SliderExtension.language/supportedLanguages + RagTasks câblé. 9/9 I18nConfigResolverTest PASS. | ✅ TERMINÉ
 | 014 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.0 — dépendance i18n-contracts:0.0.2 + DeckContext.languageCode ("fr" ISO 639-1) + requireValidLanguage(). 5/5 DeckContextLanguageTest PASS. 3 sites corrigés. 10 échecs Cucumber préexistants. | ✅ TERMINÉ
 | 013 | 2026-07-03 | dev | CNV-6 Migration — convention plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing), build.gradle.kts 301→205 (-96), compileKotlin SUCCESS. Variantes : buildscript annotations force, exclusions logback, extendsFrom legacy, configurationCache=false | ✅ TERMINÉ

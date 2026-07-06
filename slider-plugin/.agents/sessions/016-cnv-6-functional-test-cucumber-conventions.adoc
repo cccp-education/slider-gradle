@@ -1,0 +1,60 @@
+= Session 016 — CNV-6/7 Migration functional-test + cucumber conventions
+:date: 2026-07-06
+:borough: MIAMI (slider-gradle)
+:epic: CNV-6 / CNV-7
+:status: ✅ TERMINÉ
+
+== Objectif
+
+Migration du borough slider-gradle vers les 2 conventions plugins restantes
+(`education.cccp.build.functional-test` + `education.cccp.build.cucumber`),
+afin de compléter la CNV-6 déjà entamée en session 013 (gradle-plugin + publishing).
+
+== Baby-step DDD/TDD/BDD appliqué
+
+. **Baseline (RED)** : état des 3 tâches de test avant migration
+  - `functionalTest` : BUILD SUCCESSFUL (mais tout le code est commenté → failOnNoDiscoveredTests=false)
+  - `cucumberTest` : 17 tests, 10 FAIL (proposeDeckContext préexistants), 1 skip, 6 PASS
+  - `test` : 33 tests, 10 FAIL — **bug de filtre** : `excludeTestsMatching("com.cheroliv.slider.scenarios.**")` utilise l'ancien package (migré S-007 vers `slider.scenarios`), le CucumberTestRunner fuit dans `test`
+
+. **GREEN — functional-test** : appliquer `id("education.cccp.build.functional-test") version "0.0.1"`,
+   supprimer source set manuel + task + deps + extendsFrom. Ajouter `failOnNoDiscoveredTests = false`
+   (tests commentés). `functionalTest` BUILD SUCCESSFUL.
+
+. **GREEN — cucumber** : appliquer `id("education.cccp.build.cucumber") version "0.0.1"`,
+   supprimer source sets test mod + cucumberTest task + filter. Configurer `cucumberConventions { featuresDir = "src/test/features" ; scenariosDir = "src/test/scenarios" }`.
+   `cucumberTest` : 17 tests, 10 FAIL, 1 skip — identique au baseline (pas de régression).
+
+. **REFACTOR — nettoyage** : `test` BUILD SUCCESSFUL (22 PASS, 0 FAIL vs 10 FAIL baseline).
+   Le bug du filtre package est résolu par la convention (`excludeTestsMatching("*.scenarios.*")`).
+
+== Livrables
+
+. `slider-plugin/slider/build.gradle.kts` : 251 → 157 lignes (-114 lignes, -45%)
+. 2 conventions plugins appliquées (functional-test + cucumber)
+. Variants préservées : buildscript annotations force, exclusions logback,
+  additionalDependencies mockito/coroutines/slf4j, compatibility configurationCache=false
+. Test results : functionalTest ✅, cucumberTest stable (10 FAIL préexistants), test 22 PASS (bug filtre résolu)
+
+== Vérifications
+
+[source,shell]
+----
+./gradlew :slider:compileTestKotlin        # BUILD SUCCESSFUL
+./gradlew :slider:functionalTest           # BUILD SUCCESSFUL
+./gradlew :slider:cucumberTest             # 17 tests, 10 FAIL (préexistants), 1 skip
+./gradlew :slider:test                    # BUILD SUCCESSFUL (22 PASS, 0 FAIL)
+----
+
+== Notes
+
+- Aucun test unitaire n'importe de classes functionalTest (vérifié) → migration saine
+- Le `extendsFrom` inverse (testImplementation extendsFrom functionalTest) était legacy
+- functionalTest source set entièrement commenté (BakeryPluginFunctionalTests + tools.kt) → failOnNoDiscoveredTests=false requis
+- Bug filtre package S-007 résolu comme effet de bord de la migration cucumber
+- CNV-6 maintenant **complet** pour slider : 4/4 conventions (gradle-plugin + publishing + functional-test + cucumber)
+
+== Prochaine session — 017
+
+Reprise SLD-3 i18n US-3.2 (TranslatorManager 10 langues + LLM prompt adaptatif).
+CNV-6/7 terminé, retour au EPIC i18n.
