@@ -44,7 +44,7 @@ import kotlin.coroutines.resume
  * Defaults to `ollama` when absent.
  *
  * ## Two-step RAG pipeline
- *   1. `generateDeckContext` → [ProposeDeckContextTask]
+ *   1. `proposeDeckContext` → [ProposeDeckContextTask]
  *   2. `generateDeck`        → [GenerateDeckTask]
  *
  * Both tasks share the same model instance resolved by [resolveModel].
@@ -145,7 +145,7 @@ object AssistantManager {
     private fun Project.registerReindexRagTask(
         pgServiceProvider: Provider<PgVectorService>
     ) {
-        tasks.register("collectRagIndex", ReindexRagTask::class.java) {
+        tasks.register("reindexRag", ReindexRagTask::class.java) {
             it.group = "collect"
             it.description = "Force a full rebuild of the RAG embedding index."
             it.pgVectorService.set(pgServiceProvider)
@@ -156,7 +156,7 @@ object AssistantManager {
     private fun Project.registerProposeDeckContextTask(
         pgServiceProvider: Provider<PgVectorService>
     ) {
-        tasks.register("generateDeckContext", ProposeDeckContextTask::class.java) {
+        tasks.register("proposeDeckContext", ProposeDeckContextTask::class.java) {
             it.group = "generate"
             it.description = buildString {
                 append("Propose a deck-context.yml for a given subject using RAG + LLM (step 1/2). ")

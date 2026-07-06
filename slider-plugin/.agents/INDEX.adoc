@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-07-06
-_Session terminee_ : 016 — CNV-6/7 Migration functional-test + cucumber conventions (4/4 conventions, -114 lignes) ✅
-_Prochaine session_ : 017 — SLD-3 i18n US-3.2 (TranslatorManager 10 langues + LLM prompt adaptatif)
+_Session terminee_ : 017 — Baseline A (rupture noms tâches RAG + conventions 0.0.2) + CNV-8 logback-exclusion convention (TDD, -13 lignes slider) ✅
+_Prochaine session_ : 018 — Option C (pub Central conventions 0.0.2) + migration 6 boroughs + SLD-3 US-3.2
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 017 | 2026-07-06 | fix+feat+tests | Baseline A (rupture noms tâches RAG collectRagIndex→reindexRag, generateDeckContext→proposeDeckContext, cucumberTest 6→16 PASS) + CNV-8 logback-exclusion convention (conventions-gradle TDD feature fr + plugin 24 lignes, migration slider -13 lignes, ./gradlew check vert) | ✅ TERMINÉ
 | 016 | 2026-07-06 | refactor | CNV-6/7 Migration functional-test + cucumber conventions — 4/4 conventions plugins appliquées (gradle-plugin + publishing + functional-test + cucumber), build.gradle.kts 251→157 lignes (-114, -45%). functionalTest ✅, cucumberTest stable (10 FAIL préexistants), test 22 PASS (bug filtre package S-007 résolu). | ✅ TERMINÉ
 | 015 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.1 — I18nConfigResolver (cascade 5 couches CLI > gradle.properties > DSL > YAML > default) + SliderExtension.language/supportedLanguages + RagTasks câblé. 9/9 I18nConfigResolverTest PASS. | ✅ TERMINÉ
 | 014 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.0 — dépendance i18n-contracts:0.0.2 + DeckContext.language ("French") → languageCode ("fr" ISO 639-1) + requireValidLanguage() (LanguageCatalog.supportedCodes). 5/5 DeckContextLanguageTest PASS. 3 sites corrigés (SliderManager, AssistantManager, steps Cucumber). 10 échecs Cucumber préexistants (infra GradleRunner). | ✅ TERMINÉ
@@ -50,6 +51,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | 🔴 EN COURS — US-3.0 ✅ + US-3.1 ✅ TERMINÉS (S-014/015), US-3.2→3.5 restantes, README i18n 10 langues (S-011) | P1
 | CNV-6 | Migration conventions plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing) | ✅ TERMINÉ (session 013, -96 lignes) | P1
 | CNV-7 | Migration functional-test + cucumber conventions (4/4 conventions) | ✅ TERMINÉ (session 016, -114 lignes) | P1
+| CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
 | Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
 |===
 

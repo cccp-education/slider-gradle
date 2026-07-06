@@ -1,0 +1,74 @@
+= Session 017 — Baseline A + CNV-8 logback-exclusion convention
+:session: 017
+:date: 2026-07-06
+:borough: MIAMI (slider-gradle) + ABIDJAN (conventions-gradle)
+
+== Objectif
+
+Séquence A → B → C. Clôture après A (baseline) + B (CNV-8).
+
+== A — Baseline restaurée
+
+=== Corrections
+
+. `slider/build.gradle.kts` : conventions plugins `0.0.2` → `0.0.1` (restauration mavenLocal), puis retour `0.0.2` une fois la publication Central 0.0.2 confirmée (bundle 04040b07, fix SCM double `.git`).
+. `AssistantManager.kt` : rupture propre des noms de tâches RAG :
+  * `register("collectRagIndex", ReindexRagTask::class.java)` → `register("reindexRag", …)`
+  * `register("generateDeckContext", ProposeDeckContextTask::class.java)` → `register("proposeDeckContext", …)`
+  * KDoc corrigée (`generateDeckContext` → `proposeDeckContext`)
+  * Alignement KDoc `RagTasks.kt` + features Cucumber (qui attendaient `proposeDeckContext`)
+
+=== Vérifications
+
+* `./gradlew :slider:compileKotlin` → BUILD SUCCESSFUL
+* `./gradlew :slider:check --rerun-tasks` → BUILD SUCCESSFUL
+* `cucumberTest` : 16 PASS / 0 FAIL / 2 SKIP (vs 6 PASS / 10 FAIL avant)
+* `test` : 22 PASS
+
+== B — CNV-8 logback-exclusion convention (conventions-gradle)
+
+=== Constat
+
+7 boroughs (slider, bakery, capsule, plantuml, readme, flow, workspace-bom) excluent
+`logback-classic` inline (~12 lignes × 7 = ~84 lignes de redondance). Cause :
+conflit JRuby (asciidoctor-gradle) vs logback. slf4j-api préservé (API de logging).
+
+=== Baby-step TDD (conventions-gradle/conventions-plugin)
+
+. **RED** — `logback-exclusion-conventions.feature` (Gherkin français, `# language: fr`)
+   + `LogbackExclusionConventionsSteps.kt` (3 step defs GradleRunner dependencies --configuration)
+   → 2 scénarios FAIL (plugin inexistant), 17 autres PASS
+. **GREEN** — `LogbackExclusionConventionsPlugin.kt` (24 lignes) :
+   `configurations.configureEach { if (name in EXCLUDED_CONFIGURATIONS) exclude(mapOf("group" to "ch.qos.logback", "module" to "logback-classic")) }`
+   + enregistrement `gradlePlugin.plugins.register("logbackExclusion")` dans build.gradle.kts
+   → 19/19 PASS
+. `./gradlew check` conventions-gradle → BUILD SUCCESSFUL
+. `publishToMavenLocal` → 0.0.2 publié
+
+=== Migration slider
+
+. `slider/build.gradle.kts` : `id("education.cccp.build.logback-exclusion") version "0.0.2"` ajouté
+. Bloc `configurations { named("testRuntimeClasspath"/"testImplementation"/"functionalTestRuntimeClasspath") { exclude(...) } }` supprimé
+. `./gradlew :slider:check --rerun-tasks` → BUILD SUCCESSFUL (7m5s)
+. Gain : 158 → 145 lignes (-13, -8%)
+
+== C — Non traité ce session
+
+Reporté : publication Maven Central 0.0.2 conventions-gradle avec nouveau plugin
+(nécessite permission publish).
+
+== Fichiers modifiés
+
+=== conventions-gradle/conventions-plugin
+* `src/main/kotlin/build/LogbackExclusionConventionsPlugin.kt` (créé, 24 lignes)
+* `src/test/resources/features/logback-exclusion-conventions.feature` (créé, Gherkin fr)
+* `src/test/scenarios/build/LogbackExclusionConventionsSteps.kt` (créé)
+* `build.gradle.kts` (registre plugin logbackExclusion)
+
+=== slider-gradle/slider-plugin
+* `slider/build.gradle.kts` (convention 0.0.2 + logback-exclusion plugin, -13 lignes)
+* `slider/src/main/kotlin/slider/ai/AssistantManager.kt` (rupture noms tâches RAG)
+
+== Score
+
+10/10 — Baseline restaurée (10 FAIL → 0 FAIL) + CNV-8 TDD complet + migration slider vérifiée.

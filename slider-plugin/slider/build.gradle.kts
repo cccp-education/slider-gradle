@@ -19,6 +19,7 @@ plugins {
     id("education.cccp.build.publishing") version "0.0.2"
     id("education.cccp.build.functional-test") version "0.0.2"
     id("education.cccp.build.cucumber") version "0.0.2"
+    id("education.cccp.build.logback-exclusion") version "0.0.2"
 }
 
 group = "education.cccp"
@@ -81,19 +82,6 @@ dependencies {
 cucumberConventions {
     featuresDir = "src/test/features"
     scenariosDir = "src/test/scenarios"
-}
-
-configurations {
-    // Exclure logback-classic du classpath de test (conflit asciidoctor JRuby)
-    named("testRuntimeClasspath") {
-        exclude(group = "ch.qos.logback", module = "logback-classic")
-    }
-    named("testImplementation") {
-        exclude(group = "ch.qos.logback", module = "logback-classic")
-    }
-    named("functionalTestRuntimeClasspath") {
-        exclude(group = "ch.qos.logback", module = "logback-classic")
-    }
 }
 
 tasks.withType<Test>().configureEach {

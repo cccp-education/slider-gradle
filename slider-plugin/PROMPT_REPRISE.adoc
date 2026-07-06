@@ -1,37 +1,36 @@
-= PROMPT_REPRISE — slider-gradle — Session 017
-:session: 017
+= PROMPT_REPRISE — slider-gradle — Session 018
+:session: 018
 :date: 2026-07-06
 
-== Session 016 terminée — CNV-6/7 Migration functional-test + cucumber
+== Session 017 terminée — Baseline A + CNV-8 logback-exclusion ✅
 
-CNV-6/7 ✅ TERMINÉ : 4/4 conventions plugins appliquées (gradle-plugin + publishing +
-functional-test + cucumber). `build.gradle.kts` 251→157 lignes (-114, -45%).
+A — Baseline restaurée :
+- `AssistantManager.kt` rupture propre noms tâches RAG :
+  `collectRagIndex` → `reindexRag`, `generateDeckContext` → `proposeDeckContext`
+- `slider/build.gradle.kts` : conventions `0.0.2` (publiée Central, fix SCM `.git`)
+- `cucumberTest` : 16 PASS / 0 FAIL / 2 SKIP (vs 6 PASS / 10 FAIL avant)
+- `./gradlew :slider:check` vert
 
-. `functionalTest` : BUILD SUCCESSFUL (convention + failOnNoDiscoveredTests=false, tests commentés)
-. `cucumberTest` : 17 tests, 10 FAIL préexistants (proposeDeckContext), 1 skip, 6 PASS — stable
-. `test` : 22 PASS, 0 FAIL — **bug filtre package résolu** (effet de bord convention cucumber :
-  `excludeTestsMatching("*.scenarios.*")` remplace l'ancien `com.cheroliv.slider.scenarios.**` S-007)
+B — CNV-8 logback-exclusion convention :
+- Nouveau plugin `education.cccp.build.logback-exclusion` (conventions-gradle)
+- TDD : feature Gherkin français + steps + LogbackExclusionConventionsPlugin (24 lignes)
+- `conventions-gradle cucumberTest` 19/19 PASS, `publishToMavenLocal` 0.0.2
+- Migration slider : -13 lignes (bloc exclusion inline supprimé)
 
-Variants préservées : buildscript annotations force, exclusions logback,
-additionalDependencies mockito/coroutines/slf4j, compatibility configurationCache=false.
+== Prochaine session — 018
 
-== Prochaine session — 017 : SLD-3 i18n US-3.2
-
-. TranslatorManager modernisation — remplacer `setOf(FRENCH, ENGLISH)` par
-  `LanguageCatalog.ALL` (2→10 langues)
-. System prompt LLM adaptatif par langue (prompt traduction localisé)
-. Utiliser `I18nConfig.supportedLanguages` pour générer les tâches de traduction
-
-== Pattern de référence
-
-- bakery-gradle BKY-I18N (TranslatorManager équivalent)
-- i18n-contracts N0 : `LanguageCatalog.ALL`, `SupportedLanguage`, `TranslationRequest`
+. Option C reportée : publication Maven Central conventions-gradle 0.0.2
+   avec nouveau plugin logback-exclusion (nécessite permission publish)
+. Migration des 6 autres boroughs (bakery, capsule, plantuml, readme, flow,
+   workspace-bom) vers `education.cccp.build.logback-exclusion` (~84 lignes)
+. SLD-3 i18n US-3.2 (TranslatorManager 10 langues) — reprendre roadmap
 
 == Rappels
 
 - GroupId : `education.cccp`, Plugin ID : `education.cccp.slider`
 - Version publiée Central : 0.0.1
+- conventions-gradle : mavenLocal 0.0.2 (logback-exclusion non publié Central)
 - i18n-contracts : mavenLocal 0.0.2
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
-- Baby-step TDD : RED (test TranslatorManager 10 langues) → GREEN → REFACTOR
-- CNV-6/7 complet : 4/4 conventions (ne plus toucher le build.gradle.kts sauf nécessité)
+- Baby-step TDD : RED → GREEN → REFACTOR
+- Gherkin en français, code en anglais, pas de commentaires
