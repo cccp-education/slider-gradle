@@ -167,3 +167,30 @@ Nouveau test unitaire `I18nConfigResolverTest.kt` (9 tests JUnit5 + AssertJ) :
 Résultat : 9/9 PASS. Couverture cascade 5 couches + validation I18nConfig.
 Total : 22 tests PASS (5 DeckContextLanguageTest + 9 I18nConfigResolverTest + 6 Cucumber
 transition/auto-animate + 1 SliderPluginTest + 1 PlaywrightE2E).
+
+== Session 020 — SLD-2 US-2.5 Capsule Feed + SLD-3 US-3.6 Dogfood (2026-07-07)
+
+Nouveaux tests (package `slider.capsule`) :
+
+**Unit (28 PASS, was 57) :**
+- `CapsuleScriptWriterTest` (12 tests) — header deckName, segments count, note placement,
+  blank line separation, multi-line, trim whitespace, invariants construction
+- `AsciidocSpeakerNoteParserTest` (11 tests) — extraction multi-slides, skip sans note,
+  multi-lignes, attributes bracket, attribute lines preceding heading, level-2 only,
+  reindexation, blank deckName rejeté, deck vide sans notes
+- `CapsuleSmokeRealDeckTest` (1 test) — round-trip sur `kotlin-intro-deck.adoc` réel
+- `CapsuleFeedDemoDeckTest` (4 tests) — dogfood decks fr/en/ar parse+write round-trip
+
+**Functional (4 PASS, was 3) :**
+- `GenerateCapsuleFunctionalTest` (4 tests) — task registered in slider group,
+  produit `<deck>-script.txt` conforme contrat, skip decks sans notes, 1-based indices
+
+**Cucumber BDD (58 PASS, was 46) :**
+- `9_capsule_feed.feature` (13 scénarios) — 9 contractuels (1 segment, multi, skip,
+  plain-text, multi-lignes, deck vide, blank name, attributes, level-2) + 4 dogfood
+  (fr/en/ar decks + plain-text contract)
+
+Nouveaux fichiers de production : 2 (`CapsuleScript.kt` + `AsciidocSpeakerNoteParser.kt`)
+Nouveaux fichiers de test : 6 (3 unit + 1 functional + 1 feature + 1 steps)
+
+Total : 28 unit + 4 functional + 58 cucumber = 90 PASS.

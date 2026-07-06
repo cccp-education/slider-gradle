@@ -5,6 +5,8 @@
 | 019 | 2026-07-06 | SLD-3 | US-3.3 | Reveal.js UI i18n — RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task (21 unit + 3 functional + 10 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.4 | RTL support ar/ur — RevealRtlResolver + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur (9 unit + 6 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.5 | Cucumber BDD i18n fallback — 8_i18n_fallback.feature 6 scenarios (fallback default, invalid CLI, empty CLI, singleton, validation)
+| 020 | 2026-07-07 | SLD-2 | US-2.5 | Capsule Feed — domaine DDD slider.capsule (CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser), refactor generateCapsule task, 24 unit + 4 functional + 9 cucumber BDD
+| 020 | 2026-07-07 | SLD-3 | US-3.6 | Dogfood multilingue fr/en/ar — 3 decks demo + CapsuleFeedDemoDeckTest (4 unit) + 4 scénarios Cucumber dogfood
 | 018 | 2026-07-06 | SLD-3 | US-3.2 | TranslatorManager 2→10 langues via LanguageCatalog + English Only governance (11 unit + 4 functional + 7 cucumber)
 | 017 | 2026-07-06 | CNV-8 | — | Baseline A rupture noms tâches RAG + CNV-8 logback-exclusion convention (-13 lignes slider)
 | 016 | 2026-07-06 | CNV-6/7 | — | Migration functional-test + cucumber conventions (4/4 conventions plugins, -114 lignes)

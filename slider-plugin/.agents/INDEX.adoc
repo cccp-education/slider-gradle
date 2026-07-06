@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-07-06
-_Session terminee_ : 019 — SLD-3 i18n US-3.3 (RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task) + US-3.4 (RevealRtlResolver + câblage setRightToLeft -Planguage=ar|ur) + US-3.5 (Cucumber BDD i18n fallback + validation). 57 unit + 3 functional + 46 cucumber PASS ✅
-_Prochaine session_ : 020 — SLD-2 US-2.5 (Feed capsule) + SLD-3 US-3.6 (dogfooding deck multilingue) + validation Playwright RTL
+_Derniere mise a jour_ : 2026-07-07
+_Session terminee_ : 020 — SLD-2 US-2.5 (Capsule Feed — domaine DDD slider.capsule: CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser, refactor generateCapsule task, 24 unit + 4 functional + 9 cucumber) + SLD-3 US-3.6 (dogfooding deck multilingue fr+en+ar, 3 decks demo + 4 unit dogfood + 4 cucumber). 28 unit + 4 functional + 58 cucumber PASS ✅
+_Prochaine session_ : 021 — Maintenance. EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication tous terminés.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 (Capsule Feed — domaine DDD slider.capsule: CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser, refactor generateCapsule task, audit cross-borough contrat réel capsule-gradle, 24 unit + 4 functional + 9 cucumber BDD 9_capsule_feed.feature + 4 Cucumber dogfood) + SLD-3 US-3.6 (dogfooding 3 decks demo fr/en/ar + CapsuleFeedDemoDeckTest 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS, BUILD SUCCESSFUL | ✅ TERMINÉ
 | 019 | 2026-07-06 | feat+tests+bdd | SLD-3 i18n US-3.3 (RevealUiMessages value object + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task group=slider) + US-3.4 (RevealRtlResolver resolveRtl/rtlLanguages + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur Groovy-Kotlin interop) + US-3.5 (8_i18n_fallback.feature 6 scenarios fallback/validation cascade) — 57 unit (was 48, +9 RevealRtlResolver) + 3 functional + 46 cucumber (was 34, +12: 6_reveal_ui_i18n 10 + 7_rtl_layout 6 + 8_i18n_fallback 6) PASS, ./gradlew check green | ✅ TERMINÉ
 | 018 | 2026-07-06 | feat+tests+governance | SLD-3 i18n US-3.2 (TranslatorManager 2→10 langues via LanguageCatalog.supportedCodes, adaptive prompt with native names via LanguageCatalog.findByCode, slider.translator plugin registered, 90 translation tasks, displaySupportedLanguages native names) + English Only governance (Rule 7 AGENT.adoc, workspace AGENTS.adoc transverse rule, Gherkin FR purge cross-borough: logback-exclusion-conventions.feature + SignUp.feature migrated EN) — 11 unit + 4 functional + 7 cucumber PASS, ./gradlew check green | ✅ TERMINÉ
 | 017 | 2026-07-06 | fix+feat+tests | Baseline A (rupture noms tâches RAG collectRagIndex→reindexRag, generateDeckContext→proposeDeckContext, cucumberTest 6→16 PASS) + CNV-8 logback-exclusion convention (conventions-gradle TDD feature fr + plugin 24 lignes, migration slider -13 lignes, ./gradlew check vert) | ✅ TERMINÉ
@@ -49,8 +50,8 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | EPIC | Description | Statut | Priorite
 | SLD-0 | Bootstrap gouvernance agent slider (.agents/, AGENT.adoc, doc/) | ✅ TERMINE | P0
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
-| SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | 🔴 EN COURS — 4/5 US terminées, reste US-2.5 | P0
-| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | 🟡 EN COURS — US-3.0 ✅ + US-3.1 ✅ + US-3.2 ✅ + US-3.3 ✅ + US-3.4 ✅ + US-3.5 ✅ TERMINÉS (S-014/015/018/019), reste US-3.6 deck multilingue demo, README i18n 10 langues (S-011) | P1
+| SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | ✅ TERMINÉ (5/5 US) | P0
+| SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | ✅ TERMINÉ (7/7 US) | P1
 | CNV-6 | Migration conventions plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing) | ✅ TERMINÉ (session 013, -96 lignes) | P1
 | CNV-7 | Migration functional-test + cucumber conventions (4/4 conventions) | ✅ TERMINÉ (session 016, -114 lignes) | P1
 | CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
@@ -85,7 +86,7 @@ transitions fluides, feed capsule pour capsule-gradle.
 | US-2.2 | Tâche `slider:visualTest` — Playwright screenshot chaque slide + snapshot CI | ✅ TERMINE
 | US-2.3 | Theme CSS reveal.js pro (typo, palette Talaria, header/footer, barre progression) | ✅ TERMINE
 | US-2.4 | Tests validation visuelle Playwright — 10 contraintes P0/P1/P2 par slide | ✅ TERMINE
-| US-2.5 | Feed capsule — Playwright screenshots → JSON attendu par capsule-gradle | 🔴 A FAIRE
+| US-2.5 | Feed capsule — extraction notes orateur → `*-script.txt` contrat capsule-gradle, domaine DDD `slider.capsule` (CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser), refactor generateCapsule task, tests 3 niveaux (24 unit + 4 functional + 13 cucumber) | ✅ TERMINÉ (S-020)
 |===
 
 '''
@@ -106,7 +107,7 @@ _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication C
 | SLD-3.3 | Reveal.js UI i18n — générer `messages_{code}.js` pour 10 langues (navigation, contrôles, tooltips) + injecter `lang: {code}` dans config Reveal.js | ✅ TERMINÉ (S-019) | 2 pts
 | SLD-3.4 | RTL support — slides arabe/ourdou avec `rtl: true` + layout CSS RTL + validation visuelle Playwright | ✅ TERMINÉ (S-019, resolver + câblage, validation Playwright deck complète restante US-3.6) | 2 pts
 | SLD-3.5 | Tests Cucumber BDD — scénarios i18n (génération par langue, RTL, fallback, validation config) | ✅ TERMINÉ (S-019) | 2 pts
-| SLD-3.6 | Documentation + dogfooding — deck multilingue de démonstration (fr+en+ar) | 🟡 PARTIEL — README i18n 10 langues créés (S-011), deck demo reste à faire | 1 pt
+| SLD-3.6 | Documentation + dogfooding — deck multilingue de démonstration (fr+en+ar) + CapsuleFeedDemoDeckTest (4 unit) + 4 scénarios Cucumber dogfood | ✅ TERMINÉ (S-020) | 1 pt
 |===
 
 _Total_ : 7 US, ~15 pts.

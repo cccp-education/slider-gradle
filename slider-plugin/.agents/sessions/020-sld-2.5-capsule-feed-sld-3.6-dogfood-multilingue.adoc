@@ -1,0 +1,134 @@
+= Session 020 — slider-gradle — SLD-2 US-2.5 + SLD-3 US-3.6 Capsule Feed + Dogfood Multilingue
+:session: 020
+:date: 2026-07-07
+
+== Mission
+
+SLD-2 US-2.5 (Feed capsule — recadré sur le contrat réel `*-script.txt` produit par slider)
++ SLD-3 US-3.6 (dogfooding deck multilingue de démonstration fr+en+ar). Baby-step
+DDD/TDD/BDD, agile software craftsmanship.
+
+== Contexte — Recadrage US-2.5
+
+Audit cross-borough capsule-gradle : le backlog disait *"Playwright screenshots → JSON
+pour capsule-gradle"*. Le contrat réel (CAPSULE_ARCHITECTURE.adoc:388-401 + CapsuleManager
+parseScript:160-224) est fichier texte + HTML — pas de JSON, pas de screenshots. Les
+screenshots sont pris en live par capsule-gradle (ScreenshotCaptureImpl). US-2.5 recadrée :
+fiabiliser + tester le contrat `generateCapsule` existant (SliderManager.kt:775-838, inline
+doLast, 0 tests), en extrayant la logique en objets domaine DDD testables.
+
+== Baby-step TDD/BDD (RED → GREEN → REFACTOR)
+
+=== US-2.5a — Unit: CapsuleScript + SlideSegment + CapsuleScriptWriter
+
+RED: `CapsuleScriptWriterTest.kt` (12 tests) — header deckName, segments count, note
+placement, blank line separation, multi-line preservation, trim whitespace, immutabilité
+invariants (deckName non-blank, title non-blank, speakerNote non-blank).
+
+GREEN: `slider/capsule/CapsuleScript.kt` — `CapsuleScript` (aggregate root, deckName +
+segments, `isEmpty`), `SlideSegment` (VO, index + title + speakerNote, invariants sur
+title/speakerNote), `CapsuleScriptWriter` (objet, `write(script): String` sérialise au
+format contrat `=== CAPSULE SCRIPT : X ===` + `--- SLIDE n : title ---`).
+
+REFACTOR: invariants DDD au constructeur (aggregate invariant), `CapsuleScript.isEmpty`
+pour decks sans notes, `CapsuleScriptWriter.write` rejette segments vides.
+
+=== US-2.5b — Unit: AsciidocSpeakerNoteParser
+
+RED: `AsciidocSpeakerNoteParserTest.kt` (11 tests) — extraction multi-slides, skip slides
+sans `[NOTE.speaker]`, multi-lignes, attributes après bracket `[NOTE.speaker,style=foo]`,
+attribute lines précédant heading `[.slide,...]`, level-2 only (pas `===`), reindexation
+séquentielle par occurrence, blank deckName rejeté, empty deck sans notes.
+
+GREEN: `slider/capsule/AsciidocSpeakerNoteParser.kt` — `parse(adocContent, deckName):
+CapsuleScript`. Parser ligne-par-ligne : `== ` = slide heading, `[NOTE.speaker]` ou
+`[NOTE.speaker,...]` démarre note, `--` ... `--` délimite le bloc. Reindexation 1-based
+par ordre d'occurrence. Slides sans note = skippées.
+
+Smoke: `CapsuleSmokeRealDeckTest.kt` — round-trip sur `kotlin-intro-deck.adoc` réel
+(10 slides, 10 notes) → 10 segments, format contrat respecté.
+
+=== US-2.5c — Functional: generateCapsule task refactor
+
+GREEN: `SliderManager.kt:775-838` refactoré — `generateCapsule` délègue au domaine
+(`AsciidocSpeakerNoteParser.parse` + `CapsuleScriptWriter.write`). Logique inline 60
+lignes supprimée, remplacée par 12 lignes de délégation. `dependsOn("asciidoctor")`
+supprimé (parser lit les `.adoc` sources, pas le rendu HTML — la dépendance était une
+erreur de design). Group corrigé `generate`→`slider`. Log skip explicite pour decks sans
+notes (`logger.lifecycle("⚠ ...")`).
+
+RED: `GenerateCapsuleFunctionalTest.kt` (4 tests via GradleRunner) — task registered in
+slider group, produit `<deck>-script.txt` conforme contrat, skip decks sans notes,
+1-based slide indices. Validation `build/capsule/` output dir.
+
+=== US-2.5d — Cucumber BDD: 9_capsule_feed.feature
+
+RED→GREEN: `9_capsule_feed.feature` (9 scénarios initiaux EN) + `CapsuleFeedSteps.kt`
+(15 step defs). Couvre : 1 segment, multi-segments ordre, skip sans note, contrat
+plain-text (header + blank + SLIDE markers), multi-lignes, deck vide, blank deckName
+rejeté, attributes après bracket, level-2 only.
+
+Correction TDD : DataTable → doc string (Cucumber Java8 limitation avec
+`List<Map<String,String>>`), step ambigu `{int} segment(s)` vs `{int} segments` résolu
+(regex `(s)` optionnel ne match pas en Cucumber Java8, unification en `{int} segments`).
+
+=== US-3.6 — Dogfood multilingue fr+en+ar
+
+Livrables contenu :
+- `slides/misc/capsule-feed-demo-fr-deck.adoc` (4 slides, notes orateur FR)
+- `slides/misc/capsule-feed-demo-en-deck.adoc` (4 slides, speaker notes EN)
+- `slides/misc/capsule-feed-demo-ar-deck.adoc` (4 slides, ملاحظات المتحدث AR, RTL
+  via `:revealjs_direction: rtl`)
+
+Tests dogfood :
+- `CapsuleFeedDemoDeckTest.kt` (4 tests unit) — chaque deck parse 4 segments,
+  round-trip write valide, structure identique cross-langue
+- 4 scénarios Cucumber additionnels dans `9_capsule_feed.feature` — dogfood fr/en/ar
+  + contrat plain-text complet
+
+== Tests globaux session 020
+
+- test: 28 PASS (12 CapsuleScriptWriter + 11 AsciidocSpeakerNoteParser + 1 Smoke +
+  4 CapsuleFeedDemoDeck) — was 57 (S019) +4 dogfood, +24 capsule domain
+- functionalTest: 4 PASS (GenerateCapsuleFunctionalTest) — was 3 (S019) +1
+- cucumberTest: 58 PASS / 0 FAIL / 1 SKIP (Ollama) — was 46 (S019) +12 (9_capsule_feed)
+- `./gradlew :slider:test :slider:functionalTest :slider:cucumberTest` BUILD SUCCESSFUL
+
+== EPICs clôturés
+
+- **SLD-2 ✅ TERMINÉ** (5/5 US — US-2.5 était la dernière)
+- **SLD-3 ✅ TERMINÉ** (7/7 US — US-3.6 était la dernière)
+
+== Domaine posé — package `slider.capsule`
+
+| Classe | Rôle | Lignes |
+| `CapsuleScript` | Aggregate root — deckName + segments, `isEmpty` | 18 |
+| `SlideSegment` | VO — index + title + speakerNote, invariants | 12 |
+| `CapsuleScriptWriter` | Sérialiseur → plain-text contrat capsule-gradle | 16 |
+| `AsciidocSpeakerNoteParser` | Parser .adoc → CapsuleScript | 60 |
+
+== Fichiers créés
+
+- `slider/src/main/kotlin/slider/capsule/CapsuleScript.kt`
+- `slider/src/main/kotlin/slider/capsule/AsciidocSpeakerNoteParser.kt`
+- `slider/src/test/kotlin/slider/capsule/CapsuleScriptWriterTest.kt`
+- `slider/src/test/kotlin/slider/capsule/AsciidocSpeakerNoteParserTest.kt`
+- `slider/src/test/kotlin/slider/capsule/CapsuleSmokeRealDeckTest.kt`
+- `slider/src/test/kotlin/slider/capsule/CapsuleFeedDemoDeckTest.kt`
+- `slider/src/functionalTest/kotlin/slider/GenerateCapsuleFunctionalTest.kt`
+- `slider/src/test/features/9_capsule_feed.feature`
+- `slider/src/test/scenarios/slider/scenarios/CapsuleFeedSteps.kt`
+- `slides/misc/capsule-feed-demo-fr-deck.adoc`
+- `slides/misc/capsule-feed-demo-en-deck.adoc`
+- `slides/misc/capsule-feed-demo-ar-deck.adoc`
+
+== Fichiers modifiés
+
+- `slider/src/main/kotlin/slider/SliderManager.kt` — refactor generateCapsule (délégation
+  domaine + suppression dependsOn asciidoctor + group slider + log skip)
+
+== Score session
+
+10/10 — SLD-2 et SLD-3 clôturés, domaine DDD posé et testé 3 niveaux, contrat
+cross-borough capsule-gradle validé par round-trip sur deck réel, dogfood multilingue
+fr/en/ar livré.

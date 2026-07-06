@@ -69,10 +69,25 @@ GradleRunner `proposeDeckContext not found`, documentés S007) — aucune régre
 
 Migration du `build.gradle.kts` (sous-module `slider/`) vers les convention plugins `education.cccp.build.gradle-plugin` (0.0.1) + `education.cccp.build.publishing` (0.0.1), pattern bakery. build.gradle.kts 301→205 lignes (-96). compileKotlin SUCCESS. Variantes gardées : buildscript annotations force, exclusions logback, extendsFrom legacy, compatibility configurationCache=false.
 
+== Session 020 (2026-07-07) — SLD-2 US-2.5 Capsule Feed + SLD-3 US-3.6 Dogfood Multilingue
+
+US-2.5 TERMINÉ : recadrage du backlog (JSON screenshots → contrat réel `*-script.txt`).
+Domaine DDD `slider.capsule` posé : `CapsuleScript` (aggregate), `SlideSegment` (VO),
+`CapsuleScriptWriter` (sérialiseur plain-text contrat capsule-gradle),
+`AsciidocSpeakerNoteParser` (parseur .adoc → CapsuleScript). Refactor `generateCapsule`
+task — délègue au domaine, `dependsOn("asciidoctor")` supprimé, group slider.
+Contrat validé round-trip sur deck réel. 24 unit + 4 functional + 9 cucumber.
+
+US-3.6 TERMINÉ : 3 decks demo `capsule-feed-demo-{fr,en,ar}-deck.adoc` (4 slides chacun,
+notes FR/EN/AR, AR deck RTL). Dogfood tests 4 unit + 4 cucumber.
+
+SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
+
 == Sessions
 
 |===
 | # | Date | Type | Sujet | Score
+| 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 Capsule Feed (domaine DDD slider.capsule, 24 unit + 4 functional + 9 cucumber) + SLD-3 US-3.6 Dogfood fr/en/ar (3 decks demo + 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS | ✅ TERMINÉ
 | 017 | 2026-07-06 | fix+feat+tests | Baseline A (rupture noms tâches RAG collectRagIndex→reindexRag, generateDeckContext→proposeDeckContext, cucumberTest 6→16 PASS) + CNV-8 logback-exclusion convention (conventions-gradle TDD feature fr + plugin 24 lignes, migration slider -13 lignes, ./gradlew check vert) | ✅ TERMINÉ
 | 016 | 2026-07-06 | refactor | CNV-6/7 Migration functional-test + cucumber conventions — 4/4 conventions plugins (gradle-plugin + publishing + functional-test + cucumber), build.gradle.kts 251→157 (-114, -45%). functionalTest ✅, cucumberTest stable (10 FAIL préexistants), test 22 PASS (bug filtre package S-007 résolu). | ✅ TERMINÉ
 | 015 | 2026-07-06 | feat+tests | SLD-3 i18n US-3.1 — I18nConfigResolver (cascade 5 couches) + SliderExtension.language/supportedLanguages + RagTasks câblé. 9/9 I18nConfigResolverTest PASS. | ✅ TERMINÉ

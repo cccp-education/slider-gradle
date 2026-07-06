@@ -21,6 +21,8 @@ import slider.Slides.RevealJsSlides.GROUP_TASK_SLIDER
 import slider.Slides.RevealJsSlides.SOURCE_HIGHLIGHTER_KEY
 import slider.Slides.RevealJsSlides.TASK_ASCIIDOCTOR_REVEALJS
 import slider.Slides.RevealJsSlides.TASK_CLEAN_SLIDES_BUILD
+import slider.capsule.AsciidocSpeakerNoteParser
+import slider.capsule.CapsuleScriptWriter
 import slider.Slides.RevealJsSlides.TASK_DASHBOARD_SLIDES_BUILD
 import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
 import slider.Slides.RevealJsSlides.TASK_SERVE_SLIDES
@@ -777,9 +779,8 @@ object SliderManager {
             val buildDir = layout.buildDirectory
 
             tasks.register<DefaultTask>("generateCapsule") {
-                group = "generate"
-                description = "Extract speaker notes from AsciiDoc decks and generate a video script."
-                dependsOn("asciidoctor")
+                group = "slider"
+                description = "Extract speaker notes from AsciiDoc decks and generate a capsule script (consumed by capsule-gradle)."
                 outputs.upToDateWhen { false }
 
                 doLast {
@@ -787,51 +788,17 @@ object SliderManager {
                     scriptDir.mkdirs()
 
                     adocDir.listFiles { f -> f.extension == "adoc" }?.forEach { adoc ->
-                        val lines = adoc.readLines()
-                        val slides = mutableListOf<Pair<String, String>>()
-                        var currentTitle = ""
-                        var inNote = false
-                        var opened = false
-                        var noteContent = ""
-
-                        for (line in lines) {
-                            when {
-                                line.startsWith("== ") -> {
-                                    currentTitle = line.removePrefix("== ").trim()
-                                    inNote = false
-                                    opened = false
-                                }
-                                line.startsWith("[NOTE.speaker]") || line.startsWith("[NOTE.speaker,") -> {
-                                    inNote = true
-                                    opened = false
-                                    noteContent = ""
-                                }
-                                inNote && !opened && line.trimStart().startsWith("--") -> {
-                                    opened = true
-                                }
-                                inNote && opened && line.trimStart().startsWith("--") -> {
-                                    inNote = false
-                                    opened = false
-                                    if (noteContent.isNotBlank()) {
-                                        slides.add(currentTitle to noteContent.trim())
-                                    }
-                                }
-                                inNote && opened -> noteContent += line + "\n"
-                            }
+                        val script = AsciidocSpeakerNoteParser.parse(
+                            adocContent = adoc.readText(),
+                            deckName = adoc.nameWithoutExtension,
+                        )
+                        if (script.isEmpty) {
+                            logger.lifecycle("⚠ Capsule script skipped for ${adoc.name} (no speaker notes found)")
+                            return@forEach
                         }
-                        if (slides.isNotEmpty()) {
-                            val scriptFile = scriptDir.resolve("${adoc.nameWithoutExtension}-script.txt")
-                            scriptFile.bufferedWriter().use { w ->
-                                w.appendLine("=== CAPSULE SCRIPT : ${adoc.nameWithoutExtension} ===")
-                                w.appendLine()
-                                slides.forEachIndexed { i, (title, note) ->
-                                    w.appendLine("--- SLIDE ${i + 1} : $title ---")
-                                    w.appendLine(note.trim())
-                                    w.appendLine()
-                                }
-                            }
-                            logger.lifecycle("✅ Capsule script → ${scriptFile.name} (${slides.size} slides)")
-                        }
+                        val scriptFile = scriptDir.resolve("${adoc.nameWithoutExtension}-script.txt")
+                        scriptFile.writeText(CapsuleScriptWriter.write(script))
+                        logger.lifecycle("✅ Capsule script → ${scriptFile.name} (${script.segments.size} slides)")
                     }
                 }
             }
