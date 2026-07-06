@@ -58,22 +58,24 @@ domain-pure steps querying TranslatorManager directly (no GradleRunner).
 - functionalTest: 4 PASS (TranslatorFunctionalTest)
 - cucumberTest: 23 PASS / 0 FAIL / 1 SKIP (Ollama integration skipped)
 
-== English Only Governance Fix
+== English Only — Code/Gherkin/Commentaires
 
 Triggered by user feedback: French Gherkin is unprofessional for OSS projects.
+La gouvernance (.adoc) reste en français — seul le code, les Gherkin et les commentaires
+doivent être en anglais.
 
 Files corrected:
-1. `workspace/AGENTS.adoc` — added transverse "English Only" rule (all boroughs)
-2. `slider-gradle/slider-plugin/AGENT.adoc` — added Rule 7 "English Only"
-3. `slider-gradle/slider-plugin/PROMPT_REPRISE.adoc` — lines 16, 36 corrected
-4. `conventions-gradle/conventions-plugin/AGENT.adoc` — added "English Only" rule
-5. `plantuml-gradle/plantuml-plugin/.agents/ARCHITECTURE.adoc` — line 4 corrected
-6. `conventions-gradle/.../logback-exclusion-conventions.feature` — migrated FR→EN
-7. `conventions-gradle/.../LogbackExclusionConventionsSteps.kt` — migrated FR→EN
-8. `plantuml-gradle/.../SignUp.feature` — migrated FR→EN
-9. `slider-gradle/.../017-baseline-cnv-8-logback-exclusion.adoc` — annotated deprecation note
+1. `workspace/AGENTS.adoc` — ajout règle transverse "English Only" (code/Gherkin/commentaires, gouvernance en français)
+2. `slider-gradle/slider-plugin/AGENT.adoc` — ajout Règle 7 "English Only"
+3. `slider-gradle/slider-plugin/PROMPT_REPRISE.adoc` — lignes 16, 36 corrigées
+4. `conventions-gradle/conventions-plugin/AGENT.adoc` — ajout règle "English Only"
+5. `plantuml-gradle/plantuml-plugin/.agents/ARCHITECTURE.adoc` — ligne 4 corrigée
+6. `conventions-gradle/.../logback-exclusion-conventions.feature` — migré FR→EN (Gherkin)
+7. `conventions-gradle/.../LogbackExclusionConventionsSteps.kt` — migré FR→EN (step defs)
+8. `plantuml-gradle/.../SignUp.feature` — migré FR→EN (Gherkin)
+9. `slider-gradle/.../017-baseline-cnv-8-logback-exclusion.adoc` — note de déprécation ajoutée
 
-Final check: `grep -rln "# language: fr" foundry/ --include="*.feature"` → zero results.
+Final check: `grep -rln "# language: fr" foundry/ --include="*.feature"` → zéro résultat.
 
 == US-3.2 Status
 
