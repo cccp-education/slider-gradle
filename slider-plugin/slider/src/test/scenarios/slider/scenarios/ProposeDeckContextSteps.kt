@@ -47,7 +47,7 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
               "subject": "$subject",
               "audience": "développeurs Kotlin intermédiaires",
               "duration": 60,
-              "language": "$language",
+              "languageCode": "$language",
               "outputFile": "${slug}_${language}-deck.adoc",
               "author": { "name": "cheroliv", "email": "cheroliv@example.com" },
               "revealjs": {
@@ -185,7 +185,7 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     @Then("the file {string} should be a valid DeckContext")
     fun fileShouldBeValidDeckContext(relativePath: String) {
         val ctx = loadDeckContext(relativePath)
-        assertThat(ctx).containsKeys("subject", "language", "outputFile", "author")
+        assertThat(ctx).containsKeys("subject", "languageCode", "outputFile", "author")
         assertThat(ctx["subject"]).isNotNull().isInstanceOf(String::class.java)
         assertThat(ctx["outputFile"].toString()).endsWith("-deck.adoc")
     }

@@ -37,7 +37,7 @@ class RevealJsTransitionSteps(private val world: SliderWorld) {
 
     @Then("the DeckContext model should be valid")
     fun deckContextModelShouldBeValid() {
-        val requiredFields = listOf("subject", "audience", "duration", "language", "outputFile", "author", "revealjs", "notes")
+        val requiredFields = listOf("subject", "audience", "duration", "languageCode", "outputFile", "author", "revealjs", "notes")
         val props = DeckContext::class.declaredMemberProperties.map { it.name }
         requiredFields.forEach { field ->
             assertThat(props)

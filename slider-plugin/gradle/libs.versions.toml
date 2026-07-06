@@ -28,6 +28,7 @@ testcontainers-pg = "1.21.4"
 logback = "1.5.32"
 codebase = "0.0.1"
 playwright = "1.52.0"
+i18n-contracts = "0.0.2"
 
 [libraries]
 asciidoctor-gradle-jvm-slides = { module = "org.asciidoctor:asciidoctor-gradle-jvm-slides", version.ref = "asciidoctor-gradle" }
@@ -75,6 +76,7 @@ testcontainers-pg = { module = "org.testcontainers:postgresql", version.ref = "t
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
+i18n-contracts = { module = "education.cccp:i18n-contracts", version.ref = "i18n-contracts" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

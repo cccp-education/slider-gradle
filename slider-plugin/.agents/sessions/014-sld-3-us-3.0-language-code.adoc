@@ -1,0 +1,68 @@
+= Session 014 — SLD-3 i18n US-3.0 (DeckContext.languageCode ISO 639-1)
+:date: 2026-07-06
+:session: 014
+:epic: SLD-3
+:us: US-3.0
+
+== Objectif
+
+US-3.0 : Ajouter la dépendance `i18n-contracts:0.0.2` (N0) et migrer
+`DeckContext.language` (String display name "French") vers
+`DeckContext.languageCode` (ISO 639-1 "fr"), avec validation contre
+`LanguageCatalog.supportedCodes()`.
+
+== Méthode — Baby-step TDD (RED → GREEN → REFACTOR)
+
+=== RED
+Création de `DeckContextLanguageTest.kt` (5 tests) :
+. `DeckContext default languageCode should be fr`
+. `DeckContext languageCode should accept all LanguageCatalog supported codes`
+. `DeckContext languageCode should reject legacy display name 'French'`
+. `DeckContext languageCode should reject unknown ISO code 'xx'`
+. `DeckContext requireValidLanguage should pass for fr`
+
+Échec compilation : `Unresolved reference 'languageCode'` + `requireValidLanguage`.
+
+=== GREEN
+. `gradle/libs.versions.toml` : ajout `i18n-contracts = "0.0.2"` + library
+. `slider/build.gradle.kts` : `implementation(libs.i18n.contracts)`
+. `models.kt` : rename `language: String = "French"` → `languageCode: String = "fr"`
+  + ajout `fun DeckContext.requireValidLanguage()` utilisant `LanguageCatalog.supportedCodes()`
+. `SliderManager.kt:305` : `language = "French"` → `languageCode = "fr"`
+. `AssistantManager.kt:607` : `ctx.language` → `ctx.languageCode`
+. `RevealJsTransitionSteps.kt:40` : champ required `"language"` → `"languageCode"`
+. `ProposeDeckContextSteps.kt` : clé JSON `"language"` → `"languageCode"` (fixture mock LLM)
+  + assertion `containsKeys("language")` → `"languageCode"`
+. `2_propose_deck_context.feature:87` : `field "language"` → `field "languageCode"`
+
+=== REFACTOR
+`requireValidLanguage()` extrait directement dans `DeckContext` (data class) —
+réutilisable par US-3.1 (config layer cascade).
+
+== Vérification
+
+. `./gradlew :slider:compileKotlin` → BUILD SUCCESSFUL
+. `./gradlew :slider:test --tests "slider.DeckContextLanguageTest"` → 5/5 PASSED
+. `./gradlew :slider:test` → 14 PASS, 10 FAIL (préexistants : `Task 'proposeDeckContext'
+   not found` — infra GradleRunner documentée session 007), 1 SKIP
+
+Les 10 échecs Cucumber `proposeDeckContext` sont **préexistants** (infra
+GradleRunner, pas liés à US-3.0). Aucune régression introduite.
+
+== Fichiers modifiés
+
+. `gradle/libs.versions.toml` — dépendance i18n-contracts 0.0.2
+. `slider/build.gradle.kts` — implementation(libs.i18n.contracts)
+. `slider/src/main/kotlin/slider/models.kt` — rename + requireValidLanguage()
+. `slider/src/main/kotlin/slider/SliderManager.kt` — languageCode = "fr"
+. `slider/src/main/kotlin/slider/ai/AssistantManager.kt` — ctx.languageCode
+. `slider/src/test/kotlin/slider/DeckContextLanguageTest.kt` — NEW (5 tests)
+. `slider/src/test/scenarios/slider/scenarios/RevealJsTransitionSteps.kt` — languageCode
+. `slider/src/test/scenarios/slider/scenarios/ProposeDeckContextSteps.kt` — languageCode
+. `slider/src/test/features/2_propose_deck_context.feature` — languageCode
+
+== Prochaine session — 015 : US-3.1
+
+Configuration layer DSL `language`/`supportedLanguages` + cascade 5 couches
+(CLI `-Planguage` > gradle.properties > DSL > deck-context.yml > default "fr")
++ `I18nConfig.validate()`.

@@ -1,5 +1,6 @@
 package slider
 
+import contracts.i18n.LanguageCatalog
 import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.transport.PushResult
 
@@ -99,11 +100,17 @@ data class DeckContext(
     val subject: String,
     val audience: String,
     val duration: Int,
-    val language: String = "French",
+    val languageCode: String = "fr",
     val outputFile: String,
     val author: AuthorContext,
     val revealjs: RevealJsContext = RevealJsContext(),
     val notes: NotesConfiguration = NotesConfiguration(),
     // optional — LLM is free to decide slide structure if empty
     val slides: List<SlideHint> = emptyList(),
-)
+) {
+    fun requireValidLanguage() {
+        require(languageCode in LanguageCatalog.supportedCodes()) {
+            "Invalid languageCode '$languageCode' — must be one of ${LanguageCatalog.supportedCodes()}"
+        }
+    }
+}

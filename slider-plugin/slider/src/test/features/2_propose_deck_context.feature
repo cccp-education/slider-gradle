@@ -84,7 +84,7 @@ Feature: proposeDeckContext — RAG-assisted deck context generation
       | subject  | Kotlin Coroutines |
       | language | fr                |
     Then the build should succeed
-    And the DeckContext field "language" should equal "fr"
+    And the DeckContext field "languageCode" should equal "fr"
 
   Scenario: Generated DeckContext outputFile follows the naming convention
     Given a new Slider project

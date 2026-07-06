@@ -302,7 +302,7 @@ object SliderManager {
                 subject = "Your presentation subject",
                 audience = "Your target audience",
                 duration = 45,
-                language = "French",
+                languageCode = "fr",
                 outputFile = "example-deck.adoc",
                 author = AuthorContext(
                     name = "Your Name",

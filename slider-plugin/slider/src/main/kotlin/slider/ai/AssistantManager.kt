@@ -604,7 +604,7 @@ Use auto-animate for:
             appendLine("Subject   : ${ctx.subject}")
             appendLine("Audience  : ${ctx.audience}")
             appendLine("Duration  : ${ctx.duration} minutes")
-            appendLine("Language  : ${ctx.language}")
+            appendLine("Language  : ${ctx.languageCode}")
             appendLine("OutputFile: ${ctx.outputFile}")
             appendLine()
             appendLine("Author:")

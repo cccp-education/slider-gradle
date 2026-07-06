@@ -1,31 +1,29 @@
-= PROMPT_REPRISE — slider-gradle — Session 014
-:session: 014
-:date: 2026-07-03
+= PROMPT_REPRISE — slider-gradle — Session 015
+:session: 015
+:date: 2026-07-06
 
-== Session 013 terminée — CNV-6 Migration conventions plugins
+== Session 014 terminée — SLD-3 i18n US-3.0
 
-Migration du `build.gradle.kts` (sous-module `slider/`) vers les convention
-plugins `education.cccp.build.gradle-plugin` (0.0.1) + `education.cccp.build.publishing`
-(0.0.1), pattern bakery. build.gradle.kts 301→205 lignes (-96). compileKotlin
-SUCCESS. Variantes gardées : buildscript annotations force, exclusions logback,
-extendsFrom legacy, compatibility configurationCache=false.
+US-3.0 TERMINÉ : dépendance `i18n-contracts:0.0.2` ajoutée, `DeckContext.language`
+("French") → `DeckContext.languageCode` ("fr" ISO 639-1) + `requireValidLanguage()`
+validant contre `LanguageCatalog.supportedCodes()`. 5/5 tests unitaires PASS
+(`DeckContextLanguageTest`). 3 sites appelants corrigés (SliderManager,
+AssistantManager, steps Cucumber). 10 échecs Cucumber préexistants (infra
+GradleRunner `proposeDeckContext not found`, documentés S007) — aucune régression.
 
-CNV-6 ✅ TERMINÉ pour slider-gradle.
+== Prochaine session — 015 : SLD-3 i18n US-3.1
 
-== Prochaine session — 014 : SLD-3 i18n US-3.0 + US-3.1
-
-. US-3.0 — Dépendance `i18n-contracts` + remplacer `DeckContext.language`
-  (String "French" → ISO 639-1 `languageCode`) + valider contre
-  `LanguageCatalog.supportedCodes()`
-. US-3.1 — Configuration layer DSL `language`/`supportedLanguages` +
-  cascade 5 couches (CLI `-Planguage` > gradle.properties > DSL >
-  deck-context.yml > default "fr") + `I18nConfig.validate()`
+. Configuration layer — DSL `language`/`supportedLanguages` sur l'extension slider
+. Cascade 5 couches : CLI `-Planguage` > `gradle.properties` > DSL >
+  `deck-context.yml` > default "fr"
+. `I18nConfig.validate()` (contrat N0) — activer la validation dans la chaîne
+. Bridge : `DeckContext.languageCode` ← `I18nConfig.activeLanguage`
 
 == Pattern de référence
 
-- bakery-gradle BKY-I18N (US-I18N-0 config layer + US-I18N-1 JBake injection)
-- i18n-contracts N0 (workspace-bom MEM-3, 5 classes, 28/28 PASS, mavenLocal)
-- Dépendance : `implementation(libs.i18n.contracts)` version 0.0.1
+- bakery-gradle BKY-I18N US-I18N-0 (config layer + cascade)
+- document-gradle `DocumentI18nBridge.kt` (bridge SupportedLanguage → pipeline)
+- i18n-contracts N0 : `I18nConfig(activeLanguage, supportedLanguages, fallbackLanguage).validate()`
 
 == Rappels
 
@@ -33,6 +31,7 @@ CNV-6 ✅ TERMINÉ pour slider-gradle.
 - Plugin ID : `education.cccp.slider`, impl class `slider.SliderPlugin`
 - Version publiée Central : 0.0.1
 - Package source : `slider`
-- i18n-contracts : mavenLocal seulement (publication Central MEM-3.6)
+- i18n-contracts : mavenLocal 0.0.2 (publication Central en attente MEM-3.6)
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - RTL : ar + ur (Reveal.js `rtl: true`)
+- Baby-step TDD : RED (test config cascade) → GREEN (DSL + resolve) → REFACTOR

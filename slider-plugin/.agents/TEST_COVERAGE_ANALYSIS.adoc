@@ -10,3 +10,16 @@ _Statut session 006_ : SLD-3a Playwright E2E fix. 3 bugs corrigés, test unitair
 == Session 009 — Publication Maven Central (2026-06-11)
 
 Inchangé — aucun test modifié. Publication uniquement (build -x cucumberTest -x functionalTest).
+
+== Session 014 — SLD-3 i18n US-3.0 (2026-07-06)
+
+Nouveau test unitaire `DeckContextLanguageTest.kt` (5 tests JUnit5 + AssertJ) :
+. `DeckContext default languageCode should be fr` — default ISO 639-1
+. `DeckContext languageCode should accept all LanguageCatalog supported codes` — 10 codes
+. `DeckContext languageCode should reject legacy display name 'French'` — migration safety
+. `DeckContext languageCode should reject unknown ISO code 'xx'` — validation
+. `DeckContext requireValidLanguage should pass for fr` — happy path
+
+Résultat : 5/5 PASS. Couverture `DeckContext.languageCode` + `requireValidLanguage()`.
+Tests Cucumber modifiés (RevealJsTransitionSteps, ProposeDeckContextSteps, feature) —
+10 échecs préexistants (infra GradleRunner `proposeDeckContext not found`, S007).

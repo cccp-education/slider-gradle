@@ -46,6 +46,9 @@ dependencies {
     api(libs.bundles.jgit)
     api(libs.commons.io)
 
+    // N0 contracts — i18n (internationalisation deck, EPIC SLD-3)
+    implementation(libs.i18n.contracts)
+
     // Coroutines - IMPORTANT for the asynchronous tests
     testImplementation(libs.bundles.coroutines)
 
