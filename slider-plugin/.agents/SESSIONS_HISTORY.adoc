@@ -27,13 +27,13 @@ withType<MavenPublication>, mavenCentral, signing GPG clé CBE2926CD46D8E8B,
 i18n-contracts:0.0.2 + codebase-plugin:0.0.5 publiés Central, zéro SNAPSHOT).
 
 Premier essai FAILED : namespace `slider.translator` non autorisé sur Central
-(seul `education.ccp.*` autorisé). Correction : plugin ID `slider.translator`→
-`education.ccp.slider.translator` (build.gradle.kts:130 + TranslatorFunctionalTest.kt:20).
+(seul `education.cccp.*` autorisé). Correction : plugin ID `slider.translator`→
+`education.cccp.slider.translator` (build.gradle.kts:130 + TranslatorFunctionalTest.kt:20).
 
 Deuxième essai BUILD SUCCESSFUL : bundle `4684447b-c876-4e62-80d2-16e15bd831eb`,
 publishingType AUTOMATIC, validation 18s. Après ~15 min propagation, 3 artefacts
-confirmés sur repo1.maven.org : `education.ccp:slider:0.0.8` +
-`education.ccp.slider` plugin marker + `education.ccp.slider.translator` plugin marker.
+confirmés sur repo1.maven.org : `education.cccp:slider:0.0.8` +
+`education.cccp.slider` plugin marker + `education.cccp.slider.translator` plugin marker.
 
 == Session 021 (2026-07-09) — US-3.4-bis Validation visuelle Playwright RTL
 
@@ -152,7 +152,7 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 
 |===
 | # | Date | Type | Sujet | Score
-| 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central (version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace `slider.translator`→`education.ccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org, zéro régression) | ✅ TERMINÉ
+| 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central (version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org, zéro régression) | ✅ TERMINÉ
 | 021 | 2026-07-09 | feat+tests+bdd | US-3.4-bis Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD — révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime — 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS | ✅ TERMINÉ
 | 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 Capsule Feed (domaine DDD slider.capsule, 24 unit + 4 functional + 9 cucumber) + SLD-3 US-3.6 Dogfood fr/en/ar (3 decks demo + 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS | ✅ TERMINÉ
 | 017 | 2026-07-06 | fix+feat+tests | Baseline A (rupture noms tâches RAG collectRagIndex→reindexRag, generateDeckContext→proposeDeckContext, cucumberTest 6→16 PASS) + CNV-8 logback-exclusion convention (conventions-gradle TDD feature fr + plugin 24 lignes, migration slider -13 lignes, ./gradlew check vert) | ✅ TERMINÉ

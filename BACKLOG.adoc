@@ -24,13 +24,13 @@ Plugin N2 de generation de presentations Reveal.js (AsciiDoc → HTML). VAGUE 4 
 **Estimation** : 1 pt
 
 . Artefacts : `education.cccp:slider:0.0.8` + 2 plugin markers
-  (`education.ccp.slider` + `education.ccp.slider.translator`)
+  (`education.cccp.slider` + `education.cccp.slider.translator`)
 . URL : https://central.sonatype.com/artifact/education.cccp/slider/0.0.8
 . Methode : nmcp, bundle 4684447b, publishingType AUTOMATIC
 . Bump strictement montant : 0.0.1→0.0.8 (slider), 0.0.1→0.0.5 (codebase),
   0.0.0→0.0.1 (readme)
 . Correction namespace : plugin ID `slider.translator`→
-  `education.ccp.slider.translator` (Central education.ccp.* seulement)
+  `education.cccp.slider.translator` (Central education.cccp.* seulement)
 . Zéro régression : 94 unit + 65 cucumber + 11 functional identiques pré/post
 
 === PUB-5.1 — Verifier Maven Central ✅ TERMINE (2026-07-09)

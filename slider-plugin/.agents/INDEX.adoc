@@ -59,7 +59,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | CNV-7 | Migration functional-test + cucumber conventions (4/4 conventions) | ✅ TERMINÉ (session 016, -114 lignes) | P1
 | CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
 | Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
-| Publication Maven Central 0.0.8 | Bump strictement montant (0.0.1→0.0.8, codebase 0.0.5, readme 0.0.1), correction namespace `slider.translator`→`education.ccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org | ✅ 2026-07-09 | P2
+| Publication Maven Central 0.0.8 | Bump strictement montant (0.0.1→0.0.8, codebase 0.0.5, readme 0.0.1), correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org | ✅ 2026-07-09 | P2
 |===
 
 '''
