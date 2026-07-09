@@ -1,53 +1,45 @@
-= PROMPT_REPRISE — slider-gradle — Session 021
-:session: 021
-:date: 2026-07-07
+= PROMPT_REPRISE — slider-gradle — Session 022
+:session: 022
+:date: 2026-07-09
 
-== Session 020 terminée — SLD-2 US-2.5 + SLD-3 US-3.6 ✅
+== Session 021 terminée — US-3.4-bis Validation visuelle Playwright RTL ✅
 
-A — SLD-2 US-2.5 TERMINÉ (Capsule Feed — recadré sur contrat réel) :
-- Audit cross-borough : backlog disait "JSON screenshots" mais contrat réel = `*-script.txt`
-  plain-text (CAPSULE_ARCHITECTURE.adoc:388-401, CapsuleManager parseScript:160-224)
-- Domaine DDD `slider.capsule` posé : `CapsuleScript` (aggregate) + `SlideSegment` (VO)
-  + `CapsuleScriptWriter` (sérialiseur contrat) + `AsciidocSpeakerNoteParser` (parser .adoc)
-- Refactor `SliderManager.kt:775-838` — `generateCapsule` délègue au domaine,
-  `dependsOn("asciidoctor")` supprimé (parser lit .adoc sources), group slider, log skip
-- Baby-step TDD: 24 unit (12 writer + 11 parser + 1 smoke) + 4 functional + 9 cucumber BDD
+US-3.4-bis TERMINÉ (validation visuelle Playwright reportée depuis S-019) :
+- Domaine DDD `slider.rtl` posé : `RtlAssertionCode` (enum 3 P0 + 1 P1),
+  `RtlAssertionResult`/`RtlAssertionFailure` (résultat), `SlideRenderData`
+  (snapshot Playwright-agnostic), `RtlSlideAssertion` (4 contraintes pure logic)
+- Test functional `RtlPlaywrightFunctionalTest` — GradleRunner génère deck arabe
+  `-Planguage=ar` (mavenLocal 0.0.7), Playwright-jvm ouvre HTML, extrait
+  `SlideRenderData`, délègue à `RtlSlideAssertion.assertAll()`
+- Cucumber BDD `10_rtl_visual_validation.feature` (6 scénarios)
+- Révélation : Reveal.js gère RTL via `rtl: true` config JS + `.rtl` classe
+  runtime, PAS via `<html dir="rtl">`. Assertions adaptées au modèle réel.
+- Tests : 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS
 
-B — SLD-3 US-3.6 TERMINÉ (Dogfood multilingue) :
-- 3 decks démo créés `slides/misc/capsule-feed-demo-{fr,en,ar}-deck.adoc` (4 slides chacun)
-- `CapsuleFeedDemoDeckTest.kt` (4 tests) — dogfood round-trip parse+write par langue
-- 4 scénarios Cucumber additionnels — dogfood fr/en/ar + contrat plain-text
-- AR deck avec `:revealjs_direction: rtl` pour validation RTL contractuelle
+== Prochaine session — 022
 
-C — Tests globaux session 020 :
-- test: 28 PASS (was 57 S019, +4 dogfood +24 capsule domain nets après refactor)
-- functionalTest: 4 PASS (GenerateCapsuleFunctionalTest, was 3)
-- cucumberTest: 58 PASS / 0 FAIL / 1 SKIP (was 46, +12: 9_capsule_feed.feature)
-- `./gradlew :slider:test :slider:functionalTest :slider:cucumberTest` BUILD SUCCESSFUL
+EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication + US-3.4-bis tous TERMINÉS.
+Slider-gradle en maintenance. Pistes possibles :
 
-D — EPICs clôturés :
-- SLD-2 ✅ TERMINÉ (5/5 US — US-2.5 dernière)
-- SLD-3 ✅ TERMINÉ (7/7 US — US-3.6 dernière)
-
-== Prochaine session — 021
-
-EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication tous TERMINÉS. Slider-gradle est maintenant
-en maintenance. Pistes possibles :
-
-. Validation visuelle Playwright RTL complète sur le deck arabe généré
-  (US-3.4 mentionnait validation Playwright deck complète, reportée)
 . Migration version plugin 0.0.1 → 0.0.2 (nouvelles tasks generateCapsule +
-  generateRevealUiMessages + domaine capsule) — publication Maven Central
+  generateRevealUiMessages + domaine capsule + slider.rtl) — publication
+  Maven Central
 . Exploration nouveaux EPICs (slides interactives, export PPTX, etc.)
+. Mise à jour README i18n 10 langues avec nouvelles classes `slider.rtl`
+  + `slider.capsule`
 
 == Rappels
 
 - GroupId : `education.cccp`, Plugin ID : `education.cccp.slider`
-- Version publiée Central : 0.0.1
+- Version publiée Central : 0.0.1 (build.gradle.kts hardcodé 0.0.1)
+- mavenLocal : 0.0.7 (publié temporairement S-021 pour GradleRunner)
 - conventions-gradle : mavenLocal 0.0.2 (logback-exclusion non publié Central)
 - i18n-contracts : mavenLocal 0.0.2
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
+- Domaine `slider.rtl` : 4 classes (RtlAssertionCode, RtlAssertionResult,
+  SlideRenderData, RtlSlideAssertion)
 - Domaine `slider.capsule` : 4 classes (CapsuleScript, SlideSegment,
   CapsuleScriptWriter, AsciidocSpeakerNoteParser)
+- Reveal.js RTL = `rtl: true` config JS + `.rtl` classe runtime (PAS `<html dir>`)

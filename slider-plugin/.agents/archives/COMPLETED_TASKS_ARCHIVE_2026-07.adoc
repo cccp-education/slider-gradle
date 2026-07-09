@@ -2,6 +2,7 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 021 | 2026-07-09 | SLD-3 | US-3.4-bis | Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD (8 unit + 1 functional + 6 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.3 | Reveal.js UI i18n — RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task (21 unit + 3 functional + 10 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.4 | RTL support ar/ur — RevealRtlResolver + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur (9 unit + 6 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.5 | Cucumber BDD i18n fallback — 8_i18n_fallback.feature 6 scenarios (fallback default, invalid CLI, empty CLI, singleton, validation)

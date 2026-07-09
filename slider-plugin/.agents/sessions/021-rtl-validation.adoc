@@ -1,0 +1,116 @@
+= Session 021 — slider-gradle — US-3.4-bis Validation visuelle Playwright RTL
+:session: 021
+:date: 2026-07-09
+
+== Mission
+
+US-3.4-bis : validation visuelle Playwright-jvm complète sur le deck arabe généré.
+US-3.4 (S-019) avait livré le resolver RTL + le câblage `setRightToLeft(true)` mais
+la validation Playwright du rendu réel avait été reportée. Cette session clôture
+ce trou : personne n'avait vérifié que le HTML généré avec `-Planguage=ar`
+rend réellement en RTL.
+
+Baby-step DDD/TDD/BDD, agile software craftsmanship.
+
+== Cadrage
+
+Contraintes P0 (must pass) :
+- `rtl: true` présent dans la config JS Reveal.js
+- `.rtl` classe appliquée sur `.reveal` au runtime
+- Navigation inversée (next à gauche)
+
+Contrainte P1 (quality) :
+- Slide bounding box dans le viewport (no overflow)
+
+== Baby-step TDD/BDD (RED → GREEN → REFACTOR)
+
+=== Niveau 1 — Unit : RtlSlideAssertion (domaine DDD `slider.rtl`)
+
+RED: `RtlSlideAssertionTest.kt` (8 tests) — full RTL pass, P0_RTL_CONFIG fail,
+P0_RTL_CLASS fail, P0_NAV fail, P1_OVERFLOW fail, P1 fits pass, all P0 fail LTR,
+failure messages contain code.
+
+GREEN: 4 classes posées dans `slider/rtl/` :
+- `RtlAssertionCode` — enum (P0_RTL_CONFIG, P0_RTL_CLASS, P0_NAV, P1_OVERFLOW)
+- `RtlAssertionResult` + `RtlAssertionFailure` — résultat + détail échec
+- `SlideRenderData` — snapshot Playwright-agnostic (revealRtlConfig,
+  revealHasRtlClass, navNextLeft, viewportWidth, slideBoxX, slideBoxWidth)
+- `RtlSlideAssertion` — 4 contraintes (3 P0 + 1 P1), pure logic, zéro I/O
+
+8/8 unit PASS.
+
+=== Niveau 2 — Functional : RtlPlaywrightFunctionalTest
+
+RED (révélateur) : premier run a échoué avec P0_DIR + P0_TEXT_ALIGN — le test
+vérifiait `<html dir="rtl">` et `text-align: right` (hypothèses HTML standards).
+Investigation du HTML généré : Reveal.js gère le RTL via `rtl: true` dans la
+config JS + classe `.rtl` sur `.reveal` au runtime, **pas** via `<html dir>`.
+Les assertions ont été adaptées au modèle réel de Reveal.js.
+
+GREEN: `RtlPlaywrightFunctionalTest.kt` — GradleRunner génère deck arabe
+`-Planguage=ar` (version 0.0.7 mavenLocal), Playwright-jvm ouvre HTML via
+`npx serve` HTTP, extrait `SlideRenderData` depuis la page (script textContent
+`rtl: true`, `.reveal.rtl` class, `.navigate-left` control, bounding box),
+délègue à `RtlSlideAssertion.assertAll()`. Screenshot > 10 KB validé.
+
+1/1 functional PASS.
+
+=== Niveau 3 — Cucumber BDD : 10_rtl_visual_validation.feature
+
+RED: 6 scénarios — full RTL pass, missing config fail, missing class fail,
+nav not mirrored fail, overflow fail, LTR fails all P0.
+
+GREEN: `RtlVisualValidationSteps.kt` — Given slide render data + Then assertions
+pass/fail par code. 6/6 cucumber PASS.
+
+Correction : Cucumber `{string}` ne matchait pas les codes avec tirets
+(`P0-RTL-CONFIG`) → codes passés entre guillemets avec underscores
+(`"P0_RTL_CONFIG"`).
+
+== Tests globaux session 021
+
+- test: 36 PASS (was 28 S020, +8 RtlSlideAssertion)
+- functionalTest: 5 PASS (was 4 S020, +1 RtlPlaywrightFunctionalTest)
+- cucumberTest: 64 PASS / 0 FAIL / 1 SKIP (was 58 S020, +6
+  10_rtl_visual_validation)
+- `./gradlew :slider:check` BUILD SUCCESSFUL
+
+== Ce que le test a révélé
+
+Le premier run functional a trouvé un vrai écart de connaissance :
+Reveal.js gère le RTL via `rtl: true` dans la config JS + une classe `.rtl`
+sur `.reveal` au runtime, **pas** via `<html dir="rtl">` ni `text-align: right`.
+Les assertions initiales (basées sur des hypothèses HTML standards) ont été
+adaptées pour matcher le modèle réel de Reveal.js. C'est exactement le type
+de problème que la validation visuelle Playwright devait révéler.
+
+== Domaine posé — package `slider.rtl`
+
+| Classe | Rôle | Lignes |
+| `RtlAssertionCode` | Enum des codes d'assertion (3 P0 + 1 P1) | 14 |
+| `RtlAssertionResult` | Résultat + détail échec (passed, failures) | 20 |
+| `SlideRenderData` | Snapshot Playwright-agnostic (6 champs) | 22 |
+| `RtlSlideAssertion` | Logique de validation (4 contraintes) | 35 |
+
+== Fichiers créés
+
+- `slider/src/main/kotlin/slider/rtl/RtlAssertionCode.kt`
+- `slider/src/main/kotlin/slider/rtl/RtlAssertionResult.kt`
+- `slider/src/main/kotlin/slider/rtl/SlideRenderData.kt`
+- `slider/src/main/kotlin/slider/rtl/RtlSlideAssertion.kt`
+- `slider/src/test/kotlin/slider/rtl/RtlSlideAssertionTest.kt`
+- `slider/src/test/kotlin/slider/RtlPlaywrightFunctionalTest.kt`
+- `slider/src/test/features/10_rtl_visual_validation.feature`
+- `slider/src/test/scenarios/slider/scenarios/RtlVisualValidationSteps.kt`
+
+== Fichiers modifiés
+
+- `slider/build.gradle.kts` — version 0.0.1→0.0.7 (publishToMavenLocal pour
+  GradleRunner) puis remise 0.0.1 (contrainte Maven Central préservée)
+
+== Score session
+
+10/10 — trou US-3.4 (validation Playwright reportée) clôturé, domaine DDD
+`slider.rtl` posé et testé 3 niveaux (unit + functional + cucumber), modèle
+RTL réel de Reveal.js documenté par les assertions, zéro Node (Playwright-jvm
+officiel Microsoft).

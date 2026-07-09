@@ -2,6 +2,38 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 021 (2026-07-09) — US-3.4-bis Validation visuelle Playwright RTL
+
+US-3.4-bis TERMINÉ : validation visuelle Playwright-jvm complète sur le deck arabe
+généré avec `-Planguage=ar` (trou laissé par US-3.4 S-019 — resolver + câblage
+livrés mais rendu jamais vérifié).
+
+Domaine DDD `slider.rtl` posé (4 classes, pure logic) :
+- `RtlAssertionCode` — enum (P0_RTL_CONFIG, P0_RTL_CLASS, P0_NAV, P1_OVERFLOW)
+- `RtlAssertionResult` + `RtlAssertionFailure` — résultat + détail échec
+- `SlideRenderData` — snapshot Playwright-agnostic (revealRtlConfig,
+  revealHasRtlClass, navNextLeft, viewportWidth, slideBoxX, slideBoxWidth)
+- `RtlSlideAssertion` — 4 contraintes (3 P0 + 1 P1)
+
+Baby-step TDD/BDD 3 niveaux :
+- Unit : `RtlSlideAssertionTest` (8 tests) — RED (compilation fail) → GREEN
+  (4 classes posées, 8/8 PASS)
+- Functional : `RtlPlaywrightFunctionalTest` — GradleRunner génère deck arabe
+  (mavenLocal 0.0.7), Playwright-jvm ouvre HTML via npx serve, extrait
+  SlideRenderData, délègue à RtlSlideAssertion.assertAll(). 1/1 PASS.
+- Cucumber : `10_rtl_visual_validation.feature` (6 scénarios) +
+  RtlVisualValidationSteps.kt. 6/6 PASS.
+
+Révélation : le premier run functional a échoué car les assertions initiales
+vérifiaient `<html dir="rtl">` et `text-align: right` (hypothèses HTML standards).
+Investigation du HTML généré : Reveal.js gère le RTL via `rtl: true` dans la
+config JS + une classe `.rtl` sur `.reveal` au runtime, **pas** via `<html dir>`.
+Assertions adaptées au modèle réel de Reveal.js.
+
+Tests globaux : 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS.
+`./gradlew :slider:check` BUILD SUCCESSFUL. Version 0.0.7 mavenLocal publiée
+temporairement pour GradleRunner, remise 0.0.1 (contrainte Maven Central).
+
 == Session 019 (2026-07-06) — SLD-3 i18n US-3.3/3.4/3.5 Reveal.js UI + RTL + BDD
 
 US-3.3 TERMINÉ : Reveal.js UI i18n — `RevealUiMessages` value object (languageCode,
@@ -87,6 +119,7 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 
 |===
 | # | Date | Type | Sujet | Score
+| 021 | 2026-07-09 | feat+tests+bdd | US-3.4-bis Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD — révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime — 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS | ✅ TERMINÉ
 | 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 Capsule Feed (domaine DDD slider.capsule, 24 unit + 4 functional + 9 cucumber) + SLD-3 US-3.6 Dogfood fr/en/ar (3 decks demo + 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS | ✅ TERMINÉ
 | 017 | 2026-07-06 | fix+feat+tests | Baseline A (rupture noms tâches RAG collectRagIndex→reindexRag, generateDeckContext→proposeDeckContext, cucumberTest 6→16 PASS) + CNV-8 logback-exclusion convention (conventions-gradle TDD feature fr + plugin 24 lignes, migration slider -13 lignes, ./gradlew check vert) | ✅ TERMINÉ
 | 016 | 2026-07-06 | refactor | CNV-6/7 Migration functional-test + cucumber conventions — 4/4 conventions plugins (gradle-plugin + publishing + functional-test + cucumber), build.gradle.kts 251→157 (-114, -45%). functionalTest ✅, cucumberTest stable (10 FAIL préexistants), test 22 PASS (bug filtre package S-007 résolu). | ✅ TERMINÉ

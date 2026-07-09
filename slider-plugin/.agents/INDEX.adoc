@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-07-07
-_Session terminee_ : 020 — SLD-2 US-2.5 (Capsule Feed — domaine DDD slider.capsule: CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser, refactor generateCapsule task, 24 unit + 4 functional + 9 cucumber) + SLD-3 US-3.6 (dogfooding deck multilingue fr+en+ar, 3 decks demo + 4 unit dogfood + 4 cucumber). 28 unit + 4 functional + 58 cucumber PASS ✅
-_Prochaine session_ : 021 — Maintenance. EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication tous terminés.
+_Derniere mise a jour_ : 2026-07-09
+_Session terminee_ : 021 — US-3.4-bis (Validation visuelle Playwright RTL — domaine DDD slider.rtl: RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion, test functional Playwright-jvm sur deck arabe -Planguage=ar, 6 scénarios Cucumber BDD 10_rtl_visual_validation.feature, révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime PAS <html dir>). 36 unit + 5 functional + 64 cucumber PASS ✅
+_Prochaine session_ : 022 — Maintenance. EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication + US-3.4-bis tous terminés.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 021 | 2026-07-09 | feat+tests+bdd | US-3.4-bis Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion, pure logic 4 contraintes 3 P0 + 1 P1) + RtlPlaywrightFunctionalTest (GradleRunner -Planguage=ar mavenLocal 0.0.7 → Playwright-jvm HTML → SlideRenderData → assertAll) + 10_rtl_visual_validation.feature 6 scénarios BDD — révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime PAS <html dir>, assertions adaptées — 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS | ✅ TERMINÉ
 | 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 (Capsule Feed — domaine DDD slider.capsule: CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser, refactor generateCapsule task, audit cross-borough contrat réel capsule-gradle, 24 unit + 4 functional + 9 cucumber BDD 9_capsule_feed.feature + 4 Cucumber dogfood) + SLD-3 US-3.6 (dogfooding 3 decks demo fr/en/ar + CapsuleFeedDemoDeckTest 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS, BUILD SUCCESSFUL | ✅ TERMINÉ
 | 019 | 2026-07-06 | feat+tests+bdd | SLD-3 i18n US-3.3 (RevealUiMessages value object + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task group=slider) + US-3.4 (RevealRtlResolver resolveRtl/rtlLanguages + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur Groovy-Kotlin interop) + US-3.5 (8_i18n_fallback.feature 6 scenarios fallback/validation cascade) — 57 unit (was 48, +9 RevealRtlResolver) + 3 functional + 46 cucumber (was 34, +12: 6_reveal_ui_i18n 10 + 7_rtl_layout 6 + 8_i18n_fallback 6) PASS, ./gradlew check green | ✅ TERMINÉ
 | 018 | 2026-07-06 | feat+tests+governance | SLD-3 i18n US-3.2 (TranslatorManager 2→10 langues via LanguageCatalog.supportedCodes, adaptive prompt with native names via LanguageCatalog.findByCode, slider.translator plugin registered, 90 translation tasks, displaySupportedLanguages native names) + English Only governance (Rule 7 AGENT.adoc, workspace AGENTS.adoc transverse rule, Gherkin FR purge cross-borough: logback-exclusion-conventions.feature + SignUp.feature migrated EN) — 11 unit + 4 functional + 7 cucumber PASS, ./gradlew check green | ✅ TERMINÉ
@@ -52,6 +53,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-1 | Upgrade Reveal.js 3.9.1→5.2.1 + Auto-Animate + Transitions configurables | ✅ TERMINE (5/5 US) | P0
 | SLD-2 | Playwright E2E + Theme pro + Capsule feed (5 US) | ✅ TERMINÉ (5/5 US) | P0
 | SLD-3 | i18n 10 langues — contrats N0 i18n-contracts, pattern bakery BKY-I18N (7 US, ~15 pts) | ✅ TERMINÉ (7/7 US) | P1
+| US-3.4-bis | Validation visuelle Playwright RTL complète sur deck arabe (reportée US-3.4 S-019) | ✅ TERMINÉ (S-021) | P1
 | CNV-6 | Migration conventions plugins education.cccp.build.* v0.0.1 (gradle-plugin + publishing) | ✅ TERMINÉ (session 013, -96 lignes) | P1
 | CNV-7 | Migration functional-test + cucumber conventions (4/4 conventions) | ✅ TERMINÉ (session 016, -114 lignes) | P1
 | CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
