@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-07-09
-_Session terminee_ : 022 — Bump 0.0.8 + Publication Maven Central (version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace plugin ID `slider.translator`→`education.cccp.slider.translator` pour Central, bundle nmcp 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org : slider + 2 plugin markers, zéro régression 94 unit + 65 cucumber + 11 functional identiques pré/post). ✅
-_Prochaine session_ : 023 — Maintenance. EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.1 + US-3.4-bis + Publication 0.0.8 tous terminés.
+_Session terminee_ : 023 — Investigation Playwright Gem JRuby — diagnostic root cause `GradleRunner` crée un Gradle user home isolé dans `/tmp`, JRuby ne trouve pas la gem `asciidoctor-revealjs`. 5 approches testées (withGradleUserHomeDir absent API 9.6.1, GRADLE_USER_HOME env var non respectée, --offline bloque mavenLocal, asciidoctorGemsPrepare insuffisant, gradleTestKit() compile mais méthode absente). Non fixable sans modification API GradleRunner. 🔍
+_Prochaine session_ : 024 — Maintenance. EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.1 + US-3.4-bis + Publication 0.0.8 tous terminés. Pistes : @Disabled tests Playwright, nouveaux EPICs, README i18n 0.0.8.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé dans /tmp, JRuby ne trouve pas la gem asciidoctor-revealjs. 5 approches testées (withGradleUserHomeDir absent API 9.6.1, GRADLE_USER_HOME env var non respectée, --offline bloque mavenLocal, asciidoctorGemsPrepare insuffisant, gradleTestKit() compile mais méthode absente). Non fixable sans modification API GradleRunner. | 🔍 7/10
 | 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central — version 0.0.1→0.0.8 (slider + catalogue racine), codebase 0.0.1→0.0.5 (dernière Central), readme 0.0.0→0.0.1, correction namespace plugin ID `slider.translator`→`education.cccp.slider.translator` (Central education.cccp.* seulement), bundle nmcp 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org (slider:0.0.8 + 2 plugin markers), zéro régression 94 unit + 65 cucumber + 11 functional identiques pré/post (2 fail Playwright env préexistant) | ✅ TERMINÉ
 | 021 | 2026-07-09 | feat+tests+bdd | US-3.4-bis Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion, pure logic 4 contraintes 3 P0 + 1 P1) + RtlPlaywrightFunctionalTest (GradleRunner -Planguage=ar mavenLocal 0.0.7 → Playwright-jvm HTML → SlideRenderData → assertAll) + 10_rtl_visual_validation.feature 6 scénarios BDD — révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime PAS <html dir>, assertions adaptées — 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS | ✅ TERMINÉ
 | 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 (Capsule Feed — domaine DDD slider.capsule: CapsuleScript + SlideSegment + CapsuleScriptWriter + AsciidocSpeakerNoteParser, refactor generateCapsule task, audit cross-borough contrat réel capsule-gradle, 24 unit + 4 functional + 9 cucumber BDD 9_capsule_feed.feature + 4 Cucumber dogfood) + SLD-3 US-3.6 (dogfooding 3 decks demo fr/en/ar + CapsuleFeedDemoDeckTest 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS, BUILD SUCCESSFUL | ✅ TERMINÉ

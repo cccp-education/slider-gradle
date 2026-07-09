@@ -2,6 +2,29 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 023 (2026-07-09) — Investigation Playwright Gem JRuby
+
+Investigation des 2 tests Playwright échouant (`RtlPlaywrightFunctionalTest` +
+`SliderPlaywrightE2eTest`) — `LoadError: no such file to load -- asciidoctor-revealjs`.
+
+Root cause : `GradleRunner.create()` crée un Gradle user home isolé dans `/tmp`.
+JRuby ne trouve pas la gem `asciidoctor-revealjs` dans cet environnement vierge.
+La gem est bien présente dans `~/.gradle/caches/modules-2/files-2.1/rubygems/asciidoctor-revealjs/5.2.0/`
+mais le GradleRunner ne partage pas ce cache.
+
+5 approches testées :
+- `withGradleUserHomeDir(File)` — n'existe pas dans Gradle 9.6.1 GradleRunner API (vérifié via javap)
+- `GRADLE_USER_HOME` env var via `withEnvironment()` — non respectée par GradleRunner
+- `--offline` flag — bloque la résolution mavenLocal du plugin slider
+- `asciidoctorGemsPrepare` avant `asciidoctorRevealJs` — gem dans ~/.gradle réel, pas temp dir
+- `gradleTestKit()` dans testImplementation — compile mais méthode toujours absente
+
+Non fixable sans modification de l'API GradleRunner. Solutions : gem install
+asciidoctor-revealjs système-wide, feature request GradleRunner.withGradleUserHomeDir,
+ou @Disabled avec raison documentée.
+
+Aucun fichier modifié — investigation pure, code reverté à l'état original.
+
 == Session 022 (2026-07-09) — Bump 0.0.8 + Publication Maven Central
 
 Bump strictement montant + publication Maven Central 0.0.8 TERMINÉ. Slider-gradle
@@ -152,6 +175,7 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 
 |===
 | # | Date | Type | Sujet | Score
+| 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé, JRuby ne trouve pas asciidoctor-revealjs. 5 approches testées, non fixable sans modification API GradleRunner 9.6.1. | 🔍 7/10
 | 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central (version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org, zéro régression) | ✅ TERMINÉ
 | 021 | 2026-07-09 | feat+tests+bdd | US-3.4-bis Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD — révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime — 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS | ✅ TERMINÉ
 | 020 | 2026-07-07 | feat+tests+bdd+dogfood | SLD-2 US-2.5 Capsule Feed (domaine DDD slider.capsule, 24 unit + 4 functional + 9 cucumber) + SLD-3 US-3.6 Dogfood fr/en/ar (3 decks demo + 4 unit + 4 cucumber) — 28 unit + 4 functional + 58 cucumber PASS | ✅ TERMINÉ
