@@ -17,7 +17,7 @@ class TranslatorFunctionalTest {
         """.trimIndent())
         projectDir.resolve("build.gradle.kts").writeText("""
             plugins {
-                id("slider.translator")
+                id("education.cccp.slider.translator")
             }
         """.trimIndent())
     }

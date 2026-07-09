@@ -1,5 +1,12 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 022_ : Bump 0.0.8 + Publication Maven Central. Aucun test
+modifié — bumps de versions uniquement (slider 0.0.1→0.0.8, codebase 0.0.1→0.0.5,
+readme 0.0.0→0.0.1) + correction namespace plugin ID `slider.translator`→
+`education.ccp.slider.translator` (build.gradle.kts + TranslatorFunctionalTest.kt).
+Zéro régression confirmée : 94 unit (2 fail Playwright env préexistant) +
+65 cucumber + 11 functional identiques pré/post bump (clean check comparé).
+
 _Statut session 006_ : SLD-3a Playwright E2E fix. 3 bugs corrigés, test unitaire Playwright PASSED (49s). 1 fichier modifié : `SliderPlaywrightE2eTest.kt`.
 
 | Session | Fichiers testés | Couverture | Notes

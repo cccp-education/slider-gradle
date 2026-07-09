@@ -1,6 +1,6 @@
-= Backlog — MIAMI (slider-gradle)
+:= Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-:.date: 2026-07-06
+:.date: 2026-07-09
 :toc: left
 :sectnums:
 
@@ -11,7 +11,7 @@ _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fi
 
 Plugin N2 de generation de presentations Reveal.js (AsciiDoc → HTML). VAGUE 4 (plugins metier).
 
-=== PUB-3.12 — slider-plugin ✅ TERMINE (Session 009, 2026-06-11)
+=== PUB-3.12 — slider-plugin 0.0.1 ✅ TERMINE (Session 009, 2026-06-11)
 **Priorite** : P0
 **Estimation** : 1 pt
 
@@ -19,11 +19,26 @@ Plugin N2 de generation de presentations Reveal.js (AsciiDoc → HTML). VAGUE 4 
 . URL : https://central.sonatype.com/artifact/education.cccp/slider-plugin
 . Methode : nmcp, POM sans guard, version 0.0.1 hardcodee
 
-=== PUB-5.1 — Verifier Maven Central ✅ TERMINE (2026-06-11)
+=== PUB-3.13 — slider 0.0.8 ✅ TERMINE (Session 022, 2026-07-09)
+**Priorite** : P2
+**Estimation** : 1 pt
+
+. Artefacts : `education.cccp:slider:0.0.8` + 2 plugin markers
+  (`education.ccp.slider` + `education.ccp.slider.translator`)
+. URL : https://central.sonatype.com/artifact/education.cccp/slider/0.0.8
+. Methode : nmcp, bundle 4684447b, publishingType AUTOMATIC
+. Bump strictement montant : 0.0.1→0.0.8 (slider), 0.0.1→0.0.5 (codebase),
+  0.0.0→0.0.1 (readme)
+. Correction namespace : plugin ID `slider.translator`→
+  `education.ccp.slider.translator` (Central education.ccp.* seulement)
+. Zéro régression : 94 unit + 65 cucumber + 11 functional identiques pré/post
+
+=== PUB-5.1 — Verifier Maven Central ✅ TERMINE (2026-07-09)
 
 | Artefact | URL |
 |---|---|
-| slider-plugin | https://central.sonatype.com/artifact/education.cccp/slider-plugin |
+| slider-plugin 0.0.1 | https://central.sonatype.com/artifact/education.cccp/slider-plugin |
+| slider 0.0.8 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.8 |
 
 '''
 == EPIC CNV-6/7/8 — Conventions plugins ✅ TERMINE

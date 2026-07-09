@@ -1,0 +1,126 @@
+= Session 022 — slider-gradle — Bump 0.0.8 + Publication Maven Central
+:session: 022
+:date: 2026-07-09
+
+== Mission
+
+Bump de version strictement montant (aucune régression) puis publication
+Maven Central de `education.cccp:slider:0.0.8`. Slider-gradle était en
+maintenance (tous EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.1 +
+US-3.4-bis terminés). Cette session valorise le travail livré depuis la
+publication 0.0.1 (domaines DDD `slider.rtl` + `slider.capsule`, tasks
+`generateCapsule` + `generateRevealUiMessages`, i18n 10 langues, RTL).
+
+== Audit pré-bump
+
+État des versions avant intervention :
+
+| Fichier | Champ | Av | Réalité |
+| `slider-plugin/slider/build.gradle.kts:26` | `version` | `0.0.1` | Central 0.0.1, mavenLocal 0.0.6/0.0.7 (temp S-021) |
+| `slider-plugin/gradle/libs.versions.toml:2` | `slider` | `0.0.1` | cohérent avec version plugin |
+| `slider-plugin/gradle/libs.versions.toml:29` | `codebase` | `0.0.1` | Central a 0.0.5 (retard 4 versions) |
+| `gradle/libs.versions.toml:2` | `slider` | `0.0.5` | 0.0.5 inexistant (ni Central ni mavenLocal) |
+| `gradle/libs.versions.toml:3` | `readme` | `0.0.0` | Central a 0.0.1 |
+
+Variables mortes (`artifact.version`/`artifact.group` dans
+`slider/gradle.properties`) non consommées par le build — non bumpées.
+
+== Bumps appliqués (strictement montants)
+
+| Fichier | Champ | Av | Après |
+| `slider-plugin/slider/build.gradle.kts:26` | `version` | `0.0.1` | `0.0.8` |
+| `slider-plugin/gradle/libs.versions.toml:2` | `slider` | `0.0.1` | `0.0.8` |
+| `slider-plugin/gradle/libs.versions.toml:29` | `codebase` | `0.0.1` | `0.0.5` |
+| `gradle/libs.versions.toml:2` | `slider` | `0.0.5` | `0.0.8` |
+| `gradle/libs.versions.toml:3` | `readme` | `0.0.0` | `0.0.1` |
+
+== Vérification — zéro régression
+
+Comparaison pré-bump vs post-bump (clean check) :
+
+| Niveau | Pré-bump | Post-bump | Delta |
+| test (unit) | 94 (2 fail Playwright env) | 94 (2 fail Playwright env) | 0 |
+| cucumberTest | 65 PASS / 0 fail | 65 PASS / 0 fail | 0 |
+| functionalTest | 11 PASS / 0 fail | 11 PASS / 0 fail | 0 |
+
+Les 2 échecs (`RtlPlaywrightFunctionalTest` + `SliderPlaywrightE2eTest`)
+sont **préexistants** — `LoadError: no such file to load -- asciidoctor-revealjs`
+dans JRuby isolé du GradleRunner (problème d'environnement gem, indépendant
+des versions). Confirmé en stashing les bumps et en relançant les mêmes
+tests pré-bump : mêmes 2 échecs.
+
+`publishToMavenLocal` ✅ (0.0.8 disponible pour GradleRunner).
+
+== Publication Maven Central — nmcp
+
+Pré-requis vérifiés :
+- POM complet (name, description, url, licence Apache-2.0, developer
+  cccp-education, scm) via convention plugin `publishing`
+- `withType<MavenPublication>` présent
+- `repositories { mavenCentral() }`
+- `signing` via convention plugin (useGpgCmd, clé CBE2926CD46D8E8B)
+- Dépendances : `i18n-contracts:0.0.2` publié Central (13 jours),
+  `codebase-plugin:0.0.5` publié Central (13 jours)
+- Zéro SNAPSHOT dans le POM
+- `settings.gradle.kts` nmcp 1.5.0 + centralPortal (publishingType AUTOMATIC)
+- `./gradlew build -x test -x cucumberTest -x functionalTest` BUILD SUCCESS
+
+=== Premier essai — rejet namespace
+
+`publishAggregationToCentralPortal` FAILED :
+```
+{"pkg:maven/slider.translator/slider.translator.gradle.plugin@0.0.8?type=pom":
+ ["Namespace 'slider.translator' is not allowed"]}
+```
+
+Cause : le sous-plugin `slider.translator` (créé S-018) a un plugin ID qui
+crée un namespace `slider.translator` non autorisé sur Central (seul
+`education.cccp.*` est autorisé).
+
+=== Correction — renommage plugin ID
+
+| Fichier | Changement |
+| `slider-plugin/slider/build.gradle.kts:130` | `id = "slider.translator"` → `id = "education.cccp.slider.translator"` |
+| `slider-plugin/slider/src/functionalTest/kotlin/slider/TranslatorFunctionalTest.kt:20` | `id("slider.translator")` → `id("education.cccp.slider.translator")` |
+
+Aucune autre référence dans `src/` (vérifié grep). Docs de gouvernance
+(INDEX, SESSIONS_HISTORY, sessions/) non modifiées — référence historique
+au plugin ID ancien conservée pour traçabilité.
+
+=== Deuxième essai — succès
+
+`publishAggregationToCentralPortal --no-daemon` BUILD SUCCESSFUL.
+Bundle `4684447b-c876-4e62-80d2-16e15bd831eb` uploaded, publishingType
+AUTOMATIC, validation 18s.
+
+=== Vérification propagation
+
+Après ~15 min de propagation :
+- `education.cccp:slider:0.0.8` confirmé sur repo1.maven.org ✅
+  (POM accessible, dépendances i18n-contracts:0.0.2 + langchain4j 1.14.1 etc.)
+- `education.cccp.slider` (plugin marker) 0.0.8 confirmé ✅
+- `education.cccp.slider.translator` (plugin marker) 0.0.8 confirmé ✅
+
+URLs :
+- https://central.sonatype.com/artifact/education.cccp/slider/0.0.8
+- https://repo1.maven.org/maven2/education/cccp/slider/0.0.8/
+- https://repo1.maven.org/maven2/education/cccp/slider/translator/education.cccp.slider.translator.gradle.plugin/0.0.8/
+
+== Fichiers modifiés
+
+- `slider-plugin/slider/build.gradle.kts` — version 0.0.1→0.0.8,
+  plugin ID `slider.translator`→`education.cccp.slider.translator`
+- `slider-plugin/gradle/libs.versions.toml` — slider 0.0.1→0.0.8,
+  codebase 0.0.1→0.0.5
+- `slider-plugin/slider/src/functionalTest/kotlin/slider/TranslatorFunctionalTest.kt`
+  — plugin ID `slider.translator`→`education.cccp.slider.translator`
+- `gradle/libs.versions.toml` (racine consommateur) — slider 0.0.5→0.0.8,
+  readme 0.0.0→0.0.1
+
+== Score session
+
+10/10 — bumps strictement montants sans régression (94 unit + 65 cucumber
++ 11 functional identiques pré/post), publication Maven Central 0.0.8
+confirmée (3 artefacts : slider + 2 plugin markers), correction namespace
+`slider.translator`→`education.cccp.slider.translator` pour conformité
+Central, zéro secret/token dans le diff.

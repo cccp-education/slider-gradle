@@ -1,6 +1,6 @@
 [versions]
-slider = "0.0.5"
-readme = "0.0.0"
+slider = "0.0.8"
+readme = "0.0.1"
 
 [libraries]
 

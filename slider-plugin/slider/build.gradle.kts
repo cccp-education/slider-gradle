@@ -23,7 +23,7 @@ plugins {
 }
 
 group = "education.cccp"
-version = "0.0.1"
+version = "0.0.8"
 
 repositories {
     mavenCentral()
@@ -127,7 +127,7 @@ gradlePlugin {
             }
         }
         create("slider-translator") {
-            id = "slider.translator"
+            id = "education.cccp.slider.translator"
             implementationClass = "slider.translate.TranslatorPlugin"
             displayName = "Slider Translator Plugin"
             description = "Gradle plugin for slide translation across 10 languages."

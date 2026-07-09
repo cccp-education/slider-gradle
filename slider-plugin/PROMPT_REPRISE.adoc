@@ -1,40 +1,45 @@
-= PROMPT_REPRISE — slider-gradle — Session 022
-:session: 022
+= PROMPT_REPRISE — slider-gradle — Session 023
+:session: 023
 :date: 2026-07-09
 
-== Session 021 terminée — US-3.4-bis Validation visuelle Playwright RTL ✅
+== Session 022 terminée — Bump 0.0.8 + Publication Maven Central ✅
 
-US-3.4-bis TERMINÉ (validation visuelle Playwright reportée depuis S-019) :
-- Domaine DDD `slider.rtl` posé : `RtlAssertionCode` (enum 3 P0 + 1 P1),
-  `RtlAssertionResult`/`RtlAssertionFailure` (résultat), `SlideRenderData`
-  (snapshot Playwright-agnostic), `RtlSlideAssertion` (4 contraintes pure logic)
-- Test functional `RtlPlaywrightFunctionalTest` — GradleRunner génère deck arabe
-  `-Planguage=ar` (mavenLocal 0.0.7), Playwright-jvm ouvre HTML, extrait
-  `SlideRenderData`, délègue à `RtlSlideAssertion.assertAll()`
-- Cucumber BDD `10_rtl_visual_validation.feature` (6 scénarios)
-- Révélation : Reveal.js gère RTL via `rtl: true` config JS + `.rtl` classe
-  runtime, PAS via `<html dir="rtl">`. Assertions adaptées au modèle réel.
-- Tests : 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS
+Bump strictement montant + publication Maven Central 0.0.8 TERMINÉ :
+- Version plugin 0.0.1 → 0.0.8 (slider + catalogue consommateur racine)
+- codebase 0.0.1 → 0.0.5 (dernière Central), readme 0.0.0 → 0.0.1
+- Correction namespace : plugin ID `slider.translator` →
+  `education.cccp.slider.translator` (namespace Central education.cccp.*)
+- Bundle nmcp `4684447b`, publishingType AUTOMATIC, 3 artefacts confirmés
+  sur repo1.maven.org : slider:0.0.8 + 2 plugin markers
+- Zéro régression : 94 unit (2 fail Playwright env préexistant) +
+  65 cucumber + 11 functional identiques pré/post bump
+- 2 tests Playwright (`RtlPlaywrightFunctionalTest` +
+  `SliderPlaywrightE2eTest`) échouent sur `LoadError: no such file to
+  load -- asciidoctor-revealjs` (gem JRuby isolé, préexistant, non lié
+  aux bumps)
 
-== Prochaine session — 022
+== Prochaine session — 023
 
-EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication + US-3.4-bis tous TERMINÉS.
-Slider-gradle en maintenance. Pistes possibles :
+EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.1 + US-3.4-bis +
+Publication 0.0.8 tous TERMINÉS. Slider-gradle en maintenance. Pistes :
 
-. Migration version plugin 0.0.1 → 0.0.2 (nouvelles tasks generateCapsule +
-  generateRevealUiMessages + domaine capsule + slider.rtl) — publication
-  Maven Central
+. Fix 2 tests Playwright (gem asciidoctor-revealjs JRuby isolé) —
+  investigation `asciidoctorGemsPrepare` dans GradleRunner, possible
+  cache JRuby à préparer hors-ligne
 . Exploration nouveaux EPICs (slides interactives, export PPTX, etc.)
 . Mise à jour README i18n 10 langues avec nouvelles classes `slider.rtl`
-  + `slider.capsule`
+  + `slider.capsule` + version 0.0.8
 
 == Rappels
 
-- GroupId : `education.cccp`, Plugin ID : `education.cccp.slider`
-- Version publiée Central : 0.0.1 (build.gradle.kts hardcodé 0.0.1)
-- mavenLocal : 0.0.7 (publié temporairement S-021 pour GradleRunner)
-- conventions-gradle : mavenLocal 0.0.2 (logback-exclusion non publié Central)
-- i18n-contracts : mavenLocal 0.0.2
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.cccp.slider.translator`
+- Version publiée Central : 0.0.8 (build.gradle.kts hardcodé 0.0.8)
+- mavenLocal : 0.0.8 (aligné)
+- conventions-gradle : mavenLocal 0.0.2 (logback-exclusion non publié
+  Central)
+- i18n-contracts : Central 0.0.2
+- codebase-plugin : Central 0.0.5
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French

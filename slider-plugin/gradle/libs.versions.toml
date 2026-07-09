@@ -1,5 +1,5 @@
 [versions]
-slider = "0.0.1"
+slider = "0.0.8"
 asciidoctor-gradle = "5.0.0-alpha.1"
 node-gradle = "7.1.0"
 commons-io = "2.13.0"
@@ -26,7 +26,7 @@ langchain4j-beta = "1.14.1-beta24"
 docker-java = "3.7.0"
 testcontainers-pg = "1.21.4"
 logback = "1.5.32"
-codebase = "0.0.1"
+codebase = "0.0.5"
 playwright = "1.52.0"
 i18n-contracts = "0.0.2"
 

@@ -2,6 +2,7 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 022 | 2026-07-09 | PUB | — | Bump 0.0.8 + Publication Maven Central — version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace plugin ID `slider.translator`→`education.ccp.slider.translator`, bundle nmcp 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org (slider + 2 plugin markers), zéro régression
 | 021 | 2026-07-09 | SLD-3 | US-3.4-bis | Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD (8 unit + 1 functional + 6 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.3 | Reveal.js UI i18n — RevealUiMessages + RevealUiMessageCatalog 10 langues + RevealUiMessagesWriter messages_{code}.js + generateRevealUiMessages task (21 unit + 3 functional + 10 cucumber)
 | 019 | 2026-07-06 | SLD-3 | US-3.4 | RTL support ar/ur — RevealRtlResolver + câblage asciidoctorRevealJs setRightToLeft -Planguage=ar|ur (9 unit + 6 cucumber)
