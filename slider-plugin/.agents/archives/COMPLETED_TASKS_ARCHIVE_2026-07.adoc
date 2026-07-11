@@ -2,6 +2,11 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 027 | 2026-07-11 | SLD-4 | SLD-4.6 | Extraction JGitSlidePusher (adaptateur JGit) — initAndCommit + push, types domaine CommitResult/SlidePushResult, zéro leak JGit. SliderManager.Git réduit ~120→55 lignes. 6 unit (JGitSlidePusherTest) + 3 cucumber (12_git_push_adapter.feature).
+| 027 | 2026-07-11 | SLD-4 | SLD-4.7 | Tests intégration pipeline avec bare repo local — SlideDeploymentPipelineIntegrationTest 3 tests (pipeline complet, commit message, échec gracieux).
+| 027 | 2026-07-11 | SLD-4 | SLD-4.8 | Suppression GitOperationResult dead code (leak RevCommit/PushResult dans models.kt) + cleanup imports JGit. EPIC SLD-4 TERMINÉ 8/8 US.
+| 026 | 2026-07-11 | — | — | Rename Cucumber steps package slider.scenarios → slider.steps. 12 fichiers renommés, exclusion locale slider.steps.** ajoutée au test task.
+| 025 | 2026-07-11 | SLD-4 | SLD-4.1/4.2/4.3/4.4/4.5 | Refactor DDD slider.repository — SlideDeploymentRequest + GitCredentials + SlideDeployer + suppression FileOps/FileOperationResult. 16 unit + 2 functional + 9 cucumber BDD.
 | 024 | 2026-07-11 | cleanup | — | Cleanup dead code + Playwright @Disabled + check vert — @Disabled 2 tests Playwright (gem JRuby isolé), suppression BakeryPluginFunctionalTests.kt (388 lignes mortes), fix KDoc Reveal.js 3.9.1→5.2.1, suppression TODO Slides.kt:44. `./gradlew check` vert pour la première fois.
 | 023 | 2026-07-09 | — | — | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé, JRuby ne trouve pas asciidoctor-revealjs. 5 approches testées, non fixable sans modification API GradleRunner 9.6.1.
 | 022 | 2026-07-09 | PUB | — | Bump 0.0.8 + Publication Maven Central — version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace plugin ID `slider.translator`→`education.cccp.slider.translator`, bundle nmcp 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org (slider + 2 plugin markers), zéro régression

@@ -2,6 +2,37 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 027 (2026-07-11) — Extraction JGitSlidePusher + EPIC SLD-4 clos
+
+Extraction de l'adaptateur JGit (`JGitSlidePusher`) depuis `SliderManager.Git`.
+`initAndCommit` (Git.init + remoteAdd + add + commit) et `push` (Git.open + push +
+credentials) extraits vers `slider.repository.JGitSlidePusher` avec types domaine
+`CommitResult` / `SlidePushResult` (zéro leak JGit hors adaptateur). `SliderManager.Git`
+réduit de ~120 lignes à ~55 (suppression `initAddCommitToSlides` + `pushSlide` +
+constants `CVS_ORIGIN`/`CVS_REMOTE` + 7 imports JGit). `pushSlides` délègue maintenant
+au domaine avec gestion d'erreurs typée.
+
+Tests d'intégration pipeline (`SlideDeploymentPipelineIntegrationTest`) avec bare repo
+local comme "remote" — 3 tests (pipeline complet, commit message, échec gracieux).
+Note : initialement écrit dans `functionalTest` mais déplacé vers `test` car le
+convention plugin `functional-test` n'expose pas les classes `main` dans le classpath
+de compilation.
+
+Suppression `GitOperationResult` (models.kt) — dead code qui leakait `RevCommit` et
+`PushResult` (types JGit) dans `models.kt`. Jamais utilisé en production. Imports JGit
+nettoyés de `models.kt`.
+
+Baby-step TDD/BDD : RED (6 tests JGitSlidePusherTest, 5 fail) → GREEN (implémentation,
+6/6 PASS) → REFACTOR (délégation SliderManager.Git). BDD Cucumber
+`12_git_push_adapter.feature` 3 scénarios (init/commit, push bare remote, push failure).
+Steps ajoutés à `DeploymentRequestSteps.kt` + helper `buildRequestFromContext()`.
+
+`./gradlew :slider:check` VERT — 211 PASS (120 unit + 13 functional + 78 cucumber),
+0 FAIL, 3 SKIP. +15 depuis S-026 (196).
+
+**EPIC SLD-4 TERMINÉ** — 8/8 US, ~13 pts. Domaine `slider.repository` complet :
+3 fichiers (SlideDeploymentRequest, SlideDeployer, JGitSlidePusher).
+
 == Session 026 (2026-07-11) — Rename Cucumber steps package
 
 Fix double `scenarios` dans le chemin `src/test/scenarios/slider/scenarios/`.

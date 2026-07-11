@@ -1,8 +1,6 @@
 package slider
 
 import contracts.i18n.LanguageCatalog
-import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.transport.PushResult
 
 data class SlidesConfiguration(
     val srcPath: String? = null,
@@ -31,15 +29,6 @@ data class GitPushConfiguration(
     val branch: String,
     val message: String,
 )
-
-sealed class GitOperationResult {
-    data class Success(
-        val commit: RevCommit,
-        val pushResults: MutableIterable<PushResult>?
-    ) : GitOperationResult()
-
-    data class Failure(val error: String) : GitOperationResult()
-}
 
 sealed class WorkspaceError {
     object FileNotFound : WorkspaceError()

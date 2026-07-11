@@ -1,34 +1,42 @@
-= PROMPT_REPRISE — slider-gradle — Session 027
-:session: 027
+= PROMPT_REPRISE — slider-gradle — Session 028
+:session: 028
 :date: 2026-07-11
 
-== Sessions 025-026 terminées
+== Session 027 terminée
 
-S-025 : Refactor DDD `slider.repository` — extraction `SlideDeploymentRequest`
-+ `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/
-cleanup, typed results). `FileOps` + `FileOperationResult` supprimés.
-`Git.pushSlides` délègue au domaine. 16 unit + 2 functional + 9 cucumber BDD.
+SLD-4.6/4.7/4.8 — Extraction `JGitSlidePusher` (adaptateur JGit) depuis
+`SliderManager.Git` + tests intégration pipeline avec bare repo local +
+suppression `GitOperationResult` dead code (leak JGit dans models.kt).
 
-S-026 : Rename package `slider.scenarios` → `slider.steps`. Fix double
-`scenarios` dans chemin `src/test/scenarios/slider/scenarios/` →
-`src/test/scenarios/slider/steps/`. 12 fichiers renommés, glue Cucumber
-mise à jour, exclusion locale `slider.steps.**` ajoutée au `test` task.
+`JGitSlidePusher.kt` créé (82 lignes) — `initAndCommit` (Git.init + remoteAdd
++ add + commit) + `push` (Git.open + push + credentials). Types domaine
+`CommitResult` / `SlidePushResult` (zéro leak JGit). `SliderManager.Git`
+réduit de ~120→55 lignes (suppression `initAddCommitToSlides` + `pushSlide`
++ 7 imports JGit). `models.kt` nettoyé (suppression `GitOperationResult` +
+2 imports JGit).
 
-`./gradlew :slider:check` VERT — 196 PASS, 0 FAIL, 4 SKIP.
+Baby-step TDD/BDD : 6 unit (JGitSlidePusherTest) + 3 unit (pipeline
+integration) + 3 cucumber (12_git_push_adapter.feature). `./gradlew
+:slider:check` VERT — 211 PASS, 0 FAIL, 3 SKIP.
 
-== Prochaine session — 027
+**EPIC SLD-4 TERMINÉ** — 8/8 US, ~13 pts. Domaine `slider.repository`
+complet : 3 fichiers (SlideDeploymentRequest, SlideDeployer,
+JGitSlidePusher), zéro leak JGit hors adaptateur.
+
+== Prochaine session — 028
 
 Pistes (par priorité) :
-. Extraction `JGitSlidePusher` (adaptateur) — `initAddCommitToSlides` +
-  `pushSlide` sortis de `SliderManager.Git` vers `slider.repository`
-. Tests fonctionnels `deploySlides` avec mock Git remote (bypass push)
-. Mise à jour README i18n 10 langues avec domaine `slider.repository`
-. Refactor `GitOperationResult` (models.kt) → `slider.repository`
+. Définir prochain EPIC — maintenance ou nouvelle fonctionnalité
+. README i18n 10 langues — mettre à jour avec domaine `slider.repository`
+  (3 fichiers, JGitSlidePusher, CommitResult, SlidePushResult)
+. Fix 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner —
+  investigation S-023, non fixable sans modification API GradleRunner)
+. Bump version 0.0.8 → 0.0.9 + publication Maven Central (si EPIC clos)
 
 == Rappels
 
-- GroupId : `education.ccp`, Plugin IDs : `education.ccp.slider` +
-  `education.ccp.slider.translator`
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.cccp.slider.translator`
 - Version publiée Central : 0.0.8 (build.gradle.kts hardcodé 0.0.8)
 - conventions-gradle : mavenLocal 0.0.2
 - i18n-contracts : Central 0.0.2
@@ -36,9 +44,9 @@ Pistes (par priorité) :
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
-- Package Cucumber steps : `slider.steps` (renommé S-026, was `slider.scenarios`)
-- Domaine `slider.repository` : SlideDeploymentRequest, GitCredentials,
-  SlideDeployer, RepoDirResult, CopyResult
+- Package Cucumber steps : `slider.steps` (renommé S-026)
+- Domaine `slider.repository` : 3 fichiers — SlideDeploymentRequest,
+  SlideDeployer, JGitSlidePusher (zéro leak JGit hors adaptateur)
 - Domaine `slider.rtl` : 4 classes (RtlAssertionCode, RtlAssertionResult,
   SlideRenderData, RtlSlideAssertion)
 - Domaine `slider.capsule` : 4 classes (CapsuleScript, SlideSegment,
@@ -49,3 +57,5 @@ Pistes (par priorité) :
   "deploySlides"), group "deploy"
 - Exclusion locale `slider.steps.**` dans `test` task (le plugin
   conventions n'exclut que `*.scenarios.*` par défaut)
+- EPIC SLD-4 CLOS (8/8 US) — tous les EPICs SLD-0→4 + CNV-6/7/8 + PUB
+  terminés

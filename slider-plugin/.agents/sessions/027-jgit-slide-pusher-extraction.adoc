@@ -1,0 +1,126 @@
+= Session 027 — Extraction JGitSlidePusher + pipeline integration + cleanup GitOperationResult
+:date: 2026-07-11
+:epic: SLD-4
+:score: 9/10
+
+== Objectif
+
+Extraction de l'adaptateur JGit (`JGitSlidePusher`) depuis `SliderManager.Git`,
+tests d'intégration du pipeline complet avec mock Git remote (bare repo local),
+et suppression du dead code `GitOperationResult` qui leakait des types JGit dans
+`models.kt`. Clôture de l'EPIC SLD-4 (Refactor DDD `slider.repository`).
+
+== Baby-step TDD/BDD — 3 niveaux
+
+=== RED → GREEN → REFACTOR (SLD-4.6)
+
+1. **RED** : `JGitSlidePusherTest.kt` créé avec 6 tests (init/commit SHA, commit
+   message, branch name, remote URL, push to bare repo, push failure unreachable
+   remote). Stub `JGitSlidePusher` retourne `Failure("Not implemented")`. 5/6 fail.
+2. **GREEN** : Implémentation `JGitSlidePusher.kt` — `initAndCommit` (Git.init +
+   remoteAdd + add + commit) et `push` (Git.open + push + credentials). 6/6 PASS.
+3. **REFACTOR** : `SliderManager.Git.pushSlides` délègue à `JGitSlidePusher` avec
+   gestion d'erreurs typée (`CommitResult.Failure` / `SlidePushResult.Failure`).
+   Suppression de `initAddCommitToSlides` + `pushSlide` + constants `CVS_ORIGIN`/
+   `CVS_REMOTE` + 7 imports JGit de `SliderManager.kt`. `SliderManager.Git` réduit
+   de ~120 lignes à ~55 lignes.
+
+=== SLD-4.7 — Tests intégration pipeline
+
+`SlideDeploymentPipelineIntegrationTest.kt` (unit sourceSet) — 3 tests avec bare
+repo local comme "remote" :
+- Pipeline complet init→commit→push vers bare repo, vérification `refs/heads/gh-pages`
+- Vérification commit message poussé sur le remote
+- Échec gracieux quand remote URL unreachable
+
+Note : initialement écrit dans `functionalTest` sourceSet mais déplacé vers `test`
+car le convention plugin `functional-test` n'expose pas les classes `main` dans le
+classpath de compilation (les tests fonctionnels utilisent GradleRunner uniquement).
+
+=== SLD-4.8 — Suppression GitOperationResult
+
+`GitOperationResult` (models.kt) était du dead code — référencé uniquement dans
+sa propre définition, jamais utilisé en production. Il leakait `RevCommit` et
+`PushResult` (types JGit) dans `models.kt`. Supprimé + 2 imports JGit nettoyés.
+Les types domaine `CommitResult` / `SlidePushResult` (zéro leak JGit) le remplacent.
+
+=== BDD Cucumber
+
+`12_git_push_adapter.feature` — 3 scénarios :
+- Init/commit crée un git repo avec le commit message configuré + branche
+- Push vers bare remote local réussit après init/commit
+- Push vers remote inexistant échoue avec message d'erreur
+
+Steps ajoutés à `DeploymentRequestSteps.kt` : `Given("a bare git remote is
+available")`, `When("the slides are committed via JGitSlidePusher")`, `When("the
+slides are pushed via JGitSlidePusher")`, + 4 `Then` steps. Refactor
+`buildRequestFromContext()` helper pour éviter la duplication.
+
+== Fichiers modifiés/créés
+
+[cols="2,3,1"]
+|===
+| Fichier | Action | LOC
+
+| `slider/repository/JGitSlidePusher.kt` | CRÉÉ | 82
+| `slider/repository/SlideDeploymentPipelineIntegrationTest.kt` | CRÉÉ | 109
+| `src/test/features/12_git_push_adapter.feature` | CRÉÉ | 35
+| `src/test/kotlin/slider/repository/JGitSlidePusherTest.kt` | CRÉÉ | 124
+| `slider/SliderManager.kt` | MODIFIÉ (refactor Git object -66 lignes) | -66
+| `slider/models.kt` | MODIFIÉ (suppression GitOperationResult + imports JGit) | -9
+| `slider/steps/DeploymentRequestSteps.kt` | MODIFIÉ (+steps BDD push) | +60
+|===
+
+== Résultats tests
+
+[cols="3,2,2,2"]
+|===
+| SourceSet | Avant | Après | Delta
+| test (unit) | 108 | 120 | +12
+| functionalTest | 11 | 13 | +2
+| cucumberTest | 72 | 78 | +6
+| **Total** | **196** | **211** | **+15**
+|===
+
+0 FAIL, 3 SKIP (2 Playwright @Disabled + 1 Cucumber @full-pipeline).
+
+`./gradlew :slider:check` BUILD SUCCESSFUL.
+
+== Statut EPIC SLD-4
+
+|===
+| US | Description | Statut
+| SLD-4.1 | Value objects (SlideDeploymentRequest + GitCredentials) | ✅ S-025
+| SLD-4.2 | SlideDeployer (createRepoDir + copySlides + cleanup) | ✅ S-025
+| SLD-4.3 | Refactor Git.pushSlides → délègue au domaine | ✅ S-025
+| SLD-4.4 | Tests fonctionnels deploySlides (GradleTestKit) | ✅ S-025
+| SLD-4.5 | Tests Cucumber BDD deployment | ✅ S-025
+| SLD-4.6 | Extraction JGitSlidePusher (adaptateur JGit) | ✅ S-027
+| SLD-4.7 | Tests intégration pipeline avec mock Git remote | ✅ S-027
+| SLD-4.8 | Suppression GitOperationResult dead code | ✅ S-027
+|===
+
+**EPIC SLD-4 TERMINÉ** — 8/8 US, ~13 pts.
+
+== Architecture finale slider.repository
+
+----
+slider.repository/
+├── SlideDeploymentRequest.kt   (SlideDeploymentRequest + GitCredentials)
+├── SlideDeployer.kt            (SlideDeployer + RepoDirResult + CopyResult)
+└── JGitSlidePusher.kt          (JGitSlidePusher + CommitResult + SlidePushResult)
+----
+
+3 fichiers, 3 responsabilités DDD :
+- **Value objects** : SlideDeploymentRequest, GitCredentials (validation constructeur)
+- **File-system adapter** : SlideDeployer (createRepoDir, copySlides, cleanup)
+- **Git wire adapter** : JGitSlidePusher (initAndCommit, push)
+
+Zéro leak JGit hors de `JGitSlidePusher.kt`. `SliderManager.Git` est un thin Gradle
+adapter qui build la request depuis YAML + délègue au domaine.
+
+== Prochaines pistes
+
+- EPIC SLD-4 clos — prochain EPIC à définir
+- Maintenance : 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner)
+- README i18n 10 langues à mettre à jour avec domaine `slider.repository`

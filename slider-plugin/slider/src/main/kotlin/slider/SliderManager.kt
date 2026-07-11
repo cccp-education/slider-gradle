@@ -4,8 +4,6 @@ import arrow.integrations.jackson.module.registerArrowModule
 import slider.SliderManager.Configuration.CONFIG_PATH_KEY
 import slider.SliderManager.Configuration.localConf
 import slider.SliderManager.Configuration.yamlMapper
-import slider.SliderManager.Git.initAddCommitToSlides
-import slider.SliderManager.Git.pushSlide
 import slider.SliderManager.Git.pushSlides
 import slider.SliderManager.Tasks.registerAsciidoctorRevealJsTask
 import slider.SliderManager.Tasks.registerCleanSlidesBuildTask
@@ -44,13 +42,6 @@ import org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.OUT_OF_PROCESS
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.asciidoctor.gradle.jvm.slides.AsciidoctorJRevealJSTask
 import org.asciidoctor.gradle.jvm.slides.RevealJSExtension
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.api.Git.init
-import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.eclipse.jgit.transport.PushResult
-import org.eclipse.jgit.transport.URIish
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -904,14 +895,15 @@ object SliderManager {
     /**
      * Handles all Git operations required to publish slides to a remote repository.
      *
-     * Workflow:
-     * 1. [pushSlides]            → orchestrates copy + init + commit + push + cleanup
-     * 2. [initAddCommitToSlides] → initialises local repo, adds remote, stages, commits
-     * 3. [pushSlide]             → authenticates and force-pushes to the remote
+     * The full pipeline is delegated to the `slider.repository` domain:
+     * - [slider.repository.SlideDeployer] handles file-system preparation
+     * - [slider.repository.JGitSlidePusher] handles Git init/commit/push
+     *
+     * This object is now a thin Gradle adapter that builds the
+     * [slider.repository.SlideDeploymentRequest] from YAML config and
+     * delegates everything else to the domain layer.
      */
     object Git {
-        const val CVS_ORIGIN: String = "origin"
-        const val CVS_REMOTE: String = "remote"
 
         /**
          * Full publish pipeline:
@@ -919,10 +911,6 @@ object SliderManager {
          * - Copies slides from [slidesDirPath] into it via [SlideDeployer]
          * - Commits and pushes if the copy succeeds
          * - Cleans up both the repo dir and the source slides dir on success
-         *
-         * Delegates file-system preparation to the pure-domain
-         * [slider.repository.SlideDeployer] so that copy/repo-dir logic
-         * is unit-tested without a Gradle `Project`.
          */
         fun Project.pushSlides(
             slidesDirPath: () -> String,
@@ -955,77 +943,23 @@ object SliderManager {
                 return
             }
 
-            initAddCommitToSlides(repoDir, conf)
-            pushSlide(repoDir, conf)
+            val commitResult = slider.repository.JGitSlidePusher.initAndCommit(request)
+            if (commitResult is slider.repository.CommitResult.Failure) {
+                logger.error("Cannot init and commit: ${commitResult.error}")
+                slider.repository.SlideDeployer.cleanupRepoDir(request)
+                return
+            }
+
+            val pushResult = slider.repository.JGitSlidePusher.push(request)
+            if (pushResult is slider.repository.SlidePushResult.Failure) {
+                logger.error("Cannot push slides: ${pushResult.error}")
+                slider.repository.SlideDeployer.cleanupRepoDir(request)
+                return
+            }
 
             slider.repository.SlideDeployer.cleanupRepoDir(request)
             slider.repository.SlideDeployer.cleanupSlidesDir(request)
         }
-
-        /**
-         * Initialises a local Git repository in [repoDir], adds the remote origin,
-         * stages all files, and creates an initial commit.
-         *
-         * @param repoDir  directory to initialise as a Git repository
-         * @param conf     slides configuration carrying branch, remote URL, and commit message
-         */
-        fun Project.initAddCommitToSlides(
-            repoDir: File,
-            conf: SlidesConfiguration,
-        ): RevCommit =
-            init()
-                .setInitialBranch(conf.pushSlides?.branch)
-                .setDirectory(repoDir)
-                .call()
-                .run {
-                    assert(!repository.isBare)
-                    assert(repository.directory.isDirectory)
-                    // Register the remote origin
-                    remoteAdd().apply {
-                        setName(CVS_ORIGIN)
-                        setUri(URIish(conf.pushSlides?.repo?.repository))
-                    }.call()
-                    // Stage all files
-                    add().addFilepattern(".").call()
-                    // Commit with the configured message
-                    commit().setMessage(conf.pushSlides?.message).call()
-                }
-
-        /**
-         * Force-pushes the local repository at [repoDir] to the configured remote.
-         *
-         * @param repoDir  local repository directory to push from
-         * @param conf     slides configuration carrying remote URL and credentials
-         * @throws IOException if the repository is bare or the Git dir cannot be found
-         */
-        @Throws(IOException::class)
-        fun Project.pushSlide(
-            repoDir: File,
-            conf: SlidesConfiguration,
-        ): MutableIterable<PushResult>? =
-            FileRepositoryBuilder()
-                .setInitialBranch(conf.pushSlides?.branch ?: "main")
-                .setGitDir("${repoDir.absolutePath}${separator}.git".let(::File))
-                .readEnvironment()
-                .findGitDir()
-                .setMustExist(true)
-                .build()
-                .apply {
-                    config.apply {
-                        getString(CVS_REMOTE, CVS_ORIGIN, conf.pushSlides?.repo?.repository)
-                    }.save()
-                    if (isBare) throw IOException("Repo dir should not be bare")
-                }.let(::Git)
-                .push()
-                .setCredentialsProvider(
-                    UsernamePasswordCredentialsProvider(
-                        conf.pushSlides?.repo?.credentials?.username,
-                        conf.pushSlides?.repo?.credentials?.password
-                    )
-                ).apply {
-                    remote = CVS_ORIGIN
-                    isForce = true
-                }.call()
     }
 
 }

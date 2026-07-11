@@ -2,10 +2,15 @@ package slider.steps
 
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import slider.repository.CommitResult
 import slider.repository.CopyResult
+import slider.repository.JGitSlidePusher
 import slider.repository.RepoDirResult
 import slider.repository.SlideDeploymentRequest
 import slider.repository.SlideDeployer
+import slider.repository.SlidePushResult
 import java.io.File
 import java.nio.file.Files
 
@@ -22,6 +27,9 @@ class DeploymentRequestSteps : En {
     private var caught: Throwable? = null
     private var repoResult: RepoDirResult? = null
     private var copyResult: CopyResult? = null
+    private var commitResult: CommitResult? = null
+    private var pushResult: SlidePushResult? = null
+    private var bareRemote: File? = null
 
     init {
 
@@ -145,5 +153,64 @@ class DeploymentRequestSteps : En {
         Then("the copy should fail") {
             assertThat(copyResult).isInstanceOf(CopyResult.Failure::class.java)
         }
+
+        Given("a bare git remote is available") {
+            bareRemote = Files.createTempDirectory("bare-remote").toFile()
+                .resolve("remote.git")
+            Git.init().setBare(true).setDirectory(bareRemote!!).call().close()
+            remoteUrl = "file://${bareRemote!!.absolutePath}"
+        }
+
+        When("the slides are committed via JGitSlidePusher") {
+            val req = buildRequestFromContext()
+            commitResult = JGitSlidePusher.initAndCommit(req)
+        }
+
+        When("the slides are pushed via JGitSlidePusher") {
+            val req = buildRequestFromContext()
+            pushResult = JGitSlidePusher.push(req)
+        }
+
+        Then("the commit should succeed") {
+            assertThat(commitResult).isInstanceOf(CommitResult.Success::class.java)
+        }
+
+        Then("the commit message should be {string}") { expected: String ->
+            val req = buildRequestFromContext()
+            val git = Git.open(req.repoDir)
+            val commits = git.log().call().toList()
+            assertThat(commits).hasSize(1)
+            assertThat(commits[0].fullMessage).isEqualTo(expected)
+            git.close()
+        }
+
+        Then("the git branch should be {string}") { expected: String ->
+            val req = buildRequestFromContext()
+            val repo = FileRepositoryBuilder()
+                .setGitDir(req.repoDir.resolve(".git"))
+                .build()
+            assertThat(repo.branch).isEqualTo(expected)
+            repo.close()
+        }
+
+        Then("the push should succeed") {
+            assertThat(pushResult).isInstanceOf(SlidePushResult.Success::class.java)
+        }
+
+        Then("the push should fail with an error message") {
+            assertThat(pushResult).isInstanceOf(SlidePushResult.Failure::class.java)
+            assertThat((pushResult as SlidePushResult.Failure).error).isNotBlank()
+        }
     }
+
+    private fun buildRequestFromContext(): SlideDeploymentRequest =
+        request ?: SlideDeploymentRequest(
+            slidesDir = slidesDir,
+            repoDir = repoDir,
+            remoteUrl = remoteUrl.ifBlank { "https://github.com/org/slides.git" },
+            branch = branch.ifBlank { "main" },
+            commitMessage = commitMessage.ifBlank { "deploy" },
+            username = username.ifBlank { "user" },
+            password = password.ifBlank { "token" },
+        )
 }
