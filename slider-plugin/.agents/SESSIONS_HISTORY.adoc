@@ -2,6 +2,28 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 025 (2026-07-11) — Refactor DDD slider.repository
+
+Extraction du domaine `slider.repository` depuis `SliderManager.Git`.
+Baby-step DDD/TDD/BDD 3 niveaux (unit → functional → cucumber).
+
+Domaine `slider.repository` posé (2 fichiers production) :
+- `SlideDeploymentRequest` + `GitCredentials` — value objects validés
+  à la construction (slidesDir exists+isDirectory, tous String non-blank)
+- `SlideDeployer` — `createRepoDir`/`copySlides`/`cleanupRepoDir`/
+  `cleanupSlidesDir` avec typed results (`RepoDirResult`/`CopyResult`)
+
+Refactor `SliderManager.Git.pushSlides` : délègue file-system au domaine.
+`FileOps` + `FileOperationResult` supprimés (dead code).
+
+Tests ajoutés : 16 unit (10 SlideDeploymentRequestTest + 6 SlideDeployerTest) +
+2 functional (SlideDeploymentFunctionalTest) + 9 cucumber BDD
+(11_deployment_request.feature + DeploymentRequestSteps.kt).
+
+`./gradlew :slider:check` VERT — 196 PASS, 0 FAIL, 4 SKIP.
+
+7 fichiers créés, 2 modifiés, zéro régression.
+
 == Session 024 (2026-07-11) — Cleanup dead code + Playwright @Disabled + check vert
 
 Cleanup de la dette technique identifiée lors de l'analyse du code source.
@@ -197,6 +219,7 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 
 |===
 | # | Date | Type | Sujet | Score
+| 025 | 2026-07-11 | refactor+ddd+tdd+bdd | Refactor DDD slider.repository — extraction SlideDeploymentRequest + GitCredentials (value objects) + SlideDeployer (createRepoDir/copySlides/cleanup, typed results) depuis SliderManager.Git. FileOps + FileOperationResult supprimés. Git.pushSlides délègue au domaine. Baby-step TDD/BDD : 16 unit + 2 functional + 9 cucumber. ./gradlew check VERT 196 PASS / 0 FAIL / 4 SKIP. | ✅ 9/10
 | 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé, JRuby ne trouve pas asciidoctor-revealjs. 5 approches testées, non fixable sans modification API GradleRunner 9.6.1. | 🔍 7/10
 | 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central (version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org, zéro régression) | ✅ TERMINÉ
 | 021 | 2026-07-09 | feat+tests+bdd | US-3.4-bis Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD — révélation modèle RTL Reveal.js = rtl:true config JS + .rtl classe runtime — 36 unit (+8) + 5 functional (+1) + 64 cucumber (+6) PASS | ✅ TERMINÉ

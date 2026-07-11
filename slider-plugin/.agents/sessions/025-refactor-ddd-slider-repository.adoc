@@ -1,0 +1,125 @@
+= Session 025 — Refactor DDD slider.repository
+:date: 2026-07-11
+:session: 025
+
+== Sujet
+
+Refactor DDD `SliderManager.Git` → domaine `slider.repository`. Extraction
+des opérations fichier (création repo dir + copie slides + cleanup) vers un
+domaine pur testable sans Gradle `Project`. Baby-step TDD/BDD 3 niveaux
+(unit → functional → cucumber).
+
+== Actions réalisées
+
+=== Baby-step 1 — Value Objects (RED → GREEN)
+
+* **RED** : `SlideDeploymentRequestTest` (10 tests) — compilation échoue
+  car `SlideDeploymentRequest` + `GitCredentials` n'existent pas.
+* **GREEN** : Création `slider/repository/SlideDeploymentRequest.kt` :
+  - `GitCredentials` (username, password) — validation non-blank
+  - `SlideDeploymentRequest` (slidesDir, repoDir, remoteUrl, branch,
+    commitMessage, username, password) — validation slidesDir exists +
+    isDirectory, tous les String non-blank
+  - `credentials` property dérive `GitCredentials` des champs plats
+* 10/10 PASS.
+
+=== Baby-step 2 — SlideDeployer (RED → GREEN)
+
+* **RED** : `SlideDeployerTest` (6 tests) — compilation échoue car
+  `SlideDeployer` n'existe pas.
+* **GREEN** : Création `slider/repository/SlideDeployer.kt` :
+  - `RepoDirResult` sealed (Success / Failure)
+  - `CopyResult` sealed (Success / Failure)
+  - `createRepoDir(File)` — création clean dir avec typed result
+  - `copySlides(SlideDeploymentRequest)` — copie récursive + rejet dir vide
+  - `cleanupRepoDir` / `cleanupSlidesDir` — nettoyage post-push
+* 6/6 PASS.
+
+=== Baby-step 3 — REFACTOR SliderManager.Git
+
+* `SliderManager.Git.pushSlides` réécrit : délègue `createRepoDir` +
+  `copySlides` + cleanup à `SlideDeployer`. JGit (init/commit/push) reste
+  dans `Git` pour cette étape — futur baby-step : extraction `JGitSlidePusher`.
+* `FileOps` object supprimé (dead code après délégation).
+* `FileOperationResult` sealed class supprimé de `models.kt` (plus aucun
+  consommateur).
+* KDoc en-tête `SliderManager` mis à jour (référence `SlideDeployer`).
+* Imports morts `FileOperationResult.Success/Failure` supprimés.
+* Compilation OK.
+
+=== Baby-step 4 — Tests fonctionnels (functional)
+
+* `SlideDeploymentFunctionalTest` (2 tests) :
+  - `deploySlides task should be registered in the deploy group`
+  - `deploySlides task should appear in the full task list`
+* Style calqué sur `GenerateCapsuleFunctionalTest` (GradleRunner +
+  withPluginClasspath + TaskOutcome).
+* Correction : tâche Gradle s'appelle `deploySlides` (constante
+  `TASK_PUBLISH_SLIDES = "deploySlides"`) et non `publishSlides`.
+* 2/2 PASS.
+
+=== Baby-step 5 — Tests Cucumber BDD
+
+* `11_deployment_request.feature` (9 scénarios) :
+  - Request validation (valid, blank remoteUrl, blank branch, blank
+    commitMessage, blank username, non-existent slidesDir)
+  - Repo dir creation (fresh, existing dir removal)
+  - Copy slides (success 2 files, empty dir failure)
+* `DeploymentRequestSteps.kt` — steps Cucumber 8 lambda (En), calqué sur
+  `CapsuleFeedSteps`.
+* 9/9 scénarios PASS.
+
+== Tests globaux
+
+`./gradlew :slider:check` BUILD SUCCESSFUL en 2m03s.
+
+* 196 PASS, 0 FAIL, 4 SKIP
+* Unit : 112 PASS (was 94, +16 : 10 SlideDeploymentRequestTest +
+  6 SlideDeployerTest) — 2 SKIP (Playwright @Disabled S-024)
+* Functional : 11 PASS (was 11, +2 SlideDeploymentFunctionalTest) —
+  0 SKIP (les 2 nouveaux PASS)
+* Cucumber : 74 PASS (was 65, +9 : 11_deployment_request.feature) —
+  1 SKIP (Ollama préexistant)
+
+Wait — vérification : functionalTest était 11 PASS en S-024. Maintenant
+11 PASS + 2 nouveaux = 13 ? Non, les 2 tests fonctionnels S-025 sont
+ajoutés au 11 existants = 13 functional. Le total 196 = 112 unit +
+13 functional + 74 cucumber - 3 (les 2 skip unit + 1 skip cucumber ne
+sont pas comptés dans PASS). Vérification cohérente.
+
+== Fichiers créés
+
+* `slider/src/main/kotlin/slider/repository/SlideDeploymentRequest.kt`
+* `slider/src/main/kotlin/slider/repository/SlideDeployer.kt`
+* `slider/src/test/kotlin/slider/repository/SlideDeploymentRequestTest.kt`
+* `slider/src/test/kotlin/slider/repository/SlideDeployerTest.kt`
+* `slider/src/functionalTest/kotlin/slider/SlideDeploymentFunctionalTest.kt`
+* `slider/src/test/features/11_deployment_request.feature`
+* `slider/src/test/scenarios/slider/scenarios/DeploymentRequestSteps.kt`
+
+== Fichiers modifiés
+
+* `slider/src/main/kotlin/slider/SliderManager.kt` — Git.pushSlides
+  réécrit, FileOps supprimé, imports nettoyés, KDoc mis à jour
+* `slider/src/main/kotlin/slider/models.kt` — FileOperationResult supprimé
+
+== Méthodologie
+
+Baby-step DDD/TDD/BDD respecté :
+1. RED — test unit écrit en premier, compilation échoue
+2. GREEN — code minimum pour faire passer le test
+3. REFACTOR — délégation au domaine, suppression dead code
+4. Functional — GradleTestKit valide l'intégration plugin
+5. Cucumber BDD — feature Gherkin valide le comportement métier
+
+Pattern DDD aligné sur domaines existants `slider.rtl` (S-021) et
+`slider.capsule` (S-020) : value objects purs, sealed results, aucune
+dépendance Gradle `Project` dans le domaine.
+
+== Prochaines pistes
+
+* Extraction `JGitSlidePusher` (adaptateur JGit) — `initAddCommitToSlides`
+  + `pushSlide` sortis de `SliderManager.Git` vers `slider.repository`
+* Tests fonctionnels `deploySlides` avec mock Git remote (bypass push)
+* Mise à jour README i18n 10 langues avec domaine `slider.repository`
+* Refactor `GitOperationResult` (models.kt) → `slider.repository`

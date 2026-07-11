@@ -1,8 +1,6 @@
 package slider
 
 import arrow.integrations.jackson.module.registerArrowModule
-import slider.FileOperationResult.Failure
-import slider.FileOperationResult.Success
 import slider.SliderManager.Configuration.CONFIG_PATH_KEY
 import slider.SliderManager.Configuration.localConf
 import slider.SliderManager.Configuration.yamlMapper
@@ -75,8 +73,8 @@ import java.util.zip.ZipInputStream
  * - [Dependencies]  — gem dependency declaration
  * - [Extensions]    — DSL extension + RevealJS configuration
  * - [Tasks]         — task registration orchestration
- * - [Git]           — Git commit/push operations
- * - [FileOps]       — file copy and repo directory management
+ * - [Git]           — Git commit/push operations (delegates file-system
+ *                    preparation to [slider.repository.SlideDeployer])
  */
 object SliderManager {
 
@@ -918,33 +916,51 @@ object SliderManager {
         /**
          * Full publish pipeline:
          * - Creates a clean temporary repo directory at [pathTo]
-         * - Copies slides from [slidesDirPath] into it via [FileOps.copySlideFilesToRepo]
+         * - Copies slides from [slidesDirPath] into it via [SlideDeployer]
          * - Commits and pushes if the copy succeeds
          * - Cleans up both the repo dir and the source slides dir on success
+         *
+         * Delegates file-system preparation to the pure-domain
+         * [slider.repository.SlideDeployer] so that copy/repo-dir logic
+         * is unit-tested without a Gradle `Project`.
          */
         fun Project.pushSlides(
             slidesDirPath: () -> String,
             pathTo: () -> String
-        ) = pathTo()
-            .run(FileOps::createRepoDir)
-            .let { repoDir: File ->
-                FileOps.copySlideFilesToRepo(slidesDirPath(), repoDir)
-                    .takeIf { it is Success }
-                    ?.run {
-                        initAddCommitToSlides(repoDir, localConf)
-                        pushSlide(
-                            repoDir,
-                            "${project.rootDir}${separator}${project.properties[CONFIG_PATH_KEY]}"
-                                .run(::File)
-                                .readText()
-                                .trimIndent()
-                                .run(YAMLMapper()::readValue)
-                        )
-                        // Cleanup: remove temporary repo dir and source slides dir
-                        repoDir.deleteRecursively()
-                        slidesDirPath().let(::File).deleteRecursively()
-                    }
+        ) {
+            val conf = localConf
+            val slidesDir = File(slidesDirPath())
+            val repoDir = File(pathTo())
+            val pushConf = conf.pushSlides ?: return
+            val request = slider.repository.SlideDeploymentRequest(
+                slidesDir = slidesDir,
+                repoDir = repoDir,
+                remoteUrl = pushConf.repo.repository,
+                branch = pushConf.branch,
+                commitMessage = pushConf.message,
+                username = pushConf.repo.credentials.username,
+                password = pushConf.repo.credentials.password,
+            )
+
+            val repoResult = slider.repository.SlideDeployer.createRepoDir(repoDir)
+            if (repoResult is slider.repository.RepoDirResult.Failure) {
+                logger.error("Cannot create repo dir: ${repoResult.error}")
+                return
             }
+
+            val copyResult = slider.repository.SlideDeployer.copySlides(request)
+            if (copyResult is slider.repository.CopyResult.Failure) {
+                logger.error("Cannot copy slides: ${copyResult.error}")
+                slider.repository.SlideDeployer.cleanupRepoDir(request)
+                return
+            }
+
+            initAddCommitToSlides(repoDir, conf)
+            pushSlide(repoDir, conf)
+
+            slider.repository.SlideDeployer.cleanupRepoDir(request)
+            slider.repository.SlideDeployer.cleanupSlidesDir(request)
+        }
 
         /**
          * Initialises a local Git repository in [repoDir], adds the remote origin,
@@ -1012,63 +1028,4 @@ object SliderManager {
                 }.call()
     }
 
-// =========================================================================
-// FileOps
-// =========================================================================
-
-    /**
-     * Low-level file system operations used by the Git publish pipeline.
-     *
-     * Kept separate from [Git] to allow independent unit testing of
-     * file copy and directory management logic.
-     */
-    object FileOps {
-
-        /**
-         * Copies all files from [slidesDirPath] into [repoDir] recursively,
-         * then deletes the source directory on success.
-         *
-         * @return [FileOperationResult.Success] on success,
-         *         [FileOperationResult.Failure] with message on any exception
-         */
-        fun copySlideFilesToRepo(
-            slidesDirPath: String,
-            repoDir: File
-        ): FileOperationResult = try {
-            slidesDirPath
-                .let(::File)
-                .apply {
-                    when {
-                        !copyRecursively(repoDir, true) ->
-                            throw Exception("Unable to copy slides directory to build directory")
-                    }
-                }.deleteRecursively()
-            Success
-        } catch (e: Exception) {
-            Failure(e.message ?: "An error occurred during file copy.")
-        }
-
-        /**
-         * Creates a clean directory at [path], removing any existing file or directory
-         * at that location before creating the new one.
-         *
-         * @throws Exception if the existing file/directory cannot be deleted,
-         *                   or if the new directory cannot be created
-         */
-        fun createRepoDir(path: String): File = path
-            .let(::File)
-            .apply {
-                // Remove any existing file occupying the target path
-                if (exists() && !isDirectory) {
-                    if (!delete()) throw Exception("Cannot delete file at repo dir path")
-                }
-                // Remove any existing directory
-                if (exists()) {
-                    if (!deleteRecursively()) throw Exception("Cannot delete existing repo dir")
-                }
-                // Create the fresh directory
-                if (exists()) throw Exception("Repo dir should not already exist")
-                if (!mkdir()) throw Exception("Cannot create repo dir")
-            }
-    }
 }

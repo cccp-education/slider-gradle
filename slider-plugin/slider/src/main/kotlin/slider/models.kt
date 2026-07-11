@@ -41,11 +41,6 @@ sealed class GitOperationResult {
     data class Failure(val error: String) : GitOperationResult()
 }
 
-sealed class FileOperationResult {
-    object Success : FileOperationResult()
-    data class Failure(val error: String) : FileOperationResult()
-}
-
 sealed class WorkspaceError {
     object FileNotFound : WorkspaceError()
     data class ParsingError(val message: String) : WorkspaceError()

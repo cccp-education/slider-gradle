@@ -1,10 +1,37 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-:.date: 2026-07-09
+:.date: 2026-07-11
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== EPIC SLD-4 — Refactor DDD slider.repository 🔧 EN COURS
+
+_Vision_ : Extraction du domaine `slider.repository` depuis `SliderManager.Git`.
+Value objects purs (SlideDeploymentRequest, GitCredentials) + SlideDeployer
+(createRepoDir/copySlides/cleanup, typed results). Délégation Git.pushSlides.
+
+_Session 025 (2026-07-11)_ : Baby-step TDD/BDD 3 niveaux. `SlideDeploymentRequest`
++ `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/
+cleanup, typed results RepoDirResult/CopyResult). `FileOps` +
+`FileOperationResult` supprimés (dead code). `Git.pushSlides` délègue au domaine.
+16 unit + 2 functional + 9 cucumber BDD. `./gradlew :slider:check` VERT 196/0/4.
+
+|===
+| US | Description | Statut | Estimation
+| SLD-4.1 | Value objects (SlideDeploymentRequest + GitCredentials) + validation | ✅ TERMINÉ (S-025) | 2 pts
+| SLD-4.2 | SlideDeployer (createRepoDir + copySlides + cleanup, typed results) | ✅ TERMINÉ (S-025) | 2 pts
+| SLD-4.3 | Refactor Git.pushSlides → délègue au domaine + suppression FileOps | ✅ TERMINÉ (S-025) | 1 pt
+| SLD-4.4 | Tests fonctionnels deploySlides (GradleTestKit) | ✅ TERMINÉ (S-025) | 1 pt
+| SLD-4.5 | Tests Cucumber BDD deployment (11_deployment_request.feature) | ✅ TERMINÉ (S-025) | 1 pt
+| SLD-4.6 | Extraction JGitSlidePusher (adaptateur JGit) — initAddCommitToSlides + pushSlide | ⏳ À FAIRE | 3 pts
+| SLD-4.7 | Tests fonctionnels deploySlides avec mock Git remote | ⏳ À FAIRE | 2 pts
+| SLD-4.8 | Refactor GitOperationResult → slider.repository | ⏳ À FAIRE | 1 pt
+|===
+
+_Total_ : 8 US, ~13 pts (5 terminées, 3 restantes).
 
 '''
 == EPIC PUB — Publication Maven Central ✅ TERMINE

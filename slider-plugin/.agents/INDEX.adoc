@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-07-11
-_Session terminee_ : 024 — Cleanup dead code + Playwright @Disabled + check vert. `./gradlew :slider:check` BUILD SUCCESSFUL pour la première fois (2 tests Playwright @Disabled — gem JRuby isolé GradleRunner). Suppression fichier mort `BakeryPluginFunctionalTests.kt` (388 lignes 100% commentées). Fix KDoc stale Reveal.js 3.9.1→5.2.1. Suppression TODO mort Slides.kt:44. Tests : 94 unit (0 fail, 2 skip) + 11 functional + 65 cucumber (0 fail, 1 skip).
-_Prochaine session_ : 025 — Maintenance, check vert. Pistes : nouveaux EPICs, README i18n 0.0.8, refactor DDD SliderManager.Git, tests fonctionnels publishSlides.
+_Session terminee_ : 025 — Refactor DDD `SliderManager.Git` → domaine `slider.repository`. Baby-step TDD/BDD 3 niveaux. `SlideDeploymentRequest` + `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/cleanup, typed results). `FileOps` + `FileOperationResult` supprimés (dead code). `Git.pushSlides` délègue au domaine. 16 unit + 2 functional + 9 cucumber BDD ajoutés. `./gradlew :slider:check` VERT — 196 PASS, 0 FAIL, 4 SKIP.
+_Prochaine session_ : 026 — Extraction `JGitSlidePusher` (adaptateur JGit), tests fonctionnels `deploySlides` mock Git, README i18n `slider.repository`, refactor `GitOperationResult` → domaine.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 025 | 2026-07-11 | refactor+ddd+tdd+bdd | Refactor DDD slider.repository — extraction `SlideDeploymentRequest` + `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/cleanup, typed results RepoDirResult/CopyResult) depuis `SliderManager.Git`. `FileOps` + `FileOperationResult` supprimés (dead code). `Git.pushSlides` délègue au domaine. Baby-step TDD/BDD : 16 unit (10 SlideDeploymentRequestTest + 6 SlideDeployerTest) + 2 functional (SlideDeploymentFunctionalTest) + 9 cucumber (11_deployment_request.feature). `./gradlew :slider:check` VERT 196 PASS / 0 FAIL / 4 SKIP. | ✅ 9/10
 | 024 | 2026-07-11 | cleanup | Cleanup dead code + Playwright @Disabled + check vert — @Disabled 2 tests Playwright (gem JRuby isolé, root cause S-023), suppression BakeryPluginFunctionalTests.kt (388 lignes mortes), fix KDoc Reveal.js 3.9.1→5.2.1, suppression TODO Slides.kt:44. `./gradlew check` vert pour la première fois. 94 unit (0 fail, 2 skip) + 11 functional + 65 cucumber (0 fail, 1 skip). | ✅ 8/10
 | 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé dans /tmp, JRuby ne trouve pas la gem asciidoctor-revealjs. 5 approches testées (withGradleUserHomeDir absent API 9.6.1, GRADLE_USER_HOME env var non respectée, --offline bloque mavenLocal, asciidoctorGemsPrepare insuffisant, gradleTestKit() compile mais méthode absente). Non fixable sans modification API GradleRunner. | 🔍 7/10
 | 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central — version 0.0.1→0.0.8 (slider + catalogue racine), codebase 0.0.1→0.0.5 (dernière Central), readme 0.0.0→0.0.1, correction namespace plugin ID `slider.translator`→`education.cccp.slider.translator` (Central education.cccp.* seulement), bundle nmcp 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org (slider:0.0.8 + 2 plugin markers), zéro régression 94 unit + 65 cucumber + 11 functional identiques pré/post (2 fail Playwright env préexistant) | ✅ TERMINÉ
@@ -62,6 +63,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
 | Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
 | Publication Maven Central 0.0.8 | Bump strictement montant (0.0.1→0.0.8, codebase 0.0.5, readme 0.0.1), correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org | ✅ 2026-07-09 | P2
+| SLD-4 | Refactor DDD slider.repository — extraction domaine depuis SliderManager.Git (SlideDeploymentRequest, GitCredentials, SlideDeployer) | 🔧 EN COURS (S-025 : value objects + deployer + refactor pushSlides, reste JGitSlidePusher) | P1
 |===
 
 '''

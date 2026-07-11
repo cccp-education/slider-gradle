@@ -1,33 +1,32 @@
-= PROMPT_REPRISE — slider-gradle — Session 025
-:session: 025
+= PROMPT_REPRISE — slider-gradle — Session 026
+:session: 026
 :date: 2026-07-11
 
-== Session 024 terminée — Cleanup dead code + Playwright @Disabled + check vert
+== Session 025 terminée — Refactor DDD slider.repository
 
-Cleanup de la dette technique : `./gradlew :slider:check` BUILD SUCCESSFUL
-pour la première fois (2 tests Playwright @Disabled avec raison documentée —
-gem JRuby isolé dans GradleRunner, root cause S-023).
+Extraction du domaine `slider.repository` depuis `SliderManager.Git`.
+Baby-step DDD/TDD/BDD 3 niveaux (unit → functional → cucumber).
 
-Actions réalisées :
-- `@Disabled` des 2 tests Playwright (SliderPlaywrightE2eTest + RtlPlaywrightFunctionalTest)
-- Suppression fichier mort `BakeryPluginFunctionalTests.kt` (388 lignes 100% commentées)
-- Fix KDoc stale `SliderManager.kt:467` (Reveal.js 3.9.1 → 5.2.1)
-- Fix `AGENT.adoc:6` version Reveal.js (3.9.1 → 5.2.1)
-- Suppression TODO mort `Slides.kt:44` (construct path from config YAML)
+Domaine `slider.repository` posé (2 fichiers production) :
+- `SlideDeploymentRequest` + `GitCredentials` — value objects validés
+  à la construction (slidesDir exists+isDirectory, tous String non-blank)
+- `SlideDeployer` — `createRepoDir`/`copySlides`/`cleanupRepoDir`/
+  `cleanupSlidesDir` avec typed results (`RepoDirResult`/`CopyResult`)
 
-Tests : 94 unit (0 fail, 2 skip) + 11 functional (0 fail) + 65 cucumber (0 fail, 1 skip).
-`./gradlew clean :slider:check` vert en 4m05s.
+Refactor `SliderManager.Git.pushSlides` : délègue file-system au domaine.
+`FileOps` + `FileOperationResult` supprimés (dead code).
 
-== Prochaine session — 025
+Tests ajoutés : 16 unit (10+6) + 2 functional + 9 cucumber BDD.
+`./gradlew :slider:check` VERT — 196 PASS, 0 FAIL, 4 SKIP.
 
-EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.8 + cleanup S-024 tous TERMINÉS.
-Slider-gradle en maintenance, `check` vert. Pistes :
+== Prochaine session — 026
 
-. Exploration nouveaux EPICs (slides interactives, export PPTX, etc.)
-. Mise à jour README i18n 10 langues avec nouvelles classes `slider.rtl`
-  + `slider.capsule` + version 0.0.8
-. Refactor DDD `SliderManager.Git` → domaine `slider.repository` (baby-step TDD)
-. Création tests fonctionnels pour `registerPublishSlidesTask` (TODOs S-024 supprimés)
+Pistes (par priorité) :
+. Extraction `JGitSlidePusher` (adaptateur) — `initAddCommitToSlides` +
+  `pushSlide` sortis de `SliderManager.Git` vers `slider.repository`
+. Tests fonctionnels `deploySlides` avec mock Git remote (bypass push)
+. Mise à jour README i18n 10 langues avec domaine `slider.repository`
+. Refactor `GitOperationResult` (models.kt) → `slider.repository`
 
 == Rappels
 
@@ -40,10 +39,14 @@ Slider-gradle en maintenance, `check` vert. Pistes :
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
+- Domaine `slider.repository` : 2 classes (SlideDeploymentRequest,
+  SlideDeployer) + 2 value objects (GitCredentials, typed results)
 - Domaine `slider.rtl` : 4 classes (RtlAssertionCode, RtlAssertionResult,
   SlideRenderData, RtlSlideAssertion)
 - Domaine `slider.capsule` : 4 classes (CapsuleScript, SlideSegment,
   CapsuleScriptWriter, AsciidocSpeakerNoteParser)
-- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner, non fixable sans
-  withGradleUserHomeDir dans l'API GradleRunner 9.6.1)
+- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner, non fixable
+  sans withGradleUserHomeDir dans l'API GradleRunner 9.6.1)
 - `./gradlew :slider:check` est VERT (depuis S-024)
+- Tâche Gradle : `deploySlides` (constante TASK_PUBLISH_SLIDES =
+  "deploySlides"), group "deploy"
