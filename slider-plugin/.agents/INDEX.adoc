@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-07-11
-_Session terminee_ : 025 — Refactor DDD `SliderManager.Git` → domaine `slider.repository`. Baby-step TDD/BDD 3 niveaux. `SlideDeploymentRequest` + `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/cleanup, typed results). `FileOps` + `FileOperationResult` supprimés (dead code). `Git.pushSlides` délègue au domaine. 16 unit + 2 functional + 9 cucumber BDD ajoutés. `./gradlew :slider:check` VERT — 196 PASS, 0 FAIL, 4 SKIP.
-_Prochaine session_ : 026 — Extraction `JGitSlidePusher` (adaptateur JGit), tests fonctionnels `deploySlides` mock Git, README i18n `slider.repository`, refactor `GitOperationResult` → domaine.
+_Session terminee_ : 026 — Rename package Cucumber `slider.scenarios` → `slider.steps`. Fix double `scenarios` dans chemin `src/test/scenarios/slider/scenarios/` → `src/test/scenarios/slider/steps/`. 12 fichiers renommés, glue Cucumber mise à jour, exclusion locale `slider.steps.**` ajoutée au `test` task (plugin conventions n'exclut que `*.scenarios.*`). Zéro régression.
+_Prochaine session_ : 027 — Extraction `JGitSlidePusher` (adaptateur JGit), tests fonctionnels `deploySlides` mock Git, README i18n `slider.repository`, refactor `GitOperationResult` → domaine.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 026 | 2026-07-11 | refactor | Rename Cucumber steps package `slider.scenarios` → `slider.steps`. Fix double `scenarios` dans chemin `src/test/scenarios/slider/scenarios/` → `src/test/scenarios/slider/steps/`. 12 fichiers renommés, glue Cucumber mise à jour, exclusion locale `slider.steps.**` ajoutée au `test` task. Zéro régression. | ✅ 8/10
 | 025 | 2026-07-11 | refactor+ddd+tdd+bdd | Refactor DDD slider.repository — extraction `SlideDeploymentRequest` + `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/cleanup, typed results RepoDirResult/CopyResult) depuis `SliderManager.Git`. `FileOps` + `FileOperationResult` supprimés (dead code). `Git.pushSlides` délègue au domaine. Baby-step TDD/BDD : 16 unit (10 SlideDeploymentRequestTest + 6 SlideDeployerTest) + 2 functional (SlideDeploymentFunctionalTest) + 9 cucumber (11_deployment_request.feature). `./gradlew :slider:check` VERT 196 PASS / 0 FAIL / 4 SKIP. | ✅ 9/10
 | 024 | 2026-07-11 | cleanup | Cleanup dead code + Playwright @Disabled + check vert — @Disabled 2 tests Playwright (gem JRuby isolé, root cause S-023), suppression BakeryPluginFunctionalTests.kt (388 lignes mortes), fix KDoc Reveal.js 3.9.1→5.2.1, suppression TODO Slides.kt:44. `./gradlew check` vert pour la première fois. 94 unit (0 fail, 2 skip) + 11 functional + 65 cucumber (0 fail, 1 skip). | ✅ 8/10
 | 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé dans /tmp, JRuby ne trouve pas la gem asciidoctor-revealjs. 5 approches testées (withGradleUserHomeDir absent API 9.6.1, GRADLE_USER_HOME env var non respectée, --offline bloque mavenLocal, asciidoctorGemsPrepare insuffisant, gradleTestKit() compile mais méthode absente). Non fixable sans modification API GradleRunner. | 🔍 7/10

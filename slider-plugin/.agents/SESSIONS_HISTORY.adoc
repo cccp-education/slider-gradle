@@ -2,6 +2,28 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 026 (2026-07-11) — Rename Cucumber steps package
+
+Fix double `scenarios` dans le chemin `src/test/scenarios/slider/scenarios/`.
+Renommage package `slider.scenarios` → `slider.steps` pour cohérence
+sémantique (ce sont des Cucumber step definitions, pas des scénarios).
+
+Actions :
+- Renommage sous-répertoire `scenarios/` → `steps/` (12 fichiers)
+- `package slider.scenarios` → `package slider.steps` (12 fichiers)
+- `GLUE_PROPERTY_NAME` value `"slider.scenarios"` → `"slider.steps"`
+  (CucumberTestRunner.kt)
+- Ajout `excludeTestsMatching("slider.steps.**")` au `test` task dans
+  build.gradle.kts (plugin conventions n'exclut que `*.scenarios.*`)
+- Commentaire build.gradle.kts mis à jour
+
+Chemin final : `src/test/scenarios/slider/steps/` — `scenarios` (dir
+source Cucumber) + `steps` (package step definitions). Zéro redondance.
+
+Tests : 183 test+cucumber PASS, 13 functional PASS, 0 FAIL.
+
+12 fichiers renommés, 1 build.gradle.kts modifié, zéro régression.
+
 == Session 025 (2026-07-11) — Refactor DDD slider.repository
 
 Extraction du domaine `slider.repository` depuis `SliderManager.Git`.
@@ -219,6 +241,7 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 
 |===
 | # | Date | Type | Sujet | Score
+| 026 | 2026-07-11 | refactor | Rename Cucumber steps package slider.scenarios → slider.steps. Fix double scenarios dans chemin src/test/scenarios/slider/scenarios/ → src/test/scenarios/slider/steps/. 12 fichiers renommés, glue mise à jour, exclusion locale slider.steps.** ajoutée. Zéro régression. | ✅ 8/10
 | 025 | 2026-07-11 | refactor+ddd+tdd+bdd | Refactor DDD slider.repository — extraction SlideDeploymentRequest + GitCredentials (value objects) + SlideDeployer (createRepoDir/copySlides/cleanup, typed results) depuis SliderManager.Git. FileOps + FileOperationResult supprimés. Git.pushSlides délègue au domaine. Baby-step TDD/BDD : 16 unit + 2 functional + 9 cucumber. ./gradlew check VERT 196 PASS / 0 FAIL / 4 SKIP. | ✅ 9/10
 | 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé, JRuby ne trouve pas asciidoctor-revealjs. 5 approches testées, non fixable sans modification API GradleRunner 9.6.1. | 🔍 7/10
 | 022 | 2026-07-09 | bump+publish | Bump 0.0.8 + Publication Maven Central (version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org, zéro régression) | ✅ TERMINÉ

@@ -1,0 +1,47 @@
+= Session 026 — Rename Cucumber steps package
+:date: 2026-07-11
+:session: 026
+
+== Sujet
+
+Fix double `scenarios` dans le chemin `src/test/scenarios/slider/scenarios/`.
+Renommage package `slider.scenarios` → `slider.steps` pour cohérence sémantique.
+
+== Problème
+
+Le chemin `src/test/scenarios/slider/scenarios/` contenait `scenarios` en
+double :
+- `src/test/scenarios/` — dir source Cucumber (config `scenariosDir` du
+  plugin conventions)
+- `slider/scenarios/` — sous-répertoire du package `slider.scenarios`
+
+== Fix
+
+Renommage du sous-répertoire `scenarios/` → `steps/` (12 fichiers) :
+- `slider.scenarios` → `slider.steps` (12 package declarations)
+- `GLUE_PROPERTY_NAME` value `"slider.scenarios"` → `"slider.steps"`
+  (CucumberTestRunner.kt)
+- Ajout `excludeTestsMatching("slider.steps.**")` au `test` task dans
+  build.gradle.kts (le plugin conventions n'exclut que `*.scenarios.*` par
+  défaut — exclusion locale nécessaire pour le nouveau package)
+- Commentaire build.gradle.kts mis à jour
+
+== Résultat
+
+Chemin final : `src/test/scenarios/slider/steps/` — `scenarios` (dir
+source Cucumber) + `steps` (package step definitions). Zéro redondance.
+
+Tests : 183 test+cucumber PASS, 13 functional PASS, 0 FAIL.
+
+== Fichiers modifiés
+
+* `slider-plugin/slider/build.gradle.kts` — exclusion `slider.steps.**`
+* 12 fichiers renommés `scenarios/` → `steps/` + package + glue mis à jour
+
+== Note cross-borough
+
+Le package `*.scenarios` est utilisé par 15 boroughs. Le plugin conventions
+exclut `*.scenarios.*` du `test` task. Ce renommage est local à slider-gradle
+(car le double `scenarios/scenarios` n'existe que ici). Les autres boroughs
+utilisent soit `src/test/scenarios/<name>/scenarios/` (même problème mais
+non signalé), soit `src/test/kotlin/<name>/scenarios/` (pas de doublon).

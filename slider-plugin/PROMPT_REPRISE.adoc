@@ -1,25 +1,22 @@
-= PROMPT_REPRISE — slider-gradle — Session 026
-:session: 026
+= PROMPT_REPRISE — slider-gradle — Session 027
+:session: 027
 :date: 2026-07-11
 
-== Session 025 terminée — Refactor DDD slider.repository
+== Sessions 025-026 terminées
 
-Extraction du domaine `slider.repository` depuis `SliderManager.Git`.
-Baby-step DDD/TDD/BDD 3 niveaux (unit → functional → cucumber).
+S-025 : Refactor DDD `slider.repository` — extraction `SlideDeploymentRequest`
++ `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/
+cleanup, typed results). `FileOps` + `FileOperationResult` supprimés.
+`Git.pushSlides` délègue au domaine. 16 unit + 2 functional + 9 cucumber BDD.
 
-Domaine `slider.repository` posé (2 fichiers production) :
-- `SlideDeploymentRequest` + `GitCredentials` — value objects validés
-  à la construction (slidesDir exists+isDirectory, tous String non-blank)
-- `SlideDeployer` — `createRepoDir`/`copySlides`/`cleanupRepoDir`/
-  `cleanupSlidesDir` avec typed results (`RepoDirResult`/`CopyResult`)
+S-026 : Rename package `slider.scenarios` → `slider.steps`. Fix double
+`scenarios` dans chemin `src/test/scenarios/slider/scenarios/` →
+`src/test/scenarios/slider/steps/`. 12 fichiers renommés, glue Cucumber
+mise à jour, exclusion locale `slider.steps.**` ajoutée au `test` task.
 
-Refactor `SliderManager.Git.pushSlides` : délègue file-system au domaine.
-`FileOps` + `FileOperationResult` supprimés (dead code).
-
-Tests ajoutés : 16 unit (10+6) + 2 functional + 9 cucumber BDD.
 `./gradlew :slider:check` VERT — 196 PASS, 0 FAIL, 4 SKIP.
 
-== Prochaine session — 026
+== Prochaine session — 027
 
 Pistes (par priorité) :
 . Extraction `JGitSlidePusher` (adaptateur) — `initAddCommitToSlides` +
@@ -30,8 +27,8 @@ Pistes (par priorité) :
 
 == Rappels
 
-- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
-  `education.cccp.slider.translator`
+- GroupId : `education.ccp`, Plugin IDs : `education.ccp.slider` +
+  `education.ccp.slider.translator`
 - Version publiée Central : 0.0.8 (build.gradle.kts hardcodé 0.0.8)
 - conventions-gradle : mavenLocal 0.0.2
 - i18n-contracts : Central 0.0.2
@@ -39,14 +36,16 @@ Pistes (par priorité) :
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
-- Domaine `slider.repository` : 2 classes (SlideDeploymentRequest,
-  SlideDeployer) + 2 value objects (GitCredentials, typed results)
+- Package Cucumber steps : `slider.steps` (renommé S-026, was `slider.scenarios`)
+- Domaine `slider.repository` : SlideDeploymentRequest, GitCredentials,
+  SlideDeployer, RepoDirResult, CopyResult
 - Domaine `slider.rtl` : 4 classes (RtlAssertionCode, RtlAssertionResult,
   SlideRenderData, RtlSlideAssertion)
 - Domaine `slider.capsule` : 4 classes (CapsuleScript, SlideSegment,
   CapsuleScriptWriter, AsciidocSpeakerNoteParser)
-- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner, non fixable
-  sans withGradleUserHomeDir dans l'API GradleRunner 9.6.1)
+- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner)
 - `./gradlew :slider:check` est VERT (depuis S-024)
 - Tâche Gradle : `deploySlides` (constante TASK_PUBLISH_SLIDES =
   "deploySlides"), group "deploy"
+- Exclusion locale `slider.steps.**` dans `test` task (le plugin
+  conventions n'exclut que `*.scenarios.*` par défaut)
