@@ -1,37 +1,39 @@
-= PROMPT_REPRISE — slider-gradle — Session 024
-:session: 024
-:date: 2026-07-09
+= PROMPT_REPRISE — slider-gradle — Session 025
+:session: 025
+:date: 2026-07-11
 
-== Session 023 terminée — Investigation Playwright Gem JRuby 🔍
+== Session 024 terminée — Cleanup dead code + Playwright @Disabled + check vert
 
-Investigation des 2 tests Playwright échouant (`RtlPlaywrightFunctionalTest` +
-`SliderPlaywrightE2eTest`) — `LoadError: no such file to load -- asciidoctor-revealjs`.
+Cleanup de la dette technique : `./gradlew :slider:check` BUILD SUCCESSFUL
+pour la première fois (2 tests Playwright @Disabled avec raison documentée —
+gem JRuby isolé dans GradleRunner, root cause S-023).
 
-Root cause : `GradleRunner.create()` crée un Gradle user home isolé dans `/tmp`.
-JRuby ne trouve pas la gem `asciidoctor-revealjs` dans cet environnement vierge.
-5 approches testées, aucune applicable dans l'état actuel de l'API GradleRunner 9.6.1.
+Actions réalisées :
+- `@Disabled` des 2 tests Playwright (SliderPlaywrightE2eTest + RtlPlaywrightFunctionalTest)
+- Suppression fichier mort `BakeryPluginFunctionalTests.kt` (388 lignes 100% commentées)
+- Fix KDoc stale `SliderManager.kt:467` (Reveal.js 3.9.1 → 5.2.1)
+- Fix `AGENT.adoc:6` version Reveal.js (3.9.1 → 5.2.1)
+- Suppression TODO mort `Slides.kt:44` (construct path from config YAML)
 
-Solutions possibles :
-- `gem install asciidoctor-revealjs` système-wide
-- Attendre que GradleRunner expose `withGradleUserHomeDir`
-- `@Disabled` avec raison documentée
+Tests : 94 unit (0 fail, 2 skip) + 11 functional (0 fail) + 65 cucumber (0 fail, 1 skip).
+`./gradlew clean :slider:check` vert en 4m05s.
 
-== Prochaine session — 024
+== Prochaine session — 025
 
-EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.1 + US-3.4-bis +
-Publication 0.0.8 tous TERMINÉS. Slider-gradle en maintenance. Pistes :
+EPICs SLD-0/1/2/3 + CNV-6/7/8 + Publication 0.0.8 + cleanup S-024 tous TERMINÉS.
+Slider-gradle en maintenance, `check` vert. Pistes :
 
-. `@Disabled` les 2 tests Playwright avec raison documentée (gem JRuby isolé)
 . Exploration nouveaux EPICs (slides interactives, export PPTX, etc.)
 . Mise à jour README i18n 10 langues avec nouvelles classes `slider.rtl`
   + `slider.capsule` + version 0.0.8
+. Refactor DDD `SliderManager.Git` → domaine `slider.repository` (baby-step TDD)
+. Création tests fonctionnels pour `registerPublishSlidesTask` (TODOs S-024 supprimés)
 
 == Rappels
 
 - GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
   `education.cccp.slider.translator`
 - Version publiée Central : 0.0.8 (build.gradle.kts hardcodé 0.0.8)
-- mavenLocal : 0.0.8 (aligné)
 - conventions-gradle : mavenLocal 0.0.2
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5
@@ -42,6 +44,6 @@ Publication 0.0.8 tous TERMINÉS. Slider-gradle en maintenance. Pistes :
   SlideRenderData, RtlSlideAssertion)
 - Domaine `slider.capsule` : 4 classes (CapsuleScript, SlideSegment,
   CapsuleScriptWriter, AsciidocSpeakerNoteParser)
-- Reveal.js RTL = `rtl: true` config JS + `.rtl` classe runtime (PAS `<html dir>`)
-- 2 tests Playwright échouent (gem JRuby isolé, préexistant, non fixable sans
-  `withGradleUserHomeDir` dans GradleRunner API)
+- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner, non fixable sans
+  withGradleUserHomeDir dans l'API GradleRunner 9.6.1)
+- `./gradlew :slider:check` est VERT (depuis S-024)

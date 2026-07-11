@@ -41,7 +41,5 @@ object Slides {
         const val IMAGES = "images"
         const val DEFAULT_SLIDES_FOLDER = "misc"
         const val SLIDES_CONTEXT_YML = "slides-context.yml"
-        //TODO: construct path from config file in yaml format
-
     }
 }

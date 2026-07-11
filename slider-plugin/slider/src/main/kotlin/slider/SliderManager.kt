@@ -464,7 +464,7 @@ object SliderManager {
 
         /**
          * Registers the `slider {}` DSL extension for consumer configuration,
-         * and pins the RevealJS template to reveal.js 3.9.1 from the hakimel/reveal.js
+         * and pins the RevealJS template to reveal.js 5.2.1 from the hakimel/reveal.js
          * GitHub repository.
          */
         internal fun Project.configureExtensions() {

@@ -2,6 +2,7 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 024 | 2026-07-11 | cleanup | — | Cleanup dead code + Playwright @Disabled + check vert — @Disabled 2 tests Playwright (gem JRuby isolé), suppression BakeryPluginFunctionalTests.kt (388 lignes mortes), fix KDoc Reveal.js 3.9.1→5.2.1, suppression TODO Slides.kt:44. `./gradlew check` vert pour la première fois.
 | 023 | 2026-07-09 | — | — | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé, JRuby ne trouve pas asciidoctor-revealjs. 5 approches testées, non fixable sans modification API GradleRunner 9.6.1.
 | 022 | 2026-07-09 | PUB | — | Bump 0.0.8 + Publication Maven Central — version 0.0.1→0.0.8, codebase 0.0.1→0.0.5, readme 0.0.0→0.0.1, correction namespace plugin ID `slider.translator`→`education.cccp.slider.translator`, bundle nmcp 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org (slider + 2 plugin markers), zéro régression
 | 021 | 2026-07-09 | SLD-3 | US-3.4-bis | Validation visuelle Playwright RTL — domaine DDD slider.rtl (RtlAssertionCode + RtlAssertionResult + SlideRenderData + RtlSlideAssertion) + RtlPlaywrightFunctionalTest (Playwright-jvm deck arabe -Planguage=ar) + 10_rtl_visual_validation.feature 6 scénarios BDD (8 unit + 1 functional + 6 cucumber)

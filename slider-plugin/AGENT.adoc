@@ -3,7 +3,7 @@
 _Produit_ : Slide Deck Generator comme plugin Gradle
 _Licence_ : Apache 2.0 (OSS)
 _DAG_ : N2 — Plugin Gradle de generation de presentations
-_Reveal.js_ : 3.9.1 (cible upgrade 5.2.1)
+_Reveal.js_ : 5.2.1 (upgrade SLD-1 terminé)
 
 == Principe
 
