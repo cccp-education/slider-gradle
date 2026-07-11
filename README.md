@@ -8,7 +8,7 @@
 [![CI](https://img.shields.io/badge/CI-not%20configured-lightgrey?label=CI)](#)
 [![License](https://img.shields.io/github/license/cheroliv/slider-gradle?label=License)](../LICENCE)
 
-- **Version**: `0.0.1` · **Group**: `education.cccp` · **Plugin ID**: `education.cccp.slider`
+- **Version**: `0.0.9` · **Group**: `education.cccp` · **Plugin ID**: `education.cccp.slider`
 - **Toolchain**: Java 24+ · Kotlin 2.3.20 · Gradle 9.5.1
 - **Build**: `./gradlew asciidoctorRevealJs` · **Tests**: `./gradlew test` (JUnit5) + `cucumberTest` (Cucumber) + `functionalTest` (Gradle Test Kit)
 - **Coverage**: not measured (no Kover)
@@ -26,7 +26,7 @@ a `*-deck-context.yml` for human review, then generates the final AsciiDoc deck
 enriched by project examples.
 
 It is part of the CCCP Education multi-plugin ecosystem (MIAMI borough, N2) and
-consumes `codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.1`).
+consumes `codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.5`).
 
 ```
 subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → HTML deck
@@ -38,7 +38,7 @@ subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → g
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -180,6 +180,23 @@ Unknown or missing values fall back to `ollama` with a logged warning.
 
 `<slug>` is derived from `subject` in kebab-case (accents normalised); `<lang>` is
 the ISO 639-1 code passed via `-Planguage` (default `fr`).
+
+## Domain model (DDD)
+
+The plugin's core logic is organised into pure domain packages, tested at three
+levels (unit → functional → Cucumber BDD). Framework types (JGit, AsciidoctorJ)
+are confined to thin adapters — the domain layer has zero framework leaks.
+
+| Package | Files | Responsibility |
+|---------|-------|----------------|
+| `slider.repository` | `SlideDeploymentRequest`, `SlideDeployer`, `JGitSlidePusher` | Deployment pipeline: value objects (`SlideDeploymentRequest`, `GitCredentials`), file-system adapter (`SlideDeployer` — createRepoDir/copySlides/cleanup), Git wire adapter (`JGitSlidePusher` — initAndCommit/push). Typed results `RepoDirResult`, `CopyResult`, `CommitResult`, `SlidePushResult`. Zero JGit leak outside `JGitSlidePusher.kt`. |
+| `slider.capsule` | `CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser` | Capsule feed: aggregate root + VO + plain-text serializer (contract consumed by `capsule-gradle`) + AsciiDoc speaker-note parser. |
+| `slider.rtl` | `RtlAssertionCode`, `RtlAssertionResult`, `SlideRenderData`, `RtlSlideAssertion` | RTL visual validation: pure-logic assertions (3 P0 + 1 P1) on rendered slide data. |
+
+The `SliderManager.Git` nested object is a thin Gradle adapter that builds a
+`SlideDeploymentRequest` from the deck-context YAML and delegates to the
+`slider.repository` domain (≈55 lines). All Git operations go through
+`JGitSlidePusher`; the domain never imports `org.eclipse.jgit`.
 
 ## Prerequisites
 

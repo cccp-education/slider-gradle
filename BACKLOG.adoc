@@ -7,6 +7,17 @@
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== EPIC PUB — Publication Maven Central 0.0.9 ✅ TERMINE (Session 028, 2026-07-11)
+
+README i18n (20 fichiers) mis à jour avec domaine DDD `slider.repository` + 2
+autres domaines (`slider.capsule`, `slider.rtl`). Bump 0.0.8 → 0.0.9. Bundle
+nmcp `63048fec` AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers).
+
+| Artefact | URL |
+|---|---|
+| slider 0.0.9 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.9 |
+
+'''
 == EPIC SLD-4 — Refactor DDD slider.repository ✅ TERMINÉ
 
 _Vision_ : Extraction du domaine `slider.repository` depuis `SliderManager.Git`.

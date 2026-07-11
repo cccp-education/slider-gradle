@@ -2,6 +2,34 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 028 (2026-07-11) — README i18n slider.repository + Bump 0.0.9 + Publication Maven Central
+
+README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à
+jour avec le domaine DDD `slider.repository` (SlideDeploymentRequest,
+SlideDeployer, JGitSlidePusher) + 2 autres domaines DDD (`slider.capsule`,
+`slider.rtl`). Nouvelle section "Domain model (DDD)" ajoutée dans les 10 README
+consommateurs (traduite dans 9 langues : zh/hi/es/fr/ar/bn/pt/ru/ur). Module
+layout enrichi dans les 10 README plugin (3 sous-dossiers DDD `repository/`,
+`capsule/`, `rtl/` avec fichiers et responsabilités). EPIC status mis à jour
+dans toutes les langues (SLD-2/3/4 ✅, CNV-6/7/8 ✅, PUB 0.0.8 + 0.0.9 ✅,
+mention "last session 010" → "027").
+
+Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues libs.versions.toml).
+Publication Maven Central via nmcp — bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef`,
+publishingType AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers
+`education.cccp.slider` + `education.cccp.slider.translator`). Signing GPG clé
+`CBE2926CD46D8E8B`.
+
+`./gradlew :slider:check` VERT — 211 PASS / 0 FAIL / 3 SKIP (inchangé depuis
+S-027, les README sont de la documentation, zéro impact build). Pré-requis
+nmcp vérifiés : zéro SNAPSHOT, deps `education.cccp:*` publiées Central
+(i18n-contracts 0.0.2, codebase-plugin 0.0.5, conventions-gradle 0.0.2).
+
+Pistes restantes (non cadrées en EPIC) : Fix 2 tests Playwright @Disabled
+(gem JRuby isolé GradleRunner, non fixable sans modification API GradleRunner,
+piste bloquée techniquement). Définir prochain EPIC (maintenance ou nouvelle
+feature, vision produit à définir).
+
 == Session 027 (2026-07-11) — Extraction JGitSlidePusher + EPIC SLD-4 clos
 
 Extraction de l'adaptateur JGit (`JGitSlidePusher`) depuis `SliderManager.Git`.
@@ -272,6 +300,7 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 
 |===
 | # | Date | Type | Sujet | Score
+| 028 | 2026-07-11 | docs+i18n+pub | README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD slider.repository + slider.capsule + slider.rtl. Nouvelle section "Domain model (DDD)" traduite 9 langues. Bump 0.0.8 → 0.0.9. Publication Maven Central bundle 63048fec AUTOMATIC, 3 artefacts signés. ./gradlew check VERT 211 PASS / 0 FAIL / 3 SKIP. | ✅ 9/10
 | 026 | 2026-07-11 | refactor | Rename Cucumber steps package slider.scenarios → slider.steps. Fix double scenarios dans chemin src/test/scenarios/slider/scenarios/ → src/test/scenarios/slider/steps/. 12 fichiers renommés, glue mise à jour, exclusion locale slider.steps.** ajoutée. Zéro régression. | ✅ 8/10
 | 025 | 2026-07-11 | refactor+ddd+tdd+bdd | Refactor DDD slider.repository — extraction SlideDeploymentRequest + GitCredentials (value objects) + SlideDeployer (createRepoDir/copySlides/cleanup, typed results) depuis SliderManager.Git. FileOps + FileOperationResult supprimés. Git.pushSlides délègue au domaine. Baby-step TDD/BDD : 16 unit + 2 functional + 9 cucumber. ./gradlew check VERT 196 PASS / 0 FAIL / 4 SKIP. | ✅ 9/10
 | 023 | 2026-07-09 | investigation | Investigation Playwright Gem JRuby — diagnostic root cause GradleRunner crée Gradle user home isolé, JRuby ne trouve pas asciidoctor-revealjs. 5 approches testées, non fixable sans modification API GradleRunner 9.6.1. | 🔍 7/10

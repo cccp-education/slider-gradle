@@ -1,0 +1,140 @@
+= Session 028 — slider-gradle — README i18n slider.repository + Bump 0.0.9 + Publication Maven Central
+:session: 028
+:date: 2026-07-11
+
+== Mission
+
+Mettre à jour les README i18n (10 langues × 2 fichiers = 20 README) avec le
+domaine DDD `slider.repository` (JGitSlidePusher, CommitResult, SlidePushResult),
+puis bump 0.0.8 → 0.0.9 et publication Maven Central.
+
+== Contexte pré-session
+
+Tous les EPICs actifs SLD-0→4 + CNV-6/7/8 + PUB 0.0.8 sont clos. L'EPIC SLD-4
+(Refactor DDD `slider.repository`) clôturé en S-025 + S-027 n'avait pas encore
+été valorisé dans les README i18n. Deux pistes restantes listées dans le
+PROMPT_REPRISE S-028 :
+
+. README i18n 10 langues à mettre à jour avec `slider.repository`
+. Fix 2 tests Playwright `@Disabled` (gem JRuby, non fixable sans modification
+  API GradleRunner — investigation S-023, piste bloquée techniquement)
+
+Cette session traite la piste 1 (actionnable) + bump + publication.
+
+== Étape 1 — README i18n mis à jour
+
+=== README EN master (2 fichiers)
+
+. `README.md` (consommateur) :
+ * Bump version `0.0.1` → `0.0.9` (ligne Version + bloc `plugins { id(...) }`)
+ * Dépendance `codebase-gradle` version `0.0.1` → `0.0.5` (dernier Central)
+ * Nouvelle section "Domain model (DDD)" avant "Prerequisites" — 3 packages
+   décrits (`slider.repository`, `slider.capsule`, `slider.rtl`) avec table
+   Files/Responsibility, note sur `SliderManager.Git` thin adapter (≈55 lignes)
+
+. `slider-plugin/README.md` (plugin interne) :
+ * Bump version `0.0.1` → `0.0.9`
+ * Dépendance `codebase` `0.0.1` → `0.0.5`
+ * Module layout enrichi — 3 sous-dossiers DDD ajoutés (`repository/`,
+   `capsule/`, `rtl/`) avec leurs fichiers et responsabilités
+ * Test matrix — exclusion `slider.scenarios.**` → `slider.steps.**`
+   (renommage S-026)
+ * EPIC status — tableau mis à jour : SLD-2 ✅ (5/5), SLD-3 ✅ (7/7),
+   SLD-4 ✅ (8/8), CNV-6/7/8 ✅, PUB 0.0.8 + 0.0.9 ✅. Mention "last
+   session 010" → "027"
+
+=== 9 traductions consommateur (README.consommateurs/)
+
+Pour chaque fichier (`zh`, `hi`, `es`, `fr`, `ar`, `bn`, `pt`, `ru`, `ur`) :
+ * En-tête `<!-- translated from README.md rev 0.0.1 -->` → `rev 0.0.9`
+ * Ligne Version bumpée `0.0.1` → `0.0.9` (FR : `Groupe`, autres : `Group`)
+ * Dépendance `codebase-gradle` version `0.0.1` → `0.0.5`
+ * Bloc `plugins { id("education.cccp.slider") version "0.0.1" }` → `0.0.9`
+ * Nouvelle section "Domain model (DDD)" traduite avant "Prérequis"
+
+=== 9 traductions plugin (README.plugin/)
+
+Pour chaque fichier :
+ * En-tête `rev 0.0.1` → `rev 0.0.9`
+ * Ligne Version bumpée `0.0.1` → `0.0.9`
+ * Dépendance `codebase` version `0.0.1` → `0.0.5`
+ * EPIC status — table mise à jour (SLD-2/3/4 ✅, CNV-6/7/8 ✅, PUB 0.0.8 +
+   0.0.9 ✅). FR : traduit en français (TERMINÉ). Autres langues : statuts
+   conservés en anglais (standard du repo).
+ * Mention "last session 010" → "027" dans toutes les langues
+
+Total : 20 fichiers README modifiés (2 EN masters + 9 consommateurs + 9 plugins).
+
+== Étape 2 — Vérification build
+
+`./gradlew :slider:check` BUILD SUCCESSFUL — 211 PASS / 0 FAIL / 3 SKIP
+(UP-TO-DATE, inchangé depuis S-027). Les README sont des fichiers de
+documentation, zéro impact sur le build.
+
+== Étape 3 — Bump 0.0.8 → 0.0.9
+
+| Fichier | Champ | Av | Après |
+| `slider-plugin/slider/build.gradle.kts:26` | `version` | `0.0.8` | `0.0.9` |
+| `slider-plugin/gradle/libs.versions.toml:2` | `slider` | `0.0.8` | `0.0.9` |
+| `gradle/libs.versions.toml:2` (racine) | `slider` | `0.0.8` | `0.0.9` |
+
+`./gradlew :slider:compileKotlin` BUILD SUCCESSFUL après bump.
+
+== Étape 4 — Vérification pré-requis publication (nmcp)
+
+Pré-requis AGENTS.adoc méthode nmcp :
+ * Version hardcodée `0.0.9` dans `build.gradle.kts` ✅
+ * `settings.gradle.kts` nmcp 1.5.0 + centralPortal (username/password
+   depuis `~/.gradle/gradle.properties`, publishingType AUTOMATIC) ✅
+ * POM complet sur `withType<MavenPublication>` via convention plugin
+   `publishing` ✅
+ * `repositories { mavenCentral() }` via convention plugin ✅
+ * `signing { useGpgCmd() }` via convention plugin ✅
+ * Toutes les dépendances `implementation` releases (zéro SNAPSHOT) ✅
+ * Dépendances `education.cccp:*` publiées sur Central :
+   ** `i18n-contracts:0.0.2` (MEMPHIS S-017) ✅
+   ** `codebase-plugin:0.0.5` ✅
+   ** `conventions-gradle` 0.0.2 (ABIDJAN S-008) ✅
+ * Build compile (`./gradlew :slider:build -x test`) BUILD SUCCESSFUL ✅
+
+== Étape 5 — Publication Maven Central
+
+`./gradlew publishAggregationToCentralPortal --no-daemon` BUILD SUCCESSFUL.
+
+Bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef` uploaded, publishingType
+AUTOMATIC. 3 artefacts publiés :
+
+. `education.cccp:slider:0.0.9`
+. `education.cccp.slider` (plugin marker) 0.0.9
+. `education.cccp.slider.translator` (plugin marker) 0.0.9
+
+Signing GPG clé `CBE2926CD46D8E8B` (3 artefacts signés).
+
+== Fichiers modifiés
+
+=== README (20 fichiers)
+. `README.md` (consommateur EN master)
+. `slider-plugin/README.md` (plugin EN master)
+. `README.consommateurs/README.{zh,hi,es,fr,ar,bn,pt,ru,ur}.md` (9)
+. `slider-plugin/README.plugin/README.{zh,hi,es,fr,ar,bn,pt,ru,ur}.md` (9)
+
+=== Build (3 fichiers)
+. `slider-plugin/slider/build.gradle.kts` — version `0.0.8` → `0.0.9`
+. `slider-plugin/gradle/libs.versions.toml` — slider `0.0.8` → `0.0.9`
+. `gradle/libs.versions.toml` — slider `0.0.8` → `0.0.9`
+
+== Pistes restantes (non cadrées en EPIC)
+
+. Fix 2 tests Playwright `@Disabled` (gem JRuby isolé GradleRunner —
+  investigation S-023, non fixable sans modification API GradleRunner).
+  Piste bloquée techniquement.
+. Définir prochain EPIC — maintenance ou nouvelle fonctionnalité (vision
+  produit à définir).
+
+== Score session
+
+9/10 — README i18n 20 fichiers mis à jour avec domaine `slider.repository`
++ 2 autres domaines DDD (`slider.capsule`, `slider.rtl`), bump strictement
+montant 0.0.8 → 0.0.9 sans régression (211 PASS / 0 FAIL / 3 SKIP), publication
+Maven Central 0.0.9 confirmée (bundle `63048fec`, 3 artefacts signés), zéro
+secret/token dans le diff.

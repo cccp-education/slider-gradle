@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — 用户指南
 
 > 基于 RAG 增强的 Gradle 插件，从 AsciiDoc 源文件生成 Reveal.js 演示文稿。
@@ -24,7 +24,7 @@
 `*-deck-context.yml`，随后生成经项目示例增强的最终 AsciiDoc 演示文稿。
 
 它是 CCCP Education 多插件生态系统的一部分（MIAMI borough，N2），并使用
-`codebase-gradle`（plugin id `education.cccp.codebase` version `0.0.1`）。
+`codebase-gradle`（plugin id `education.cccp.codebase` version `0.0.5`）。
 
 ```
 subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → HTML deck
@@ -36,7 +36,7 @@ subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → g
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -176,6 +176,21 @@ slides:
 
 `<slug>` 由 `subject` 经 kebab-case 转换得到（重音符号已规范化）；`<lang>` 是
 通过 `-Planguage` 传入的 ISO 639-1 代码（默认为 `fr`）。
+
+## 领域模型 (DDD)
+
+插件的核心逻辑组织在纯领域包中,在三个层级测试(单元 → 功能 → Cucumber BDD)。
+框架类型(JGit、AsciidoctorJ)局限于薄适配器 — 领域层零框架泄漏。
+
+| 包 | 文件 | 职责 |
+|-----|------|------|
+| `slider.repository` | `SlideDeploymentRequest`、`SlideDeployer`、`JGitSlidePusher` | 部署管道:值对象(`SlideDeploymentRequest`、`GitCredentials`)、文件系统适配器(`SlideDeployer` — createRepoDir/copySlides/cleanup)、Git 适配器(`JGitSlidePusher` — initAndCommit/push)。类型化结果 `RepoDirResult`、`CopyResult`、`CommitResult`、`SlidePushResult`。`JGitSlidePusher.kt` 之外零 JGit 泄漏。 |
+| `slider.capsule` | `CapsuleScript`、`SlideSegment`、`CapsuleScriptWriter`、`AsciidocSpeakerNoteParser` | capsule feed:聚合根 + 值对象 + 纯文本序列化器(`capsule-gradle` 消费的契约)+ AsciiDoc 演讲者笔记解析器。 |
+| `slider.rtl` | `RtlAssertionCode`、`RtlAssertionResult`、`SlideRenderData`、`RtlSlideAssertion` | RTL 视觉验证:对渲染的幻灯片数据进行纯逻辑断言(3 P0 + 1 P1)。 |
+
+嵌套 object `SliderManager.Git` 是一个薄 Gradle 适配器,从 deck-context YAML
+构建 `SlideDeploymentRequest` 并委托给 `slider.repository` 领域(≈55 行)。
+所有 Git 操作通过 `JGitSlidePusher` 进行;领域从不导入 `org.eclipse.jgit`。
 
 ## 前置条件
 

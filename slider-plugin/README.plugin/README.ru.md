@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — Внутреннее устройство плагина
 
 > Руководство для разработчиков и контрибьюторов плагина `slider-plugin` для Gradle.
@@ -9,7 +9,7 @@
 [![Coverage](https://img.shields.io/static/v1?label=coverage&message=n%2Fa&color=lightgrey)]()
 [![License](https://img.shields.io/github/license/cheroliv/slider-gradle?label=License)](../LICENCE)
 
-- **Version**: `0.0.1` · **Group**: `education.cccp` · **Plugin ID**: `education.cccp.slider`
+- **Version**: `0.0.9` · **Group**: `education.cccp` · **Plugin ID**: `education.cccp.slider`
 - **Toolchain**: Java 24 · Kotlin 2.3.20 · Gradle 9.5.1
 - **Build**: `./gradlew build -x test` · **Tests**: `./gradlew test` + `functionalTest` + `cucumberTest` (wired into `check`)
 - **Coverage gate**: none (no Kover)
@@ -50,7 +50,7 @@ slider-plugin/
 
 ## Потребляемый плагин (зависимость N2 → N2)
 
-- `education.cccp.codebase` version `0.0.1` (catalog alias
+- `education.cccp.codebase` version `0.0.5` (catalog alias
   `libs.plugins.codebase` в `slider-plugin/gradle/libs.versions.toml`) — применяется
   как родственный плагин в `slider/build.gradle.kts`. Он предоставляет примитивы
   ingestа EAGER/RAG, переиспользуемые `RagManager`.
@@ -165,15 +165,18 @@ slider-plugin/
 
 ## Статус EPIC
 
-Из `slider-plugin/.agents/INDEX.adoc` (последняя сессия 010):
+Из `slider-plugin/.agents/INDEX.adoc` (последняя сессия 027):
 
 | EPIC | Description | Status |
 |------|-------------|--------|
 | SLD-0 | Bootstrap governance agent | ✅ DONE |
 | SLD-1 | Upgrade Reveal.js 3.9.1 → 5.2.1 + Auto-Animate + transitions | ✅ DONE (5/5 US) |
-| SLD-2 | Playwright E2E + Pro theme + Capsule feed | 🔴 IN PROGRESS — 4/5 US done (US-2.5 pending) |
-| SLD-3 | i18n 10 languages via `i18n-contracts:0.0.1` | ☐ NEW — framed session 010 |
-| Publication Maven Central 0.0.1 | NMCP, hardcoded version | ✅ 2026-06-11 |
+| SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
+| SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
+| SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
+| Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
+| Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
 
 ## Участие
 

@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-07-11
-_Session terminee_ : 027 — Extraction `JGitSlidePusher` (adaptateur JGit) depuis `SliderManager.Git`. `initAndCommit` + `push` avec types domaine `CommitResult`/`SlidePushResult` (zéro leak JGit). `SliderManager.Git` réduit ~120→55 lignes. Tests intégration pipeline avec bare repo local. Suppression `GitOperationResult` dead code + imports JGit de `models.kt`. 211 PASS / 0 FAIL / 3 SKIP. **EPIC SLD-4 TERMINÉ** 8/8 US.
-_Prochaine session_ : 028 — Définir prochain EPIC (maintenance ou nouvelle feature). README i18n `slider.repository`. Fix 2 tests Playwright @Disabled. Bump 0.0.9 possible.
+_Session terminee_ : 028 — README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD `slider.repository` + 2 autres domaines (`slider.capsule`, `slider.rtl`). Nouvelle section "Domain model (DDD)" dans les 10 README consommateurs. Module layout enrichi dans les 10 README plugin. EPIC status mis à jour toutes langues. Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues). Publication Maven Central via nmcp — bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef`, 3 artefacts signés (slider:0.0.9 + 2 plugin markers). `./gradlew :slider:check` VERT 211 PASS / 0 FAIL / 3 SKIP.
+_Prochaine session_ : 029 — Définir prochain EPIC (maintenance ou nouvelle feature). Fix 2 tests Playwright @Disabled (piste bloquée techniquement).
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 028 | 2026-07-11 | docs+i18n+pub | README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD `slider.repository` (SlideDeploymentRequest, SlideDeployer, JGitSlidePusher) + 2 autres domaines (`slider.capsule`, `slider.rtl`). Nouvelle section "Domain model (DDD)" dans les 10 README consommateurs (traduite dans 9 langues). Module layout enrichi dans les 10 README plugin. EPIC status mis à jour toutes langues (SLD-2/3/4 ✅, CNV-6/7/8 ✅, PUB 0.0.8 + 0.0.9 ✅). Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues libs.versions.toml). Publication Maven Central via nmcp — bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef`, publishingType AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers `education.cccp.slider` + `education.cccp.slider.translator`). `./gradlew :slider:check` VERT 211 PASS / 0 FAIL / 3 SKIP (inchangé). | ✅ 9/10
 | 027 | 2026-07-11 | refactor+ddd+tdd+bdd | Extraction `JGitSlidePusher` (adaptateur JGit) depuis `SliderManager.Git` — `initAndCommit` (Git.init + remoteAdd + add + commit) + `push` (Git.open + push + credentials) avec types domaine `CommitResult`/`SlidePushResult` (zéro leak JGit). `SliderManager.Git` réduit ~120→55 lignes (suppression `initAddCommitToSlides` + `pushSlide` + 7 imports JGit). Tests intégration pipeline avec bare repo local (`SlideDeploymentPipelineIntegrationTest` 3 tests). Suppression `GitOperationResult` dead code (leak `RevCommit`/`PushResult` dans `models.kt`). Baby-step TDD/BDD : 6 unit (JGitSlidePusherTest) + 3 unit (pipeline integration) + 3 cucumber (12_git_push_adapter.feature). `./gradlew :slider:check` VERT 211 PASS / 0 FAIL / 3 SKIP. **EPIC SLD-4 TERMINÉ** 8/8 US. | ✅ 9/10
 | 026 | 2026-07-11 | refactor | Rename Cucumber steps package `slider.scenarios` → `slider.steps`. Fix double `scenarios` dans chemin `src/test/scenarios/slider/scenarios/` → `src/test/scenarios/slider/steps/`. 12 fichiers renommés, glue Cucumber mise à jour, exclusion locale `slider.steps.**` ajoutée au `test` task. Zéro régression. | ✅ 8/10
 | 025 | 2026-07-11 | refactor+ddd+tdd+bdd | Refactor DDD slider.repository — extraction `SlideDeploymentRequest` + `GitCredentials` (value objects) + `SlideDeployer` (createRepoDir/copySlides/cleanup, typed results RepoDirResult/CopyResult) depuis `SliderManager.Git`. `FileOps` + `FileOperationResult` supprimés (dead code). `Git.pushSlides` délègue au domaine. Baby-step TDD/BDD : 16 unit (10 SlideDeploymentRequestTest + 6 SlideDeployerTest) + 2 functional (SlideDeploymentFunctionalTest) + 9 cucumber (11_deployment_request.feature). `./gradlew :slider:check` VERT 196 PASS / 0 FAIL / 4 SKIP. | ✅ 9/10
@@ -65,6 +66,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | CNV-8 | logback-exclusion convention (conventions-gradle plugin + migration slider) | ✅ TERMINÉ (session 017, -13 lignes slider) | P1
 | Publication Maven Central 0.0.1 | nmcp, POM sans guard, version 0.0.1 hardcodé, settings nmcp | ✅ 2026-06-11 | P2
 | Publication Maven Central 0.0.8 | Bump strictement montant (0.0.1→0.0.8, codebase 0.0.5, readme 0.0.1), correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org | ✅ 2026-07-09 | P2
+| Publication Maven Central 0.0.9 | README i18n slider.repository (20 fichiers) + bump 0.0.8→0.0.9, bundle 63048fec AUTOMATIC, 3 artefacts signés | ✅ 2026-07-11 | P2
 | SLD-4 | Refactor DDD slider.repository — extraction domaine depuis SliderManager.Git (SlideDeploymentRequest, GitCredentials, SlideDeployer, JGitSlidePusher, CommitResult, SlidePushResult) | ✅ TERMINÉ (S-025 + S-027, 8/8 US) | P1
 |===
 

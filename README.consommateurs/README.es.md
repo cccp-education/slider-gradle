@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — Guía del Consumidor
 
 > Plugin de Gradle aumentado con RAG que genera presentaciones Reveal.js a partir de fuentes AsciiDoc.
@@ -27,7 +27,7 @@ por un almacén pgvector. Un LLM propone un
 enriquecido con ejemplos del proyecto.
 
 Forma parte del ecosistema multi-plugin de CCCP Education (MIAMI borough, N2) y
-consume `codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.1`).
+consume `codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.5`).
 
 ```
 subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → HTML deck
@@ -39,7 +39,7 @@ subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → g
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -184,6 +184,24 @@ Los valores desconocidos o ausentes revierten a `ollama` con una advertencia reg
 
 `<slug>` se deriva de `subject` en kebab-case (acentos normalizados); `<lang>` es
 el código ISO 639-1 pasado vía `-Planguage` (predeterminado `fr`).
+
+## Modelo de dominio (DDD)
+
+La lógica central del plugin está organizada en paquetes de dominio puros,
+probados en tres niveles (unitario → funcional → Cucumber BDD). Los tipos del
+framework (JGit, AsciidoctorJ) están confinados en adaptadores delgados — la
+capa de dominio no tiene fugas del framework.
+
+| Paquete | Archivos | Responsabilidad |
+|---------|----------|-----------------|
+| `slider.repository` | `SlideDeploymentRequest`, `SlideDeployer`, `JGitSlidePusher` | Pipeline de despliegue: value objects (`SlideDeploymentRequest`, `GitCredentials`), adaptador de sistema de archivos (`SlideDeployer` — createRepoDir/copySlides/cleanup), adaptador Git (`JGitSlidePusher` — initAndCommit/push). Resultados tipados `RepoDirResult`, `CopyResult`, `CommitResult`, `SlidePushResult`. Cero fuga JGit fuera de `JGitSlidePusher.kt`. |
+| `slider.capsule` | `CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser` | Capsule feed: aggregate root + VO + serializador plain-text (contrato consumido por `capsule-gradle`) + parser de notas del orador AsciiDoc. |
+| `slider.rtl` | `RtlAssertionCode`, `RtlAssertionResult`, `SlideRenderData`, `RtlSlideAssertion` | Validación visual RTL: aserciones de lógica pura (3 P0 + 1 P1) sobre datos de slide renderizados. |
+
+El object anidado `SliderManager.Git` es un adaptador Gradle delgado que construye
+un `SlideDeploymentRequest` desde el YAML de deck-context y delega al dominio
+`slider.repository` (≈55 líneas). Todas las operaciones Git pasan por
+`JGitSlidePusher`; el dominio nunca importa `org.eclipse.jgit`.
 
 ## Requisitos previos
 

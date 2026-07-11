@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — Internes du Plugin
 
 > Guide développeur et contributeur pour le plugin Gradle `slider-plugin`.
@@ -9,7 +9,7 @@
 [![Coverage](https://img.shields.io/static/v1?label=couverture&message=n%2Fa&color=lightgrey)]()
 [![License](https://img.shields.io/github/license/cheroliv/slider-gradle?label=Licence)](../LICENCE)
 
-- **Version** : `0.0.1` · **Groupe** : `education.cccp` · **ID plugin** : `education.cccp.slider`
+- **Version** : `0.0.9` · **Groupe** : `education.cccp` · **ID plugin** : `education.cccp.slider`
 - **Toolchain** : Java 24 · Kotlin 2.3.20 · Gradle 9.5.1
 - **Build** : `./gradlew build -x test` · **Tests** : `./gradlew test` + `functionalTest` + `cucumberTest` (intégrés à `check`)
 - **Gate de couverture** : aucune (pas de Kover)
@@ -50,7 +50,7 @@ slider-plugin/
 
 ## Plugin consommé (dépendance N2 → N2)
 
-- `education.cccp.codebase` version `0.0.1` (alias catalogue
+- `education.cccp.codebase` version `0.0.5` (alias catalogue
   `libs.plugins.codebase` dans `slider-plugin/gradle/libs.versions.toml`) — appliqué
   comme plugin sibling dans `slider/build.gradle.kts`. Il fournit les primitives
   d'ingestion EAGER/RAG réutilisées par `RagManager`.
@@ -164,15 +164,18 @@ Le bloc `gradlePlugin` de `slider/build.gradle.kts` câble :
 
 ## Statut des EPICs
 
-D'après `slider-plugin/.agents/INDEX.adoc` (dernière session 010) :
+D'après `slider-plugin/.agents/INDEX.adoc` (dernière session 027) :
 
 | EPIC | Description | Statut |
 |------|-------------|--------|
 | SLD-0 | Bootstrap gouvernance agent | ✅ TERMINÉ |
 | SLD-1 | Upgrade Reveal.js 3.9.1 → 5.2.1 + Auto-Animate + transitions | ✅ TERMINÉ (5/5 US) |
-| SLD-2 | Playwright E2E + thème pro + feed capsule | 🔴 EN COURS — 4/5 US faites (US-2.5 en attente) |
-| SLD-3 | i18n 10 langues via `i18n-contracts:0.0.1` | ☐ NOUVEAU — cadré session 010 |
-| Publication Maven Central 0.0.1 | NMCP, version hardcodée | ✅ 2026-06-11 |
+| SLD-2 | Playwright E2E + thème pro + feed capsule | ✅ TERMINÉ (5/5 US) |
+| SLD-3 | i18n 10 langues via `i18n-contracts:0.0.2` | ✅ TERMINÉ (7/7 US) |
+| SLD-4 | Refactor DDD `slider.repository` — extraction domaine depuis `SliderManager.Git` | ✅ TERMINÉ (8/8 US, S-025 + S-027) |
+| CNV-6/7/8 | Migration conventions plugins (`education.cccp.build.*` v0.0.2) | ✅ TERMINÉ (build.gradle.kts 301 → 145 lignes, −52%) |
+| Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
+| Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
 
 ## Contribuer
 

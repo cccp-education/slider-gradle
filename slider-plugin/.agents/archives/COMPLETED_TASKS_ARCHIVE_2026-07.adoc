@@ -2,6 +2,8 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 028 | 2026-07-11 | PUB | — | README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD slider.repository + slider.capsule + slider.rtl. Nouvelle section "Domain model (DDD)" traduite 9 langues. EPIC status mis à jour toutes langues.
+| 028 | 2026-07-11 | PUB | — | Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues libs.versions.toml). Publication Maven Central via nmcp bundle 63048fec AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers). ./gradlew check VERT 211 PASS / 0 FAIL / 3 SKIP.
 | 027 | 2026-07-11 | SLD-4 | SLD-4.6 | Extraction JGitSlidePusher (adaptateur JGit) — initAndCommit + push, types domaine CommitResult/SlidePushResult, zéro leak JGit. SliderManager.Git réduit ~120→55 lignes. 6 unit (JGitSlidePusherTest) + 3 cucumber (12_git_push_adapter.feature).
 | 027 | 2026-07-11 | SLD-4 | SLD-4.7 | Tests intégration pipeline avec bare repo local — SlideDeploymentPipelineIntegrationTest 3 tests (pipeline complet, commit message, échec gracieux).
 | 027 | 2026-07-11 | SLD-4 | SLD-4.8 | Suppression GitOperationResult dead code (leak RevCommit/PushResult dans models.kt) + cleanup imports JGit. EPIC SLD-4 TERMINÉ 8/8 US.

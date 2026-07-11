@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — دليل المستهلك
 
 > إضافة Gradle معزّزة بـ RAG تُنشئ عروض Reveal.js التقديمية من مصادر AsciiDoc.
@@ -26,7 +26,7 @@
 مُعزّزًا بأمثلة من المشروع.
 
 وهو جزء من منظومة CCCP Education متعددة الإضافات (MIAMI borough, N2) ويستهلك
-`codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.1`).
+`codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.5`).
 
 ```
 subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → HTML deck
@@ -38,7 +38,7 @@ subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → g
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -179,6 +179,23 @@ slides:
 
 `<slug>` مُشتق من `subject` بصيغة kebab-case (تطبيع التشكيل); `<lang>` هو
 رمز ISO 639-1 المُمرر عبر `-Planguage` (افتراضي `fr`).
+
+## نموذج المجال (DDD)
+
+تم تنظيز المنطق الأساسي للإضافة في حزم مجال نقية، تم اختبارها على ثلاثة
+مستويات (وحدة → وظيفي → Cucumber BDD). أنواع الإطار (JGit، AsciidoctorJ)
+محصورة في محولات رفيعة — طبقة المجال لا تحتوي على أي تسريب للإطار.
+
+| الحزمة | الملفات | المسؤولية |
+|--------|---------|-----------|
+| `slider.repository` | `SlideDeploymentRequest`, `SlideDeployer`, `JGitSlidePusher` | خط نشر العرض: value objects (`SlideDeploymentRequest`, `GitCredentials`)، محول نظام الملفات (`SlideDeployer` — createRepoDir/copySlides/cleanup)، محول Git (`JGitSlidePusher` — initAndCommit/push). نتائج محورية `RepoDirResult`, `CopyResult`, `CommitResult`, `SlidePushResult`. صفر تسريب JGit خارج `JGitSlidePusher.kt`. |
+| `slider.capsule` | `CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser` | capsule feed: aggregate root + VO + plain-text serializer (عقد يستهلكه `capsule-gradle`) + محلل ملاحظات المتحدث AsciiDoc. |
+| `slider.rtl` | `RtlAssertionCode`, `RtlAssertionResult`, `SlideRenderData`, `RtlSlideAssertion` | التحقق المرئي RTL: assertions منطق نقي (3 P0 + 1 P1) على بيانات الشرائح المعروضة. |
+
+object المتداخل `SliderManager.Git` هو محول Gradle رفيع يبني
+`SlideDeploymentRequest` من YAML deck-context ويفوض إلى مجال
+`slider.repository` (≈55 سطر). جميع عمليات Git تمر عبر `JGitSlidePusher`؛
+المجال لا يستورد أبداً `org.eclipse.jgit`.
 
 ## المتطلبات المسبقة
 

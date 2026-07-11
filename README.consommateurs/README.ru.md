@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — Руководство потребителя
 
 > Плагин Gradle с усилением RAG, генерирующий презентации Reveal.js из источников AsciiDoc.
@@ -27,7 +27,7 @@ pgvector. LLM предлагает
 обогащённую примерами проекта.
 
 Он является частью мультиплагинной экосистемы CCCP Education (MIAMI borough, N2) и
-использует `codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.1`).
+использует `codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.5`).
 
 ```
 subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → HTML deck
@@ -39,7 +39,7 @@ subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → g
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -185,6 +185,24 @@ slides:
 
 `<slug>` выводится из `subject` в kebab-case (акценты нормализованы); `<lang>` —
 код ISO 639-1, передаваемый через `-Planguage` (по умолчанию `fr`).
+
+## Доменная модель (DDD)
+
+Основная логика плагина организована в чистые доменные пакеты, протестированные
+на трёх уровнях (модульный → функциональный → Cucumber BDD). Типы фреймворка
+(JGit, AsciidoctorJ) confinement в тонких адаптерах — доменный слой не имеет
+утечек фреймворка.
+
+| Пакет | Файлы | Ответственность |
+|--------|-------|-----------------|
+| `slider.repository` | `SlideDeploymentRequest`, `SlideDeployer`, `JGitSlidePusher` | Конвейер развёртывания: value objects (`SlideDeploymentRequest`, `GitCredentials`), адаптер файловой системы (`SlideDeployer` — createRepoDir/copySlides/cleanup), Git-адаптер (`JGitSlidePusher` — initAndCommit/push). Типизированные результаты `RepoDirResult`, `CopyResult`, `CommitResult`, `SlidePushResult`. Ноль утечек JGit вне `JGitSlidePusher.kt`. |
+| `slider.capsule` | `CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser` | Capsule feed: aggregate root + VO + plain-text сериализатор (контракт, потребляемый `capsule-gradle`) + парсер заметок докладчика AsciiDoc. |
+| `slider.rtl` | `RtlAssertionCode`, `RtlAssertionResult`, `SlideRenderData`, `RtlSlideAssertion` | Визуальная валидация RTL: assertion чистой логики (3 P0 + 1 P1) по данным отрендеренного слайда. |
+
+Вложенный object `SliderManager.Git` — тонкий Gradle-адаптер, который строит
+`SlideDeploymentRequest` из YAML deck-context и делегирует домену
+`slider.repository` (≈55 строк). Все Git-операции идут через `JGitSlidePusher`;
+домен никогда не импортирует `org.eclipse.jgit`.
 
 ## Предварительные требования
 

@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — صارفین کی رہنمائی
 
 > RAG کے ساتھ بڑھا ہوا Gradle پلگ ان جو AsciiDoc ذرائع سے Reveal.js پیشکشات تیار کرتا ہے۔
@@ -25,7 +25,7 @@
 تیار کرتا ہے۔
 
 یہ CCCP Education ملٹی پلگ ان ماحولیاتی نظام کا حصہ ہے (MIAMI borough, N2) اور
-`codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.1`) استعمال کرتا ہے۔
+`codebase-gradle` (plugin id `education.cccp.codebase` version `0.0.5`) استعمال کرتا ہے۔
 
 ```
 subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → HTML deck
@@ -37,7 +37,7 @@ subject → proposeDeckContext (RAG+LLM) → *-deck-context.yml → review → g
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -178,6 +178,23 @@ slides:
 
 `<slug>` کو `subject` سے kebab-case میں اخذ کیا جاتا ہے (لہجے معمول پر لائے گئے); `<lang>` وہ
 ISO 639-1 کوڈ ہے جو `-Planguage` کے ذریعے پاس کیا جاتا ہے (طے شدہ `fr`)۔
+
+## ڈومین ماڈل (DDD)
+
+پلگ ان کا بنیادی منطق خالص ڈومین پیکیج میں منظم ہے، تین سطحوں پر тест کیا گیا
+(یونٹ → فنکشنل → Cucumber BDD)۔ فریم ورک کے اقسام (JGit، AsciidoctorJ)
+پتلے ایڈاپٹرز میں محصور ہیں — ڈومین پرت میں فریم ورک کا کوئی لیک نہیں ہے۔
+
+| پیکیج | فائلیں | ذمہداری |
+|--------|--------|---------|
+| `slider.repository` | `SlideDeploymentRequest`, `SlideDeployer`, `JGitSlidePusher` | ڈپلائمنٹ پائپ لائن: value objects (`SlideDeploymentRequest`, `GitCredentials`)، فائل سسٹم ایڈاپٹر (`SlideDeployer` — createRepoDir/copySlides/cleanup)، Git ایڈاپٹر (`JGitSlidePusher` — initAndCommit/push)۔ type شدہ نتائج `RepoDirResult`, `CopyResult`, `CommitResult`, `SlidePushResult`۔ `JGitSlidePusher.kt` کے باہر JGit کا کوئی لیک نہیں۔ |
+| `slider.capsule` | `CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser` | capsule feed: aggregate root + VO + plain-text serializer (`capsule-gradle` کا استعمال کردہ کنٹریکٹ) + AsciiDoc اسپیکر نوٹ پارسر۔ |
+| `slider.rtl` | `RtlAssertionCode`, `RtlAssertionResult`, `SlideRenderData`, `RtlSlideAssertion` | RTL بصری توثیق: خالص منطق assertions (3 P0 + 1 P1) رینڈر شدہ سلائیڈ ڈیٹا پر۔ |
+
+نیسٹڈ object `SliderManager.Git` ایک پتلا Gradle ایڈاپٹر ہے جو
+deck-context YAML سے `SlideDeploymentRequest` بناتا ہے اور `slider.repository`
+ڈومین کو تفویض کرتا ہے (≈55 سطریں)۔ تمام Git عملیات `JGitSlidePusher` کے
+ذریعے جاتے ہیں؛ ڈومین کبھی `org.eclipse.jgit` درآمد نہیں کرتا۔
 
 ## پیشگی شرائط
 

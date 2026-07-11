@@ -9,7 +9,7 @@
 [![Coverage](https://img.shields.io/static/v1?label=coverage&message=n%2Fa&color=lightgrey)]()
 [![License](https://img.shields.io/github/license/cheroliv/slider-gradle?label=License)](../LICENCE)
 
-- **Version**: `0.0.1` · **Group**: `education.cccp` · **Plugin ID**: `education.cccp.slider`
+- **Version**: `0.0.9` · **Group**: `education.cccp` · **Plugin ID**: `education.cccp.slider`
 - **Toolchain**: Java 24 · Kotlin 2.3.20 · Gradle 9.5.1
 - **Build**: `./gradlew build -x test` · **Tests**: `./gradlew test` + `functionalTest` + `cucumberTest` (wired into `check`)
 - **Coverage gate**: none (no Kover)
@@ -30,9 +30,22 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Plugin entry point — thin orchestrator
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (object DSL)
+        │   │   │                            Extensions, Tasks, Git (thin Gradle adapter delegating
+        │   │   │                            to slider.repository domain, ≈55 lines)
         │   │   ├── Slides.kt                # RevealJsSlides constants (task names, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # DDD domain — slide deployment pipeline
+        │   │   │   ├── SlideDeploymentRequest.kt   # Value objects (SlideDeploymentRequest + GitCredentials)
+        │   │   │   ├── SlideDeployer.kt             # File-system adapter (RepoDirResult, CopyResult)
+        │   │   │   └── JGitSlidePusher.kt            # Git wire adapter (CommitResult, SlidePushResult)
+        │   │   ├── capsule/                  # DDD domain — capsule feed (capsule-gradle contract)
+        │   │   │   ├── CapsuleScript.kt              # Aggregate root + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # Parser .adoc → CapsuleScript
+        │   │   └── rtl/                      # DDD domain — RTL visual validation
+        │   │       ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │       ├── RtlAssertionResult.kt        # Result + failure detail
+        │   │       ├── SlideRenderData.kt           # Rendered slide snapshot
+        │   │       └── RtlSlideAssertion.kt          # Assertion engine (assertAll)
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -40,17 +53,17 @@ slider-plugin/
         │   │   ├── RagTask.kt                # Base class for RAG tasks (service injection)
         │   │   └── RagTasks.kt               # collectRagIndex, generateDeckContext, generateDeck
         │   └── slider/translate/
-        │       ├── TranslatorManager.kt      # Translation orchestration
+        │       ├── TranslatorManager.kt      # Translation orchestration (10 languages)
         │       └── TranslatorPlugin.kt       # Translation plugin
         ├── test/                              # JUnit5 unit tests + Cucumber features/steps
-        │   ├── features/                      # 4 .feature files (BDD)
-        │   └── scenarios/                     # Cucumber step definitions
+        │   ├── features/                      # .feature files (BDD)
+        │   └── scenarios/slider/steps/        # Cucumber step definitions (package slider.steps)
         └── functionalTest/                    # GradleTestKit functional tests
 ```
 
 ## Consumed plugin (N2 → N2 dependency)
 
-- `education.cccp.codebase` version `0.0.1` (catalog alias
+- `education.cccp.codebase` version `0.0.5` (catalog alias
   `libs.plugins.codebase` in `slider-plugin/gradle/libs.versions.toml`) — applied
   as a sibling plugin in `slider/build.gradle.kts`. It provides the EAGER/RAG
   ingestion primitives reused by `RagManager`.
@@ -95,7 +108,7 @@ Locally available models catalogued in `AssistantManager.localModels`:
 
 | Task | Scope | Notes |
 |------|-------|-------|
-| `test` | JUnit5 unit tests | excludes `com.cheroliv.slider.scenarios.**` (Cucumber) and `SliderPluginFunctionalTests` |
+| `test` | JUnit5 unit tests | excludes `slider.steps.**` (Cucumber) and `SliderPluginFunctionalTests` |
 | `functionalTest` | GradleTestKit functional tests | own source set, depends on `test` impl via `extendsFrom` trick |
 | `cucumberTest` | Cucumber BDD feature files | uses JUnit Platform suite engine, excludes `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | aggregates | `test + functionalTest + cucumberTest` |
@@ -163,15 +176,18 @@ The `slider/build.gradle.kts` plugin block wires:
 
 ## EPIC status
 
-From `slider-plugin/.agents/INDEX.adoc` (last session 010):
+From `slider-plugin/.agents/INDEX.adoc` (last session 027):
 
 | EPIC | Description | Status |
 |------|-------------|--------|
 | SLD-0 | Bootstrap governance agent | ✅ DONE |
 | SLD-1 | Upgrade Reveal.js 3.9.1 → 5.2.1 + Auto-Animate + transitions | ✅ DONE (5/5 US) |
-| SLD-2 | Playwright E2E + Pro theme + Capsule feed | 🔴 IN PROGRESS — 4/5 US done (US-2.5 pending) |
-| SLD-3 | i18n 10 languages via `i18n-contracts:0.0.1` | ☐ NEW — framed session 010 |
-| Publication Maven Central 0.0.1 | NMCP, hardcoded version | ✅ 2026-06-11 |
+| SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
+| SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
+| SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
+| Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
+| Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
 
 ## Contributing
 

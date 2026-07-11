@@ -1,4 +1,4 @@
-<!-- translated from README.md rev 0.0.1 -->
+<!-- translated from README.md rev 0.0.9 -->
 # slider-gradle — Guide Consommateur
 
 > Plugin Gradle augmenté par RAG qui génère des présentations Reveal.js depuis des sources AsciiDoc.
@@ -8,7 +8,7 @@
 [![CI](https://img.shields.io/badge/CI-non%20configur%C3%A9-lightgrey?label=CI)](#)
 [![License](https://img.shields.io/github/license/cheroliv/slider-gradle?label=Licence)](../LICENCE)
 
-- **Version** : `0.0.1` · **Groupe** : `education.cccp` · **ID plugin** : `education.cccp.slider`
+- **Version** : `0.0.9` · **Groupe** : `education.cccp` · **ID plugin** : `education.cccp.slider`
 - **Toolchain** : Java 24+ · Kotlin 2.3.20 · Gradle 9.5.1
 - **Build** : `./gradlew asciidoctorRevealJs` · **Tests** : `./gradlew test` (JUnit5) + `cucumberTest` (Cucumber) + `functionalTest` (Gradle Test Kit)
 - **Couverture** : non mesurée (pas de Kover)
@@ -26,7 +26,7 @@ magasin pgvector. Un LLM propose un `*-deck-context.yml` pour revue humaine,
 puis génère le deck AsciiDoc final enrichi par les exemples du projet.
 
 Il fait partie de l'écosystème multi-plugins CCCP Education (borough MIAMI, N2)
-et consomme `codebase-gradle` (id plugin `education.cccp.codebase` version `0.0.1`).
+et consomme `codebase-gradle` (id plugin `education.cccp.codebase` version `0.0.5`).
 
 ```
 sujet → generateDeckContext (RAG+LLM) → *-deck-context.yml → revue → generateDeck (RAG+LLM) → <slug>_<lang>-deck.adoc → asciidoctorRevealJs → deck HTML
@@ -38,7 +38,7 @@ sujet → generateDeckContext (RAG+LLM) → *-deck-context.yml → revue → gen
 
 ```gradle
 plugins {
-    id("education.cccp.slider") version "0.0.1"
+    id("education.cccp.slider") version "0.0.9"
 }
 ```
 
@@ -182,6 +182,24 @@ Une valeur inconnue ou absente retombe sur `ollama` avec un avertissement journa
 
 `<slug>` est dérivé de `subject` en kebab-case (accents normalisés) ; `<lang>` est
 le code ISO 639-1 passé via `-Planguage` (par défaut `fr`).
+
+## Modèle de domaine (DDD)
+
+La logique cœur du plugin est organisée en packages domaines purs, testés à trois
+niveaux (unitaire → fonctionnel → Cucumber BDD). Les types framework (JGit,
+AsciidoctorJ) sont confinés dans de fins adaptateurs — la couche domaine n'a
+aucune fuite framework.
+
+| Package | Fichiers | Responsabilité |
+|---------|----------|----------------|
+| `slider.repository` | `SlideDeploymentRequest`, `SlideDeployer`, `JGitSlidePusher` | Pipeline de déploiement : value objects (`SlideDeploymentRequest`, `GitCredentials`), adaptateur système de fichiers (`SlideDeployer` — createRepoDir/copySlides/cleanup), adaptateur Git (`JGitSlidePusher` — initAndCommit/push). Résultats typés `RepoDirResult`, `CopyResult`, `CommitResult`, `SlidePushResult`. Zéro fuite JGit hors de `JGitSlidePusher.kt`. |
+| `slider.capsule` | `CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser` | Capsule feed : aggregate root + VO + sérialiseur plain-text (contrat consommé par `capsule-gradle`) + parseur de notes orateur AsciiDoc. |
+| `slider.rtl` | `RtlAssertionCode`, `RtlAssertionResult`, `SlideRenderData`, `RtlSlideAssertion` | Validation visuelle RTL : assertions pure-logic (3 P0 + 1 P1) sur les données de slide rendues. |
+
+Le nested object `SliderManager.Git` est un fin adaptateur Gradle qui construit
+une `SlideDeploymentRequest` depuis le YAML de deck-context et délègue au domaine
+`slider.repository` (≈55 lignes). Toutes les opérations Git passent par
+`JGitSlidePusher` ; le domaine n'importe jamais `org.eclipse.jgit`.
 
 ## Prérequis
 
