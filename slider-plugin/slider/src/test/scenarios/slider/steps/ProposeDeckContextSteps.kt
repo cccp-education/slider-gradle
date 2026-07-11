@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package slider.scenarios
+package slider.steps
 
 import slider.SliderManager.Configuration.yamlMapper
 import io.cucumber.datatable.DataTable

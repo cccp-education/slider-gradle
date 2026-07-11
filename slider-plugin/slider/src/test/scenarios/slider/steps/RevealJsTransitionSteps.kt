@@ -1,4 +1,4 @@
-package slider.scenarios
+package slider.steps
 
 import slider.DeckContext
 import slider.RevealJsContext

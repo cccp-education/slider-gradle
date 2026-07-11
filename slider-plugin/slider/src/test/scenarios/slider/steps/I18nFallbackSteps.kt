@@ -1,4 +1,4 @@
-package slider.scenarios
+package slider.steps
 
 import contracts.i18n.I18nValidationResult
 import io.cucumber.java8.En

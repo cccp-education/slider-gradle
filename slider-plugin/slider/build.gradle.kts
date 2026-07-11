@@ -78,10 +78,19 @@ dependencies {
     }
 }
 
-// Cucumber features/scenarios dirs (scenarios deja en src/test/scenarios)
+// Cucumber features/steps dirs (step definitions in src/test/scenarios)
 cucumberConventions {
     featuresDir = "src/test/features"
     scenariosDir = "src/test/scenarios"
+}
+
+// Exclude Cucumber step definitions from the unit `test` task.
+// The convention plugin excludes `*.scenarios.*` by default, but this
+// project uses the `slider.steps` package, so we add a matching filter.
+tasks.named<Test>("test") {
+    filter {
+        excludeTestsMatching("slider.steps.**")
+    }
 }
 
 tasks.withType<Test>().configureEach {

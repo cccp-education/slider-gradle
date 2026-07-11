@@ -1,4 +1,4 @@
-package slider.scenarios
+package slider.steps
 
 import contracts.i18n.LanguageCatalog
 import io.cucumber.java8.En

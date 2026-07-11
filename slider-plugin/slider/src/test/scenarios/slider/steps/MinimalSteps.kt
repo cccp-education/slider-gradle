@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package slider.scenarios
+package slider.steps
 
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then

@@ -1,4 +1,4 @@
-package slider.scenarios
+package slider.steps
 
 import com.sun.net.httpserver.HttpServer
 import kotlinx.coroutines.*

@@ -1,4 +1,4 @@
-package slider.scenarios
+package slider.steps
 
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
