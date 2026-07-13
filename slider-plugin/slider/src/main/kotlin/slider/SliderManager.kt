@@ -26,6 +26,8 @@ import slider.Slides.RevealJsSlides.TASK_VISUAL_TEST
 import slider.Slides.RevealJsSlides.TASK_INSTALL_PLAYWRIGHT
 import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
 import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
+import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
+import slider.translation.registerTranslateDeckTask
 import slider.Slides.Serve.SERVE_DEP
 import slider.Slides.Slide.DEFAULT_SLIDES_FOLDER
 import slider.Slides.Slide.IMAGES
@@ -509,6 +511,7 @@ object SliderManager {
             registerVisualTestTask()
             registerInstallPlaywrightTask()
             registerGenerateRevealUiMessagesTask()
+            registerTranslateDeckTask()
         }
 
         /**

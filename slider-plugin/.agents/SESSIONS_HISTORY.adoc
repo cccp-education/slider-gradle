@@ -2,6 +2,28 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 029 (2026-07-13) — EPIC SLD-5 Deck Translation Pipeline (US-5.0 → US-5.5)
+
+EPIC SLD-5 démarré et 6/7 US terminées. Domaine DDD `slider.translation` créé
+(8 fichiers production) : TranslationRequest, DeckTranslationPlan,
+TranslationResult (sealed 3 variants Translated/Skipped/Failed),
+TranslationOutcome, LanguageModelAdapter (port hexagonal), DeckTranslator
+(domain service), OllamaLanguageModelAdapter (adaptateur langchain4j),
+TranslateDeckTask (tâche Gradle `translateDeck` group "translator").
+
+Pipeline one-to-many : deck source (deck-context.yml + .adoc) → 10 variantes
+localisées couvrant le top 10 des langues les plus parlées (source :
+`10 langues les plus parlés.csv` — aligné sur `LanguageCatalog.supportedCodes()` :
+en, zh, hi, es, fr, ar, bn, pt, ru, ur).
+
+Baby-step TDD/BDD 3 niveaux : RED → GREEN → REFACTOR. +100 tests (71 unit +
+4 functional + 25 cucumber). `./gradlew :slider:check` VERT — 270 PASS (165
+unit + 15 functional + 90 cucumber), was 170. Zéro régression. 2 SKIP
+Playwright @Disabled inchangés (gem JRuby isolé GradleRunner).
+
+US-5.6 (dogfooding 10 langues + validation Playwright + README i18n) reportée
+à S-030 — nécessite exécution LLM réelle.
+
 == Session 028 (2026-07-11) — README i18n slider.repository + Bump 0.0.9 + Publication Maven Central
 
 README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à

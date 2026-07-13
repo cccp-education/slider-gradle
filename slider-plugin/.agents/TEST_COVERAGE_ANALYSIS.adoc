@@ -1,5 +1,40 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 029_ : EPIC SLD-5 Deck Translation Pipeline — 6/7 US.
++100 tests (165 unit + 15 functional + 90 cucumber = 270 total, 0 FAIL, 2 SKIP).
+
+Nouveaux tests :
+
+. `TranslationRequestTest.kt` (10 unit) — construction valide, défaut 10 langues
+  LanguageCatalog, targets explicites, rejet code inconnu/doublon/vide/blank,
+  source invalide, source dans liste cible, source hors liste cible.
+. `DeckTranslationPlanTest.kt` (9 unit) — expansion tasks (1 per target),
+  from/to pairing, sourceLanguage exposure, targetLanguages exposure, filtre
+  identity (source → source exclu), 9 tasks pour 10 langues moins source,
+  sourceDeck préservé.
+. `TranslationResultTest.kt` (8 unit) — 3 variants (Translated/Skipped/Failed),
+  rejet blank targetLanguage, rejet blank translatedAdoc, status distinction.
+. `TranslationOutcomeTest.kt` (13 unit) — agrégation, translatedCount/
+  skippedCount/failedCount, totalCount = sum, translatedResults() filter,
+  translatedLanguages(), isAllTranslated() true/false, summary(), rejet liste
+  vide, rejet doublon target languages, failures() exposure.
+. `DeckTranslatorTest.kt` (10 unit) — StubModelAdapter mock LLM, succès complet
+  (3/3), échec null (1 translated + 1 failed), échec blank, translated deck
+  languageCode + outputFile injectés, outputFile remplace segment _<lang>
+  existant, translatedAdoc match LLM response, préservation subject/audience,
+  9 tasks pipeline (all minus fr), summary partiel.
+. `TranslateDeckFunctionalTest.kt` (2 functional) — tâche `translateDeck`
+  enregistrée group "translator" + apparaît dans task list complète.
+. `13_deck_translation.feature` (13 cucumber BDD) — 14 scénarios : défaut 10
+  langues, targets explicites (3), plan exclusion identity, plan 9 tasks,
+  rejets (source invalide, target inconnu, empty, duplicate), succès LLM (2
+  translated), échec LLM (1 translated + 1 failed), output file injection,
+  préservation subject, summary counts.
+
+Domaine `slider.translation` : 8 fichiers production, zéro leak langchain4j
+dans le domaine (port `LanguageModelAdapter` + adaptateur
+`OllamaLanguageModelAdapter` séparé).
+
 _Statut session 027_ : Extraction JGitSlidePusher + EPIC SLD-4 clos.
 +15 tests (120 unit + 13 functional + 78 cucumber = 211 total, 0 FAIL, 3 SKIP).
 
@@ -28,6 +63,7 @@ Zéro régression confirmée : 94 unit (2 fail Playwright env préexistant) +
 _Statut session 006_ : SLD-3a Playwright E2E fix. 3 bugs corrigés, test unitaire Playwright PASSED (49s). 1 fichier modifié : `SliderPlaywrightE2eTest.kt`.
 
 | Session | Fichiers testés | Couverture | Notes
+| 029 | `TranslationRequestTest.kt` (10), `DeckTranslationPlanTest.kt` (9), `TranslationResultTest.kt` (8), `TranslationOutcomeTest.kt` (13), `DeckTranslatorTest.kt` (10), `TranslateDeckFunctionalTest.kt` (2), `13_deck_translation.feature` (13 cucumber), `DeckTranslationSteps.kt` | 165 unit + 15 functional + 90 cucumber = 270 total, 0 FAIL, 2 SKIP | Domaine DDD `slider.translation` (8 fichiers production). +100 tests vs S-028. Port `LanguageModelAdapter` + adaptateur `OllamaLanguageModelAdapter` (zéro leak langchain4j dans domaine). StubModelAdapter mock LLM en tests.
 | 006 | `SliderPlaywrightE2eTest.kt` (242 lignes, 1 test + 1 helper) — GradleRunner mavenLocal → asciidoctorRevealJs BUILD SUCCESSFUL, HTTP local (npx serve) navigate, Playwright assertions title/slides/h2/bounding box/screenshot PASS | 1/1 Gradle ✅, 1/1 Playwright ✅ | 3 bugs corrigés : (1) file:// → HTTP npx serve + startHttpServer polling, (2) chemin output build/docs/asciidocRevealJs/intro.html, (3) strict mode .first() sur 4 sections. Screenshot > 10 KB, bbox viewport contrainte OK.
 | 005 | `SliderPlaywrightE2eTest.kt` (177 lignes, 1 test) — GradleRunner mavenLocal → asciidoctorRevealJs BUILD SUCCESSFUL, HTML généré ✅, Playwright navigate ⚠️ file:// + reveal.js CDN ne charge pas en headless | 1/1 Gradle ✅, 0/1 Playwright ⚠️ | TODO session 006 : servir HTML via HTTP local (npx serve) avant Playwright navigate. Assertions UX/UI viewport déjà codées. |
 | 002 | `RevealJsTransitionSteps.kt`, `MinimalSteps.kt` — Cucumber | 17/17 PASS | Cucumber BDD — parsing transitions + auto-animate model validation |

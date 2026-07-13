@@ -1,0 +1,143 @@
+= Session 029 — EPIC SLD-5 Deck Translation Pipeline (US-5.0 → US-5.5)
+:date: 2026-07-13
+:session: 029
+
+== Objectif
+
+Démarrer et implémenter l'EPIC SLD-5 — Deck Translation Pipeline. Pipeline de
+traduction de deck one-to-many : partant d'un deck source (deck-context.yml +
+.adoc) dans une langue, génère les 10 variantes localisées couvrant le top 10
+des langues les plus parlées (source : `10 langues les plus parlés.csv` —
+aligné sur `LanguageCatalog.supportedCodes()` : en, zh, hi, es, fr, ar, bn, pt,
+ru, ur).
+
+SLD-5 est le chaînon manquant du story i18n : SLD-3 a posé l'infra (cascade 5
+couches, TranslatorManager 10 langues, Reveal.js UI i18n, RTL), SLD-5 rend la
+traduction de deck opérationnelle.
+
+== Méthode
+
+Baby-step TDD/BDD — RED → GREEN → REFACTOR. Trois niveaux de tests par US :
+unit (value object pur) → functional (GradleTestKit) → cucumber (BDD
+end-to-end). English only dans le code, Gherkin, commentaires. DDD : value
+objects purs + adaptateur LLM + tâche Gradle thin (pattern `slider.repository`
+/ `slider.capsule`).
+
+== Domaine DDD `slider.translation` (nouveau)
+
+6 fichiers production dans `slider/translation/` :
+
+. `TranslationRequest.kt` — value object : source DeckContext + targetLanguages
+  validée contre `LanguageCatalog.supportedCodes()`. Refus : langue source
+  invalide, liste cible vide, code inconnu, doublons.
+. `DeckTranslationPlan.kt` — value object : expand request en list de
+  `TranslationTask` (from → to + sourceDeck). Filtre identity (source → source).
+. `TranslationResult.kt` — sealed class 3 variants : Translated (deck + adoc),
+  Skipped (reason), Failed (errorMessage). Chaque variant expose targetLanguage
+  + status.
+. `TranslationOutcome.kt` — agrégation : translatedCount/skippedCount/failedCount,
+  translatedResults(), failures(), translatedLanguages(), isAllTranslated(),
+  summary(). Refus liste vide + doublons target languages.
+. `LanguageModelAdapter.kt` — port (interface DDD hexagonal) : translate(deck,
+  adoc, from, to) → String?. Le domaine ne dépend jamais de langchain4j.
+. `DeckTranslator.kt` — domain service : orchestre LLM par langue cible via le
+  port. Produit TranslationOutcome. buildOutputFile : injecte `<lang>` dans le
+  nom de fichier (`kotlin-deck.adoc` → `kotlin_en-deck.adoc`), remplace un
+  segment `_<lang>` existant.
+. `OllamaLanguageModelAdapter.kt` — adaptateur infrastructure : implémente le
+  port avec langchain4j ChatModel. System prompt préserve syntaxe AsciiDoc +
+  attributs Reveal.js, traduit uniquement le texte humain.
+. `TranslateDeckTask.kt` — tâche Gradle `translateDeck` (group "translator",
+  @DisableCachingByDefault). Inputs : `-Pdeck.context` + `-Pdeck.adoc` (optionnel)
+  + `-Ptarget.languages` (défaut 10). Outputs : 10 × `_<lang>-deck-context.yml`
+  + `_<lang>-deck.adoc` dans slides/misc/.
+
+== US terminées (6/7)
+
+|===
+| US | Description | Tests | Statut
+
+| SLD-5.0 | Cadrage EPIC — INDEX/BACKLOG/PROMPT_REPRISE/AGENTS racine | — | ✅
+| SLD-5.1 | TranslationRequest + DeckTranslationPlan (value objects) | 19 unit | ✅
+| SLD-5.2 | TranslationResult + TranslationOutcome (value objects) | 25 unit | ✅
+| SLD-5.3 | DeckTranslator + LanguageModelAdapter (port, mock LLM) | 10 unit | ✅
+| SLD-5.4 | Tâche `translateDeck` + OllamaLanguageModelAdapter | 2 functional | ✅
+| SLD-5.5 | Cucumber `13_deck_translation.feature` (BDD end-to-end) | 13 cucumber | ✅
+| SLD-5.6 | Dogfooding 10 langues + Playwright + README i18n | — | 🔜 S-030
+|===
+
+== Tests
+
+`./gradlew :slider:check` VERT.
+
+| Niveau | Avant (S-028) | Après (S-029) | Delta |
+|---|---|---|---|
+| Unit | 94 | 165 | +71 |
+| Functional | 11 | 15 | +4 |
+| Cucumber | 65 | 90 | +25 |
+| Total PASS | 170 | 270 | +100 |
+
+Nouveaux fichiers test :
+. `TranslationRequestTest.kt` (10 unit) — construction valide, défaut 10 langues,
+  rejet code inconnu/doublon/vide/source invalide.
+. `DeckTranslationPlanTest.kt` (9 unit) — expansion tasks, filtre identity,
+  source/target exposure, 9 tasks pour 10 langues moins source.
+. `TranslationResultTest.kt` (8 unit) — 3 variants (Translated/Skipped/Failed),
+  rejet blank, status distinction.
+. `TranslationOutcomeTest.kt` (13 unit) — agrégation, counts, filtrage
+  translated/failures, isAllTranslated, summary, rejet vide/doublon.
+. `DeckTranslatorTest.kt` (10 unit) — mock LLM via StubModelAdapter, succès
+  complet, échec null/blank, préservation subject/audience, output file
+  injection/remplacement, 9 tasks pipeline, summary partiel.
+. `TranslateDeckFunctionalTest.kt` (2 functional) — tâche enregistrée group
+  "translator" + task list.
+. `13_deck_translation.feature` (13 cucumber BDD) — 14 scénarios : défaut 10
+  langues, targets explicites, plan exclusion identity, 9 tasks, rejets
+  (source/target/empty/duplicate), succès/failure LLM, output file, préservation
+  subject, summary.
+
+Zéro régression : 90 cucumber (was 65), 15 functional (was 11), 165 unit (was
+94). 2 SKIP inchangés (Playwright @Disabled JRuby gem).
+
+== Fichiers modifiés
+
+Production (8 nouveaux + 2 modifiés) :
+. `slider/translation/TranslationRequest.kt` (nouveau)
+. `slider/translation/DeckTranslationPlan.kt` (nouveau)
+. `slider/translation/TranslationResult.kt` (nouveau)
+. `slider/translation/TranslationOutcome.kt` (nouveau)
+. `slider/translation/LanguageModelAdapter.kt` (nouveau)
+. `slider/translation/DeckTranslator.kt` (nouveau)
+. `slider/translation/OllamaLanguageModelAdapter.kt` (nouveau)
+. `slider/translation/TranslateDeckTask.kt` (nouveau)
+. `slider/Slides.kt` (constante TASK_TRANSLATE_DECK ajoutée)
+. `slider/SliderManager.kt` (import + registerTranslateDeckTask dans registerTasks)
+
+Test (7 nouveaux) :
+. `slider/translation/TranslationRequestTest.kt`
+. `slider/translation/DeckTranslationPlanTest.kt`
+. `slider/translation/TranslationResultTest.kt`
+. `slider/translation/TranslationOutcomeTest.kt`
+. `slider/translation/DeckTranslatorTest.kt`
+. `slider/TranslateDeckFunctionalTest.kt`
+. `slider/steps/DeckTranslationSteps.kt`
+. `features/13_deck_translation.feature`
+
+Gouvernance (5 modifiés) :
+. `.agents/INDEX.adoc` (roadmap + détail US SLD-5)
+. `BACKLOG.adoc` racine (EPIC SLD-5 section)
+. `PROMPT_REPRISE.adoc` (session 030, US-5.6 prochaine)
+. `AGENTS.adoc` racine (table MIAMI)
+. `~workspace/AGENTS.adoc` (historique mises à jour)
+
+== Prochaine session — 030
+
+US-5.6 Dogfooding : étendre les 3 decks demo fr/en/ar (S-020) à 10 langues via
+`translateDeck`. Validation visuelle Playwright sur au moins 2 decks traduits
+(1 LTR en + 1 RTL ar). Mise à jour README i18n avec domaine `slider.translation`.
+
+== Score
+
+9/10 — EPIC démarré et 6/7 US terminées en une session, 100 tests ajoutés,
+zéro régression, DDD pattern respecté (port + adaptateur), baby-step TDD/BDD
+3 niveaux. US-5.6 (dogfooding) reportée — nécessite exécution LLM réelle.

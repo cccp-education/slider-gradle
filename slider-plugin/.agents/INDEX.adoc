@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-07-11
-_Session terminee_ : 028 — README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD `slider.repository` + 2 autres domaines (`slider.capsule`, `slider.rtl`). Nouvelle section "Domain model (DDD)" dans les 10 README consommateurs. Module layout enrichi dans les 10 README plugin. EPIC status mis à jour toutes langues. Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues). Publication Maven Central via nmcp — bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef`, 3 artefacts signés (slider:0.0.9 + 2 plugin markers). `./gradlew :slider:check` VERT 211 PASS / 0 FAIL / 3 SKIP.
-_Prochaine session_ : 029 — Définir prochain EPIC (maintenance ou nouvelle feature). Fix 2 tests Playwright @Disabled (piste bloquée techniquement).
+_Derniere mise a jour_ : 2026-07-13
+_Session terminee_ : 029 — EPIC SLD-5 Deck Translation Pipeline démarré, 6/7 US terminées. Domaine DDD `slider.translation` créé (8 fichiers production) : TranslationRequest, DeckTranslationPlan, TranslationResult (sealed 3 variants), TranslationOutcome, LanguageModelAdapter (port), DeckTranslator (domain service), OllamaLanguageModelAdapter (adaptateur langchain4j), TranslateDeckTask (tâche `translateDeck`). Pipeline one-to-many : deck source → 10 variantes localisées (top 10 langues, `LanguageCatalog.supportedCodes()`). Baby-step TDD/BDD 3 niveaux. `./gradlew :slider:check` VERT — 270 PASS (165 unit + 15 functional + 90 cucumber), was 170. +100 tests, zéro régression.
+_Prochaine session_ : 030 — US-5.6 Dogfooding : 3 decks demo étendus à 10 langues via `translateDeck` + validation Playwright + README i18n.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+| 029 | 2026-07-13 | feat+ddd+tdd+bdd | EPIC SLD-5 Deck Translation Pipeline — 6/7 US terminées. Domaine DDD `slider.translation` (8 fichiers : TranslationRequest, DeckTranslationPlan, TranslationResult sealed 3 variants, TranslationOutcome, LanguageModelAdapter port, DeckTranslator domain service, OllamaLanguageModelAdapter adaptateur langchain4j, TranslateDeckTask tâche `translateDeck`). Pipeline one-to-many : deck source → 10 variantes localisées (top 10 langues `LanguageCatalog.supportedCodes()`). Baby-step TDD/BDD 3 niveaux : 71 unit + 4 functional + 25 cucumber = +100 tests. `./gradlew :slider:check` VERT 270 PASS / 0 FAIL / 2 SKIP. US-5.6 (dogfooding) restante. | ✅ 9/10
 | 028 | 2026-07-11 | docs+i18n+pub | README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD `slider.repository` (SlideDeploymentRequest, SlideDeployer, JGitSlidePusher) + 2 autres domaines (`slider.capsule`, `slider.rtl`). Nouvelle section "Domain model (DDD)" dans les 10 README consommateurs (traduite dans 9 langues). Module layout enrichi dans les 10 README plugin. EPIC status mis à jour toutes langues (SLD-2/3/4 ✅, CNV-6/7/8 ✅, PUB 0.0.8 + 0.0.9 ✅). Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues libs.versions.toml). Publication Maven Central via nmcp — bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef`, publishingType AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers `education.cccp.slider` + `education.cccp.slider.translator`). `./gradlew :slider:check` VERT 211 PASS / 0 FAIL / 3 SKIP (inchangé). | ✅ 9/10
 | 027 | 2026-07-11 | refactor+ddd+tdd+bdd | Extraction `JGitSlidePusher` (adaptateur JGit) depuis `SliderManager.Git` — `initAndCommit` (Git.init + remoteAdd + add + commit) + `push` (Git.open + push + credentials) avec types domaine `CommitResult`/`SlidePushResult` (zéro leak JGit). `SliderManager.Git` réduit ~120→55 lignes (suppression `initAddCommitToSlides` + `pushSlide` + 7 imports JGit). Tests intégration pipeline avec bare repo local (`SlideDeploymentPipelineIntegrationTest` 3 tests). Suppression `GitOperationResult` dead code (leak `RevCommit`/`PushResult` dans `models.kt`). Baby-step TDD/BDD : 6 unit (JGitSlidePusherTest) + 3 unit (pipeline integration) + 3 cucumber (12_git_push_adapter.feature). `./gradlew :slider:check` VERT 211 PASS / 0 FAIL / 3 SKIP. **EPIC SLD-4 TERMINÉ** 8/8 US. | ✅ 9/10
 | 026 | 2026-07-11 | refactor | Rename Cucumber steps package `slider.scenarios` → `slider.steps`. Fix double `scenarios` dans chemin `src/test/scenarios/slider/scenarios/` → `src/test/scenarios/slider/steps/`. 12 fichiers renommés, glue Cucumber mise à jour, exclusion locale `slider.steps.**` ajoutée au `test` task. Zéro régression. | ✅ 8/10
@@ -68,6 +69,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | Publication Maven Central 0.0.8 | Bump strictement montant (0.0.1→0.0.8, codebase 0.0.5, readme 0.0.1), correction namespace `slider.translator`→`education.cccp.slider.translator`, bundle 4684447b AUTOMATIC, 3 artefacts confirmés repo1.maven.org | ✅ 2026-07-09 | P2
 | Publication Maven Central 0.0.9 | README i18n slider.repository (20 fichiers) + bump 0.0.8→0.0.9, bundle 63048fec AUTOMATIC, 3 artefacts signés | ✅ 2026-07-11 | P2
 | SLD-4 | Refactor DDD slider.repository — extraction domaine depuis SliderManager.Git (SlideDeploymentRequest, GitCredentials, SlideDeployer, JGitSlidePusher, CommitResult, SlidePushResult) | ✅ TERMINÉ (S-025 + S-027, 8/8 US) | P1
+| SLD-5 | Deck Translation Pipeline — génère 10 decks localisés (one-to-many) depuis un deck source (deck-context.yml + .adoc). Domaine DDD `slider.translation` + tâche `translateDeck`. Aligné sur `LanguageCatalog.supportedCodes()` (en, zh, hi, es, fr, ar, bn, pt, ru, ur — top 10 langues les plus parlées). | 🔄 EN COURS (S-029, 6/7 US) | P1
 |===
 
 '''
@@ -125,6 +127,79 @@ _Dependance_ : i18n-contracts N0 (workspace-bom MEM-3, mavenLocal, publication C
 _Total_ : 7 US, ~15 pts.
 _Pattern de référence_ : bakery-gradle BKY-I18N (US-I18N-0→6, 23 pts).
 _Prérequis_ : i18n-contracts publié sur Maven Central (US-MEM-3.6).
+
+'''
+== EPIC SLD-5 — Detail US
+
+_Vision_ : Pipeline de traduction de deck one-to-many. Partant d'un deck source
+(deck-context.yml + .adoc) dans une langue, génère les 10 variantes localisées
+couvrant le top 10 des langues les plus parlées (source : `10 langues les plus
+parlés.csv` — aligné sur `LanguageCatalog.supportedCodes()` : en, zh, hi, es, fr,
+ar, bn, pt, ru, ur).
+
+_Problématique_ : Aujourd'hui slider sait générer un deck dans UNE langue
+(`proposeDeckContext -Planguage=X`) et traduire du texte libre entre 10 langues
+(`translate{From}To{To}`). Il ne sait PAS prendre un deck existant et produire
+ses 10 variantes localisées. SLD-5 comble ce manque — c'est le chaînon manquant
+du story i18n entamé en SLD-3.
+
+_Domaine DDD_ : `slider.translation` (nouveau) — value objects purs
+(TranslationRequest, TranslationResult, DeckTranslationPlan) + adaptateur LLM
+(DeckTranslator) + tâche Gradle thin (`translateDeck`). Zéro leak LLM hors
+adaptateur (pattern `slider.repository` / `slider.capsule`).
+
+_Dépendances_ :
+* `i18n-contracts:0.0.2` (LanguageCatalog.supportedCodes, findByCode) — déjà branché
+* `slider.ai.AssistantManager` (resolveModel, OllamaChatModel) — déjà en place
+* `slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessage` — réutilisé pour le prompt LLM par langue cible
+
+_Méthode_ : baby-step TDD/BDD — RED → GREEN → REFACTOR. Trois niveaux de tests
+par US : unit (value object pur) → functional (GradleTestKit) → cucumber (BDD
+end-to-end). English only dans le code, Gherkin, commentaires.
+
+_Contrats de test_ :
+* Unit : value objects purs, zéro dépendance Gradle/LLM. Mock LLM via interface.
+* Functional : tâche `translateDeck` exécutée via GradleRunner, asserts sur
+  fichiers générés (10 × 2 = 20 fichiers : 10 `*-<lang>-deck-context.yml` +
+  10 `*-<lang>-deck.adoc`).
+* Cucumber : `13_deck_translation.feature` — scénarios BDD one-to-many,
+  fallback langue source, validation LanguageCatalog, fichier source absent.
+
+|===
+| US | Description | Statut | Estimation
+
+| SLD-5.0
+| Cadrage EPIC — vision, domaine `slider.translation`, découpage US, dépendances. Mise à jour INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI.
+| ✅ TERMINÉ (S-029) | 1 pt
+
+| SLD-5.1
+| Value object `TranslationRequest` (source DeckContext + targetLanguages: List<String> validée contre LanguageCatalog.supportedCodes()) + `DeckTranslationPlan` (permutation source→target, 9 tasks si source ∈ supported, 10 sinon). Validation : refus langue source invalide, refus liste cible vide, refus doublon. *Unit tests purs* (zéro Gradle, zéro LLM).
+| ✅ TERMINÉ (S-029, 19 unit) | 3 pts
+
+| SLD-5.2
+| Value object `TranslationResult` (per-language : DeckContext traduit + adoc traduit + status Translated/Skipped/Failed) + `TranslationOutcome` (agrégation 10 résultats, statistiques ok/skipped/failed). *Unit tests purs*.
+| ✅ TERMINÉ (S-029, 25 unit) | 2 pts
+
+| SLD-5.3
+| `DeckTranslator` (domain service) — orchestre la traduction par langue cible via LLM. Réutilise `TranslatorManager.PromptManager` pour le prompt. Interface `LanguageModelAdapter` (port) pour mockable. Zéro leak langchain4j dans le domaine. *Unit tests avec mock LLM* (retour contrôle, fallback, partiel).
+| ✅ TERMINÉ (S-029, 10 unit) | 3 pts
+
+| SLD-5.4
+| Tâche Gradle `translateDeck` — `@DisableCachingByDefault`, group "translator", inputs : `-Pdeck.context=<path>` + `-Ptarget.languages=en,zh,hi,...` (défaut : LanguageCatalog.supportedCodes()). Outputs : `slides/misc/<slug>_<lang>-deck-context.yml` + `<slug>_<lang>-deck.adoc` × 10. Délègue à `DeckTranslator`. *Functional tests GradleTestKit*.
+| ✅ TERMINÉ (S-029, 2 functional) | 3 pts
+
+| SLD-5.5
+| Cucumber `13_deck_translation.feature` — scénarios BDD : one-to-many (1 source → 10 cibles), langue source invalide rejetée, langue cible inconnue filtrée, fallback langue source, fichier source absent erreur claire, idempotence (re-run écrase). *BDD end-to-end*.
+| ✅ TERMINÉ (S-029, 13 cucumber) | 2 pts
+
+| SLD-5.6
+| Dogfooding — les 3 decks demo fr/en/ar (S-020) étendus à 10 langues via `translateDeck`. Vérification visuelle (Playwright) sur au moins 2 decks traduits (1 LTR en + 1 RTL ar). Documentation README i18n mise à jour.
+| 🔜 À FAIRE (S-030) | 2 pts
+|===
+
+_Total_ : 7 US, ~16 pts (6/7 terminées, 13 pts livrés).
+_Pattern de référence_ : `slider.repository` (S-025/027) — value objects purs + adaptateur infrastructure + tâche thin.
+_Prérequis_ : SLD-3 terminé (✅), i18n-contracts:0.0.2 publié Central (✅).
 
 '''
 == Fichiers Associes

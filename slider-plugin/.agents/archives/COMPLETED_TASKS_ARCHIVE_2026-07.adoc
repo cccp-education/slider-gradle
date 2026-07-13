@@ -2,6 +2,12 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 029 | 2026-07-13 | SLD-5 | SLD-5.0 | Cadrage EPIC Deck Translation Pipeline — vision, domaine `slider.translation`, découpage 7 US, dépendances. MàJ INDEX/BACKLOG/PROMPT_REPRISE + AGENTS.adoc racine MIAMI.
+| 029 | 2026-07-13 | SLD-5 | SLD-5.1 | Value object TranslationRequest (source DeckContext + targetLanguages validée LanguageCatalog.supportedCodes) + DeckTranslationPlan (permutations source→target, filtre identity). 19 unit tests purs.
+| 029 | 2026-07-13 | SLD-5 | SLD-5.2 | Value object TranslationResult (sealed 3 variants Translated/Skipped/Failed) + TranslationOutcome (agrégation, counts, summary, failures). 25 unit tests purs.
+| 029 | 2026-07-13 | SLD-5 | SLD-5.3 | DeckTranslator (domain service) + LanguageModelAdapter (port hexagonal) — orchestre LLM par langue cible, zéro leak langchain4j. OllamaLanguageModelAdapter (adaptateur infra). 10 unit tests mock LLM (StubModelAdapter).
+| 029 | 2026-07-13 | SLD-5 | SLD-5.4 | Tâche Gradle `translateDeck` (group "translator", @DisableCachingByDefault) — inputs -Pdeck.context + -Pdeck.adoc + -Ptarget.languages (défaut 10). Outputs 10 × deck-context.yml + deck.adoc. 2 functional tests GradleTestKit.
+| 029 | 2026-07-13 | SLD-5 | SLD-5.5 | Cucumber 13_deck_translation.feature (14 scénarios BDD) — one-to-many, rejets (source/target/empty/duplicate), succès/failure LLM, output file injection, summary. 13 cucumber PASS.
 | 028 | 2026-07-11 | PUB | — | README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à jour avec domaine DDD slider.repository + slider.capsule + slider.rtl. Nouvelle section "Domain model (DDD)" traduite 9 langues. EPIC status mis à jour toutes langues.
 | 028 | 2026-07-11 | PUB | — | Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues libs.versions.toml). Publication Maven Central via nmcp bundle 63048fec AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers). ./gradlew check VERT 211 PASS / 0 FAIL / 3 SKIP.
 | 027 | 2026-07-11 | SLD-4 | SLD-4.6 | Extraction JGitSlidePusher (adaptateur JGit) — initAndCommit + push, types domaine CommitResult/SlidePushResult, zéro leak JGit. SliderManager.Git réduit ~120→55 lignes. 6 unit (JGitSlidePusherTest) + 3 cucumber (12_git_push_adapter.feature).

@@ -1,30 +1,45 @@
-= PROMPT_REPRISE — slider-gradle — Session 029
-:session: 029
-:date: 2026-07-12
+= PROMPT_REPRISE — slider-gradle — Session 030
+:session: 030
+:date: 2026-07-13
 
-== Session 028 terminée
+== Session 029 terminée
 
-README i18n (20 fichiers — 2 EN masters + 9 consommateurs + 9 plugins) mis à
-jour avec le domaine DDD `slider.repository` (3 fichiers : SlideDeploymentRequest,
-SlideDeployer, JGitSlidePusher) + 2 autres domaines DDD (`slider.capsule`,
-`slider.rtl`). Nouvelle section "Domain model (DDD)" ajoutée dans les 10 README
-consommateurs. Module layout enrichi dans les 10 README plugin. EPIC status
-mis à jour dans toutes les langues (SLD-2/3/4 ✅, CNV-6/7/8 ✅, PUB 0.0.8 +
-0.0.9 ✅).
+EPIC SLD-5 Deck Translation Pipeline démarré et 6/7 US terminées. Domaine DDD
+`slider.translation` créé (8 fichiers production) : TranslationRequest,
+DeckTranslationPlan, TranslationResult, TranslationOutcome, LanguageModelAdapter
+(port), DeckTranslator (domain service), OllamaLanguageModelAdapter
+(adaptateur langchain4j), TranslateDeckTask (tâche Gradle `translateDeck`).
 
-Bump 0.0.8 → 0.0.9 (build.gradle.kts + 2 catalogues libs.versions.toml).
-Publication Maven Central via nmcp — bundle `63048fec-9f69-4cfa-812c-7adb63fa0fef`,
-publishingType AUTOMATIC, 3 artefacts signés (slider:0.0.9 + 2 plugin markers).
-`./gradlew :slider:check` VERT — 211 PASS / 0 FAIL / 3 SKIP (inchangé).
+Pipeline one-to-many : deck source (deck-context.yml + .adoc) → 10 variantes
+localisées (top 10 langues les plus parlées, aligné sur
+`LanguageCatalog.supportedCodes()` : en, zh, hi, es, fr, ar, bn, pt, ru, ur).
 
-== Prochaine session — 029
+`./gradlew :slider:check` VERT — 270 PASS (165 unit + 15 functional + 90
+cucumber), was 170. +100 tests, zéro régression. 2 SKIP Playwright @Disabled
+inchangés.
 
-Pistes (par priorité) :
-. Définir prochain EPIC — maintenance ou nouvelle fonctionnalité (vision
-  produit à définir). Tous les EPICs SLD-0→4 + CNV-6/7/8 + PUB sont clos.
-. Fix 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner —
-  investigation S-023, non fixable sans modification API GradleRunner).
-  Piste bloquée techniquement.
+Baby-step TDD/BDD 3 niveaux : RED → GREEN → REFACTOR. English only code/
+Gherkin. DDD : value objects purs + port + adaptateur LLM + tâche thin.
+
+== Prochaine session — 030
+
+*Objectif* : US-5.6 Dogfooding — étendre les 3 decks demo fr/en/ar (S-020) à
+10 langues via `translateDeck`. Validation visuelle Playwright sur au moins
+2 decks traduits (1 LTR en + 1 RTL ar). Mise à jour README i18n avec domaine
+`slider.translation` (8 fichiers : 4 value objects + port + DeckTranslator +
+adaptateur + tâche).
+
+_Pré-requis_ : exécution LLM réelle (Ollama `gemma3:1b-it-fp16` ou
+`gpt-oss:120b-cloud`). Vérifier disponibilité instance Ollama locale avant
+de lancer `translateDeck`.
+
+_Etapes_ :
+. Vérifier `ollama list` + port 11437-11465 (rotation).
+. Lancer `./gradlew translateDeck -Pdeck.context=slides/misc/capsule-feed-demo-fr-deck-context.yml -Pai.provider=ollama`.
+. Vérifier 9 fichiers générés (fr exclu si source fr).
+. Répéter pour decks en et ar.
+. Validation Playwright sur deck_en et deck_ar (1 LTR + 1 RTL).
+. Mise à jour README i18n (20 fichiers) avec section domaine `slider.translation`.
 
 == Rappels
 
@@ -35,19 +50,19 @@ Pistes (par priorité) :
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
+  (source : `10 langues les plus parlés.csv` — top 10 démographique mondial)
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
 - Package Cucumber steps : `slider.steps` (renommé S-026)
-- Domaine `slider.repository` : 3 fichiers — SlideDeploymentRequest,
-  SlideDeployer, JGitSlidePusher (zéro leak JGit hors adaptateur)
-- Domaine `slider.rtl` : 4 classes (RtlAssertionCode, RtlAssertionResult,
-  SlideRenderData, RtlSlideAssertion)
-- Domaine `slider.capsule` : 4 classes (CapsuleScript, SlideSegment,
-  CapsuleScriptWriter, AsciidocSpeakerNoteParser)
-- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner)
-- `./gradlew :slider:check` est VERT (depuis S-024)
-- Tâche Gradle : `deploySlides` (constante TASK_PUBLISH_SLIDES =
-  "deploySlides"), group "deploy"
-- Exclusion locale `slider.steps.**` dans `test` task (le plugin
-  conventions n'exclut que `*.scenarios.*` par défaut)
-- Tous les EPICs SLD-0→4 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9 CLOS
+- Domaines DDD : `slider.repository`, `slider.capsule`, `slider.rtl`,
+  `slider.i18n`, `slider.translate`, `slider.ai`, `slider.translation` (S-029)
+- Domaine `slider.translation` : 8 fichiers — TranslationRequest,
+  DeckTranslationPlan, TranslationResult (sealed 3 variants), TranslationOutcome,
+  LanguageModelAdapter (port), DeckTranslator (domain service),
+  OllamaLanguageModelAdapter (adaptateur langchain4j), TranslateDeckTask
+- Tâche Gradle : `translateDeck` (group "translator"), inputs `-Pdeck.context`
+  + `-Pdeck.adoc` (optionnel) + `-Ptarget.languages` (défaut 10)
+- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner — piste bloquée)
+- `./gradlew :slider:check` est VERT (270 PASS depuis S-029)
+- EPICs clos : SLD-0→4 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9
+- EPIC SLD-5 en cours : US-5.0→5.5 terminées, US-5.6 (dogfooding) restante
