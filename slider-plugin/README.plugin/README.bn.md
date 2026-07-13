@@ -30,9 +30,31 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Plugin entry point — thin orchestrator
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (object DSL)
-        │   │   ├── Slides.kt                # RevealJsSlides constants (task names, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   │                            Extensions, Tasks, Git (পাতলা Gradle অ্যাডাপ্টার যা
+        │   │   │                            slider.repository ডোমেনে অর্পণ করে, ≈55 লাইন)
+        │   │   ├── Slides.kt                # RevealJsSlides ধ্রুবক (কাজের নাম, লেআউট)
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # DDD ডোমেন — স্লাইড স্থাপনা পাইপলাইন
+        │   │   │   ├── SlideDeploymentRequest.kt   # Value objects (SlideDeploymentRequest + GitCredentials)
+        │   │   │   ├── SlideDeployer.kt             # Filesystem অ্যাডাপ্টার (RepoDirResult, CopyResult)
+        │   │   │   └── JGitSlidePusher.kt            # Git wire অ্যাডাপ্টার (CommitResult, SlidePushResult)
+        │   │   ├── capsule/                  # DDD ডোমেন — capsule feed (capsule-gradle চুক্তি)
+        │   │   │   ├── CapsuleScript.kt              # Aggregate root + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # পার্সার .adoc → CapsuleScript
+        │   │   ├── rtl/                      # DDD ডোমেন — RTL ভিজ্যুয়াল যাচাই
+        │   │   │   ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │   │   ├── RtlAssertionResult.kt        # ফলাফল + ব্যর্থতার বিবরণ
+        │   │   │   ├── SlideRenderData.kt           # রেন্ডার করা স্লাইড স্ন্যাপশট
+        │   │   │   └── RtlSlideAssertion.kt          # অ্যাসারশন ইঞ্জিন (assertAll)
+        │   │   └── translation/             # DDD ডোমেন — ডেক অনুবাদ পাইপলাইন (one-to-many)
+        │   │       ├── TranslationRequest.kt         # Value object (source DeckContext + targetLanguages)
+        │   │       ├── DeckTranslationPlan.kt        # Value object (source→target permutation)
+        │   │       ├── TranslationResult.kt          # Sealed (Translated / Skipped / Failed)
+        │   │       ├── TranslationOutcome.kt         # Aggregation (ok/skipped/failed stats)
+        │   │       ├── LanguageModelAdapter.kt       # Port (LLM interface, mockable)
+        │   │       ├── DeckTranslator.kt            # Domain service (per-target LLM orchestration)
+        │   │       ├── OllamaLanguageModelAdapter.kt # langchain4j adapter (bridge to ChatModel)
+        │   │       └── TranslateDeckTask.kt          # Gradle task `translateDeck` (group "translator")
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -42,10 +64,10 @@ slider-plugin/
         │   └── slider/translate/
         │       ├── TranslatorManager.kt      # Translation orchestration
         │       └── TranslatorPlugin.kt       # Translation plugin
-        ├── test/                              # JUnit5 unit tests + Cucumber features/steps
-        │   ├── features/                      # 4 .feature files (BDD)
-        │   └── scenarios/                     # Cucumber step definitions
-        └── functionalTest/                    # GradleTestKit functional tests
+        ├── test/                              # JUnit5 একক পরীক্ষা + Cucumber features/steps
+        │   ├── features/                      # .feature ফাইল (BDD)
+        │   └── scenarios/slider/steps/        # Cucumber step সংজ্ঞা (প্যাকেজ slider.steps)
+        └── functionalTest/                    # GradleTestKit কার্যকরী পরীক্ষা
 ```
 
 ## গৃহীত প্লাগইন (N2 → N2 নির্ভরতা)
@@ -93,7 +115,7 @@ slider-plugin/
 
 | Task | Scope | Notes |
 |------|-------|-------|
-| `test` | JUnit5 unit tests | excludes `com.cheroliv.slider.scenarios.**` (Cucumber) and `SliderPluginFunctionalTests` |
+| `test` | JUnit5 unit tests | excludes `slider.steps.**` (Cucumber) and `SliderPluginFunctionalTests` |
 | `functionalTest` | GradleTestKit functional tests | own source set, depends on `test` impl via `extendsFrom` trick |
 | `cucumberTest` | Cucumber BDD feature files | uses JUnit Platform suite engine, excludes `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | aggregates | `test + functionalTest + cucumberTest` |
@@ -161,7 +183,7 @@ classpath বাইন্ডিং দ্বন্দ্ব এড়াতে `
 
 ## EPIC অবস্থা
 
-`slider-plugin/.agents/INDEX.adoc` (শেষ সেশন 027) থেকে:
+`slider-plugin/.agents/INDEX.adoc` (শেষ সেশন 030) থেকে:
 
 | EPIC | Description | Status |
 |------|-------------|--------|
@@ -170,6 +192,7 @@ classpath বাইন্ডিং দ্বন্দ্ব এড়াতে `
 | SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
 | SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 files) | ✅ DONE (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
@@ -180,7 +203,7 @@ classpath বাইন্ডিং দ্বন্দ্ব এড়াতে `
 2. পরীক্ষা সবুজ: `./gradlew check`
 3. `SliderManager`-এ **একক দায়িত্ব** প্যাটার্ন মেনে চলুন — প্রতিটি নেস্টেড
    object একটি কনসার্নের মালিক (Prerequisites, Repositories, Plugins, Dependencies,
-   Extensions, Tasks, Git, FileOps)।
+   Extensions, Tasks, Git)।
 4. স্পষ্ট imports (কোনো ওয়াইল্ডকার্ড নেই), 4-স্পেস ইন্ডেন্টেশন, ওপেনিং বন্ধনী একই
    লাইনে; ধ্রুবক `SCREAMING_SNAKE_CASE`।
 5. Configuration Cache সক্ষম করবেন না — `asciidoctorRevealJs` স্পষ্টভাবে

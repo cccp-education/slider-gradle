@@ -2,6 +2,35 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 031 (2026-07-14) — README i18n slider.translation + SLD-5 statut
+
+README i18n (9 fichiers `README.plugin/README.*.md` — ar, bn, es, fr, hi, pt,
+ru, ur, zh) alignés sur le master EN mis à jour en S-030. Les 9 READMEs étaient
+restés à l'état S-028 (révision 0.0.9 mais contenu pré-SLD-4/SLD-5).
+
+6 édits par langue (55 total) :
+- **Edit B1** — Module layout : description `SliderManager.kt` mise à jour
+  (délègue à `slider.repository`, ≈55 lignes, suppression `FileOps`) + 4
+  domaines DDD détaillés (`repository/` 3 fichiers, `capsule/` 2 fichiers,
+  `rtl/` 4 fichiers, `translation/` 8 fichiers)
+- **Edit B2** — Module layout : section test `scenarios/slider/steps/` +
+  `.feature files` (sans nombre) + package `slider.steps`
+- **Edit C** — Test matrix : `com.cheroliv.slider.scenarios.**` →
+  `slider.steps.**` (renommage S-026)
+- **Edit D1** — EPIC intro : "session 027" → "session 030" (par langue)
+- **Edit D2** — EPIC table : insertion row SLD-5 (DDD `slider.translation`,
+  8 files, S-029 + S-030)
+- **Edit E** — Contributing point 3 : suppression `FileOps` (dead code S-025)
+- **Edit A** (FR only) — Language switcher incomplet (2 langues → 10 langues)
+
+Baby-step par langue — un fichier à la fois, 6 édits par fichier dans l'ordre
+A→B1→B2→C→D1→D2→E. Pas de TDD/BDD 3 niveaux (session de doc i18n, pas de code
+métier). Validation par build compile + check VERT.
+
+`./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE,
+zéro régression — les READMEs ne sont pas du code). 9 fichiers modifiés,
+zéro secret, zéro fichier de production modifié.
+
 == Session 030 (2026-07-14) — US-5.6 Dogfooding + EPIC SLD-5 TERMINÉ (7/7 US)
 
 EPIC SLD-5 Deck Translation Pipeline clôturé. US-5.6 Dogfooding : 3 decks demo

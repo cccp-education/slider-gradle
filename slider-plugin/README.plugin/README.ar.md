@@ -30,9 +30,31 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Plugin entry point — thin orchestrator
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (object DSL)
-        │   │   ├── Slides.kt                # RevealJsSlides constants (task names, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   │                            Extensions, Tasks, Git (محول Gradle رفيع يفوّض
+        │   │   │                            إلى مجال slider.repository، ≈55 سطرًا)
+        │   │   ├── Slides.kt                # ثوابت RevealJsSlides (أسماء المهام، التخطيط)
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # مجال DDD — خط أنابيب نشر الشرائح
+        │   │   │   ├── SlideDeploymentRequest.kt   # كائنات قيم (SlideDeploymentRequest + GitCredentials)
+        │   │   │   ├── SlideDeployer.kt             # محول نظام الملفات (RepoDirResult, CopyResult)
+        │   │   │   └── JGitSlidePusher.kt            # محول Git wire (CommitResult, SlidePushResult)
+        │   │   ├── capsule/                  # مجال DDD — تغذية capsule (عقد capsule-gradle)
+        │   │   │   ├── CapsuleScript.kt              # جذر تجميعي + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # محلل .adoc → CapsuleScript
+        │   │   ├── rtl/                      # مجال DDD — التحقق البصري RTL
+        │   │   │   ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │   │   ├── RtlAssertionResult.kt        # النتيجة + تفاصيل الفشل
+        │   │   │   ├── SlideRenderData.kt           # لقطة شريحة مُعادة
+        │   │   │   └── RtlSlideAssertion.kt          # محرك التأكيدات (assertAll)
+        │   │   └── translation/             # مجال DDD — خط أنابيب ترجمة العرض (one-to-many)
+        │   │       ├── TranslationRequest.kt         # كائن قيمة (DeckContext مصدر + targetLanguages)
+        │   │       ├── DeckTranslationPlan.kt        # كائن قيمة (تبديل مصدر→هدف)
+        │   │       ├── TranslationResult.kt          # Sealed (Translated / Skipped / Failed)
+        │   │       ├── TranslationOutcome.kt         # تجميع (إحصائيات ok/skipped/failed)
+        │   │       ├── LanguageModelAdapter.kt       # منفذ (واجهة LLM، قابل للمحاكاة)
+        │   │       ├── DeckTranslator.kt            # خدمة مجال (تنسق LLM لكل هدف)
+        │   │       ├── OllamaLanguageModelAdapter.kt # محول langchain4j (جسر إلى ChatModel)
+        │   │       └── TranslateDeckTask.kt          # مهمة Gradle `translateDeck` (group "translator")
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -42,10 +64,10 @@ slider-plugin/
         │   └── slider/translate/
         │       ├── TranslatorManager.kt      # Translation orchestration
         │       └── TranslatorPlugin.kt       # Translation plugin
-        ├── test/                              # JUnit5 unit tests + Cucumber features/steps
-        │   ├── features/                      # 4 .feature files (BDD)
-        │   └── scenarios/                     # Cucumber step definitions
-        └── functionalTest/                    # GradleTestKit functional tests
+        ├── test/                              # اختبارات وحدة JUnit5 + Cucumber features/steps
+        │   ├── features/                      # ملفات .feature (BDD)
+        │   └── scenarios/slider/steps/        # تعريفات خطوات Cucumber (الحزمة slider.steps)
+        └── functionalTest/                    # اختبارات وظيفية GradleTestKit
 ```
 
 ## الإضافة المُستهلكة (اعتماد N2 → N2)
@@ -95,7 +117,7 @@ slider-plugin/
 
 | Task | Scope | Notes |
 |------|-------|-------|
-| `test` | JUnit5 unit tests | excludes `com.cheroliv.slider.scenarios.**` (Cucumber) and `SliderPluginFunctionalTests` |
+| `test` | JUnit5 unit tests | excludes `slider.steps.**` (Cucumber) and `SliderPluginFunctionalTests` |
 | `functionalTest` | GradleTestKit functional tests | own source set, depends on `test` impl via `extendsFrom` trick |
 | `cucumberTest` | Cucumber BDD feature files | uses JUnit Platform suite engine, excludes `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | aggregates | `test + functionalTest + cucumberTest` |
@@ -163,7 +185,7 @@ slider-plugin/
 
 ## حالة EPIC
 
-من `slider-plugin/.agents/INDEX.adoc` (آخر جلسة 027):
+من `slider-plugin/.agents/INDEX.adoc` (آخر جلسة 030):
 
 | EPIC | Description | Status |
 |------|-------------|--------|
@@ -172,6 +194,7 @@ slider-plugin/
 | SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
 | SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 files) | ✅ DONE (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
@@ -182,7 +205,7 @@ slider-plugin/
 2. الاختبارات خضراء: `./gradlew check`
 3. احترم نمط **المسؤولية الواحدة** في `SliderManager` — كل object متداخل
    يملك اهتمامًا واحدًا (Prerequisites, Repositories, Plugins, Dependencies,
-   Extensions, Tasks, Git, FileOps)。
+   Extensions, Tasks, Git)。
 4. استخدم واردات صريحة (بدون أحرف بدل)، مسافة بادئة 4 مسافات، القوس الافتتاحي على
    نفس السطر； الثوابت `SCREAMING_SNAKE_CASE`。
 5. لا تُمكّن Configuration Cache — `asciidoctorRevealJs` مُصرّح به صراحةً

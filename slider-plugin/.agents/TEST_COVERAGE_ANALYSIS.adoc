@@ -1,5 +1,9 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 031_ : README i18n (9 fichiers doc). Aucun test modifié —
+session de documentation i18n pure. 425 PASS / 0 FAIL / 2 SKIP inchangés
+(UP-TO-DATE).
+
 _Statut session 030_ : EPIC SLD-5 Deck Translation Pipeline TERMINÉ (7/7 US).
 +155 tests (293 unit + 15 functional + 117 cucumber = 425 total, 0 FAIL, 2 SKIP).
 

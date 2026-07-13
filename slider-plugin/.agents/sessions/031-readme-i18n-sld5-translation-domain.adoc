@@ -1,0 +1,90 @@
+= Session 031 — README i18n slider.translation + SLD-5 statut
+:date: 2026-07-14
+:session: 031
+:borough: MIAMI
+:type: docs+i18n
+
+== Objectif
+
+Traduction README i18n — étendre la section `slider.translation` (8 fichiers
+domaine DDD, créés en S-029) + statut EPIC SLD-5 ✅ DONE dans les 9 fichiers
+`README.plugin/README.*.md` (ar, bn, es, fr, hi, pt, ru, ur, zh), alignés sur le
+master EN mis à jour en S-030.
+
+== Contexte
+
+Le master EN (`README.md`) avait été mis à jour en S-030 avec :
+- 4 domaines DDD dans le module layout (`repository/`, `capsule/`, `rtl/`,
+  `translation/` — 18 fichiers)
+- Description `SliderManager.kt` mise à jour (délègue à `slider.repository`,
+  ≈55 lignes, suppression mention `FileOps` dead code S-025)
+- Section test `scenarios/slider/steps/` (renommage package S-026)
+- Matrice tests `slider.steps.**` (anciennement `com.cheroliv.slider.scenarios.**`)
+- Table EPIC avec SLD-5 row + "session 030"
+- Contribution point 3 sans `FileOps`
+
+Les 9 READMEs traduits (ar, bn, es, fr, hi, pt, ru, ur, zh) étaient restés à
+l'état S-028 (révision 0.0.9 mais contenu pré-SLD-4/SLD-5).
+
+== Travail effectué
+
+Baby-step par langue (9 fichiers, un edit à la fois) — 6 edits par fichier :
+
+. **Edit A** (FR only) — Language switcher incomplet (2 langues → 10 langues)
+. **Edit B1** — Module layout : description `SliderManager.kt` + 4 domaines DDD
+  (`repository/`, `capsule/`, `rtl/`, `translation/` avec 18 fichiers détaillés)
+. **Edit B2** — Module layout : section test `scenarios/slider/steps/` +
+  `.feature files` (sans nombre) + package `slider.steps`
+. **Edit C** — Test matrix : `com.cheroliv.slider.scenarios.**` →
+  `slider.steps.**` (renommage S-026)
+. **Edit D1** — EPIC intro : "session 027" → "session 030" (par langue)
+. **Edit D2** — EPIC table : insertion row SLD-5 (DDD `slider.translation`,
+  8 files, S-029 + S-030)
+. **Edit E** — Contributing point 3 : suppression `FileOps` (dead code S-025)
+
+== Langues traitées
+
+|===
+| Langue | Fichier | Édits | RTL
+
+| ar | README.ar.md | 6 | RTL
+| bn | README.bn.md | 6 |
+| es | README.es.md | 6 |
+| fr | README.fr.md | 7 | +Edit A (switcher)
+| hi | README.hi.md | 6 |
+| pt | README.pt.md | 6 |
+| ru | README.ru.md | 6 |
+| ur | README.ur.md | 6 | RTL
+| zh | README.zh.md | 6 |
+|===
+
+Total : 55 édits (6 × 9 + 1 switcher FR).
+
+== Vérifications
+
+- `./gradlew :slider:compileKotlin` : BUILD SUCCESSFUL (UP-TO-DATE)
+- `./gradlew :slider:check` : BUILD SUCCESSFUL — 425 PASS / 0 FAIL / 2 SKIP
+  (UP-TO-DATE, inchangé — les READMEs ne sont pas du code)
+- `git status` : 9 fichiers modifiés (README.plugin/README.*.md)
+- `grep` secrets : zéro token/password/api key dans les READMEs
+- Zéro fichier de production modifié
+
+== Méthode
+
+Baby-step par langue — un fichier à la fois, 6 édits par fichier dans l'ordre
+A→B1→B2→C→D1→D2→E. Pas de TDD/BDD 3 niveaux (session de doc i18n, pas de code
+métier). Validation par build compile + check VERT.
+
+== Prochaine session — 032
+
+*Objectif* : À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.9 publié.
+Pistes :
+- SLD-6 cadrage (nouvel EPIC feature)
+- Publication 0.0.10 (bump README i18n mis à jour)
+- Rattrapage i18n autre borough
+
+== Score
+
+8/10 — Session doc i18n pure, exécutée proprement, 9 fichiers alignés sur le
+master EN. Pas de code, pas de risque, pas de régression. Méthodologie
+baby-step respectée (un fichier à la fois).

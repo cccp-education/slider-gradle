@@ -1,40 +1,26 @@
-= PROMPT_REPRISE — slider-gradle — Session 031
-:session: 031
+= PROMPT_REPRISE — slider-gradle — Session 032
+:session: 032
 :date: 2026-07-14
 
-== Session 030 terminée
+== Session 031 terminée
 
-EPIC SLD-5 Deck Translation Pipeline TERMINÉ (7/7 US, 16 pts). US-5.6
-Dogfooding livrée : 3 decks demo fr/en/ar étendus à 10 langues via
-`translateDeck` avec LLM réel `gpt-oss:120b-cloud` (port 11439). 54 fichiers
-générés (27 `.adoc` + 27 `deck-context.yml`).
+README i18n (9 fichiers `README.plugin/README.*.md` — ar, bn, es, fr, hi, pt,
+ru, ur, zh) alignés sur le master EN (S-030). 6 édits par langue (55 total) :
+module layout (4 domaines DDD `repository/`, `capsule/`, `rtl/`, `translation/`
++ SliderManager desc + test `scenarios/slider/steps/`), test matrix
+`slider.steps.**`, EPIC table SLD-5 row + "session 030", contribution `FileOps`
+supprimé. FR switcher 10 langues (Edit A).
 
-`DeckTranslator.kt` enrichi : `ensureRtlDirection` post-traduction injecte
-`:revealjs_direction: rtl` pour cibles RTL (ar, ur) et supprime l'attribut
-pour cibles LTR (source RTL → cible LTR).
+`./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE, zéro
+régression — les READMEs ne sont pas du code). 9 fichiers modifiés, zéro secret.
 
-Validation Playwright : LTR (fr→en) `slides=5, rtl=false` ✅, RTL (fr→ar)
-`slides=5, rtl=true, screenshot=32KB` ✅.
+== Prochaine session — 032
 
-`./gradlew :slider:check` VERT — 425 PASS (293 unit + 15 functional + 117
-cucumber), was 270. +155 tests, zéro régression. 2 SKIP Playwright @Disabled
-inchangés.
-
-README.md master EN mis à jour avec domaine `slider.translation` (8 fichiers)
-+ EPIC SLD-5 ✅ DONE. 9 README.plugin/ traduits en attente.
-
-== Prochaine session — 031
-
-*Objectif* : Traduction README i18n (9 fichiers `README.plugin/README.*.md`)
-avec domaine `slider.translation` (8 fichiers) + EPIC SLD-5 statut. Aligner
-sur le master EN mis à jour en S-030.
-
-_Etapes_ :
-. Lire `README.md` master EN (section module layout + EPIC status).
-. Traduire la section `slider.translation` dans les 9 README.plugin/
-  (ar, bn, es, fr, hi, pt, ru, ur, zh).
-. Mettre à jour le statut EPIC SLD-5 ✅ DONE dans les 9 fichiers.
-. Vérifier `./gradlew :slider:check` VERT.
+*Objectif* : À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.9 publié.
+Pistes possibles :
+- SLD-6 cadrage (nouvel EPIC feature)
+- Publication 0.0.10 (bump README i18n mis à jour)
+- Rattrapage i18n autre borough
 
 == Rappels
 

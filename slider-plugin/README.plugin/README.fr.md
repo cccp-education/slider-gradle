@@ -14,7 +14,7 @@
 - **Build** : `./gradlew build -x test` · **Tests** : `./gradlew test` + `functionalTest` + `cucumberTest` (intégrés à `check`)
 - **Gate de couverture** : aucune (pas de Kover)
 
-🌐 Langues : [English](README.md) | **Français**
+🌐 Langues : [English](README.md) | **Français** | [中文](README.zh.md) | [हिन्दी](README.hi.md) | [Español](README.es.md) | [العربية](README.ar.md) | [বাংলা](README.bn.md) | [Português](README.pt.md) | [Русский](README.ru.md) | [اردو](README.ur.md)
 
 ---
 
@@ -30,9 +30,31 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Point d'entrée du plugin — orchestrateur mince
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (DSL par objets)
+        │   │   │                            Extensions, Tasks, Git (adaptateur Gradle mince déléguant
+        │   │   │                            au domaine slider.repository, ≈55 lignes)
         │   │   ├── Slides.kt                # Constantes RevealJsSlides (noms de tâches, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # Domaine DDD — pipeline de déploiement des slides
+        │   │   │   ├── SlideDeploymentRequest.kt   # Value objects (SlideDeploymentRequest + GitCredentials)
+        │   │   │   ├── SlideDeployer.kt             # Adaptateur système de fichiers (RepoDirResult, CopyResult)
+        │   │   │   └── JGitSlidePusher.kt            # Adaptateur Git wire (CommitResult, SlidePushResult)
+        │   │   ├── capsule/                  # Domaine DDD — feed capsule (contrat capsule-gradle)
+        │   │   │   ├── CapsuleScript.kt              # Aggregate root + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # Parser .adoc → CapsuleScript
+        │   │   ├── rtl/                      # Domaine DDD — validation visuelle RTL
+        │   │   │   ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │   │   ├── RtlAssertionResult.kt        # Result + détail d'échec
+        │   │   │   ├── SlideRenderData.kt           # Snapshot de slide rendue
+        │   │   │   └── RtlSlideAssertion.kt          # Moteur d'assertion (assertAll)
+        │   │   └── translation/             # Domaine DDD — pipeline de traduction de deck (one-to-many)
+        │   │       ├── TranslationRequest.kt         # Value object (DeckContext source + targetLanguages)
+        │   │       ├── DeckTranslationPlan.kt        # Value object (permutation source→cible)
+        │   │       ├── TranslationResult.kt          # Sealed (Translated / Skipped / Failed)
+        │   │       ├── TranslationOutcome.kt         # Agrégation (stats ok/skipped/failed)
+        │   │       ├── LanguageModelAdapter.kt       # Port (interface LLM, mockable)
+        │   │       ├── DeckTranslator.kt            # Service domaine (orchestre LLM par cible)
+        │   │       ├── OllamaLanguageModelAdapter.kt # Adaptateur langchain4j (bridge vers ChatModel)
+        │   │       └── TranslateDeckTask.kt          # Tâche Gradle `translateDeck` (group "translator")
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # Résolution fournisseurs LLM, catalogues de modèles, tâches chat
         │   │   ├── PgVectorService.kt       # BuildService — cycle de vie pgvector via docker-java
@@ -43,8 +65,8 @@ slider-plugin/
         │       ├── TranslatorManager.kt      # Orchestration traduction
         │       └── TranslatorPlugin.kt       # Plugin de traduction
         ├── test/                              # Tests unitaires JUnit5 + features/steps Cucumber
-        │   ├── features/                      # 4 fichiers .feature (BDD)
-        │   └── scenarios/                     # Définitions des steps Cucumber
+        │   ├── features/                      # fichiers .feature (BDD)
+        │   └── scenarios/slider/steps/        # Définitions des steps Cucumber (package slider.steps)
         └── functionalTest/                    # Tests fonctionnels GradleTestKit
 ```
 
@@ -95,7 +117,7 @@ Modèles locaux catalogués dans `AssistantManager.localModels` :
 
 | Tâche | Portée | Notes |
 |------|--------|-------|
-| `test` | Tests unitaires JUnit5 | exclut `com.cheroliv.slider.scenarios.**` (Cucumber) et `SliderPluginFunctionalTests` |
+| `test` | Tests unitaires JUnit5 | exclut `slider.steps.**` (Cucumber) et `SliderPluginFunctionalTests` |
 | `functionalTest` | Tests fonctionnels GradleTestKit | source set dédié, dépend de `test` impl via astuce `extendsFrom` |
 | `cucumberTest` | Feature files Cucumber BDD | moteur suite JUnit Platform, exclut `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | agrège | `test + functionalTest + cucumberTest` |
@@ -164,7 +186,7 @@ Le bloc `gradlePlugin` de `slider/build.gradle.kts` câble :
 
 ## Statut des EPICs
 
-D'après `slider-plugin/.agents/INDEX.adoc` (dernière session 027) :
+D'après `slider-plugin/.agents/INDEX.adoc` (dernière session 030) :
 
 | EPIC | Description | Statut |
 |------|-------------|--------|
@@ -173,6 +195,7 @@ D'après `slider-plugin/.agents/INDEX.adoc` (dernière session 027) :
 | SLD-2 | Playwright E2E + thème pro + feed capsule | ✅ TERMINÉ (5/5 US) |
 | SLD-3 | i18n 10 langues via `i18n-contracts:0.0.2` | ✅ TERMINÉ (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — extraction domaine depuis `SliderManager.Git` | ✅ TERMINÉ (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 fichiers) | ✅ TERMINÉ (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Migration conventions plugins (`education.cccp.build.*` v0.0.2) | ✅ TERMINÉ (build.gradle.kts 301 → 145 lignes, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
@@ -183,7 +206,7 @@ D'après `slider-plugin/.agents/INDEX.adoc` (dernière session 027) :
 2. Tests verts : `./gradlew check`
 3. Respecter le pattern de **responsabilité unique** dans `SliderManager` — chaque
    objet imbriqué possède un seul souci (Prerequisites, Repositories, Plugins,
-   Dependencies, Extensions, Tasks, Git, FileOps).
+   Dependencies, Extensions, Tasks, Git).
 4. Utiliser des imports explicites (pas de wildcards), indentation 4 espaces,
    accolade ouvrante sur la même ligne ; constantes en `SCREAMING_SNAKE_CASE`.
 5. Ne pas activer le Configuration Cache — `asciidoctorRevealJs` est déclarée

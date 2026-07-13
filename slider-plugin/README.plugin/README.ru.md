@@ -30,9 +30,31 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Plugin entry point — thin orchestrator
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (object DSL)
-        │   │   ├── Slides.kt                # RevealJsSlides constants (task names, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   │                            Extensions, Tasks, Git (тонкий Gradle-адаптер, делегирующий
+        │   │   │                            домену slider.repository, ≈55 строк)
+        │   │   ├── Slides.kt                # Константы RevealJsSlides (имена задач, layout)
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # DDD-домен — конвейер развёртывания слайдов
+        │   │   │   ├── SlideDeploymentRequest.kt   # Value objects (SlideDeploymentRequest + GitCredentials)
+        │   │   │   ├── SlideDeployer.kt             # Файловый адаптер (RepoDirResult, CopyResult)
+        │   │   │   └── JGitSlidePusher.kt            # Git wire адаптер (CommitResult, SlidePushResult)
+        │   │   ├── capsule/                  # DDD-домен — capsule feed (контракт capsule-gradle)
+        │   │   │   ├── CapsuleScript.kt              # Aggregate root + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # Парсер .adoc → CapsuleScript
+        │   │   ├── rtl/                      # DDD-домен — RTL визуальная валидация
+        │   │   │   ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │   │   ├── RtlAssertionResult.kt        # Результат + детали сбоя
+        │   │   │   ├── SlideRenderData.kt           # Снапшот отрендеренного слайда
+        │   │   │   └── RtlSlideAssertion.kt          # Движок утверждений (assertAll)
+        │   │   └── translation/             # DDD-домен — конвейер перевода колоды (one-to-many)
+        │   │       ├── TranslationRequest.kt         # Value object (исходный DeckContext + targetLanguages)
+        │   │       ├── DeckTranslationPlan.kt        # Value object (перестановка источник→цель)
+        │   │       ├── TranslationResult.kt          # Sealed (Translated / Skipped / Failed)
+        │   │       ├── TranslationOutcome.kt         # Агрегация (статистика ok/skipped/failed)
+        │   │       ├── LanguageModelAdapter.kt       # Port (интерфейс LLM, mockable)
+        │   │       ├── DeckTranslator.kt            # Доменный сервис (оркестрация LLM по целям)
+        │   │       ├── OllamaLanguageModelAdapter.kt # Адаптер langchain4j (мост к ChatModel)
+        │   │       └── TranslateDeckTask.kt          # Задача Gradle `translateDeck` (group "translator")
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -42,10 +64,10 @@ slider-plugin/
         │   └── slider/translate/
         │       ├── TranslatorManager.kt      # Translation orchestration
         │       └── TranslatorPlugin.kt       # Translation plugin
-        ├── test/                              # JUnit5 unit tests + Cucumber features/steps
-        │   ├── features/                      # 4 .feature files (BDD)
-        │   └── scenarios/                     # Cucumber step definitions
-        └── functionalTest/                    # GradleTestKit functional tests
+        ├── test/                              # Модульные тесты JUnit5 + Cucumber features/steps
+        │   ├── features/                      # файлы .feature (BDD)
+        │   └── scenarios/slider/steps/        # Определения шагов Cucumber (пакет slider.steps)
+        └── functionalTest/                    # Функциональные тесты GradleTestKit
 ```
 
 ## Потребляемый плагин (зависимость N2 → N2)
@@ -95,7 +117,7 @@ slider-plugin/
 
 | Task | Scope | Notes |
 |------|-------|-------|
-| `test` | JUnit5 unit tests | excludes `com.cheroliv.slider.scenarios.**` (Cucumber) and `SliderPluginFunctionalTests` |
+| `test` | JUnit5 unit tests | excludes `slider.steps.**` (Cucumber) and `SliderPluginFunctionalTests` |
 | `functionalTest` | GradleTestKit functional tests | own source set, depends on `test` impl via `extendsFrom` trick |
 | `cucumberTest` | Cucumber BDD feature files | uses JUnit Platform suite engine, excludes `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | aggregates | `test + functionalTest + cucumberTest` |
@@ -165,7 +187,7 @@ slider-plugin/
 
 ## Статус EPIC
 
-Из `slider-plugin/.agents/INDEX.adoc` (последняя сессия 027):
+Из `slider-plugin/.agents/INDEX.adoc` (последняя сессия 030):
 
 | EPIC | Description | Status |
 |------|-------------|--------|
@@ -174,6 +196,7 @@ slider-plugin/
 | SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
 | SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 files) | ✅ DONE (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
@@ -184,7 +207,7 @@ slider-plugin/
 2. Тесты зелёные: `./gradlew check`
 3. Соблюдайте паттерн **единой ответственности** в `SliderManager` — каждый вложенный
    object владеет одной задачей (Prerequisites, Repositories, Plugins, Dependencies,
-   Extensions, Tasks, Git, FileOps).
+   Extensions, Tasks, Git).
 4. Используйте явные импорты (без wildcards), 4-пробельный отступ, открывающую скобку на
    той же строке; константы — `SCREAMING_SNAKE_CASE`.
 5. Не включайте Configuration Cache — `asciidoctorRevealJs` явно

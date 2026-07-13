@@ -30,9 +30,31 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Plugin entry point — thin orchestrator
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (object DSL)
-        │   │   ├── Slides.kt                # RevealJsSlides constants (task names, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   │                            Extensions, Tasks, Git（轻量 Gradle 适配器，委托
+        │   │   │                            slider.repository 领域，≈55 行）
+        │   │   ├── Slides.kt                # RevealJsSlides 常量（任务名、布局）
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # DDD 领域 — 幻灯片部署管道
+        │   │   │   ├── SlideDeploymentRequest.kt   # 值对象（SlideDeploymentRequest + GitCredentials）
+        │   │   │   ├── SlideDeployer.kt             # 文件系统适配器（RepoDirResult, CopyResult）
+        │   │   │   └── JGitSlidePusher.kt            # Git 线适配器（CommitResult, SlidePushResult）
+        │   │   ├── capsule/                  # DDD 领域 — capsule feed（capsule-gradle 契约）
+        │   │   │   ├── CapsuleScript.kt              # 聚合根 + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # 解析器 .adoc → CapsuleScript
+        │   │   ├── rtl/                      # DDD 领域 — RTL 视觉验证
+        │   │   │   ├── RtlAssertionCode.kt          # 枚举（3 P0 + 1 P1）
+        │   │   │   ├── RtlAssertionResult.kt        # 结果 + 失败详情
+        │   │   │   ├── SlideRenderData.kt           # 渲染幻灯片快照
+        │   │   │   └── RtlSlideAssertion.kt          # 断言引擎（assertAll）
+        │   │   └── translation/             # DDD 领域 — 演示文稿翻译管道（one-to-many）
+        │   │       ├── TranslationRequest.kt         # 值对象（源 DeckContext + targetLanguages）
+        │   │       ├── DeckTranslationPlan.kt        # 值对象（源→目标排列）
+        │   │       ├── TranslationResult.kt          # Sealed（Translated / Skipped / Failed）
+        │   │       ├── TranslationOutcome.kt         # 聚合（ok/skipped/failed 统计）
+        │   │       ├── LanguageModelAdapter.kt       # 端口（LLM 接口，可 mock）
+        │   │       ├── DeckTranslator.kt            # 领域服务（按目标编排 LLM）
+        │   │       ├── OllamaLanguageModelAdapter.kt # langchain4j 适配器（桥接 ChatModel）
+        │   │       └── TranslateDeckTask.kt          # Gradle 任务 `translateDeck`（group "translator"）
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -42,10 +64,10 @@ slider-plugin/
         │   └── slider/translate/
         │       ├── TranslatorManager.kt      # Translation orchestration
         │       └── TranslatorPlugin.kt       # Translation plugin
-        ├── test/                              # JUnit5 unit tests + Cucumber features/steps
-        │   ├── features/                      # 4 .feature files (BDD)
-        │   └── scenarios/                     # Cucumber step definitions
-        └── functionalTest/                    # GradleTestKit functional tests
+        ├── test/                              # JUnit5 单元测试 + Cucumber features/steps
+        │   ├── features/                      # .feature 文件（BDD）
+        │   └── scenarios/slider/steps/        # Cucumber 步骤定义（包 slider.steps）
+        └── functionalTest/                    # GradleTestKit 功能测试
 ```
 
 ## 被消费的插件（N2 → N2 依赖）
@@ -95,7 +117,7 @@ slider-plugin/
 
 | Task | Scope | Notes |
 |------|-------|-------|
-| `test` | JUnit5 unit tests | excludes `com.cheroliv.slider.scenarios.**` (Cucumber) and `SliderPluginFunctionalTests` |
+| `test` | JUnit5 unit tests | excludes `slider.steps.**` (Cucumber) and `SliderPluginFunctionalTests` |
 | `functionalTest` | GradleTestKit functional tests | own source set, depends on `test` impl via `extendsFrom` trick |
 | `cucumberTest` | Cucumber BDD feature files | uses JUnit Platform suite engine, excludes `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | aggregates | `test + functionalTest + cucumberTest` |
@@ -163,7 +185,7 @@ classpath 排除 `logback-classic` 以避免绑定冲突。
 
 ## EPIC 状态
 
-来自 `slider-plugin/.agents/INDEX.adoc`（最后一次会话 027）：
+来自 `slider-plugin/.agents/INDEX.adoc`（最后一次会话 030）：
 
 | EPIC | Description | Status |
 |------|-------------|--------|
@@ -172,6 +194,7 @@ classpath 排除 `logback-classic` 以避免绑定冲突。
 | SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
 | SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 files) | ✅ DONE (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
@@ -182,7 +205,7 @@ classpath 排除 `logback-classic` 以避免绑定冲突。
 2. 测试通过：`./gradlew check`
 3. 遵守 `SliderManager` 中的**单一职责**模式——每个嵌套
    object 负责一个关注点（Prerequisites、Repositories、Plugins、Dependencies、
-   Extensions、Tasks、Git、FileOps）。
+   Extensions、Tasks、Git）。
 4. 使用显式导入（无通配符）、4 空格缩进、左大括号在
    同一行；常量使用 `SCREAMING_SNAKE_CASE`。
 5. 不要启用 Configuration Cache——`asciidoctorRevealJs` 已明确

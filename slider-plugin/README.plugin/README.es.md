@@ -30,9 +30,31 @@ slider-plugin/
         │   ├── slider/
         │   │   ├── SliderPlugin.kt        # Plugin entry point — thin orchestrator
         │   │   ├── SliderManager.kt       # Prerequisites, Repositories, Plugins, Dependencies,
-        │   │   │                            Extensions, Tasks, Git, FileOps (object DSL)
-        │   │   ├── Slides.kt                # RevealJsSlides constants (task names, layout)
-        │   │   └── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   │                            Extensions, Tasks, Git (adaptador Gradle delgado que delega
+        │   │   │                            al dominio slider.repository, ≈55 líneas)
+        │   │   ├── Slides.kt                # Constantes RevealJsSlides (nombres de tareas, layout)
+        │   │   ├── models.kt                # SlidesConfiguration, DeckContext, AuthorContext…
+        │   │   ├── repository/              # Dominio DDD — pipeline de despliegue de slides
+        │   │   │   ├── SlideDeploymentRequest.kt   # Value objects (SlideDeploymentRequest + GitCredentials)
+        │   │   │   ├── SlideDeployer.kt             # Adaptador filesystem (RepoDirResult, CopyResult)
+        │   │   │   └── JGitSlidePusher.kt            # Adaptador Git wire (CommitResult, SlidePushResult)
+        │   │   ├── capsule/                  # Dominio DDD — feed capsule (contrato capsule-gradle)
+        │   │   │   ├── CapsuleScript.kt              # Aggregate root + SlideSegment VO + CapsuleScriptWriter
+        │   │   │   └── AsciidocSpeakerNoteParser.kt  # Parser .adoc → CapsuleScript
+        │   │   ├── rtl/                      # Dominio DDD — validación visual RTL
+        │   │   │   ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │   │   ├── RtlAssertionResult.kt        # Result + detalle de fallo
+        │   │   │   ├── SlideRenderData.kt           # Snapshot de slide renderizada
+        │   │   │   └── RtlSlideAssertion.kt          # Motor de aserción (assertAll)
+        │   │   └── translation/             # Dominio DDD — pipeline de traducción de deck (one-to-many)
+        │   │       ├── TranslationRequest.kt         # Value object (DeckContext fuente + targetLanguages)
+        │   │       ├── DeckTranslationPlan.kt        # Value object (permutación fuente→destino)
+        │   │       ├── TranslationResult.kt          # Sealed (Translated / Skipped / Failed)
+        │   │       ├── TranslationOutcome.kt         # Agregación (stats ok/skipped/failed)
+        │   │       ├── LanguageModelAdapter.kt       # Port (interfaz LLM, mockable)
+        │   │       ├── DeckTranslator.kt            # Servicio de dominio (orquesta LLM por destino)
+        │   │       ├── OllamaLanguageModelAdapter.kt # Adaptador langchain4j (bridge a ChatModel)
+        │   │       └── TranslateDeckTask.kt          # Tarea Gradle `translateDeck` (group "translator")
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -42,10 +64,10 @@ slider-plugin/
         │   └── slider/translate/
         │       ├── TranslatorManager.kt      # Translation orchestration
         │       └── TranslatorPlugin.kt       # Translation plugin
-        ├── test/                              # JUnit5 unit tests + Cucumber features/steps
-        │   ├── features/                      # 4 .feature files (BDD)
-        │   └── scenarios/                     # Cucumber step definitions
-        └── functionalTest/                    # GradleTestKit functional tests
+        ├── test/                              # Pruebas unitarias JUnit5 + features/steps Cucumber
+        │   ├── features/                      # archivos .feature (BDD)
+        │   └── scenarios/slider/steps/        # Definiciones de steps Cucumber (paquete slider.steps)
+        └── functionalTest/                    # Pruebas funcionales GradleTestKit
 ```
 
 ## Plugin consumido (dependencia N2 → N2)
@@ -95,7 +117,7 @@ Modelos localmente disponibles catalogados en `AssistantManager.localModels`:
 
 | Task | Scope | Notes |
 |------|-------|-------|
-| `test` | JUnit5 unit tests | excludes `com.cheroliv.slider.scenarios.**` (Cucumber) and `SliderPluginFunctionalTests` |
+| `test` | JUnit5 unit tests | excludes `slider.steps.**` (Cucumber) and `SliderPluginFunctionalTests` |
 | `functionalTest` | GradleTestKit functional tests | own source set, depends on `test` impl via `extendsFrom` trick |
 | `cucumberTest` | Cucumber BDD feature files | uses JUnit Platform suite engine, excludes `junit-jupiter`, `dependsOn functionalTest.classesTaskName` |
 | `check` | aggregates | `test + functionalTest + cucumberTest` |
@@ -165,7 +187,7 @@ El bloque de plugin en `slider/build.gradle.kts` cablea:
 
 ## Estado de EPICs
 
-Desde `slider-plugin/.agents/INDEX.adoc` (última sesión 027):
+Desde `slider-plugin/.agents/INDEX.adoc` (última sesión 030):
 
 | EPIC | Description | Status |
 |------|-------------|--------|
@@ -174,6 +196,7 @@ Desde `slider-plugin/.agents/INDEX.adoc` (última sesión 027):
 | SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
 | SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 files) | ✅ DONE (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |
@@ -184,7 +207,7 @@ Desde `slider-plugin/.agents/INDEX.adoc` (última sesión 027):
 2. Pruebas en verde: `./gradlew check`
 3. Respete el patrón de **responsabilidad única** en `SliderManager` — cada object
    anidado posee una preocupación (Prerequisites, Repositories, Plugins, Dependencies,
-   Extensions, Tasks, Git, FileOps).
+   Extensions, Tasks, Git).
 4. Use imports explícitos (sin comodines), indentación de 4 espacios, llave de
    apertura en la misma línea; las constantes son `SCREAMING_SNAKE_CASE`.
 5. No habilite el Configuration Cache — `asciidoctorRevealJs` está declarado
