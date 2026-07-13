@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introducción
+
+[%step]
+* Mostrar la tubería de slider a capsule
+* Generar texto capsule a partir de las notas del ponente
+* Texto plano consumido por capsule-gradle
+
+[NOTE.speaker]
+--
+Bienvenidos a esta demostración de la tubería capsule feed.
+Veremos cómo slider-gradle extrae las notas del ponente de una presentación AsciiDoc
+para producir un texto que capsule-gradle consume.
+--
+
+[.slide,data-transition="slide"]
+== Nodo capsule-gradle
+
+[%step]
+* Formato de texto plano definido
+* Encabezado: `=== CAPSULE SCRIPT : name ===`
+* Una sección por diapositiva: `--- SLIDE n : title ---`
+* Cuerpo: la nota del ponente tal cual
+
+[NOTE.speaker]
+--
+El nodo entre slider y capsule es intencionalmente simple:
+un archivo de texto con un encabezado y una sección por diapositiva.
+Cada sección contiene la nota del ponente que se convierte en la narración de audio.
+--
+
+[.slide,data-transition="slide"]
+== Verificación ida y vuelta
+
+[%step]
+* El analizador extrae las secciones del AsciiDoc
+* El escritor serializa al nodo de texto plano
+* capsule-gradle reanaliza el mismo formato
+* Cero pérdida: lo que escribe slider lo lee capsule
+
+[NOTE.speaker]
+--
+Se ha verificado la ida y vuelta: el analizador extrae las secciones del origen AsciiDoc,
+el escritor las serializa de nuevo al nodo de texto plano,
+y capsule-gradle vuelve a analizar exactamente el mismo formato sin pérdida de datos.
+--
+
+[.slide,data-transition="slide"]
+== Conclusión
+
+[%step]
+* capsule feed = extracción de notas del ponente
+* Sin JSON ni capturas de pantalla en el nodo
+* Las capturas de pantalla se toman directamente con capsule-gradle
+* slider genera el texto y capsule lo consume
+
+[NOTE.speaker]
+--
+Para concluir: capsule feed es simplemente la extracción de notas del ponente.
+Sin JSON ni capturas de pantalla en el nodo — las capturas se toman directamente
+con capsule-gradle durante la generación del video. slider genera el texto
+y capsule lo consume. Límite claro entre productor y consumidor.
+--

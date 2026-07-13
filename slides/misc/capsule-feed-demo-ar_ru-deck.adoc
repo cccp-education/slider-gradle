@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Введение
+
+[%step]
+* Показ pipeline от slider к capsule
+* Генерация текста capsule из заметок докладчика
+* Обычный текстовый узел, потребляемый capsule-gradle
+
+[NOTE.speaker]
+--
+Добро пожаловать в эту демонстрацию pipeline capsule feed.
+Мы увидим, как slider-gradle извлекает заметки докладчика из AsciiDoc-презентации
+для создания текста, потребляемого capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Контракты capsule-gradle
+
+[%step]
+* Определённый обычный текстовый формат
+* Заголовок: `=== CAPSULE SCRIPT : name ===`
+* Один раздел на каждый слайд: `--- SLIDE n : title ---`
+* Тело: заметка докладчика как есть
+
+[NOTE.speaker]
+--
+Контракт между slider и capsule преднамеренно прост:
+Текстовый файл с заголовком и одним разделом на каждый слайд.
+Каждый раздел содержит заметку докладчика, которая становится озвучкой.
+--
+
+[.slide,data-transition="slide"]
+== Проверка обратного пути
+
+[%step]
+* Анализатор извлекает разделы из AsciiDoc
+* Автор сериализует их в обычный текстовый узел
+* capsule-gradle повторно анализирует тот же формат
+* Нулевые потери: то, что пишет slider, читает capsule
+
+[NOTE.speaker]
+--
+Проверка обратного пути завершена: анализатор извлекает разделы из исходного AsciiDoc,
+автор сериализует их обратно в обычный текстовый узел,
+и capsule-gradle повторно анализирует точно такой же формат без каких-либо потерь данных.
+--
+
+[.slide,data-transition="slide"]
+== Заключение
+
+[%step]
+* capsule feed = извлечение заметок докладчика
+* Нет JSON и скриншотов в узлах
+* Скриншоты берутся напрямую capsule-gradle
+* slider генерирует текст, а capsule потребляет его
+
+[NOTE.speaker]
+--
+В заключение: capsule feed — это просто извлечение заметок докладчика.
+Нет JSON и скриншотов в узлах — скриншоты берутся напрямую
+capsule-gradle во время генерации видео. slider генерирует текст,
+а capsule потребляет его. Чёткое разделение между производителем и потребителем.
+--

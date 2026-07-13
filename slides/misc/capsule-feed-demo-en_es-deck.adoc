@@ -1,0 +1,72 @@
+= Demostración del Feed de Cápsulas (Español)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introducción
+
+[%step]
+* Demostración del pipeline de slider a cápsula
+* Generación del script de cápsula a partir de notas del ponente
+* Contrato de texto plano consumido por capsule-gradle
+
+[NOTE.speaker]
+--
+Bienvenidos a esta demostración del pipeline de feed de cápsulas.
+Veremos cómo slider-gradle extrae las notas del ponente de una presentación AsciiDoc
+para producir un script consumido por capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== El contrato de capsule-gradle
+
+[%step]
+* Formato delimitado de texto plano
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: speaker note as-is
+
+[NOTE.speaker]
+--
+El contrato entre slider y capsule es intencionalmente simple:
+un archivo de texto con un encabezado y un segmento por diapositiva.
+Cada segmento contiene la nota del ponente que se convierte en la narración TTS.
+--
+
+[.slide,data-transition="slide"]
+== Validación de ida y vuelta
+
+[%step]
+* El analizador extrae segmentos del AsciiDoc
+* El escritor serializa al contrato de texto plano
+* Capsule-gradle vuelve a analizar el mismo formato
+* Sin pérdida: lo que slider escribe, capsule lee
+
+[NOTE.speaker]
+--
+La ida y vuelta se valida: el analizador extrae segmentos del origen AsciiDoc,
+el escritor los serializa de nuevo al contrato de texto plano,
+y capsule-gradle vuelve a analizar exactamente el mismo formato sin pérdida de datos.
+--
+
+[.slide,data-transition="slide"]
+== Conclusión
+
+[%step]
+* Feed de cápsula = extracción de notas del ponente
+* Sin JSON, sin capturas de pantalla en el contrato
+* Las capturas de pantalla se toman en vivo por capsule-gradle
+* Slider produce el script, capsule lo consume
+
+[NOTE.speaker]
+--
+Para concluir: el feed de cápsula es simplemente la extracción de notas del ponente.
+Sin JSON, sin capturas de pantalla en el contrato — las capturas de pantalla se toman en vivo
+por capsule-gradle durante la generación del vídeo. Slider produce el script,
+capsule lo consume. Límite claro entre productor y consumidor.
+--

@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== परिचय
+
+[%step]
+* slider से capsule तक पाइपलाइन का प्रदर्शन
+* स्पीकर नोट्स से capsule टेक्स्ट बनाना
+* एक साधारण टेक्स्ट अनुबंध जिसे capsule-gradle उपयोग करता है
+
+[NOTE.speaker]
+--
+capsule feed पाइपलाइन के इस डेमो में आपका स्वागत है।
+हम देखेंगे कि slider-gradle कैसे AsciiDoc प्रस्तुति से स्पीकर नोट्स निकालता है
+ताकि वह टेक्स्ट उत्पन्न करे जिसे capsule-gradle उपयोग करता है।
+--
+
+[.slide,data-transition="slide"]
+== capsule-gradle का अनुबंध
+
+[%step]
+* परिभाषित साधारण टेक्स्ट फ़ॉर्मेट
+* हेडर: `=== CAPSULE SCRIPT : name ===`
+* प्रत्येक स्लाइड के लिए एक खंड: `--- SLIDE n : title ---`
+* बॉडी: स्पीकर नोट जैसा है
+
+[NOTE.speaker]
+--
+slider और capsule के बीच का अनुबंध जानबूझकर सरल रखा गया है:
+एक टेक्स्ट फ़ाइल जिसमें हेडर और प्रत्येक स्लाइड के लिए एक खंड हो।
+प्रत्येक खंड में स्पीकर नोट होता है जो आवाज़ी कथा बन जाता है।
+--
+
+[.slide,data-transition="slide"]
+== जाने-आने की जाँच
+
+[%step]
+* पार्सर AsciiDoc से खंड निकालता है
+* लिखने वाला इसे साधारण टेक्स्ट अनुबंध में क्रमबद्ध करता है
+* capsule-gradle उसी फ़ॉर्मेट को पुनः विश्लेषित करता है
+* शून्य नुकसान: जो slider लिखता है, वह capsule पढ़ता है
+
+[NOTE.speaker]
+--
+जाने-आने की जाँच सफल रही: पार्सर AsciiDoc स्रोत से खंड निकालता है,
+लिखने वाला उन्हें फिर से साधारण टेक्स्ट अनुबंध में क्रमबद्ध करता है,
+और capsule-gradle बिल्कुल उसी फ़ॉर्मेट को बिना किसी डेटा नुकसान के पुनः विश्लेषित करता है।
+--
+
+[.slide,data-transition="slide"]
+== समापन
+
+[%step]
+* capsule feed = स्पीकर नोट्स निकालना
+* अनुबंध में न JSON है न स्क्रीनशॉट
+* स्क्रीनशॉट सीधे capsule-gradle द्वारा लिए जाते हैं
+* slider टेक्स्ट बनाता है और capsule उसे उपयोग करता है
+
+[NOTE.speaker]
+--
+समापन के लिए: capsule feed बस स्पीकर नोट्स निकालना है।
+अनुबंध में न JSON है न स्क्रीनशॉट — स्क्रीनशॉट सीधे
+capsule-gradle द्वारा वीडियो उत्पादन के दौरान लिए जाते हैं। slider टेक्स्ट बनाता है
+और capsule उसे उपयोग करता है। उत्पादक और उपभोक्ता के बीच स्पष्ट सीमा।
+--

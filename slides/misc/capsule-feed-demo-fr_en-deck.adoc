@@ -1,0 +1,67 @@
+= Capsule Feed Demo (English)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introduction
+
+[%step]
+* Demonstration of the slider → capsule pipeline
+* Generation of a capsule script from speaker notes
+* Plain-text contract consumed by capsule-gradle
+
+[NOTE.speaker]
+--
+Welcome to this demonstration of the capsule feed pipeline.
+We will see how slider-gradle extracts speaker notes from an AsciiDoc deck to produce a script consumed by capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== The capsule-gradle contract
+
+[%step]
+* Delimited plain-text format
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: speaker note as is
+
+[NOTE.speaker]
+--
+The contract between slider and capsule is intentionally simple:
+a text file with a header and a segment per slide.
+Each segment contains the speaker note that will become the TTS narration.
+--
+
+[.slide,data-transition="slide"]
+== Validation round-trip
+
+[%step]
+* The parser extracts the segments from the AsciiDoc
+* The writer serializes to the plain-text contract
+* Capsule-gradle re-parses the same format
+* Zero loss: what slider writes, capsule reads
+
+[NOTE.speaker]
+--
+The round-trip is valid: the parser extracts the segments from the AsciiDoc source, the writer serializes them to the plain-text contract, and capsule-gradle re-parses the same format without any data loss.
+--
+
+[.slide,data-transition="slide"]
+== Conclusion
+
+[%step]
+* Capsule feed = extraction of speaker notes
+* No JSON, no screenshots in the contract
+* Screenshots are taken live by capsule-gradle
+* Slider produces the script, capsule consumes it
+
+[NOTE.speaker]
+--
+To conclude: the capsule feed is simply the extraction of speaker notes.
+No JSON, no screenshots in the contract — screenshots are taken live by capsule-gradle during video generation. Slider produces the script, capsule consumes it. Clean producer‑consumer boundary.
+--

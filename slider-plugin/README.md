@@ -41,11 +41,20 @@ slider-plugin/
         │   │   ├── capsule/                  # DDD domain — capsule feed (capsule-gradle contract)
         │   │   │   ├── CapsuleScript.kt              # Aggregate root + SlideSegment VO + CapsuleScriptWriter
         │   │   │   └── AsciidocSpeakerNoteParser.kt  # Parser .adoc → CapsuleScript
-        │   │   └── rtl/                      # DDD domain — RTL visual validation
-        │   │       ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
-        │   │       ├── RtlAssertionResult.kt        # Result + failure detail
-        │   │       ├── SlideRenderData.kt           # Rendered slide snapshot
-        │   │       └── RtlSlideAssertion.kt          # Assertion engine (assertAll)
+        │   │   ├── rtl/                      # DDD domain — RTL visual validation
+        │   │   │   ├── RtlAssertionCode.kt          # Enum (3 P0 + 1 P1)
+        │   │   │   ├── RtlAssertionResult.kt        # Result + failure detail
+        │   │   │   ├── SlideRenderData.kt           # Rendered slide snapshot
+        │   │   │   └── RtlSlideAssertion.kt          # Assertion engine (assertAll)
+        │   │   └── translation/             # DDD domain — deck translation pipeline (one-to-many)
+        │   │       ├── TranslationRequest.kt         # Value object (source DeckContext + targetLanguages)
+        │   │       ├── DeckTranslationPlan.kt        # Value object (permutation source→target tasks)
+        │   │       ├── TranslationResult.kt          # Sealed (Translated / Skipped / Failed)
+        │   │       ├── TranslationOutcome.kt         # Aggregation (ok/skipped/failed stats)
+        │   │       ├── LanguageModelAdapter.kt       # Port (LLM interface, mockable)
+        │   │       ├── DeckTranslator.kt            # Domain service (orchestrates LLM per target)
+        │   │       ├── OllamaLanguageModelAdapter.kt # langchain4j adapter (bridge to ChatModel)
+        │   │       └── TranslateDeckTask.kt          # Gradle task `translateDeck` (group "translator")
         │   ├── slider/ai/
         │   │   ├── AssistantManager.kt     # LLM provider resolution, model catalogs, chat tasks
         │   │   ├── PgVectorService.kt       # BuildService — docker-java pgvector lifecycle
@@ -176,7 +185,7 @@ The `slider/build.gradle.kts` plugin block wires:
 
 ## EPIC status
 
-From `slider-plugin/.agents/INDEX.adoc` (last session 027):
+From `slider-plugin/.agents/INDEX.adoc` (last session 030):
 
 | EPIC | Description | Status |
 |------|-------------|--------|
@@ -185,6 +194,7 @@ From `slider-plugin/.agents/INDEX.adoc` (last session 027):
 | SLD-2 | Playwright E2E + Pro theme + Capsule feed | ✅ DONE (5/5 US) |
 | SLD-3 | i18n 10 languages via `i18n-contracts:0.0.2` | ✅ DONE (7/7 US) |
 | SLD-4 | Refactor DDD `slider.repository` — domain extraction from `SliderManager.Git` | ✅ DONE (8/8 US, S-025 + S-027) |
+| SLD-5 | Deck Translation Pipeline — one-to-many `translateDeck` (DDD `slider.translation`, 8 files) | ✅ DONE (7/7 US, S-029 + S-030) |
 | CNV-6/7/8 | Conventions plugins migration (`education.cccp.build.*` v0.0.2) | ✅ DONE (build.gradle.kts 301 → 145 lines, −52%) |
 | Publication Maven Central 0.0.8 | NMCP, bundle 4684447b AUTOMATIC | ✅ 2026-07-09 |
 | Publication Maven Central 0.0.9 | NMCP, bump 0.0.8 → 0.0.9 | ✅ 2026-07-11 |

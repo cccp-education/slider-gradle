@@ -1,13 +1,13 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-:.date: 2026-07-13
+:.date: 2026-07-14
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
-== EPIC SLD-5 — Deck Translation Pipeline 🔄 EN COURS (Session 029, 2026-07-13)
+== EPIC SLD-5 — Deck Translation Pipeline ✅ TERMINÉ (Session 029-030, 2026-07-14)
 
 _Vision_ : Pipeline de traduction de deck one-to-many. Partant d'un deck source
 (deck-context.yml + .adoc) dans une langue, génère les 10 variantes localisées
@@ -15,16 +15,17 @@ couvrant le top 10 des langues les plus parlées (source :
 `10 langues les plus parlés.csv` — aligné sur `LanguageCatalog.supportedCodes()` :
 en, zh, hi, es, fr, ar, bn, pt, ru, ur).
 
-_Problématique_ : slider sait générer un deck dans UNE langue (`proposeDeckContext
--Planguage=X`) et traduire du texte libre (`translate{From}To{To}`). Il ne sait
-PAS prendre un deck existant et produire ses 10 variantes localisées. SLD-5
-comble ce manque — chaînon manquant du story i18n (SLD-3).
-
-_Domaine DDD_ : `slider.translation` (nouveau, S-029) — 8 fichiers : value objects
+_Domaine DDD_ : `slider.translation` (S-029) — 8 fichiers : value objects
 purs (TranslationRequest, DeckTranslationPlan, TranslationResult sealed 3 variants,
 TranslationOutcome) + port (LanguageModelAdapter) + domain service (DeckTranslator)
 + adaptateur LLM (OllamaLanguageModelAdapter) + tâche Gradle thin (TranslateDeckTask).
-Pattern `slider.repository` / `slider.capsule`.
+`DeckTranslator.ensureRtlDirection` (S-030) : injecte/supprime `:revealjs_direction: rtl`
+post-traduction selon langue cible.
+
+_Dogfooding_ (S-030) : 3 decks demo fr/en/ar étendus à 10 langues via `translateDeck`
+avec LLM réel `gpt-oss:120b-cloud` (port 11439). 54 fichiers générés (27 adoc + 27
+context). Validation Playwright LTR (fr→en) + RTL (fr→ar). README master EN mis à
+jour.
 
 |===
 | US | Description | Statut | Estimation
@@ -34,10 +35,10 @@ Pattern `slider.repository` / `slider.capsule`.
 | SLD-5.3 | `DeckTranslator` (domain service) — orchestre LLM par langue cible, port `LanguageModelAdapter` mockable, zéro leak langchain4j. Unit tests mock LLM | ✅ TERMINÉ (S-029, 10 unit) | 3 pts
 | SLD-5.4 | Tâche Gradle `translateDeck` — `-Pdeck.context` + `-Ptarget.languages` (défaut 10), outputs 20 fichiers (10 context + 10 adoc). Functional tests GradleTestKit | ✅ TERMINÉ (S-029, 2 functional) | 3 pts
 | SLD-5.5 | Cucumber `13_deck_translation.feature` — BDD end-to-end (one-to-many, langue invalide, fallback, idempotence). BDD | ✅ TERMINÉ (S-029, 13 cucumber) | 2 pts
-| SLD-5.6 | Dogfooding — 3 decks demo S-020 étendus à 10 langues + validation visuelle Playwright (1 LTR + 1 RTL) + README i18n | 🔜 À FAIRE (S-030) | 2 pts
+| SLD-5.6 | Dogfooding — 3 decks demo S-020 étendus à 10 langues + validation visuelle Playwright (1 LTR + 1 RTL) + README i18n | ✅ TERMINÉ (S-030) | 2 pts
 |===
 
-_Total_ : 7 US, ~16 pts (6/7 terminées, 14 pts livrés). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Tests_ : 270 PASS (165 unit + 15 functional + 90 cucumber), was 170. +100 tests, zéro régression.
+_Total_ : 7 US, ~16 pts (7/7 terminées, 16 pts livrés). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Tests_ : 425 PASS (293 unit + 15 functional + 117 cucumber), was 270. +155 tests, zéro régression.
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.9 ✅ TERMINE (Session 028, 2026-07-11)

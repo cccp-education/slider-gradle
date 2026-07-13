@@ -1,0 +1,52 @@
+---
+subject: "Capsule Feed Demo (English)"
+audience: "Developers discovering the slider-to-capsule pipeline"
+duration: 10
+languageCode: "ar"
+outputFile: "capsule-feed-demo-en_ar-deck.adoc"
+author:
+  name: "cheroliv"
+  email: "cheroliv@mail.com"
+revealjs:
+  theme: "sky"
+  transition: "slide"
+  slideNumber: "c/t"
+  width: 1408
+  height: 792
+  controls: true
+  controlsLayout: "edges"
+  history: true
+  fragmentInURL: true
+notes:
+  speakerNotes: true
+  pageNotes: true
+  pageNotesStyle: "DETAILED"
+slides:
+- title: "Introduction"
+  speakerHint: "Introduce the capsule feed pipeline in 1 minute."
+  pageNotesHint: "Mention slider-gradle and capsule-gradle roles."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null
+- title: "The capsule-gradle contract"
+  speakerHint: "Explain the plain-text contract format."
+  pageNotesHint: "Header, segment-per-slide, body as speaker note."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null
+- title: "Round-trip validation"
+  speakerHint: "Emphasise zero-loss round-trip parser-writer."
+  pageNotesHint: "Show the parser-writer-parser validation chain."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null
+- title: "Conclusion"
+  speakerHint: "Recap the producer-consumer boundary."
+  pageNotesHint: "No JSON, no screenshots — clean contract."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null

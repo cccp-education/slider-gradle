@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introduction
+
+[%step]
+* Présentation du pipeline du slider au capsule
+* Génération du texte capsule à partir des notes du présentateur
+* Noeud texte ordinaire consommé par capsule-gradle
+
+[NOTE.speaker]
+--
+Bienvenue à cette démonstration du pipeline capsule feed.
+Nous verrons comment slider-gradle extrait les notes du présentateur d'une présentation AsciiDoc
+pour produire un texte consommé par capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Nœud capsule-gradle
+
+[%step]
+* Format texte ordinaire défini
+* En-tête : `=== CAPSULE SCRIPT : name ===`
+* Une section par diapositive : `--- SLIDE n : title ---`
+* Corps : la note du présentateur telle quelle
+
+[NOTE.speaker]
+--
+Le nœud entre le slider et le capsule est volontairement simple :
+un fichier texte avec un en-tête et une section par diapositive.
+Chaque section contient la note du présentateur qui devient la narration audio.
+--
+
+[.slide,data-transition="slide"]
+== Vérification aller-retour
+
+[%step]
+* L'analyseur extrait les sections d'AsciiDoc
+* L'écrivain sérialise vers le nœud texte ordinaire
+* capsule-gradle réanalyse le même format
+* Zéro perte : ce que le slider écrit est lu par le capsule
+
+[NOTE.speaker]
+--
+La vérification aller-retour a été effectuée : l'analyseur extrait les sections de la source AsciiDoc,
+l'écrivain les sérialise à nouveau vers le nœud texte ordinaire,
+et capsule-gradle réanalyse exactement le même format sans aucune perte de données.
+--
+
+[.slide,data-transition="slide"]
+== Conclusion
+
+[%step]
+* capsule feed = extraction des notes du présentateur
+* Pas de JSON ni de captures d'écran dans les nœuds
+* Les captures d'écran sont prises directement par capsule-gradle
+* Le slider génère le texte et le capsule le consomme
+
+[NOTE.speaker]
+--
+En conclusion : le capsule feed consiste simplement à extraire les notes du présentateur.
+Pas de JSON ni de captures d'écran dans les nœuds — les captures d'écran sont prises directement
+par capsule-gradle lors de la génération de la vidéo. Le slider génère le texte
+et le capsule le consomme. Une frontière claire entre le producteur et le consommateur.
+--

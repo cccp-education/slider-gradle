@@ -216,4 +216,87 @@ Let's dive in.
         assertThat(summary).contains("2 translated")
         assertThat(summary).contains("1 failed")
     }
+
+    @Test
+    fun `translated adoc for RTL target ar should contain revealjs_direction rtl`() {
+        val adapter = StubModelAdapter(mapOf("ar" to "= Deck\n\n== Slide\nContent"))
+        val request = TranslationRequest(
+            sourceDeck = deck("fr"),
+            targetLanguages = listOf("ar"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+        val translator = DeckTranslator(adapter, sampleAdoc)
+
+        val outcome = translator.translate(plan)
+        val translated = outcome.translatedResults().first()
+
+        assertThat(translated.translatedAdoc).contains(":revealjs_direction: rtl")
+    }
+
+    @Test
+    fun `translated adoc for RTL target ur should contain revealjs_direction rtl`() {
+        val adapter = StubModelAdapter(mapOf("ur" to "= Deck\n\n== Slide\nContent"))
+        val request = TranslationRequest(
+            sourceDeck = deck("fr"),
+            targetLanguages = listOf("ur"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+        val translator = DeckTranslator(adapter, sampleAdoc)
+
+        val outcome = translator.translate(plan)
+        val translated = outcome.translatedResults().first()
+
+        assertThat(translated.translatedAdoc).contains(":revealjs_direction: rtl")
+    }
+
+    @Test
+    fun `translated adoc for LTR target en should not contain revealjs_direction rtl`() {
+        val adapter = StubModelAdapter(mapOf("en" to "= Deck\n\n== Slide\nContent"))
+        val request = TranslationRequest(
+            sourceDeck = deck("fr"),
+            targetLanguages = listOf("en"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+        val translator = DeckTranslator(adapter, sampleAdoc)
+
+        val outcome = translator.translate(plan)
+        val translated = outcome.translatedResults().first()
+
+        assertThat(translated.translatedAdoc).doesNotContain(":revealjs_direction: rtl")
+    }
+
+    @Test
+    fun `translated adoc for RTL target should not duplicate revealjs_direction when already present`() {
+        val rtlContent = "= Deck\n:revealjs_direction: rtl\n\n== Slide\nContent"
+        val adapter = StubModelAdapter(mapOf("ar" to rtlContent))
+        val request = TranslationRequest(
+            sourceDeck = deck("fr"),
+            targetLanguages = listOf("ar"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+        val translator = DeckTranslator(adapter, sampleAdoc)
+
+        val outcome = translator.translate(plan)
+        val translated = outcome.translatedResults().first()
+
+        val occurrences = translated.translatedAdoc.split(":revealjs_direction: rtl").size - 1
+        assertThat(occurrences).isEqualTo(1)
+    }
+
+    @Test
+    fun `translated adoc for LTR target should remove revealjs_direction rtl from RTL source`() {
+        val rtlSourceContent = "= Deck\n:revealjs_direction: rtl\n\n== Slide\nContent"
+        val adapter = StubModelAdapter(mapOf("en" to rtlSourceContent))
+        val request = TranslationRequest(
+            sourceDeck = deck("ar"),
+            targetLanguages = listOf("en"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+        val translator = DeckTranslator(adapter, rtlSourceContent)
+
+        val outcome = translator.translate(plan)
+        val translated = outcome.translatedResults().first()
+
+        assertThat(translated.translatedAdoc).doesNotContain(":revealjs_direction: rtl")
+    }
 }

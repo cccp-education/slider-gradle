@@ -1,0 +1,107 @@
+= Session 030 (2026-07-14) — US-5.6 Dogfooding + EPIC SLD-5 clôture
+
+== Objectif
+
+US-5.6 Dogfooding : étendre les 3 decks demo fr/en/ar (S-020) à 10 langues via
+`translateDeck`, validation visuelle Playwright, mise à jour README i18n avec
+domaine `slider.translation`. Dernière US de l'EPIC SLD-5 (Deck Translation
+Pipeline).
+
+== Méthode
+
+Baby-step TDD/BDD 3 niveaux (RED → GREEN → REFACTOR), DDD, agile software
+craftmanship. English only code/Gherkin.
+
+== Livrables
+
+=== Code production
+
+. `DeckTranslator.kt` — méthode `ensureRtlDirection` post-traduction :
+  - RTL targets (ar, ur) : injecte `:revealjs_direction: rtl` si absent
+  - LTR targets : supprime `:revealjs_direction: rtl` si présent (source RTL → cible LTR)
+  - Utilise `LanguageCatalog.findByCode(target).rtl` pour déterminer la direction
+. 3 `deck-context.yml` créés pour les decks demo :
+  - `slides/misc/capsule-feed-demo-fr-deck-context.yml` (languageCode: fr)
+  - `slides/misc/capsule-feed-demo-en-deck-context.yml` (languageCode: en)
+  - `slides/misc/capsule-feed-demo-ar-deck-context.yml` (languageCode: ar)
+. 54 fichiers traduits générés via `translateDeck` avec LLM réel
+  `gpt-oss:120b-cloud` (port 11439, plage 11437-11465) :
+  - 27 `.adoc` traduits (3 sources × 9 cibles)
+  - 27 `deck-context.yml` traduits (3 sources × 9 cibles)
+  - Langues : en, zh, hi, es, fr, ar, bn, pt, ru, ur
+
+=== Tests (425 PASS, +155 depuis S-029)
+
+. `DemoDeckContextTest.kt` (6 unit) — valide les 3 deck-context.yml : parse
+  YAML, languageCode valide (LanguageCatalog), outputFile pointe vers .adoc
+  existant, subject/author non-blanks, duration positive.
+. `TranslatedDemoDeckTest.kt` (~50 unit paramétrés) — valide les 54 fichiers
+  générés : existence, non-vide, structure AsciiDoc (titre `=`, sections `==`,
+  `[NOTE.speaker]`, `[%step]`), attributs revealjs préservés, languageCode
+  correct, outputFile matching, count 27+27, RTL ar/ur contiennent
+  `:revealjs_direction: rtl`, LTR depuis source RTL ne contiennent pas rtl.
+. `DeckTranslatorTest.kt` (+4 unit) — RTL injection (ar, ur), LTR non-injection
+  (en), RTL non-duplication si déjà présent, LTR suppression depuis source RTL.
+. `14_deck_translation_dogfood.feature` (~20 scénarios BDD paramétrés, +27
+  cucumber) — dogfood end-to-end : deck-context existence, languageCode valide,
+  outputFile existe, 9 adoc + 9 context par source, structure AsciiDoc
+  préservée, RTL/LTR direction correcte, count total 27+27.
+
+=== Validation visuelle Playwright
+
+. LTR (fr→en) : `title=Capsule Feed Demo (English), slides=5, rtl=false` ✅
+. RTL (fr→ar) : `title=عرض تغذية الكبسولة (فرنسي), slides=5, rtl=true,
+  screenshot=32445b` ✅ (avec `-Planguage=ar` sur asciidoctorRevealJs)
+
+=== README
+
+. `README.md` master EN : module layout enrichi avec domaine `slider.translation`
+  (8 fichiers), EPIC status SLD-5 ✅ DONE (7/7 US).
+. 9 `README.plugin/README.*.md` : traduction i18n du domaine `slider.translation`
+  en attente (reportée à session de traduction dédiée).
+
+== Comptes tests
+
+[cols="2,2,2,2"]
+|===
+| Type | Avant (S-029) | Après (S-030) | Delta
+| Unit | 165 | 293 | +128
+| Functional | 15 | 15 | 0
+| Cucumber | 90 | 117 | +27
+| *Total* | *270* | *425* | *+155*
+|===
+
+0 FAIL, 2 SKIP (Playwright @Disabled inchangés — gem JRuby isolé GradleRunner).
+
+== EPIC SLD-5 — TERMINÉ (7/7 US, 16 pts)
+
+|===
+| US | Statut
+| SLD-5.0 | ✅ Cadrage (S-029)
+| SLD-5.1 | ✅ TranslationRequest + DeckTranslationPlan (S-029)
+| SLD-5.2 | ✅ TranslationResult + TranslationOutcome (S-029)
+| SLD-5.3 | ✅ DeckTranslator + LanguageModelAdapter (S-029)
+| SLD-5.4 | ✅ TranslateDeckTask (S-029)
+| SLD-5.5 | ✅ Cucumber 13_deck_translation.feature (S-029)
+| SLD-5.6 | ✅ Dogfooding 3 decks × 10 langues + Playwright + README (S-030)
+|===
+
+== Décisions techniques
+
+. `ensureRtlDirection` dans `DeckTranslator` (domain service) plutôt que dans
+  l'adaptateur LLM — la direction RTL est une propriété de la langue cible,
+  pas une préoccupation de l'infrastructure LLM. Le domaine garantit la
+  cohérence post-traduction.
+. Le plugin asciidoctorRevealJs configure RTL via `-Planguage=ar|ur`
+  (`RevealRtlResolver` + `setRightToLeft(true)`), pas via l'attribut AsciiDoc
+  `:revealjs_direction:`. L'attribut est documenté pour les decks sources mais
+  le rendu HTML RTL dépend du flag Gradle.
+. Le dogfooding utilise un projet consumer temporaire (`/tmp/opencode/slider-dogfood`)
+  avec `mavenLocal()` pour appliquer le plugin `education.cccp.slider:0.0.9` —
+  le plugin n'est pas auto-appliqué au sous-projet `:slider`.
+
+== Score session
+
+9/10 — US-5.6 livrée, EPIC SLD-5 clôturé (7/7 US), +155 tests, validation
+Playwright LTR+RTL, README master mis à jour. Manque : traduction README i18n
+(9 fichiers) reportée.

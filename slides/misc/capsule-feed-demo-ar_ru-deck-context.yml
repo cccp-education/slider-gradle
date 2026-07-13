@@ -1,0 +1,52 @@
+---
+subject: "Capsule Feed Demo (Arabic)"
+audience: "Developers discovering the slider-to-capsule pipeline"
+duration: 10
+languageCode: "ru"
+outputFile: "capsule-feed-demo-ar_ru-deck.adoc"
+author:
+  name: "cheroliv"
+  email: "cheroliv@mail.com"
+revealjs:
+  theme: "sky"
+  transition: "slide"
+  slideNumber: "c/t"
+  width: 1408
+  height: 792
+  controls: true
+  controlsLayout: "edges"
+  history: true
+  fragmentInURL: true
+notes:
+  speakerNotes: true
+  pageNotes: true
+  pageNotesStyle: "DETAILED"
+slides:
+- title: "مقدمة"
+  speakerHint: "قدم خط أنابيب capsule feed في دقيقة واحدة."
+  pageNotesHint: "اذكر أدوار slider-gradle و capsule-gradle."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null
+- title: "عقد capsule-gradle"
+  speakerHint: "اشرح تنسيق العقد النصي العادي."
+  pageNotesHint: "رأس، مقطع واحد لكل شريحة، الجسم كملاحظة المتحدث."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null
+- title: "التحقق من الذهاب والعودة"
+  speakerHint: "أكد على التحقق ذهابًا وإيابًا بدون فقدان."
+  pageNotesHint: "اعرض سلسلة التحقق محلل-كاتب-محلل."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null
+- title: "الخاتمة"
+  speakerHint: "لخص حدود المنتج والمستهلك."
+  pageNotesHint: "لا JSON، لا لقطات شاشة — عقد نظيف."
+  transition: null
+  autoAnimate: false
+  autoAnimateEasing: null
+  autoAnimateDuration: null

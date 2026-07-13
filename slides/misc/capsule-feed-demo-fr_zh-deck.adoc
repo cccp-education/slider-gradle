@@ -1,0 +1,64 @@
+= 胶囊提要演示（法语）
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== 介绍
+
+[%step]
+* 演示 slider -> capsule 的管道
+* 从演讲者笔记生成胶囊脚本
+* capsule-gradle 消费的纯文本合同
+
+[NOTE.speaker]
+--
+欢迎来到本次胶囊提要管道的演示。
+我们将看到 slider-gradle 如何从 AsciiDoc 幻灯片中提取演讲者笔记，以生成供 capsule-gradle 消费的脚本。
+--
+
+[.slide,data-transition="slide"]
+== capsule-gradle 合同
+
+[%step]
+* 分隔的纯文本格式
+* 标头：`=== CAPSULE SCRIPT : 名称 ===`
+* 每张幻灯片一个段落：`--- SLIDE n : 标题 ---`
+* 正文：原始演讲者笔记
+
+[NOTE.speaker]
+--
+slider 与 capsule 之间的合同故意保持简单：一个包含标题和每张幻灯片段落的文本文件。每个段落包含演讲者笔记，将成为 TTS 旁白。
+--
+
+[.slide,data-transition="slide"]
+== 循环往返验证
+
+[%step]
+* 解析器从 AsciiDoc 中提取段落
+* 写入器序列化为纯文本合同
+* capsule-gradle 重新解析相同格式
+* 零损失：slider 写入的，capsule 读取
+
+[NOTE.speaker]
+--
+往返验证有效：解析器从 AsciiDoc 源文件提取段落，写入器将其序列化为纯文本合同，capsule-gradle 重新解析相同格式且没有任何数据损失。
+--
+
+[.slide,data-transition="slide"]
+== 结论
+
+[%step]
+* 胶囊提要 = 提取演讲者笔记
+* 合同中不包含 JSON，也不包含截图
+* 截图由 capsule-gradle 实时捕获
+* Slider 生成脚本，capsule 消费
+
+[NOTE.speaker]
+--
+总结：胶囊提要仅仅是提取演讲者笔记。合同中没有 JSON，也没有截图——截图由 capsule-gradle 在视频生成过程中实时捕获。Slider 生成脚本，capsule 消费。生产者-消费者边界清晰。
+--

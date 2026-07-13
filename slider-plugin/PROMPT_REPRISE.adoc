@@ -1,45 +1,40 @@
-= PROMPT_REPRISE — slider-gradle — Session 030
-:session: 030
-:date: 2026-07-13
+= PROMPT_REPRISE — slider-gradle — Session 031
+:session: 031
+:date: 2026-07-14
 
-== Session 029 terminée
+== Session 030 terminée
 
-EPIC SLD-5 Deck Translation Pipeline démarré et 6/7 US terminées. Domaine DDD
-`slider.translation` créé (8 fichiers production) : TranslationRequest,
-DeckTranslationPlan, TranslationResult, TranslationOutcome, LanguageModelAdapter
-(port), DeckTranslator (domain service), OllamaLanguageModelAdapter
-(adaptateur langchain4j), TranslateDeckTask (tâche Gradle `translateDeck`).
+EPIC SLD-5 Deck Translation Pipeline TERMINÉ (7/7 US, 16 pts). US-5.6
+Dogfooding livrée : 3 decks demo fr/en/ar étendus à 10 langues via
+`translateDeck` avec LLM réel `gpt-oss:120b-cloud` (port 11439). 54 fichiers
+générés (27 `.adoc` + 27 `deck-context.yml`).
 
-Pipeline one-to-many : deck source (deck-context.yml + .adoc) → 10 variantes
-localisées (top 10 langues les plus parlées, aligné sur
-`LanguageCatalog.supportedCodes()` : en, zh, hi, es, fr, ar, bn, pt, ru, ur).
+`DeckTranslator.kt` enrichi : `ensureRtlDirection` post-traduction injecte
+`:revealjs_direction: rtl` pour cibles RTL (ar, ur) et supprime l'attribut
+pour cibles LTR (source RTL → cible LTR).
 
-`./gradlew :slider:check` VERT — 270 PASS (165 unit + 15 functional + 90
-cucumber), was 170. +100 tests, zéro régression. 2 SKIP Playwright @Disabled
+Validation Playwright : LTR (fr→en) `slides=5, rtl=false` ✅, RTL (fr→ar)
+`slides=5, rtl=true, screenshot=32KB` ✅.
+
+`./gradlew :slider:check` VERT — 425 PASS (293 unit + 15 functional + 117
+cucumber), was 270. +155 tests, zéro régression. 2 SKIP Playwright @Disabled
 inchangés.
 
-Baby-step TDD/BDD 3 niveaux : RED → GREEN → REFACTOR. English only code/
-Gherkin. DDD : value objects purs + port + adaptateur LLM + tâche thin.
+README.md master EN mis à jour avec domaine `slider.translation` (8 fichiers)
++ EPIC SLD-5 ✅ DONE. 9 README.plugin/ traduits en attente.
 
-== Prochaine session — 030
+== Prochaine session — 031
 
-*Objectif* : US-5.6 Dogfooding — étendre les 3 decks demo fr/en/ar (S-020) à
-10 langues via `translateDeck`. Validation visuelle Playwright sur au moins
-2 decks traduits (1 LTR en + 1 RTL ar). Mise à jour README i18n avec domaine
-`slider.translation` (8 fichiers : 4 value objects + port + DeckTranslator +
-adaptateur + tâche).
-
-_Pré-requis_ : exécution LLM réelle (Ollama `gemma3:1b-it-fp16` ou
-`gpt-oss:120b-cloud`). Vérifier disponibilité instance Ollama locale avant
-de lancer `translateDeck`.
+*Objectif* : Traduction README i18n (9 fichiers `README.plugin/README.*.md`)
+avec domaine `slider.translation` (8 fichiers) + EPIC SLD-5 statut. Aligner
+sur le master EN mis à jour en S-030.
 
 _Etapes_ :
-. Vérifier `ollama list` + port 11437-11465 (rotation).
-. Lancer `./gradlew translateDeck -Pdeck.context=slides/misc/capsule-feed-demo-fr-deck-context.yml -Pai.provider=ollama`.
-. Vérifier 9 fichiers générés (fr exclu si source fr).
-. Répéter pour decks en et ar.
-. Validation Playwright sur deck_en et deck_ar (1 LTR + 1 RTL).
-. Mise à jour README i18n (20 fichiers) avec section domaine `slider.translation`.
+. Lire `README.md` master EN (section module layout + EPIC status).
+. Traduire la section `slider.translation` dans les 9 README.plugin/
+  (ar, bn, es, fr, hi, pt, ru, ur, zh).
+. Mettre à jour le statut EPIC SLD-5 ✅ DONE dans les 9 fichiers.
+. Vérifier `./gradlew :slider:check` VERT.
 
 == Rappels
 
@@ -50,7 +45,6 @@ _Etapes_ :
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
-  (source : `10 langues les plus parlés.csv` — top 10 démographique mondial)
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
 - Package Cucumber steps : `slider.steps` (renommé S-026)
@@ -63,6 +57,6 @@ _Etapes_ :
 - Tâche Gradle : `translateDeck` (group "translator"), inputs `-Pdeck.context`
   + `-Pdeck.adoc` (optionnel) + `-Ptarget.languages` (défaut 10)
 - 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner — piste bloquée)
-- `./gradlew :slider:check` est VERT (270 PASS depuis S-029)
-- EPICs clos : SLD-0→4 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9
-- EPIC SLD-5 en cours : US-5.0→5.5 terminées, US-5.6 (dogfooding) restante
+- `./gradlew :slider:check` est VERT (425 PASS depuis S-030)
+- EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9
+- EPIC SLD-5 TERMINÉ : 7/7 US (S-029 + S-030)

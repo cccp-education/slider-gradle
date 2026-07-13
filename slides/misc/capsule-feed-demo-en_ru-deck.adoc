@@ -1,0 +1,71 @@
+= Демонстрация Capsule Feed (English)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Введение
+
+[%step]
+* Демонстрация конвейера Slider → Capsule
+* Генерация скрипта Capsule из заметок докладчика
+* Текстовый контракт, потребляемый capsule-gradle
+
+[NOTE.speaker]
+--
+Добро пожаловать на демонстрацию конвейера capsule feed.
+Мы посмотрим, как slider-gradle извлекает заметки докладчика из набора AsciiDoc,
+чтобы создать скрипт, потребляемый capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Контракт capsule-gradle
+
+[%step]
+* Текстовый формат с разделителями
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: speaker note as-is
+
+[NOTE.speaker]
+--
+Контракт между slider и capsule преднамеренно прост:
+текстовый файл с заголовком и одним сегментом на каждый слайд.
+Каждый сегмент содержит заметку докладчика, которая становится озвучкой TTS.
+--
+
+[.slide,data-transition="slide"]
+== Валидация обратного пути
+
+[%step]
+* Парсер извлекает сегменты из AsciiDoc
+* Записыватель сериализует в текстовый контракт
+* Capsule-gradle повторно парсит тот же формат
+* Нулевые потери: то, что пишет slider, читает capsule
+
+[NOTE.speaker]
+--
+Обратный путь проверен: парсер извлекает сегменты из исходного AsciiDoc,
+записыватель сериализует их обратно в текстовый контракт,
+и capsule-gradle повторно парсит точно такой же формат без потери данных.
+--
+
+[.slide,data-transition="slide"]
+== Заключение
+
+[%step]
+* Capsule feed = извлечение заметок докладчика
+* Нет JSON, нет скриншотов в контракте
+* Скриншоты делаются в реальном времени capsule-gradle
+* Slider создает скрипт, capsule его потребляет
+
+[NOTE.speaker]
+--
+В заключение: capsule feed — это просто извлечение заметок докладчика.
+Нет JSON, нет скриншотов в контракте — скриншоты делаются в реальном времени capsule-gradle во время генерации видео.
+Slider создает скрипт, capsule его потребляет. Четкое разграничение продюсера и потребителя.
+--

@@ -2,6 +2,47 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 030 (2026-07-14) — US-5.6 Dogfooding + EPIC SLD-5 TERMINÉ (7/7 US)
+
+EPIC SLD-5 Deck Translation Pipeline clôturé. US-5.6 Dogfooding : 3 decks demo
+fr/en/ar (S-020) étendus à 10 langues via `translateDeck` avec LLM réel
+`gpt-oss:120b-cloud` (port 11439, plage 11437-11465). 54 fichiers générés
+(27 `.adoc` + 27 `deck-context.yml`) — 3 sources × 9 cibles (source exclue).
+
+`DeckTranslator.kt` enrichi : méthode `ensureRtlDirection` post-traduction —
+injecte `:revealjs_direction: rtl` pour cibles RTL (ar, ur) si absent, supprime
+l'attribut pour cibles LTR (source RTL → cible LTR). Utilise
+`LanguageCatalog.findByCode(target).rtl`.
+
+3 `deck-context.yml` créés pour les decks demo (fr/en/ar) — matching les .adoc
+existants (outputFile, languageCode ISO 639-1, subject, author, slides).
+
+Validation visuelle Playwright (projet consumer `/tmp/opencode/slider-dogfood`
+avec `mavenLocal()` plugin 0.0.9) :
+- LTR (fr→en) : `title=Capsule Feed Demo (English), slides=5, rtl=false` ✅
+- RTL (fr→ar) : `title=عرض تغذية الكبسولة (فرنسي), slides=5, rtl=true,
+  screenshot=32445b` ✅ (avec `-Planguage=ar` sur asciidoctorRevealJs)
+
+Baby-step TDD/BDD 3 niveaux : RED → GREEN → REFACTOR.
+- `DemoDeckContextTest` (6 unit) — parse 3 deck-context.yml, languageCode
+  valide, outputFile matching .adoc.
+- `TranslatedDemoDeckTest` (~50 unit paramétrés) — 27 adoc + 27 context :
+  existence, non-vide, structure AsciiDoc (titre, sections, NOTE.speaker,
+  %step, revealjs attrs), languageCode correct, RTL/LTR direction.
+- `DeckTranslatorTest` (+4 unit) — RTL injection (ar, ur), LTR non-injection
+  (en), RTL non-duplication, LTR suppression depuis source RTL.
+- `14_deck_translation_dogfood.feature` (~20 scénarios BDD paramétrés, +27
+  cucumber) — dogfood end-to-end : contexte existence, 9+9 par source,
+  structure préservée, RTL/LTR, count total 27+27.
+
+`./gradlew :slider:check` VERT — 425 PASS (293 unit + 15 functional + 117
+cucumber), was 270. +155 tests, zéro régression. 2 SKIP Playwright @Disabled
+inchangés (gem JRuby isolé GradleRunner).
+
+README.md master EN mis à jour : module layout avec domaine `slider.translation`
+(8 fichiers), EPIC status SLD-5 ✅ DONE. 9 README.plugin/ traduits en attente
+(reportés à S-031).
+
 == Session 029 (2026-07-13) — EPIC SLD-5 Deck Translation Pipeline (US-5.0 → US-5.5)
 
 EPIC SLD-5 démarré et 6/7 US terminées. Domaine DDD `slider.translation` créé

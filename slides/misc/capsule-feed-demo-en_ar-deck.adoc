@@ -1,0 +1,65 @@
+= عرض تغذية الكبسولة (العربية)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+:revealjs_direction: rtl
+
+[.slide,data-transition="zoom"]
+== المقدمة
+
+[%step]
+* عرض تجريبي لتدفق العمل من Slider إلى Capsule
+* إنشاء سكريبت الكبسولة من ملاحظات المتحدث
+* عقد نصي بسيط يستهلكه capsule-gradle
+
+[NOTE.speaker]
+--
+مرحبًا بكم في عرض تدفق تغذية الكبسولة.
+سنرى كيف يقوم slider-gradle باستخراج ملاحظات المتحدث من مجموعة AsciiDoc لإنتاج سكريبت يستهلكه capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== عقد capsule-gradle
+
+[%step]
+* تنسيق نصي بسيط محدد
+* العنوان: `=== CAPSULE SCRIPT : name ===`
+* جزء واحد لكل شريحة: `--- SLIDE n : title ---`
+* الجسم: ملاحظة المتحدث كما هي
+
+[NOTE.speaker]
+--
+العقد بين slider و capsule بسيط عمدًا: ملف نصي يحتوي على عنوان وجزء واحد لكل شريحة. كل جزء يحتوي على ملاحظة المتحدث التي تصبح سردًا صوتيًا (TTS).
+--
+
+[.slide,data-transition="slide"]
+== التحقق من الرحلة ذهابًا وإيابًا
+
+[%step]
+* يقوم المُحلل باستخراج الأجزاء من AsciiDoc
+* يقوم الكاتب بتسلسلها إلى عقد نصي بسيط
+* يعيد capsule-gradle تحليل نفس التنسيق
+* خسارة صفرية: ما يكتبه slider يقرؤه capsule
+
+[NOTE.speaker]
+--
+تم التحقق من الرحلة ذهابًا وإيابًا: يقوم المُحلل باستخراج الأجزاء من مصدر AsciiDoc، والكاتب بتسلسلها مرة أخرى إلى عقد نصي بسيط، ويعيد capsule-gradle تحليل نفس التنسيق تمامًا دون أي فقدان للبيانات.
+--
+
+[.slide,data-transition="slide"]
+== الخلاصة
+
+[%step]
+* تغذية الكبسولة = استخراج ملاحظات المتحدث
+* لا JSON، ولا لقطات شاشة في العقد
+* تُلقط لقطات الشاشة مباشرةً بواسطة capsule-gradle
+* Slider ينتج السكريبت، و capsule يستهلكه
+
+[NOTE.speaker]
+--
+في الختام: تغذية الكبسولة هي ببساطة استخراج ملاحظات المتحدث. لا JSON، ولا لقطات شاشة في العقد — تُلتقط لقطات الشاشة مباشرةً بواسطة capsule-gradle أثناء إنشاء الفيديو. Slider ينتج السكريبت، و capsule يستهلكه. حد واضح بين المنتج والمستهلك.
+--

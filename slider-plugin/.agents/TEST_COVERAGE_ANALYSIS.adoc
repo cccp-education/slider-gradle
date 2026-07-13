@@ -1,5 +1,34 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 030_ : EPIC SLD-5 Deck Translation Pipeline TERMINÉ (7/7 US).
++155 tests (293 unit + 15 functional + 117 cucumber = 425 total, 0 FAIL, 2 SKIP).
+
+Nouveaux tests session 030 :
+
+. `DemoDeckContextTest.kt` (6 unit) — valide les 3 deck-context.yml créés pour
+  les decks demo fr/en/ar : parse YAML, languageCode valide (LanguageCatalog),
+  outputFile pointe vers .adoc existant, subject/author non-blanks, duration
+  positive, tous languageCode dans LanguageCatalog.supportedCodes.
+. `TranslatedDemoDeckTest.kt` (~50 unit paramétrés, 27 source-target pairs ×
+  4 assertions + 6 count/RTL tests) — valide les 54 fichiers générés :
+  existence, non-vide, structure AsciiDoc (titre `=`, sections `==`,
+  `[NOTE.speaker]`, `[%step]`), attributs revealjs (`:revealjs_theme:`,
+  `:revealjs_width:`, `:revealjs_height:`), languageCode correct par context,
+  outputFile matching adoc, count 9+9 par source, 27+27 total, RTL ar/ur
+  contiennent `:revealjs_direction: rtl`, LTR depuis source RTL n'en contiennent
+  pas.
+. `DeckTranslatorTest.kt` (+4 unit) — `ensureRtlDirection` : RTL target ar
+  contient `:revealjs_direction: rtl`, RTL target ur contient rtl, LTR target
+  en ne contient pas rtl, RTL non-duplication si déjà présent, LTR target
+  supprime rtl depuis source RTL (ar→en).
+. `14_deck_translation_dogfood.feature` (~20 scénarios BDD paramétrés, +27
+  cucumber) — dogfood end-to-end : deck-context existence (3), languageCode
+  valide (3), outputFile existe (3), 9 adoc + 9 context par source (6
+  paramétrés fr/en/ar), structure AsciiDoc préservée (6 paramétrés
+  source-target), languageCode context correct (5 paramétrés), RTL decks
+  contiennent rtl (5 paramétrés), LTR depuis RTL ne contiennent pas rtl (4
+  paramétrés), count total 27+27 (2).
+
 _Statut session 029_ : EPIC SLD-5 Deck Translation Pipeline — 6/7 US.
 +100 tests (165 unit + 15 functional + 90 cucumber = 270 total, 0 FAIL, 2 SKIP).
 

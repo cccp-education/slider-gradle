@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introdução
+
+[%step]
+* Visão geral do pipeline do slider para o capsule
+* Gerar texto capsule a partir das notas do apresentador
+* Arquivo de texto simples consumido pelo capsule-gradle
+
+[NOTE.speaker]
+--
+Bem-vindos a esta demonstração do pipeline capsule feed.
+Veremos como o slider-gradle extrai as notas do apresentador de uma apresentação AsciiDoc
+para produzir um texto consumido pelo capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Nó capsule-gradle
+
+[%step]
+* Formato de texto simples definido
+* Cabeçalho: `=== CAPSULE SCRIPT : name ===`
+* Um segmento por slide: `--- SLIDE n : title ---`
+* Corpo: a nota do apresentador como está
+
+[NOTE.speaker]
+--
+A ligação entre slider e capsule é intencionalmente simples:
+Um arquivo de texto com cabeçalho e um segmento por slide.
+Cada segmento contém a nota do apresentador que se torna a narração.
+--
+
+[.slide,data-transition="slide"]
+== Verificação de ida e volta
+
+[%step]
+* O analisador extrai os segmentos do AsciiDoc
+* O escritor serializa para o nó de texto simples
+* capsule-gradle reanálise o mesmo formato
+* Zero perda: o que o slider escreve, o capsule lê
+
+[NOTE.speaker]
+--
+A ida e volta foi verificada: o analisador extrai os segmentos da fonte AsciiDoc
+O escritor os serializa novamente para o nó de texto simples
+e o capsule-gradle reanalisa exatamente o mesmo formato sem perda de dados.
+--
+
+[.slide,data-transition="slide"]
+== Conclusão
+
+[%step]
+* capsule feed = extração das notas do apresentador
+* Sem JSON nem capturas de tela nos nós
+* Capturas de tela são tiradas diretamente pelo capsule-gradle
+* slider gera o texto e capsule o consome
+
+[NOTE.speaker]
+--
+Para concluir: capsule feed é simplesmente a extração das notas do apresentador.
+Sem JSON nem capturas de tela nos nós — as capturas são tiradas diretamente
+pelo capsule-gradle durante a geração do vídeo. slider produz o texto
+e capsule o consome. Limite claro entre produtor e consumidor.
+--

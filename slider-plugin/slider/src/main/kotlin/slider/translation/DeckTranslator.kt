@@ -1,5 +1,6 @@
 package slider.translation
 
+import contracts.i18n.LanguageCatalog
 import slider.DeckContext
 
 /**
@@ -53,6 +54,7 @@ class DeckTranslator(
                     errorMessage = "LLM returned empty or null response for '${task.to}'",
                 )
             } else {
+                val rtlAdjusted = ensureRtlDirection(translatedAdoc, task.to)
                 val translatedDeck = task.sourceDeck.copy(
                     languageCode = task.to,
                     outputFile = buildOutputFile(task.sourceDeck, task.to),
@@ -60,7 +62,7 @@ class DeckTranslator(
                 TranslationResult.Translated(
                     targetLanguage = task.to,
                     translatedDeck = translatedDeck,
-                    translatedAdoc = translatedAdoc,
+                    translatedAdoc = rtlAdjusted,
                 )
             }
         }
@@ -91,6 +93,34 @@ class DeckTranslator(
             "${cleanBase}_$targetLanguage$deckSuffix"
         } else {
             original.replace(Regex("\\.adoc$"), "_$targetLanguage.adoc")
+        }
+    }
+
+    /**
+     * Ensures the translated AsciiDoc carries the correct
+     * `:revealjs_direction:` attribute for the target language.
+     *
+     * - RTL targets (Arabic, Urdu): injects `:revealjs_direction: rtl` if
+     *   not already present.
+     * - LTR targets: removes any `:revealjs_direction: rtl` line so a source
+     *   RTL deck translated to a LTR language does not keep RTL layout.
+     *
+     * The LLM does not always preserve or adjust this attribute, so the
+     * domain service guarantees it post-translation.
+     */
+    private fun ensureRtlDirection(adoc: String, targetLanguage: String): String {
+        val isRtl = LanguageCatalog.findByCode(targetLanguage)?.rtl == true
+        val rtlAttr = ":revealjs_direction: rtl"
+        return if (isRtl) {
+            if (adoc.contains(rtlAttr)) adoc
+            else {
+                val lines = adoc.lines().toMutableList()
+                val headerEnd = lines.indexOfFirst { it.isBlank() }.takeIf { it > 0 } ?: lines.size
+                lines.add(headerEnd, rtlAttr)
+                lines.joinToString("\n")
+            }
+        } else {
+            adoc.lines().filter { it.trim() != rtlAttr }.joinToString("\n")
         }
     }
 }

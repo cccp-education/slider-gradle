@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introduction
+
+[%step]
+* Presentation of the pipeline from slider to capsule
+* Generating capsule text from speaker notes
+* A regular text node consumed by capsule-gradle
+
+[NOTE.speaker]
+--
+Welcome to this demonstration of the capsule feed pipeline.
+We will see how slider-gradle extracts speaker notes from an AsciiDoc presentation
+to produce text consumed by capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Capsule-gradle Contract
+
+[%step]
+* Specific plain text format
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: speaker note as is
+
+[NOTE.speaker]
+--
+The contract between slider and capsule is intentionally simple:
+a text file with a header and one segment per slide.
+Each segment contains the speaker note that becomes the narration.
+--
+
+[.slide,data-transition="slide"]
+== Round-trip Verification
+
+[%step]
+* The parser extracts segments from AsciiDoc
+* The writer serializes to the regular text contract
+* capsule-gradle re-parses the same format
+* Zero loss: what slider writes is read by capsule
+
+[NOTE.speaker]
+--
+Round-trip has been verified: the parser extracts segments from the AsciiDoc source,
+the writer serializes them back to the regular text contract,
+and capsule-gradle re-parses the exact same format with no data loss.
+--
+
+[.slide,data-transition="slide"]
+== Conclusion
+
+[%step]
+* capsule feed = extraction of speaker notes
+* No JSON and no screenshots in the contract
+* Screenshots are captured directly by capsule-gradle
+* slider produces the text and capsule consumes it
+
+[NOTE.speaker]
+--
+In closing: capsule feed is simply the extraction of speaker notes.
+No JSON and no screenshots in the contract — screenshots are captured directly
+by capsule-gradle during video generation. slider produces the text
+and capsule consumes it. A clear boundary between producer and consumer.
+--

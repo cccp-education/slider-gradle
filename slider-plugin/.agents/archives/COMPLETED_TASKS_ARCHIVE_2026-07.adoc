@@ -2,6 +2,7 @@
 
 |===
 | Session | Date | EPIC | US | Description
+| 030 | 2026-07-14 | SLD-5 | SLD-5.6 | Dogfooding — 3 decks demo fr/en/ar étendus à 10 langues via `translateDeck` (LLM réel gpt-oss:120b-cloud port 11439). 54 fichiers générés (27 adoc + 27 context). `DeckTranslator.kt` `ensureRtlDirection` (injecte/supprime `:revealjs_direction: rtl`). Validation Playwright LTR + RTL. 6 unit (DemoDeckContextTest) + ~50 unit (TranslatedDemoDeckTest) + 4 unit (DeckTranslatorTest RTL) + ~20 cucumber (14_deck_translation_dogfood.feature). EPIC SLD-5 TERMINÉ 7/7 US.
 | 029 | 2026-07-13 | SLD-5 | SLD-5.0 | Cadrage EPIC Deck Translation Pipeline — vision, domaine `slider.translation`, découpage 7 US, dépendances. MàJ INDEX/BACKLOG/PROMPT_REPRISE + AGENTS.adoc racine MIAMI.
 | 029 | 2026-07-13 | SLD-5 | SLD-5.1 | Value object TranslationRequest (source DeckContext + targetLanguages validée LanguageCatalog.supportedCodes) + DeckTranslationPlan (permutations source→target, filtre identity). 19 unit tests purs.
 | 029 | 2026-07-13 | SLD-5 | SLD-5.2 | Value object TranslationResult (sealed 3 variants Translated/Skipped/Failed) + TranslationOutcome (agrégation, counts, summary, failures). 25 unit tests purs.

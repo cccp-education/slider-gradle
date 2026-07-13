@@ -1,0 +1,72 @@
+= Démo du flux de capsule (Anglais)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introduction
+
+[%step]
+* Démonstration du pipeline slider vers capsule
+* Génération du script capsule à partir des notes du présentateur
+* Contrat texte brut consommé par capsule-gradle
+
+[NOTE.speaker]
+--
+Bienvenue à cette démonstration du pipeline de flux de capsule.
+Nous verrons comment slider-gradle extrait les notes du présentateur d'un deck AsciiDoc
+pour produire un script consommé par capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Le contrat capsule-gradle
+
+[%step]
+* Format texte brut délimité
+* En-tête : `=== CAPSULE SCRIPT : name ===`
+* Un segment par diapositive : `--- SLIDE n : title ---`
+* Corps : note du présentateur telle quelle
+
+[NOTE.speaker]
+--
+Le contrat entre slider et capsule est intentionnellement simple :
+un fichier texte avec un en-tête et un segment par diapositive.
+Chaque segment contient la note du présentateur qui devient la narration TTS.
+--
+
+[.slide,data-transition="slide"]
+== Validation du cycle complet
+
+[%step]
+* L'analyseur extrait les segments d'AsciiDoc
+* L'écrivain sérialise vers le contrat texte brut
+* Capsule-gradle reparse le même format
+* Aucun perte : ce que slider écrit, capsule lit
+
+[NOTE.speaker]
+--
+Le cycle complet est validé : l'analyseur extrait les segments du
+source AsciiDoc, l'écrivain les sérialise de nouveau vers le contrat texte brut,
+et capsule-gradle reparse le même format exact avec aucune perte de données.
+--
+
+[.slide,data-transition="slide"]
+== Conclusion
+
+[%step]
+* Flux de capsule = extraction des notes du présentateur
+* Pas de JSON, pas de captures d'écran dans le contrat
+* Les captures d'écran sont prises en direct par capsule-gradle
+* Slider produit le script, capsule le consomme
+
+[NOTE.speaker]
+--
+Pour conclure : le flux de capsule est simplement l'extraction des notes du présentateur.
+Pas de JSON, pas de captures d'écran dans le contrat — les captures d'écran sont prises en direct
+par capsule-gradle lors de la génération de la vidéo. Slider produit le script,
+capsule le consomme. Une frontière producteur-consommateur propre.
+--
