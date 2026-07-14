@@ -1,0 +1,60 @@
+= Session 032 — Publication Maven Central 0.0.10
+
+_Date_ : 2026-07-14
+_Type_ : ops+pub
+_Score_ : 9/10
+
+== Objectif
+
+Publication slider 0.0.10 sur Maven Central + mise à jour BOM (workspace-bom 0.0.9).
+
+== Actions réalisées
+
+. Bump version 0.0.9 → 0.0.10 sur 3 fichiers :
+  * `slider-plugin/slider/build.gradle.kts` (version = "0.0.10")
+  * `slider-plugin/gradle/libs.versions.toml` (slider = "0.0.10")
+  * `gradle/libs.versions.toml` (slider = "0.0.10")
+. `./gradlew :slider:compileKotlin` UP-TO-DATE
+. `./gradlew :slider:build -x test -x functionalTest -x cucumberTest` BUILD SUCCESSFUL
+. `./gradlew publishAggregationToCentralPortal --no-daemon` BUILD SUCCESSFUL
+  * Bundle `ea117827-531a-4d3c-8a45-c58bc9d34eb1` AUTOMATIC
+  * 3 artefacts signés (GPG CBE2926CD46D8E8B) :
+    - `education.cccp:slider:0.0.10`
+    - Plugin marker `education.cccp.slider`
+    - Plugin marker `education.cccp.slider.translator`
+. Vérification Central : https://central.sonatype.com/artifact/education.cccp/slider/0.0.10 ✅
+. Mise à jour workspace-bom (MEMPHIS) :
+  * BOM 0.0.8 → 0.0.9
+  * slider-plugin constraint : `slider-plugin = "0.0.1"` → `"0.0.10"`
+  * Correction module name : `education.cccp:slider-plugin` → `education.cccp:slider`
+    (artefact publié = `slider`, pas `slider-plugin`)
+. `./gradlew publishToMavenLocal` BOM BUILD SUCCESSFUL
+. `./gradlew publishAggregationToCentralPortal --no-daemon` BOM BUILD SUCCESSFUL
+  * Bundle `79395cf5-188f-45d7-a8e0-1580dc3cf6ae` AUTOMATIC
+. Vérification Central : https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.9 ✅
+
+== Tests
+
+`./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE, zéro régression).
+
+== Fichiers modifiés
+
+. `slider-plugin/slider/build.gradle.kts` — version 0.0.9 → 0.0.10
+. `slider-plugin/gradle/libs.versions.toml` — slider 0.0.9 → 0.0.10
+. `gradle/libs.versions.toml` — slider 0.0.9 → 0.0.10
+. `workspace-bom/build.gradle.kts` — version 0.0.8 → 0.0.9
+. `workspace-bom/gradle/libs.versions.toml` — slider-plugin 0.0.1 → 0.0.10 + module name fix
+
+== Artefacts publiés
+
+| Artefact | URL |
+|---|---|
+| slider 0.0.10 | https://central.sonatype.com/artifact/education.ccp/slider/0.0.10 |
+| workspace-bom 0.0.9 | https://central.sonatype.com/artifact/education.ccp/workspace-bom/0.0.9 |
+
+== Prochaine session — 033
+
+À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.10 publié. Pistes :
+- SLD-6 cadrage (nouvel EPIC feature)
+- Rattrapage i18n autre borough
+- Mise à jour BOM pour autres plugins (bakery, codex, etc.)

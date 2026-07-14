@@ -1,32 +1,32 @@
-= PROMPT_REPRISE — slider-gradle — Session 032
-:session: 032
+= PROMPT_REPRISE — slider-gradle — Session 033
+:session: 033
 :date: 2026-07-14
 
-== Session 031 terminée
+== Session 032 terminée
 
-README i18n (9 fichiers `README.plugin/README.*.md` — ar, bn, es, fr, hi, pt,
-ru, ur, zh) alignés sur le master EN (S-030). 6 édits par langue (55 total) :
-module layout (4 domaines DDD `repository/`, `capsule/`, `rtl/`, `translation/`
-+ SliderManager desc + test `scenarios/slider/steps/`), test matrix
-`slider.steps.**`, EPIC table SLD-5 row + "session 030", contribution `FileOps`
-supprimé. FR switcher 10 langues (Edit A).
+Publication slider 0.0.10 sur Maven Central + mise à jour BOM (workspace-bom 0.0.9).
+Bump 0.0.9 → 0.0.10 sur 3 fichiers (build.gradle.kts + 2 catalogues libs.versions.toml).
+Bundle nmcp `ea117827-531a-4d3c-8a45-c58bc9d34eb1` AUTOMATIC, 3 artefacts signés
+(slider:0.0.10 + 2 plugin markers). BOM 0.0.9 publiée (bundle `79395cf5`), slider
+constraint 0.0.1 → 0.0.10 + correction module name (`slider-plugin` → `slider`).
 
 `./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE, zéro
-régression — les READMEs ne sont pas du code). 9 fichiers modifiés, zéro secret.
+régression). 5 fichiers modifiés, zéro secret.
 
-== Prochaine session — 032
+== Prochaine session — 033
 
-*Objectif* : À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.9 publié.
+*Objectif* : À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.10 publié.
 Pistes possibles :
 - SLD-6 cadrage (nouvel EPIC feature)
-- Publication 0.0.10 (bump README i18n mis à jour)
 - Rattrapage i18n autre borough
+- Mise à jour BOM pour autres plugins (bakery, codex, etc.)
 
 == Rappels
 
-- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
-  `education.cccp.slider.translator`
-- Version publiée Central : 0.0.9 (build.gradle.kts hardcodé 0.0.9)
+- GroupId : `education.ccp`, Plugin IDs : `education.ccp.slider` +
+  `education.ccp.slider.translator`
+- Version publiée Central : 0.0.10 (build.gradle.kts hardcodé 0.0.10)
+- BOM workspace-bom : Central 0.0.9
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5
@@ -44,5 +44,4 @@ Pistes possibles :
   + `-Pdeck.adoc` (optionnel) + `-Ptarget.languages` (défaut 10)
 - 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner — piste bloquée)
 - `./gradlew :slider:check` est VERT (425 PASS depuis S-030)
-- EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9
-- EPIC SLD-5 TERMINÉ : 7/7 US (S-029 + S-030)
+- EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10

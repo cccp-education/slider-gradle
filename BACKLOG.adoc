@@ -7,6 +7,19 @@
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== EPIC PUB — Publication Maven Central 0.0.10 ✅ TERMINE (Session 032, 2026-07-14)
+
+Bump 0.0.9 → 0.0.10 sur 3 fichiers (SLD-5 translation + README i18n S-031). Bundle
+nmcp `ea117827-531a-4d3c-8a45-c58bc9d34eb1` AUTOMATIC, 3 artefacts signés
+(slider:0.0.10 + 2 plugin markers). BOM 0.0.9 publiée (bundle `79395cf5`), slider
+constraint 0.0.1 → 0.0.10 + correction module name (`slider-plugin` → `slider`).
+
+| Artefact | URL |
+|---|---|
+| slider 0.0.10 | https://central.sonatype.com/artifact/education.ccp/slider/0.0.10 |
+| workspace-bom 0.0.9 | https://central.sonatype.com/artifact/education.ccp/workspace-bom/0.0.9 |
+
+'''
 == EPIC SLD-5 — Deck Translation Pipeline ✅ TERMINÉ (Session 029-030, 2026-07-14)
 
 _Vision_ : Pipeline de traduction de deck one-to-many. Partant d'un deck source
