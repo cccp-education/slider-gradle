@@ -7,6 +7,18 @@
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 033 (2026-07-14) — Audit i18n ✅
+
+Audit i18n slider-gradle. Confirmation que le support i18n est entièrement
+couvert et fonctionnel. SLD-3 (config + UI + RTL, 7/7 US) et SLD-5 (pipeline
+deck one-to-many, 7/7 US) TERMINÉS. 10 langues, RTL ar/ur, fallback, pipeline
+`translateDeck`, validation Playwright, dogfooding. 3 domaines DDD i18n
+inventoriés (slider.i18n 5 fichiers, slider.translate 2 fichiers,
+slider.translation 8 fichiers). 8 features Cucumber i18n. Nettoyage 3
+répertoires vides `com/cheroliv/slider/{ai,translate}/` (héritage S-005).
+Zéro fichier de production modifié. `./gradlew :slider:check` VERT — 425 PASS.
+
+'''
 == EPIC PUB — Publication Maven Central 0.0.10 ✅ TERMINE (Session 032, 2026-07-14)
 
 Bump 0.0.9 → 0.0.10 sur 3 fichiers (SLD-5 translation + README i18n S-031). Bundle

@@ -2,6 +2,54 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 033 (2026-07-14) — Audit i18n slider-gradle
+
+Audit du support i18n dans slider-gradle à la demande du pilote. Vérification
+de l'état réel du support i18n face au backlog marqué TERMINÉ (SLD-3 + SLD-5).
+
+Session d'audit (lecture seule) — aucun fichier de production modifié.
+
+Domaines DDD i18n inventoriés :
+
+. `slider.i18n` (5 fichiers) — I18nConfigResolver (cascade 5 couches),
+  RevealUiMessages + RevealUiMessageCatalog (10 langues labels natifs),
+  RevealUiMessagesWriter (messages_{code}.js), RevealRtlResolver (RTL ar/ur).
+. `slider.translate` (2 fichiers) — TranslatorManager (90 tâches
+  translate{From}To{To} + 90 streaming, prompt adaptatif native names),
+  TranslatorPlugin.
+. `slider.translation` (8 fichiers) — TranslationRequest, DeckTranslationPlan,
+  TranslationResult (sealed 3 variants), TranslationOutcome,
+  LanguageModelAdapter (port), DeckTranslator (domain service),
+  OllamaLanguageModelAdapter, TranslateDeckTask (translateDeck one-to-many).
+
+Dépendance N0 : `i18n-contracts:0.0.2` (MEMPHIS) — LanguageCatalog.supportedCodes(),
+findByCode, I18nConfig. Branché et publié Central.
+
+8 features Cucumber i18n : 5_translator_i18n, 6_reveal_ui_i18n, 7_rtl_layout,
+8_i18n_fallback, 10_rtl_visual_validation, 13_deck_translation,
+14_deck_translation_dogfood, 2_propose_deck_context.
+
+Couverture fonctionnelle confirmée :
+
+. 10 langues cibles (en, zh, hi, es, fr, ar, bn, pt, ru, ur)
+. RTL pour arabe (ar) + ourdou (ur) — Reveal.js `rtl: true` + `.rtl` classe +
+  `:revealjs_direction: rtl` AsciiDoc attr
+. Fallback de langue (I18nConfigResolver cascade 5 couches)
+. Pipeline de traduction de deck one-to-many (1 source → 10 cibles)
+. Validation visuelle Playwright LTR (fr→en) + RTL (fr→ar)
+. Dogfooding : 3 decks demo fr/en/ar étendus à 10 langues (54 fichiers générés)
+
+Nettoyage : 3 répertoires vides `com/cheroliv/slider/{ai,translate}/`
+supprimés (héritage renommage S-005 incomplet). Zéro fichier .kt restant sous
+`com.cheroliv`.
+
+Conclusion : le support i18n est entièrement couvert et fonctionnel. SLD-3
+(7/7 US, ~15 pts) et SLD-5 (7/7 US, ~16 pts) TERMINÉS. Aucun trou fonctionnel
+identifié dans le backlog.
+
+`./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE, zéro
+régression). Zéro fichier de production modifié. Zéro secret.
+
 == Session 032 (2026-07-14) — Publication slider 0.0.10 + BOM 0.0.9
 
 Publication slider 0.0.10 sur Maven Central + mise à jour BOM (workspace-bom 0.0.9).
