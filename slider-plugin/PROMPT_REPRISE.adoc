@@ -29,8 +29,8 @@ publié, i18n audité complet, Playwright @Disabled fixé. Pistes :
 
 - GroupId : `education.ccp`, Plugin IDs : `education.ccp.slider` +
   `education.ccp.slider.translator`
-- Version publiée Central : 0.0.10 (build.gradle.kts hardcodé 0.0.10)
-- BOM workspace-bom : Central 0.0.9
+- Version publiée Central : 0.0.11 (build.gradle.kts hardcodé 0.0.11)
+- BOM workspace-bom : Central 0.0.10
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5
@@ -44,4 +44,4 @@ publié, i18n audité complet, Playwright @Disabled fixé. Pistes :
   → `build/playwright-fixtures/{ltr,rtl}/`
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié Playwright)
 - `./gradlew :slider:check` est VERT (428 PASS depuis S-034)
-- EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10
+- EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11
