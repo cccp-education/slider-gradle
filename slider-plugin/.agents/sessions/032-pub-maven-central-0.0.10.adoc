@@ -49,8 +49,8 @@ Publication slider 0.0.10 sur Maven Central + mise à jour BOM (workspace-bom 0.
 
 | Artefact | URL |
 |---|---|
-| slider 0.0.10 | https://central.sonatype.com/artifact/education.ccp/slider/0.0.10 |
-| workspace-bom 0.0.9 | https://central.sonatype.com/artifact/education.ccp/workspace-bom/0.0.9 |
+| slider 0.0.10 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.10 |
+| workspace-bom 0.0.9 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.9 |
 
 == Prochaine session — 033
 

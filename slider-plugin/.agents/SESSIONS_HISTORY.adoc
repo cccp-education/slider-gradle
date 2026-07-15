@@ -83,7 +83,7 @@ Publication slider 0.0.10 sur Maven Central + mise à jour BOM (workspace-bom 0.
 Bump 0.0.9 → 0.0.10 sur 3 fichiers (slider/build.gradle.kts + 2 catalogues
 libs.versions.toml). Bundle nmcp `ea117827-531a-4d3c-8a45-c58bc9d34eb1` AUTOMATIC,
 3 artefacts signés (GPG CBE2926CD46D8E8B) : slider:0.0.10 + 2 plugin markers
-(`education.ccp.slider` + `education.ccp.slider.translator`).
+(`education.cccp.slider` + `education.cccp.slider.translator`).
 
 BOM 0.0.9 publiée (bundle `79395cf5-188f-45d7-a8e0-1580dc3cf6ae`), slider
 constraint 0.0.1 → 0.0.10 + correction module name (`slider-plugin` → `slider`).

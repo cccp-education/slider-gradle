@@ -27,8 +27,8 @@ publié, i18n audité complet, Playwright @Disabled fixé. Pistes :
 
 == Rappels
 
-- GroupId : `education.ccp`, Plugin IDs : `education.ccp.slider` +
-  `education.ccp.slider.translator`
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.cccp.slider.translator`
 - Version publiée Central : 0.0.11 (build.gradle.kts hardcodé 0.0.11)
 - BOM workspace-bom : Central 0.0.10
 - conventions-gradle : Central 0.0.2

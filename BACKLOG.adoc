@@ -33,7 +33,7 @@ slider constraint 0.0.10 → 0.0.11.
 | workspace-bom 0.0.10 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.10 |
 
 '''
-== EPIC PUB — Publication Maven Central 0.0.10 ✅ TERMINE (Session 032, 2026-07-14)
+== Session 033 (2026-07-14) — Audit i18n ✅
 
 Audit i18n slider-gradle. Confirmation que le support i18n est entièrement
 couvert et fonctionnel. SLD-3 (config + UI + RTL, 7/7 US) et SLD-5 (pipeline
@@ -54,8 +54,8 @@ constraint 0.0.1 → 0.0.10 + correction module name (`slider-plugin` → `slide
 
 | Artefact | URL |
 |---|---|
-| slider 0.0.10 | https://central.sonatype.com/artifact/education.ccp/slider/0.0.10 |
-| workspace-bom 0.0.9 | https://central.sonatype.com/artifact/education.ccp/workspace-bom/0.0.9 |
+| slider 0.0.10 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.10 |
+| workspace-bom 0.0.9 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.9 |
 
 '''
 == EPIC SLD-5 — Deck Translation Pipeline ✅ TERMINÉ (Session 029-030, 2026-07-14)
