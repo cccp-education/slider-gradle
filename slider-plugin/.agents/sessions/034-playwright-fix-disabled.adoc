@@ -1,0 +1,66 @@
+= Session 034 — slider-gradle — Fix Playwright @Disabled (gem JRuby isolé GradleRunner)
+:session: 034
+:date: 2026-07-15
+
+== Mission
+
+Fixer les 2 tests Playwright `@Disabled` depuis la session 023 :
+`SliderPlaywrightE2eTest` + `RtlPlaywrightFunctionalTest` — root cause :
+`GradleRunner` crée un Gradle user home isolé dans `/tmp` où JRuby ne trouve
+pas la gem `asciidoctor-revealjs` (LoadError).
+
+== Solution
+
+Découplage architecturel : séparer la génération HTML (GradleRunner → JRuby
+isolé, non fixable sans API `withGradleUserHomeDir` absente de Gradle 9.6.1)
+de la validation visuelle Playwright (chargement d'un HTML pré-généré).
+
+Approche DDD :
+- Les HTML fixtures sont pré-générés par le build racine `slider-gradle` (vrai
+  Gradle home, gem JRuby présente) via une nouvelle tâche `generatePlaywrightFixtures`.
+- Les tests Playwright chargent ces fixtures via `python3 -m http.server` (remplacement
+  `npx serve` qui faisait une 301 intempestive) + Playwright-jvm headless Chromium.
+- Pas de GradleRunner → pas de JRuby isolé → pas de LoadError.
+
+Tâches Gradle créées (build.gradle.kts racine) :
+- `copyPlaywrightLtrFixture` (Copy) — copie `build/docs/asciidocRevealJs/` → `build/playwright-fixtures/ltr/`
+- `generateRtlFixture` (Exec) — re-lance `asciidoctorRevealJs -Planguage=ar` puis copie → `build/playwright-fixtures/rtl/`
+- `generatePlaywrightFixtures` (aggregation) — orchestre les 2 ci-dessus
+
+Fixtures :
+- LTR : `capsule-feed-demo-en-deck.html` (rtl: false)
+- RTL : `capsule-feed-demo-ar-deck.html` (rtl: true, nécessite `-Planguage=ar`)
+
+Séquençage : `copyPlaywrightLtrFixture` s'exécute avant `generateRtlFixture`
+(`mustRunAfter`) car le build RTL écrase le output `asciidocRevealJs/` partagé.
+
+== Fichiers modifiés
+
+. `build.gradle.kts` (racine) — +51 lignes : 3 tâches Gradle `generatePlaywrightFixtures`
+. `slider-plugin/slider/build.gradle.kts` — +13 lignes : system properties `playwright.ltr.fixtures.dir` + `playwright.rtl.fixtures.dir`
+. `slider-plugin/slider/src/test/kotlin/slider/PlaywrightFixtureSupport.kt` — NOUVEAU : support partagé Playwright lifecycle + HTTP server (python3 -m http.server)
+. `slider-plugin/slider/src/test/kotlin/slider/SliderPlaywrightE2eTest.kt` — réécrit : charge fixture LTR pré-générée, sans GradleRunner, assertions Playwright (title, sections, h2, viewport, screenshot)
+. `slider-plugin/slider/src/test/kotlin/slider/RtlPlaywrightFunctionalTest.kt` — réécrit : charge fixture RTL pré-générée, waitForFunction Reveal.js init, délègue à RtlSlideAssertion
+
+== Baby-step TDD/BDD
+
+. RED — Tests réécrits sans @Disabled → échouent (fixtures non générées, chemins incorrects)
+. GREEN — Tâches Gradle + system properties + corrections assertions (structure HTML plates `section h2` non `section section h2`, `python3 -m http.server` au lieu de `npx serve`, `waitForFunction` pour Reveal.js init)
+. REFACTOR — `PlaywrightFixtureSupport` extrait le code commun (Browser lifecycle, HTTP server, `withPage` fermeture automatique)
+
+== Tests
+
+`./gradlew :slider:check` VERT — 428 PASS / 0 FAIL / 1 SKIP
+(was 425 PASS / 0 FAIL / 2 SKIP — +3 tests : 2 Playwright réactivés + 1 cucumber un-skipped)
+
+| Niveau | Avant | Après | Delta
+| unit (test) | 293 | 295 | +2 (Playwright LTR + RTL)
+| functional | 15 | 15 | 0
+| cucumber | 117 | 118 | +1 (un-skipped)
+| Total | 425 | 428 | +3
+
+== Score session
+
+9/10 — Fix définitif d'un blocage technique identifié en S-023. Architecture
+DDD propre (séparation génération/validation). Aucun @Disabled restant.
+Méthode baby-step TDD respectée. Reproductible via `./gradlew generatePlaywrightFixtures`.

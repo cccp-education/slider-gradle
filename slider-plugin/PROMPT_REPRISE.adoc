@@ -1,31 +1,29 @@
-= PROMPT_REPRISE — slider-gradle — Session 034
-:session: 034
-:date: 2026-07-14
+= PROMPT_REPRISE — slider-gradle — Session 035
+:session: 035
+:date: 2026-07-15
 
-== Session 033 terminée
+== Session 034 terminée
 
-Audit i18n slider-gradle. Confirmation que le support i18n est entièrement
-couvert et fonctionnel. SLD-3 (config + UI + RTL, 7/7 US) et SLD-5 (pipeline
-deck one-to-many, 7/7 US) TERMINÉS. 10 langues (en, zh, hi, es, fr, ar, bn, pt,
-ru, ur), RTL ar/ur, fallback cascade 5 couches, pipeline `translateDeck`
-(1 source → 10 cibles), validation Playwright LTR+RTL, dogfooding 3 decks ×
-10 langues. Aucun trou fonctionnel identifié.
+Fix des 2 tests Playwright `@Disabled` (S-023). Découplage architecturel :
+les HTML fixtures sont pré-générés par le build racine via
+`generatePlaywrightFixtures` (vrai Gradle home, gem JRuby présente). Les
+tests chargent ces fixtures via `python3 -m http.server` + Playwright-jvm
+headless Chromium — sans GradleRunner, sans JRuby isolé.
 
-Nettoyage : 3 répertoires vides `com/cheroliv/slider/{ai,translate}/`
-supprimés (héritage renommage S-005). Zéro fichier .kt sous `com.cheroliv`.
+`PlaywrightFixtureSupport.kt` (nouveau) mutualise Browser lifecycle + HTTP
+server. `SliderPlaywrightE2eTest` (LTR) + `RtlPlaywrightFunctionalTest` (RTL)
+réécrits — 0 `@Disabled` restant.
 
-`./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE, zéro
-régression). Zéro fichier de production modifié.
+`./gradlew :slider:check` VERT — 428 PASS / 0 FAIL / 1 SKIP (+3 vs 425).
 
-== Prochaine session — 034
+== Prochaine session — 035
 
 *Objectif* : À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.10
-publié, i18n audité et complet. Pistes possibles :
+publié, i18n audité complet, Playwright @Disabled fixé. Pistes :
 - SLD-6 cadrage (nouvel EPIC feature)
 - Rattrapage i18n autre borough
 - Mise à jour BOM pour autres plugins (bakery, codex, etc.)
-- Fix 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner — piste
-  bloquée techniquement)
+- Publication 0.0.11 (Playwright fix)
 
 == Rappels
 
@@ -42,12 +40,8 @@ publié, i18n audité et complet. Pistes possibles :
 - Package Cucumber steps : `slider.steps` (renommé S-026)
 - Domaines DDD : `slider.repository`, `slider.capsule`, `slider.rtl`,
   `slider.i18n`, `slider.translate`, `slider.ai`, `slider.translation` (S-029)
-- Domaine `slider.translation` : 8 fichiers — TranslationRequest,
-  DeckTranslationPlan, TranslationResult (sealed 3 variants), TranslationOutcome,
-  LanguageModelAdapter (port), DeckTranslator (domain service),
-  OllamaLanguageModelAdapter (adaptateur langchain4j), TranslateDeckTask
-- Tâche Gradle : `translateDeck` (group "translator"), inputs `-Pdeck.context`
-  + `-Pdeck.adoc` (optionnel) + `-Ptarget.languages` (défaut 10)
-- 2 tests Playwright @Disabled (gem JRuby isolé GradleRunner — piste bloquée)
-- `./gradlew :slider:check` est VERT (425 PASS depuis S-030)
+- Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
+  → `build/playwright-fixtures/{ltr,rtl}/`
+- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié Playwright)
+- `./gradlew :slider:check` est VERT (428 PASS depuis S-034)
 - EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10

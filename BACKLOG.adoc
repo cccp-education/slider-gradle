@@ -1,10 +1,22 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-:.date: 2026-07-14
+_.date: 2026-07-15
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== Session 034 (2026-07-15) — Fix Playwright @Disabled ✅
+
+Fix des 2 tests Playwright `@Disabled` (S-023). Découplage architecturel : les
+HTML fixtures sont pré-générés par le build racine via `generatePlaywrightFixtures`
+(vrai Gradle home, gem JRuby présente). Les tests chargent ces fixtures via
+`python3 -m http.server` + Playwright-jvm headless Chromium — sans GradleRunner,
+sans JRuby isolé. `PlaywrightFixtureSupport.kt` (nouveau) mutualise Browser
+lifecycle + HTTP server. `SliderPlaywrightE2eTest` (LTR) + `RtlPlaywrightFunctionalTest`
+(RTL) réécrits — 0 `@Disabled` restant. `./gradlew :slider:check` VERT — 428 PASS /
+0 FAIL / 1 SKIP (+3 vs 425).
 
 '''
 == Session 033 (2026-07-14) — Audit i18n ✅

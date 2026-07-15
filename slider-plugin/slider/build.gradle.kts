@@ -100,6 +100,19 @@ tasks.withType<Test>().configureEach {
         exceptionFormat = FULL
     }
     failOnNoDiscoveredTests = false
+    // Playwright visual tests load pre-generated HTML fixtures from the root
+    // project's asciidoctorRevealJs output (real Gradle home, JRuby gem present).
+    // This decouples visual validation from GradleRunner's isolated JRuby (S-023).
+    // LTR fixture: build/playwright-fixtures/ltr/
+    // RTL fixture: build/playwright-fixtures/rtl/ (requires -Planguage=ar)
+    systemProperty(
+        "playwright.ltr.fixtures.dir",
+        layout.projectDirectory.dir("../../build/playwright-fixtures/ltr").asFile.absolutePath
+    )
+    systemProperty(
+        "playwright.rtl.fixtures.dir",
+        layout.projectDirectory.dir("../../build/playwright-fixtures/rtl").asFile.absolutePath
+    )
 }
 
 gradlePlugin {
