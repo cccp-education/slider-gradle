@@ -2,7 +2,7 @@
 
 _Date creation_ : 2026-05-10
 
-== Session 034 (2026-07-15) — Fix Playwright @Disabled (gem JRuby isolé GradleRunner)
+== Session 034 (2026-07-15) — Fix Playwright @Disabled + Publication 0.0.11
 
 Fix définitif des 2 tests Playwright `@Disabled` depuis la session 023.
 Root cause : `GradleRunner` crée un Gradle user home isolé dans `/tmp` où
@@ -19,10 +19,12 @@ server (`python3 -m http.server` — remplace `npx serve` qui faisait une 301
 intempestive). Les 2 tests réécrits chargent les fixtures pré-générées sans
 GradleRunner — 0 `@Disabled` restant.
 
-Baby-step TDD : RED (tests réécrits sans @Disabled, échouent) → GREEN
-(tâches Gradle + system properties + corrections : structure HTML plates
-`section h2`, `python3 -m http.server`, `waitForFunction` Reveal.js init) →
-REFACTOR (PlaywrightFixtureSupport extrait le code commun).
+Baby-step TDD : RED → GREEN (tâches Gradle + system properties + corrections :
+structure HTML plates `section h2`, `python3 -m http.server`, `waitForFunction`
+Reveal.js init) → REFACTOR (PlaywrightFixtureSupport extrait le code commun).
+
+Publication Maven Central : slider 0.0.11 (bundle `b18431e5`) + BOM 0.0.10
+(bundle `61519263`). Bump 4 fichiers slider-gradle + 2 fichiers workspace-bom.
 
 `./gradlew :slider:check` VERT — 428 PASS / 0 FAIL / 1 SKIP
 (was 425 PASS / 0 FAIL / 2 SKIP — +3 tests).

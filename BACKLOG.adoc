@@ -7,7 +7,7 @@ _.date: 2026-07-15
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
-== Session 034 (2026-07-15) — Fix Playwright @Disabled ✅
+== Session 034 (2026-07-15) — Fix Playwright @Disabled + PUB 0.0.11 ✅
 
 Fix des 2 tests Playwright `@Disabled` (S-023). Découplage architecturel : les
 HTML fixtures sont pré-générés par le build racine via `generatePlaywrightFixtures`
@@ -15,11 +15,25 @@ HTML fixtures sont pré-générés par le build racine via `generatePlaywrightFi
 `python3 -m http.server` + Playwright-jvm headless Chromium — sans GradleRunner,
 sans JRuby isolé. `PlaywrightFixtureSupport.kt` (nouveau) mutualise Browser
 lifecycle + HTTP server. `SliderPlaywrightE2eTest` (LTR) + `RtlPlaywrightFunctionalTest`
-(RTL) réécrits — 0 `@Disabled` restant. `./gradlew :slider:check` VERT — 428 PASS /
-0 FAIL / 1 SKIP (+3 vs 425).
+(RTL) réécrits — 0 `@Disabled` restant. Publication Maven Central slider 0.0.11
+(bundle `b18431e5`) + BOM 0.0.10 (bundle `61519263`). `./gradlew :slider:check`
+VERT — 428 PASS / 0 FAIL / 1 SKIP (+3 vs 425).
 
 '''
-== Session 033 (2026-07-14) — Audit i18n ✅
+== EPIC PUB — Publication Maven Central 0.0.11 ✅ TERMINE (Session 034, 2026-07-15)
+
+Bump 0.0.10 → 0.0.11 sur 4 fichiers (Playwright @Disabled fix). Bundle nmcp
+`b18431e5-a8a1-473e-a6a9-337fd6bfd664` AUTOMATIC, 3 artefacts signés
+(slider:0.0.11 + 2 plugin markers). BOM 0.0.10 publiée (bundle `61519263`),
+slider constraint 0.0.10 → 0.0.11.
+
+| Artefact | URL |
+|---|---|
+| slider 0.0.11 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.11 |
+| workspace-bom 0.0.10 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.10 |
+
+'''
+== EPIC PUB — Publication Maven Central 0.0.10 ✅ TERMINE (Session 032, 2026-07-14)
 
 Audit i18n slider-gradle. Confirmation que le support i18n est entièrement
 couvert et fonctionnel. SLD-3 (config + UI + RTL, 7/7 US) et SLD-5 (pipeline

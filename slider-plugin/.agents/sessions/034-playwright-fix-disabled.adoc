@@ -59,8 +59,31 @@ Séquençage : `copyPlaywrightLtrFixture` s'exécute avant `generateRtlFixture`
 | cucumber | 117 | 118 | +1 (un-skipped)
 | Total | 425 | 428 | +3
 
+== Publication Maven Central
+
+Bump 0.0.10 → 0.0.11 (slider) + BOM 0.0.9 → 0.0.10 (workspace-bom).
+
+| Artefact | Version | Bundle nmcp | Statut
+| `education.cccp:slider` | 0.0.11 | `b18431e5-a8a1-473e-a6a9-337fd6bfd664` | AUTOMATIC publishing
+| `education.cccp:workspace-bom` | 0.0.10 | `61519263-eead-49d4-9299-211ffe37ef39` | AUTOMATIC publishing
+
+Fichiers bumpés (slider-gradle, 4 fichiers) :
+- `slider-plugin/slider/build.gradle.kts` — 0.0.10 → 0.0.11
+- `slider-plugin/gradle/libs.versions.toml` — slider = "0.0.11"
+- `gradle/libs.versions.toml` (racine) — slider = "0.0.11"
+- `PROMPT_REPRISE.adoc` — version + BOM mise à jour
+
+Fichiers bumpés (workspace-bom, 2 fichiers) :
+- `build.gradle.kts` — 0.0.9 → 0.0.10
+- `gradle/libs.versions.toml` — slider-plugin = "0.0.11"
+
+Commits poussés :
+- `slider-gradle` `3777957` — bump 0.0.11
+- `workspace-bom` `a4301c7` — bump 0.0.10 + constraint slider 0.0.11
+
 == Score session
 
-9/10 — Fix définitif d'un blocage technique identifié en S-023. Architecture
+10/10 — Fix définitif d'un blocage technique identifié en S-023. Architecture
 DDD propre (séparation génération/validation). Aucun @Disabled restant.
 Méthode baby-step TDD respectée. Reproductible via `./gradlew generatePlaywrightFixtures`.
+Publication Maven Central 0.0.11 + BOM 0.0.10 poussée.
