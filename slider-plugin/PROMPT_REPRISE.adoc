@@ -1,29 +1,45 @@
-= PROMPT_REPRISE — slider-gradle — Session 035
-:session: 035
-:date: 2026-07-15
+= PROMPT_REPRISE — slider-gradle — Session 037
+:session: 037
+:date: 2026-07-21
 
-== Session 034 terminée
+== Session 036 terminée
 
-Fix des 2 tests Playwright `@Disabled` (S-023). Découplage architecturel :
-les HTML fixtures sont pré-générés par le build racine via
-`generatePlaywrightFixtures` (vrai Gradle home, gem JRuby présente). Les
-tests chargent ces fixtures via `python3 -m http.server` + Playwright-jvm
-headless Chromium — sans GradleRunner, sans JRuby isolé.
+SLD-6.2 — Extraction `Configuration` → `slider.config` (nouveau domaine DDD, 3
+fichiers, ~110 lignes) :
 
-`PlaywrightFixtureSupport.kt` (nouveau) mutualise Browser lifecycle + HTTP
-server. `SliderPlaywrightE2eTest` (LTR) + `RtlPlaywrightFunctionalTest` (RTL)
-réécrits — 0 `@Disabled` restant.
+- `ConfigPath.kt` (21 lignes) — value object `@JvmInline value class`, validation
+  non-blanc, résolution relative/absolue contre base dir. Pure, zéro Gradle.
+- `YamlMapperFactory.kt` (34 lignes) — factory du `ObjectMapper` partagé
+  (YAMLFactory + Kotlin + Arrow + WRITE_DATES_AS_TIMESTAMPS disabled). Remplace
+  l'extension property `SliderManager.Configuration.yamlMapper`.
+- `SlidesConfigLoader.kt` (70 lignes) — domain service. `load(File, mapper)` +
+  `load(configPath, baseDir, mapper)` + `emptyConfiguration()` fallback. Remplace
+  `SliderManager.Configuration.readSlidesConfigurationFile`.
 
-`./gradlew :slider:check` VERT — 428 PASS / 0 FAIL / 1 SKIP (+3 vs 425).
+`SliderManager.Configuration` → thin adapter. `Project.localConf` :
+`properties[CONFIG_PATH_KEY]` → `findProperty(CONFIG_PATH_KEY)` (zéro warning).
+`registerPublishSlidesTask` (ligne 638) : re-désérialisation `YAMLMapper().readValue`
+supprimée — réutilise `localConf`. Imports morts nettoyés (5 imports Jackson/Arrow
+retirés de `SliderManager.kt`). Baby-step TDD/BDD 3 niveaux : 16 unit
+(ConfigPathTest 4 + YamlMapperFactoryTest 5 + SlidesConfigLoaderTest 7) + 15
+scénarios Cucumber (`16_config_decomposition.feature` + `ConfigDecompositionSteps.kt`).
+`./gradlew :slider:check` VERT 466 PASS / 0 FAIL / 1 SKIP (+11 vs 455).
 
-== Prochaine session — 035
+== Prochaine session — 037
 
-*Objectif* : À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.10
-publié, i18n audité complet, Playwright @Disabled fixé. Pistes :
-- SLD-6 cadrage (nouvel EPIC feature)
-- Rattrapage i18n autre borough
-- Mise à jour BOM pour autres plugins (bakery, codex, etc.)
-- Publication 0.0.11 (Playwright fix)
+*Objectif* : SLD-6.3 — extraction `Prerequisites` → `slider.prerequisite`.
+`JavaVersionGuard` (value object + `requireJava23()`). Extraction de la logique
+pure (parse version + guard) hors du contexte Gradle. `SliderManager.Prerequisites`
+(lignes ~126-141) contient :
+
+- `checkJavaVersion()` — `JavaVersion.current().majorVersion.toInt()` + `require(...)
+  Java 23+` avec message d'erreur.
+
+Migration : `JavaVersionGuard` domaine pur (prend `JavaVersion` en input, zéro
+dépendance Gradle), `SliderManager.Prerequisites` devient thin adapter qui passe
+`JavaVersion.current()` au guard.
+
+Enchaîner SLD-6.4 (Extensions → `slider.extension`), SLD-6.5 (Wiring), etc.
 
 == Rappels
 
@@ -37,11 +53,15 @@ publié, i18n audité complet, Playwright @Disabled fixé. Pistes :
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
-- Package Cucumber steps : `slider.steps` (renommé S-026)
-- Domaines DDD : `slider.repository`, `slider.capsule`, `slider.rtl`,
-  `slider.i18n`, `slider.translate`, `slider.ai`, `slider.translation` (S-029)
+- Package Cucumber steps : `slider.steps`
+- Domaines DDD existants : `slider.repository`, `slider.capsule`, `slider.rtl`,
+  `slider.i18n`, `slider.translate`, `slider.translation`, `slider.scaffold`,
+  `slider.config`
+- Domaines DDD SLD-6 à créer : `slider.prerequisite`, `slider.extension`,
+  `slider.wiring`, `slider.revealjs`, `slider.playwright`
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
-- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié Playwright)
-- `./gradlew :slider:check` est VERT (428 PASS depuis S-034)
+- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playright)
+- `./gradlew :slider:check` est VERT (466 PASS depuis S-036)
 - EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11
+- EPIC en cours : SLD-6 (SLD-6.0 ✅, SLD-6.1 ✅, SLD-6.2 ✅, SLD-6.3→6.10 ⏳)

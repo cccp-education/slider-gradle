@@ -1,6 +1,5 @@
 package slider
 
-import arrow.integrations.jackson.module.registerArrowModule
 import slider.SliderManager.Configuration.CONFIG_PATH_KEY
 import slider.SliderManager.Configuration.localConf
 import slider.SliderManager.Configuration.yamlMapper
@@ -27,6 +26,8 @@ import slider.Slides.RevealJsSlides.TASK_INSTALL_PLAYWRIGHT
 import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
 import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
 import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
+import slider.config.SlidesConfigLoader
+import slider.config.YamlMapperFactory
 import slider.translation.registerTranslateDeckTask
 import slider.Slides.Serve.SERVE_DEP
 import slider.Slides.Slide.DEFAULT_SLIDES_FOLDER
@@ -34,11 +35,6 @@ import slider.Slides.Slide.IMAGES
 import slider.Slides.Slide.SLIDES_CONTEXT_YML
 import slider.Slides.Slide.SLIDES_FOLDER
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.gradle.node.npm.task.NpxTask
 import org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.OUT_OF_PROCESS
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
@@ -52,8 +48,6 @@ import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.register
 import java.io.File
 import java.io.File.separator
-import java.io.IOException
-import java.util.zip.ZipInputStream
 
 /**
  * Root manager object for the Slider plugin.
@@ -77,43 +71,43 @@ object SliderManager {
         // Shared Project extensions
         // -------------------------------------------------------------------------
 
-        /** Reads and returns the slides YAML configuration bound to this project. */
+        /**
+         * Reads and returns the slides YAML configuration bound to this project.
+         *
+         * Thin adapter over [slider.config.SlidesConfigLoader] — resolves the
+         * config path declared via the `managed_config_path` project property
+         * (using the non-deprecated `findProperty` API) and delegates the
+         * deserialisation to the domain loader.
+         */
         val Project.localConf: SlidesConfiguration
-            get() = readSlidesConfigurationFile { "$rootDir$separator${properties[CONFIG_PATH_KEY]}" }
+            get() = SlidesConfigLoader.load(
+                configPath = findProperty(CONFIG_PATH_KEY)?.toString().orEmpty(),
+                baseDir = rootDir.absolutePath,
+                mapper = yamlMapper,
+            )
 
-        /** Jackson ObjectMapper configured for YAML, Kotlin, and Arrow support. */
+        /**
+         * Shared Jackson `ObjectMapper` for YAML serialisation.
+         *
+         * Thin adapter over [slider.config.YamlMapperFactory] — kept as an
+         * extension property so existing call sites (scaffold, publish,
+         * translateDeck, RAG) continue to resolve via `Configuration.yamlMapper`
+         * until each nested object is extracted in its own US-6.x.
+         */
         val yamlMapper: ObjectMapper
-            get() = YAMLFactory()
-                .let(::ObjectMapper)
-                .disable(WRITE_DATES_AS_TIMESTAMPS)
-                .registerKotlinModule()
-                .registerArrowModule()
+            get() = YamlMapperFactory.create()
 
         /**
          * Reads and deserialises the slides configuration YAML file.
-         * Returns an empty [SlidesConfiguration] on any parsing failure
-         * to allow the build to continue with degraded behaviour.
+         * Delegates to [slider.config.SlidesConfigLoader] which returns an
+         * empty [SlidesConfiguration] on any parsing failure.
          */
         fun readSlidesConfigurationFile(
             configPath: () -> String
-        ): SlidesConfiguration = try {
-            configPath()
-                .run(::File)
-                .run(yamlMapper::readValue)
-        } catch (_: Exception) {
-            SlidesConfiguration(
-                srcPath = "",
-                pushSlides = GitPushConfiguration(
-                    from = "", to = "",
-                    repo = RepositoryConfiguration(
-                        name = "", repository = "",
-                        credentials = RepositoryCredentials(username = "", password = "")
-                    ),
-                    branch = "", message = ""
-                ),
-                ai = AiConfiguration()
-            )
-        }
+        ): SlidesConfiguration = SlidesConfigLoader.load(
+            configFile = File(configPath()),
+            mapper = yamlMapper,
+        )
     }
 
     // =========================================================================
@@ -150,6 +144,11 @@ object SliderManager {
     /**
      * Handles first-use initialisation of the consumer project's slides/ directory.
      *
+     * Thin Gradle adapter — all pure logic (completeness check, zip extraction,
+     * default factories) lives in the `slider.scaffold` domain:
+     * - [slider.scaffold.SlidesScaffolder] — completeness check + zip extraction
+     * - [slider.scaffold.ScaffoldDefaults] — default SlidesConfiguration + DeckContext factories
+     *
      * The plugin bundles a default slides.zip in its classpath resources
      * (src/main/resources/slides.zip). On first use, if the slides/ directory
      * is absent or incomplete, the zip is extracted into the project directory
@@ -161,67 +160,30 @@ object SliderManager {
      */
     object Scaffold {
 
-        private const val SLIDES_ZIP = "slides.zip"
-
-        /**
-         * A complete slides configuration requires:
-         * - index.html         — dashboard entry point in slides/misc/
-         * - at least one *-deck.adoc source file in slides/misc/
-         *
-         * deck.properties has been removed — decks are discovered by scanning
-         * *.adoc files directly, following the <slug>_<lang>-deck.adoc convention.
-         */
-        private fun isSlidesConfigComplete(miscDir: File): Boolean {
-            val indexHtml = miscDir.resolve("index.html")
-            if (!indexHtml.exists()) return false
-            return miscDir.listFiles { f ->
-                f.isFile && f.name.endsWith("-deck.adoc")
-            }?.isNotEmpty() ?: false
-        }
-
-        /**
-         * Extracts the bundled slides.zip into the consumer project directory
-         * if the slides/ directory is absent or its configuration is incomplete.
-         *
-         * - If slides/ exists and is complete : no-op — consumer content is never overwritten.
-         * - If slides/ is absent or incomplete: extracts the bundled zip.
-         * - If slides.zip is missing from the classpath: fails with a clear error.
-         * - On successful extraction: prints a confirmation message.
-         *
-         * Must be called before [Tasks.registerTasks] so that the slides/
-         * directory is in place when task source directories are resolved.
-         */
         internal fun Project.scaffoldSlidesIfAbsent() {
             val slidesDir = layout.projectDirectory.asFile.resolve(SLIDES_FOLDER)
             val miscDir = slidesDir.resolve(DEFAULT_SLIDES_FOLDER)
 
             // slides/ exists and all required files are present — do nothing
-            if (slidesDir.exists() && isSlidesConfigComplete(miscDir)) return
+            if (slidesDir.exists() && slider.scaffold.SlidesScaffolder.isSlidesConfigComplete(miscDir)) return
 
             val zip = SliderPlugin::class.java
                 .classLoader
-                .getResourceAsStream(SLIDES_ZIP)
+                .getResourceAsStream("slides.zip")
                 ?: error(
                     "slides.zip not found in plugin classpath. " +
                             "Please report this issue at https://github.com/cheroliv/slider-gradle"
                 )
 
-            // Extract all zip entries into the project directory
-            zip.use { input ->
-                ZipInputStream(input).use { zis ->
-                    generateSequence { zis.nextEntry }
-                        .filterNot { entry -> entry.isDirectory }
-                        .forEach { entry ->
-                            val target = layout.projectDirectory.asFile.resolve(entry.name)
-                            target.parentFile.mkdirs()
-                            target.outputStream().use { out -> zis.copyTo(out) }
-                            zis.closeEntry()
-                        }
+            val result = slider.scaffold.SlidesScaffolder.extractSlidesZip(zip, layout.projectDirectory.asFile)
+            when (result) {
+                is slider.scaffold.ScaffoldResult.Created -> {
+                    println("✅ slides/ directory initialised from plugin defaults.")
+                    println("📁 Edit slides/${DEFAULT_SLIDES_FOLDER}/*-deck.adoc to get started.")
                 }
+                is slider.scaffold.ScaffoldResult.Failed -> error("Cannot extract slides.zip: ${result.reason}")
+                is slider.scaffold.ScaffoldResult.Skipped -> { /* no-op — never returned by extractSlidesZip */ }
             }
-
-            println("✅ slides/ directory initialised from plugin defaults.")
-            println("📁 Edit slides/${DEFAULT_SLIDES_FOLDER}/*-deck.adoc to get started.")
         }
 
 
@@ -229,12 +191,8 @@ object SliderManager {
          * Generates a default slides-context.yml in the consumer project directory
          * if the file does not already exist.
          *
-         * The default configuration is built from a typed [SlidesConfiguration] instance
-         * and serialized to YAML via [SliderManager.Configuration.yamlMapper], ensuring the output is
-         * always structurally valid and consistent with the data model.
-         *
-         * The generated file contains placeholder values that the consumer must replace
-         * with their actual Git repository URL, branch, credentials, and commit message.
+         * Delegates the default model construction to [slider.scaffold.ScaffoldDefaults];
+         * only the YAML serialisation and Gradle `Project` wiring remain here.
          */
         internal fun Project.scaffoldSlidesContextIfAbsent() {
             val slidesContext = layout.projectDirectory.asFile.resolve(SLIDES_CONTEXT_YML)
@@ -242,31 +200,7 @@ object SliderManager {
             // slides-context.yml already exists — do nothing
             if (slidesContext.exists()) return
 
-            // Build the default configuration from the typed model
-            val default = SlidesConfiguration(
-                srcPath = "docs/asciidocRevealJs",
-                pushSlides = GitPushConfiguration(
-                    from = "build/docs/asciidocRevealJs",
-                    to = "build/slides-repo",
-                    branch = "main",
-                    message = "deploy slides",
-                    repo = RepositoryConfiguration(
-                        name = "slides",
-                        repository = "https://github.com/your-org/your-slides-repo.git",
-                        credentials = RepositoryCredentials(
-                            username = "your-username",
-                            password = "your-token"
-                        )
-                    )
-                ),
-                ai = AiConfiguration(
-                    gemini = listOf("your-gemini-api-key"),
-                    mistral = listOf("your-mistral-api-key"),
-                    huggingface = listOf("your-huggingface-api-key"),
-                )
-            )
-
-            // Serialise to YAML using the shared mapper (Kotlin + Arrow modules enabled)
+            val default = slider.scaffold.ScaffoldDefaults.defaultSlidesConfiguration()
             yamlMapper.writeValue(slidesContext, default)
 
             println("✅ slides-context.yml generated with default values.")
@@ -277,9 +211,8 @@ object SliderManager {
          * Generates a default example-deck-context.yml in slides/misc/
          * if the file does not already exist.
          *
-         * The default configuration is built from a typed [slider.DeckContext] instance
-         * and serialized to YAML via [SliderManager.Configuration.yamlMapper], providing a
-         * ready-to-use template for the generateDeck task.
+         * Delegates the default model construction to [slider.scaffold.ScaffoldDefaults];
+         * only the YAML serialisation and Gradle `Project` wiring remain here.
          */
         internal fun Project.scaffoldDeckContextIfAbsent() {
             val miscDir = layout.projectDirectory.asFile
@@ -293,50 +226,7 @@ object SliderManager {
             // Ensure misc/ directory exists (slides scaffold may not have run yet)
             miscDir.mkdirs()
 
-            val default = DeckContext(
-                subject = "Your presentation subject",
-                audience = "Your target audience",
-                duration = 45,
-                languageCode = "fr",
-                outputFile = "example-deck.adoc",
-                author = AuthorContext(
-                    name = "Your Name",
-                    email = "your.email@example.com"
-                ),
-                revealjs = RevealJsContext(
-                    theme = "sky",
-                    slideNumber = "c/t",
-                    width = 1408,
-                    height = 792,
-                    controls = true,
-                    controlsLayout = "edges",
-                    history = true,
-                    fragmentInURL = true,
-                ),
-                notes = NotesConfiguration(
-                    speakerNotes = true,
-                    pageNotes = true,
-                    pageNotesStyle = PageNotesStyle.DETAILED,
-                ),
-                slides = listOf(
-                    SlideHint(
-                        title = "Agenda",
-                        speakerHint = "Introduce the plan in 2 minutes, ask what the audience already knows.",
-                        pageNotesHint = "List prerequisite knowledge and suggested readings."
-                    ),
-                    SlideHint(
-                        title = "First Topic",
-                        speakerHint = "Emphasise the most common misconception.",
-                        pageNotesHint = "Add a hands-on exercise and a reference link."
-                    ),
-                    SlideHint(
-                        title = "Summary and Next Steps",
-                        speakerHint = "Open the floor: what was new? what is still unclear?",
-                        pageNotesHint = "Include a 5-question formative assessment."
-                    ),
-                )
-            )
-
+            val default = slider.scaffold.ScaffoldDefaults.defaultDeckContext()
             yamlMapper.writeValue(deckContext, default)
 
             println("✅ example-deck-context.yml generated in slides/misc/.")
@@ -740,11 +630,10 @@ object SliderManager {
                     logger.info("Task description :\n\t${task.description}")
                 }
                 doLast {
-                    // Deserialize the YAML configuration from the path stored in project properties
-                    val localConf: SlidesConfiguration = properties[CONFIG_PATH_KEY].toString()
-                        .run(layout.projectDirectory.asFile::resolve)
-                        .readText().trimIndent()
-                        .run(YAMLMapper()::readValue)
+                    // Reuse the shared Configuration.localConf adapter (delegates
+                    // to slider.config.SlidesConfigLoader) instead of re-deserialising
+                    // the YAML here — fixes the properties[...] deprecation warning.
+                    val localConf: SlidesConfiguration = this@registerPublishSlidesTask.localConf
 
                     val repoDir = layout.buildDirectory.get().asFile
                         .resolve(localConf.pushSlides!!.to)

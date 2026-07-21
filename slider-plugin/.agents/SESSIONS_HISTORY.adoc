@@ -2,6 +2,88 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 036 (2026-07-21) — SLD-6.2 Configuration → slider.config
+
+SLD-6.2 — Extraction `Configuration` → `slider.config` (nouveau domaine DDD, 3
+fichiers, ~110 lignes) :
+
+- `ConfigPath.kt` (21 lignes) — value object `@JvmInline value class`, validation
+  non-blanc, résolution relative/absolue contre base dir. Pure, zéro Gradle.
+- `YamlMapperFactory.kt` (34 lignes) — factory du `ObjectMapper` partagé
+  (YAMLFactory + Kotlin + Arrow + WRITE_DATES_AS_TIMESTAMPS disabled). Remplace
+  l'extension property `SliderManager.Configuration.yamlMapper`.
+- `SlidesConfigLoader.kt` (70 lignes) — domain service. `load(File, mapper)` +
+  `load(configPath, baseDir, mapper)` + `emptyConfiguration()` fallback. Remplace
+  `SliderManager.Configuration.readSlidesConfigurationFile`.
+
+`SliderManager.Configuration` → thin adapter. `Project.localConf` :
+`properties[CONFIG_PATH_KEY]` → `findProperty(CONFIG_PATH_KEY)` (zéro warning).
+`registerPublishSlidesTask` (ligne 638) : re-désérialisation `YAMLMapper().readValue`
+supprimée — réutilise `localConf`. Imports morts nettoyés (5 imports Jackson/Arrow
+retirés de `SliderManager.kt`).
+
+Baby-step TDD/BDD 3 niveaux :
+- RED : 16 tests unitaires écrits avant le code production
+  - `ConfigPathTest` (4 tests) — validation blank, accept non-blank, resolveAgainst
+    relative/absolu
+  - `YamlMapperFactoryTest` (5 tests) — create, read Map, Kotlin data class,
+    WRITE_DATES_AS_TIMESTAMPS disabled, mappers indépendants
+  - `SlidesConfigLoaderTest` (7 tests) — YAML valide, fichier absent, YAML malformé,
+    path+baseDir, emptyConfiguration valeurs placeholder, indépendance instances
+- GREEN : création du domaine `slider.config`, tous les tests PASS
+- REFACTOR : `SliderManager.Configuration` réécrit en thin adapter
+- BDD : `16_config_decomposition.feature` (15 scénarios) +
+  `ConfigDecompositionSteps.kt` (9 steps Given/When/Then × ConfigPath/Loader/Factory).
+  Steps préfixés `config` pour éviter les collisions avec `ScaffoldDecompositionSteps`.
+
+`./gradlew :slider:check` VERT — 466 PASS / 0 FAIL / 1 SKIP (+11 vs 455 S-035).
+322 unit (was 309, +13 nets) + 144 cucumber (was 129, +15 config decomposition).
+Zéro warning deprecation `properties[...]` dans `:slider:compileKotlin`. Le seul
+warning restant (`Project object as dependency notation`) vient de `Dependencies`
+— hors périmètre US-6.2, sera traité dans SLD-6.5 Wiring.
+
+SLD-6 : 3/11 US terminées (SLD-6.0 cadrage ✅, SLD-6.1 Scaffold ✅, SLD-6.2
+Configuration ✅). Reste 8 US (~15 pts).
+
+== Session 035 (2026-07-20) — Cadrage SLD-6 + US-6.1 Scaffold decomposition
+
+Cadrage EPIC SLD-6 — Refactor DDD SliderManager decomposition. `SliderManager.kt`
+est un god-object de 968 lignes contenant 9 nested objects. Alors que les 6
+domaines métier DDD ont déjà été extraits proprement, le `SliderManager` reste
+le point d'agglomération résiduel. SLD-6 applique le même pattern DDD au
+`SliderManager` lui-même. 11 US, ~20 pts, cible thin orchestrator < 100 lignes.
+
+US-6.1 terminée : extraction `Scaffold` → `slider.scaffold` (nouveau domaine,
+3 fichiers, 169 lignes) :
+- `ScaffoldResult.kt` (12 lignes) — sealed class Created/Skipped/Failed
+- `SlidesScaffolder.kt` (65 lignes) — `isSlidesConfigComplete(File)`,
+  `extractSlidesZip(InputStream, File)` (logique pure, zéro Gradle)
+- `ScaffoldDefaults.kt` (92 lignes) — `defaultSlidesConfiguration()`,
+  `defaultDeckContext()` factories
+
+`SliderManager.Scaffold` réécrit en thin adapter (~184→65 lignes, -65%).
+Délègue à `SlidesScaffolder` + `ScaffoldDefaults`. Imports morts nettoyés
+(`ZipInputStream`, `IOException` retirés de `SliderManager.kt`).
+
+Baby-step TDD/BDD 3 niveaux :
+- RED : 13 tests unitaires écrits avant le code production (10 SlidesScaffolderTest
+  + 3 ScaffoldDefaultsTest), compilation échoue (classes manquantes)
+- GREEN : création du domaine `slider.scaffold`, tous les tests PASS
+- REFACTOR : `SliderManager.Scaffold` réécrit en thin adapter
+- BDD : `15_scaffold_decomposition.feature` (15 scénarios) +
+  `ScaffoldDecompositionSteps.kt` — couvre `isSlidesConfigComplete` (6 scénarios),
+  `extractSlidesZip` (3 scénarios), `ScaffoldDefaults` (6 scénarios)
+
+`./gradlew :slider:check` VERT — 455 PASS / 0 FAIL / 1 SKIP
+(was 428 PASS / 0 FAIL / 1 SKIP — +27 tests : +12 unit + 15 cucumber).
+
+Les 2 warnings deprecation `properties: (Mutable)Map<String, out Any?>`
+(lignes 80 et 638 après refactor) persistent — délibérément laissés pour
+l'US-6.2 (Configuration → `slider.config`), qui les corrigera en migrant
+l'accès `properties[CONFIG_PATH_KEY]` vers `providers`.
+
+Aucun commit (règle 1 AGENT.adoc — permission explicite requise).
+
 == Session 034 (2026-07-15) — Fix Playwright @Disabled + Publication 0.0.11
 
 Fix définitif des 2 tests Playwright `@Disabled` depuis la session 023.

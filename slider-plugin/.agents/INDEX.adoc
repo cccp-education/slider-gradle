@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-07-15
-_Session terminee_ : 034 — Fix Playwright @Disabled (S-023) + publication slider 0.0.11 + BOM 0.0.10. Découplage architecturel : HTML fixtures pré-générés par build racine via `generatePlaywrightFixtures` (vrai Gradle home, gem JRuby présente). Tests chargent fixtures via `python3 -m http.server` + Playwright-jvm headless Chromium — sans GradleRunner, sans JRuby isolé. `PlaywrightFixtureSupport.kt` (nouveau) mutualise Browser lifecycle + HTTP server. 0 `@Disabled` restant. `./gradlew :slider:check` VERT — 428 PASS / 0 FAIL / 1 SKIP.
-_Prochaine session_ : 035 — À définir. SLD-0→5 terminés, CNV-6/7/8 terminés, PUB 0.0.1→0.0.11 publiés, i18n audité, Playwright @Disabled fixé. Backlog entièrement consommé. Pistes : SLD-6 cadrage, rattrapage i18n, mise à jour BOM autres plugins.
+_Derniere mise a jour_ : 2026-07-21
+_Session terminee_ : 036 — SLD-6.2 Extraction `Configuration` → `slider.config`. Domaine DDD `slider.config` créé (3 fichiers : `ConfigPath.kt` value object, `YamlMapperFactory.kt` factory ObjectMapper, `SlidesConfigLoader.kt` domain service). `SliderManager.Configuration` → thin adapter (délègue à `slider.config`). Fix deprecation `properties[...]` (lignes 80 + 638) → `findProperty(...)` + réutilisation `localConf` dans `registerPublishSlidesTask`. Imports morts nettoyés (5 imports Jackson/Arrow retirés). Baby-step TDD/BDD 3 niveaux : 16 unit (ConfigPathTest + YamlMapperFactoryTest + SlidesConfigLoaderTest) + 15 scénarios Cucumber (`16_config_decomposition.feature` + `ConfigDecompositionSteps.kt`). `./gradlew :slider:check` VERT — 466 PASS / 0 FAIL / 1 SKIP (+11 vs 455).
+_Prochaine session_ : 037 — SLD-6.3 Prerequisites → `slider.prerequisite` (`JavaVersionGuard`). Baby-step TDD/BDD 3 niveaux (unit → cucumber).
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -26,6 +26,8 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | # | Date | Type | Sujet | Score
 
 | 034 | 2026-07-15 | fix+tests+ddd+pub | Fix Playwright @Disabled (S-023). Découplage architecturel : HTML fixtures pré-générés par build racine via `generatePlaywrightFixtures` (vrai Gradle home, gem JRuby présente). Tests chargent fixtures via `python3 -m http.server` + Playwright-jvm headless Chromium — sans GradleRunner, sans JRuby isolé. `PlaywrightFixtureSupport.kt` (nouveau) mutualise Browser lifecycle + HTTP server. `SliderPlaywrightE2eTest` (LTR) + `RtlPlaywrightFunctionalTest` (RTL) réécrits — 0 `@Disabled` restant. 3 tâches Gradle créées (`copyPlaywrightLtrFixture`, `generateRtlFixture`, `generatePlaywrightFixtures`). Baby-step TDD : RED → GREEN → REFACTOR. Publication Maven Central slider 0.0.11 (bundle `b18431e5`) + BOM 0.0.10 (bundle `61519263`). `./gradlew :slider:check` VERT 428 PASS / 0 FAIL / 1 SKIP (+3 vs 425). | ✅ 10/10
+| 036 | 2026-07-21 | refactor+ddd+tdd+bdd | SLD-6.2 Extraction `Configuration` → `slider.config` (nouveau domaine, 3 fichiers : `ConfigPath.kt` 21l value object, `YamlMapperFactory.kt` 34l factory ObjectMapper, `SlidesConfigLoader.kt` 70l domain service). `SliderManager.Configuration` → thin adapter (délègue à `slider.config`). Fix deprecation `properties[...]` lignes 80 + 638 → `findProperty(...)` + réutilisation `localConf` dans `registerPublishSlidesTask`. Imports morts nettoyés (5 imports Jackson/Arrow retirés de `SliderManager.kt`). Baby-step TDD/BDD 3 niveaux : 16 unit (ConfigPathTest 4 + YamlMapperFactoryTest 5 + SlidesConfigLoaderTest 7) + 15 scénarios Cucumber (`16_config_decomposition.feature` + `ConfigDecompositionSteps.kt`, steps préfixés `config` pour éviter collisions). `./gradlew :slider:check` VERT 466 PASS / 0 FAIL / 1 SKIP (+11 vs 455 S-035). | ✅ 9/10
+| 035 | 2026-07-20 | cadrage+feat+ddd+tdd+bdd | Cadrage EPIC SLD-6 — Refactor DDD SliderManager decomposition (11 US, ~20 pts, cible thin orchestrator < 100 lignes). US-6.1 terminée : extraction `Scaffold` → `slider.scaffold` (3 fichiers : `ScaffoldResult.kt` 12l, `SlidesScaffolder.kt` 65l, `ScaffoldDefaults.kt` 92l). `SliderManager.Scaffold` réduit ~184→65 lignes (thin adapter). Imports morts nettoyés (`ZipInputStream`, `IOException`). Baby-step TDD/BDD 3 niveaux : 12 unit (SlidesScaffolderTest + ScaffoldDefaultsTest) + 15 scénarios Cucumber (`15_scaffold_decomposition.feature` + `ScaffoldDecompositionSteps.kt`). `./gradlew :slider:check` VERT 455 PASS / 0 FAIL / 1 SKIP (+27 vs 428 S-034). | ✅ 9/10
 | 033 | 2026-07-14 | audit | Audit i18n slider-gradle — confirmation support i18n entièrement couvert et fonctionnel. SLD-3 (config + UI + RTL, 7/7 US) et SLD-5 (pipeline deck one-to-many, 7/7 US) TERMINÉS. 10 langues, RTL ar/ur, fallback cascade 5 couches, pipeline `translateDeck`, validation Playwright LTR+RTL, dogfooding 3 decks × 10 langues. 3 domaines DDD i18n inventoriés : `slider.i18n` (5 fichiers), `slider.translate` (2 fichiers), `slider.translation` (8 fichiers). Dépendance N0 `i18n-contracts:0.0.2`. 8 features Cucumber i18n. Nettoyage 3 répertoires vides `com/cheroliv/slider/{ai,translate}/` (héritage renommage S-005). Zéro fichier de production modifié. `./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE). | ✅ 8/10
 | 032 | 2026-07-14 | ops+pub | Publication slider 0.0.10 sur Maven Central + mise à jour BOM (workspace-bom 0.0.9). Bump 0.0.9 → 0.0.10 sur 3 fichiers (build.gradle.kts + 2 catalogues). Bundle nmcp `ea117827-531a-4d3c-8a45-c58bc9d34eb1` AUTOMATIC, 3 artefacts signés (slider:0.0.10 + 2 plugin markers). BOM 0.0.9 publiée (bundle `79395cf5`), slider constraint 0.0.1 → 0.0.10 + correction module name (`slider-plugin` → `slider`). `./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE). | ✅ 9/10
 | 031 | 2026-07-14 | docs+i18n | README i18n (9 fichiers `README.plugin/README.*.md` — ar, bn, es, fr, hi, pt, ru, ur, zh) alignés sur le master EN (S-030). 6 édits par langue (55 total) : module layout (4 domaines DDD `repository/`, `capsule/`, `rtl/`, `translation/` + SliderManager desc + test `scenarios/slider/steps/`), test matrix `slider.steps.**`, EPIC table SLD-5 row + "session 030", contribution `FileOps` supprimé. FR switcher 10 langues. `./gradlew :slider:check` VERT — 425 PASS / 0 FAIL / 2 SKIP (UP-TO-DATE, zéro régression — les READMEs ne sont pas du code). | ✅ 8/10
@@ -78,6 +80,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | Publication Maven Central 0.0.11 | Bump 0.0.10→0.0.11 (Playwright @Disabled fix S-034), bundle b18431e5 AUTOMATIC, 3 artefacts signés. BOM 0.0.10 publiée (bundle 61519263, slider constraint 0.0.11). | ✅ 2026-07-15 | P2
 | SLD-4 | Refactor DDD slider.repository — extraction domaine depuis SliderManager.Git (SlideDeploymentRequest, GitCredentials, SlideDeployer, JGitSlidePusher, CommitResult, SlidePushResult) | ✅ TERMINÉ (S-025 + S-027, 8/8 US) | P1
 | SLD-5 | Deck Translation Pipeline — génère 10 decks localisés (one-to-many) depuis un deck source (deck-context.yml + .adoc). Domaine DDD `slider.translation` + tâche `translateDeck`. Aligné sur `LanguageCatalog.supportedCodes()` (en, zh, hi, es, fr, ar, bn, pt, ru, ur — top 10 langues les plus parlées). | ✅ TERMINÉ (S-029 + S-030, 7/7 US) | P1
+| SLD-6 | Refactor DDD SliderManager decomposition — `SliderManager.kt` (968 lignes, 9 nested objects) est un god-object. Extraction de chaque responsabilité dans un domaine dédié (`slider.scaffold`, `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`, `slider.revealjs`, `slider.playwright`) + consolidation `slider.repository`/`slider.capsule` existants. Cible : `SliderManager` thin orchestrator < 100 lignes. Fix deprecation `properties[...]` (lignes 82, 744). Baby-step TDD/BDD 3 niveaux, English only. | 🚧 EN COURS (S-036, US-6.0 + US-6.1 + US-6.2 ✅, US-6.3→6.10 ⏳) | P1
 |===
 
 '''
@@ -208,6 +211,100 @@ _Contrats de test_ :
 _Total_ : 7 US, ~16 pts (7/7 terminées, 16 pts livrés).
 _Pattern de référence_ : `slider.repository` (S-025/027) — value objects purs + adaptateur infrastructure + tâche thin.
 _Prérequis_ : SLD-3 terminé (✅), i18n-contracts:0.0.2 publié Central (✅).
+
+'''
+== EPIC SLD-6 — Detail US
+
+_Vision_ : `SliderManager.kt` est un god-object de 968 lignes contenant 9 nested
+objects (Configuration, Prerequisites, Scaffold, Repositories, Plugins,
+Dependencies, Extensions, Tasks, Git). Alors que les 6 domaines métier DDD
+(`slider.repository`, `slider.capsule`, `slider.rtl`, `slider.i18n`,
+`slider.translate`, `slider.translation`) ont déjà été extraits proprement, le
+`SliderManager` reste le point d'agglomération résiduel — il mélange Gradle
+plumbing, scaffold, configuration, enregistrement de tâches et adaptateur Git.
+
+L'EPIC SLD-6 applique le même pattern DDD déjà utilisé pour `repository`/`capsule`/
+`translation` au `SliderManager` lui-même : extraire chaque responsabilité dans un
+domaine dédié, baby-step TDD/BDD 3 niveaux (unit → cucumber), jusqu'à ce que
+`SliderManager` devienne un thin orchestrator (< 100 lignes) qui ne fait que
+déléguer.
+
+_Problématique technique_ :
+* 2 warnings deprecation `properties: (Mutable)Map<String, out Any?>` (lignes 82,
+  744) — API Gradle obsolète, à corriger dans US-6.2
+* `Tasks` object (~398 lignes) — 13 tâches dans un seul bloc, sans cohésion
+* `Scaffold` (~184 lignes) — 3 méthodes métier dans une nested class
+* `Git` (~57 lignes) — déjà thin adapter vers `slider.repository`, à consolider
+
+_Méthode_ : baby-step TDD/BDD — RED → GREEN → REFACTOR. Trois niveaux de tests
+par US : unit (logique pure, zéro Gradle) → functional (GradleTestKit) →
+cucumber (BDD end-to-end). English only dans le code, Gherkin, commentaires.
+
+_Contrats de test_ :
+* Unit : value objects purs et helpers, zéro dépendance Gradle. Test logique
+  scaffold/config/prerequisite isolée.
+* Functional : tâches Gradle exécutées via GradleRunner, asserts sur fichiers
+  générés et état du build.
+* Cucumber : `15_scaffold_decomposition.feature`, `16_config_decomposition.feature`,
+  etc. — scénarios BDD par domaine extrait.
+
+_Dépendances_ :
+* Aucune nouvelle dépendance externe — refactoring pur, signature API publique
+  (`SliderPlugin.apply`) préservée.
+* `slider.repository` (S-025/027), `slider.capsule` (S-020), `slider.translation`
+  (S-029/030) — domaines déjà extraits, références à nettoyer dans `SliderManager`.
+
+|===
+| US | Description | Statut | Estimation
+
+| SLD-6.0
+| Cadrage EPIC — vision, découpage US, dépendances. Mise à jour INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI.
+| ✅ TERMINÉ (S-035) | 1 pt
+
+| SLD-6.1
+| Extraction `Scaffold` → `slider.scaffold` (nouveau domaine). 3 méthodes : `scaffoldSlidesIfAbsent` (extraction `slides.zip` + `isSlidesConfigComplete`), `scaffoldSlidesContextIfAbsent` (default `SlidesConfiguration` → YAML), `scaffoldDeckContextIfAbsent` (default `DeckContext` → YAML). Value object `ScaffoldResult` sealed (Created/Skipped/Failed). `SliderManager.Scaffold` devient thin adapter. *Unit tests purs* (zéro Gradle, tmpdir) + *Cucumber `15_scaffold_decomposition.feature`* (scénarios : slides absentes → extracted, slides complètes → skipped, slides-context.yml absent → generated, deck-context absent → generated).
+| ✅ TERMINÉ (S-035, 12 unit + 15 cucumber) | 3 pts
+
+| SLD-6.2
+| Extraction `Configuration` → `slider.config` (nouveau domaine). `SlidesConfigLoader` (read YAML via `yamlMapper`), `ConfigPath` value object, `YamlMapperFactory` (factory ObjectMapper). Fix deprecation warnings `properties[...]` lignes 80 et 638 (API Gradle obsolète → `findProperty`). `SliderManager.Configuration` → thin adapter. *Unit tests purs* (16 unit) + *Cucumber `16_config_decomposition.feature`* (15 scénarios).
+| ✅ TERMINÉ (S-036, 16 unit + 15 cucumber) | 3 pts
+
+| SLD-6.3
+| Extraction `Prerequisites` → `slider.prerequisite`. `JavaVersionGuard` (value object + `requireJava23()`). Extraction de la logique pure (parse version + guard) hors du contexte Gradle. *Unit tests purs* + *Cucumber `17_prerequisite_decomposition.feature`*.
+| ⏳ À FAIRE | 1 pt
+
+| SLD-6.4
+| Extraction `Extensions` → `slider.extension`. `SliderExtensionRegistrar` (crée DSL `slider {}` + pin RevealJS 5.2.1). `SliderExtension` déménage dans le domaine. *Unit tests purs* + *Cucumber `18_extension_decomposition.feature`*.
+| ⏳ À FAIRE | 2 pts
+
+| SLD-6.5
+| Extraction `Repositories` + `Plugins` + `Dependencies` → `slider.wiring` (Gradle plumbing groupé). `GradleWiring` facade (configureRepositories, applyPlugins, configureDependencies). *Functional tests GradleTestKit* (vérifie resolution repo + plugin apply + gem dep).
+| ⏳ À FAIRE | 2 pts
+
+| SLD-6.6
+| Extraction `registerAsciidoctorRevealJsTask` + `registerCleanSlidesBuildTask` + `registerDashboardTask` → `slider.revealjs` (cœur métier). `RevealJsTaskRegistrar` (3 tâches Reveal.js). `registerAsciidoctorTask` délégué. *Functional tests GradleTestKit*.
+| ⏳ À FAIRE | 3 pts
+
+| SLD-6.7
+| Extraction `registerServeSlidesTask` + `registerVisualTestTask` + `registerInstallPlaywrightTask` → `slider.playwright`. `PlaywrightTaskRegistrar` (3 tâches Playwright/serve). Cohérent avec `PlaywrightFixtureSupport.kt` (S-034). *Functional tests GradleTestKit*.
+| ⏳ À FAIRE | 2 pts
+
+| SLD-6.8
+| Extraction `registerAsciidocCapsuleTask` → `slider.capsule.CapsuleTaskRegistrar` (cohérent domaine `slider.capsule` existant S-020). `SliderManager.Tasks.registerAsciidocCapsuleTask` (~30 lignes) délègue au registrar. *Functional tests GradleTestKit* + *Cucumber `19_capsule_task_decomposition.feature`*.
+| ⏳ À FAIRE | 1 pt
+
+| SLD-6.9
+| Consolidation `registerPublishSlidesTask` + `Git` object → `slider.repository.PublishTaskRegistrar` + `slider.repository.SlidePublisher`. `Git` object (~57 lignes) déjà thin adapter — déménage dans le domaine `slider.repository`. Fix deprecation `properties[CONFIG_PATH_KEY]` ligne 744 (déjà traité US-6.2 pour 82, ici pour 744). *Functional tests GradleTestKit* + *Cucumber `20_publish_task_decomposition.feature`*.
+| ⏳ À FAIRE | 2 pts
+
+| SLD-6.10
+| `SliderManager` devient thin orchestrator (< 100 lignes). `SliderPlugin.apply()` délègue à `slider.scaffold.ScaffoldService`, `slider.config.SlidesConfigLoader`, `slider.prerequisite.JavaVersionGuard`, `slider.extension.SliderExtensionRegistrar`, `slider.wiring.GradleWiring`, `slider.revealjs.RevealJsTaskRegistrar`, `slider.playwright.PlaywrightTaskRegistrar`, `slider.capsule.CapsuleTaskRegistrar`, `slider.repository.PublishTaskRegistrar`. Suppression `SliderManager` object (remplacé par `SliderPlugin` direct). Vérification : `./gradlew :slider:check` VERT, zéro régression, 428 PASS maintenus.
+| ⏳ À FAIRE | 2 pts
+|===
+
+_Total_ : 11 US, ~20 pts (3/11 terminées — SLD-6.0 cadrage + SLD-6.1 scaffold + SLD-6.2 config).
+_Pattern de référence_ : `slider.repository` (S-025/027) — value objects purs + adaptateur infrastructure + tâche thin.
+_Prérequis_ : SLD-0→5 terminés (✅), CNV-6/7/8 terminés (✅), build vert 428 PASS (✅).
 
 '''
 == Fichiers Associes

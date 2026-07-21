@@ -1,0 +1,114 @@
+= Session 035 — slider-gradle — Cadrage SLD-6 + US-6.1 Scaffold decomposition
+:session: 035
+:date: 2026-07-20
+:epic: SLD-6
+:us: SLD-6.0, SLD-6.1
+
+== Objectif
+
+Cadrer l'EPIC SLD-6 — Refactor DDD SliderManager decomposition — puis livrer
+la première US (SLD-6.1 : extraction du `Scaffold` object dans le domaine
+`slider.scaffold`).
+
+== Contexte
+
+`SliderManager.kt` est un god-object de 968 lignes contenant 9 nested objects
+(Configuration, Prerequisites, Scaffold, Repositories, Plugins, Dependencies,
+Extensions, Tasks, Git). Alors que les 6 domaines métier DDD ont déjà été
+extraits proprement (`slider.repository`, `slider.capsule`, `slider.rtl`,
+`slider.i18n`, `slider.translate`, `slider.translation`), le `SliderManager`
+reste le point d'agglomération résiduel — il mélange Gradle plumbing, scaffold,
+configuration, enregistrement de tâches et adaptateur Git.
+
+SLD-6 applique le même pattern DDD déjà utilisé pour `repository`/`capsule`/
+`translation` au `SliderManager` lui-même : extraire chaque responsabilité dans
+un domaine dédié, baby-step TDD/BDD 3 niveaux, jusqu'à ce que `SliderManager`
+devienne un thin orchestrator (< 100 lignes).
+
+== Livrables SLD-6.0 (cadrage)
+
+* `slider-plugin/.agents/INDEX.adoc` — roadmap SLD-6 (11 US, ~20 pts), US-6.0 →
+  US-6.10 détaillées, statut "🚧 EN COURS"
+* `BACKLOG.adoc` — section EPIC SLD-6 complète
+* `PROMPT_REPRISE.adoc` — reprise session 036 (US-6.1 à terminer, puis enchaîner
+  US-6.2→6.10)
+* Table AGENTS.adoc racine MIAMI non modifiée (sera fait au prochain passage)
+
+== Livrables SLD-6.1 (Scaffold → slider.scaffold)
+
+* `slider/src/main/kotlin/slider/scaffold/ScaffoldResult.kt` (12 lignes) —
+  sealed class `ScaffoldResult` (Created/Skipped/Failed)
+* `slider/src/main/kotlin/slider/scaffold/SlidesScaffolder.kt` (65 lignes) —
+  domaine pur : `isSlidesConfigComplete(File)`, `extractSlidesZip(InputStream, File)`
+* `slider/src/main/kotlin/slider/scaffold/ScaffoldDefaults.kt` (92 lignes) —
+  factories pures : `defaultSlidesConfiguration()`, `defaultDeckContext()`
+* `SliderManager.Scaffold` réécrit en thin adapter (~65 lignes vs ~184 avant,
+  -65%) — délègue à `SlidesScaffolder` + `ScaffoldDefaults`
+* Imports morts nettoyés : `ZipInputStream`, `IOException` retirés de
+  `SliderManager.kt`
+
+== Méthode — baby-step TDD/BDD 3 niveaux
+
+* **RED** : tests unitaires `SlidesScaffolderTest` (10 tests) +
+  `ScaffoldDefaultsTest` (3 tests) écrits avant le code production. Compilation
+  échoue (classes manquantes).
+* **GREEN** : création du domaine `slider.scaffold` (3 fichiers). Tous les
+  tests unitaires PASS.
+* **REFACTOR** : `SliderManager.Scaffold` réécrit en thin adapter qui délègue
+  au domaine. Zéro régression sur les tests existants.
+* **BDD** : `15_scaffold_decomposition.feature` (15 scénarios) +
+  `ScaffoldDecompositionSteps.kt` — couvre `isSlidesConfigComplete` (6
+  scénarios), `extractSlidesZip` (3 scénarios), `ScaffoldDefaults` (6
+  scénarios).
+
+== Tests
+
+`./gradlew :slider:check` VERT
+
+|===
+| Niveau | Avant (S-034) | Après (S-035) | Delta
+| Unit     | 295 | 307 | +12
+| Functional | 15  | 15  | 0
+| Cucumber | 118 | 133 | +15
+| *Total*  | *428* | *455* | *+27*
+|===
+
+Zéro FAIL. 1 SKIP préexistant (JRuby gem isolé, non lié).
+
+== Aucun warning deprecation corrigé
+
+Les 2 warnings `properties: (Mutable)Map<String, out Any?>` (lignes 80 et 638
+après refactor, anciennement 82 et 744) persistent — délibérément laissés pour
+l'US-6.2 (Configuration → `slider.config`), qui les corrigera en migrant
+l'accès `properties[CONFIG_PATH_KEY]` vers `providers`.
+
+== État git
+
+Aucun commit (règle 1 AGENT.adoc — permission explicite requise).
+
+```
+modified:   slider-plugin/.agents/INDEX.adoc
+modified:   BACKLOG.adoc
+modified:   slider-plugin/PROMPT_REPRISE.adoc
+new file:   slider-plugin/slider/src/main/kotlin/slider/scaffold/ScaffoldResult.kt
+new file:   slider-plugin/slider/src/main/kotlin/slider/scaffold/SlidesScaffolder.kt
+new file:   slider-plugin/slider/src/main/kotlin/slider/scaffold/ScaffoldDefaults.kt
+new file:   slider-plugin/slider/src/test/kotlin/slider/scaffold/SlidesScaffolderTest.kt
+new file:   slider-plugin/slider/src/test/kotlin/slider/scaffold/ScaffoldDefaultsTest.kt
+new file:   slider-plugin/slider/src/test/features/15_scaffold_decomposition.feature
+new file:   slider-plugin/slider/src/test/scenarios/slider/steps/ScaffoldDecompositionSteps.kt
+modified:   slider-plugin/slider/src/main/kotlin/slider/SliderManager.kt
+```
+
+== Prochaine session (036)
+
+*Objectif* : US-6.2 — extraction `Configuration` → `slider.config` + fix
+deprecation `properties[...]` (lignes 80 et 638). Puis enchaîner SLD-6.3
+(Prerequisites → `slider.prerequisite`).
+
+== Score auto-évaluation
+
+✅ 9/10 — cadrage solide basé sur lecture complète du code, US-6.1 livrée
+baby-step TDD/BDD 3 niveaux, build vert +27 tests, thin adapter confirmé.
+Retrait d'1 point pour les warnings deprecation restants (US-6.2 sera le vrai
+test du fix).
