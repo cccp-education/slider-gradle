@@ -1,5 +1,45 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 039_ : SLD-6.5 Wiring + SLD-6.6 Reveal.js + SLD-6.7 Playwright.
++123 tests (407 unit + 217 cucumber + 17 functional = 633 total, 0 FAIL, 1 SKIP).
+3 domaines DDD créés, 6 nouveaux fichiers source.
+
+Nouveaux tests session 039 :
+
+. `WiringSpecTest.kt` (28 unit) — GroupRouting None/IncludeGroup/ExcludeGroup
+  (keep group, reject blank), RepositorySpec (Maven url+routing, MavenCentral
+  null url, Ivy pattern+metadata, reject blank url, reject non-null
+  MavenCentral url, reject empty metadata), PluginSpec (keep id, reject
+  blank), GemDependency (keep coords, reject blank group/name/version/classifier,
+  toCoordinates), WiringSpec.DEFAULT (6 repos, 3 plugins, 1 gem, rubygems
+  include+exclude, plugins.gradle.org first, MavenCentral exclude rubygems,
+  Ivy rubygems last).
+. `GradleWiringFunctionalTest.kt` (2 functional GradleTestKit) — 3 plugins
+  applied (asciidoctorRevealJs registered), asciidoctorGems config resolves
+  gem (SUCCESS + output contains `asciidoctor-revealjs`).
+. `19_wiring_decomposition.feature` (17 scénarios cucumber) — GroupRouting,
+  RepositorySpec, PluginSpec, GemDependency, WiringSpec.DEFAULT.
+. `RevealJsDomainTest.kt` (24 unit) — RevealJsAttributesSpec (14 attrs,
+  coderay, talaria.css, black theme, history+slidenumber, withOverrides,
+  reject whitespace-only), RevealJsOutputDir (build_dir/docs/asciidocRevealJs,
+  reject blank), SlideSourceDir (project/slides/misc, reject blank),
+  SlideMetadata (keep name+filename, reject blank), SlideMetadataScanner
+  (sorted by name, missing dir → empty, no adoc → empty), DashboardJsonSerializer
+  (empty array, single, multiple, escape quotes), CleanBuildTarget+CleanReport
+  (deletions count json+images+html, missing dir → no deletions, preserve
+  CSS/data non-html).
+. `20_revealjs_decomposition.feature` (17 scénarios cucumber) — RevealJsAttributesSpec,
+  RevealJsOutputDir, SlideSourceDir, SlideMetadata, SlideMetadataScanner,
+  DashboardJsonSerializer, CleanBuildTarget.
+. `PlaywrightDomainTest.kt` (16 unit) — PlaywrightDir (project/src/test/playwright,
+  configPath, reject blank), ServeCommand (packageName+servedDir, reject blank,
+  npxArgs), InstallCommand (DEFAULT chromium, custom browsers, reject blank
+  binary, reject empty browsers, npxArgs), VisualTestCommand (binary+configPath,
+  reject blank, npxArgs `test --config`), PlaywrightTaskNames (constantes
+  stables serveSlides/visualTest/installPlaywright).
+. `21_playwright_decomposition.feature` (19 scénarios cucumber) — PlaywrightDir,
+  ServeCommand, InstallCommand, VisualTestCommand, PlaywrightTaskNames.
+
 _Statut session 038_ : SLD-6.4 Extensions → slider.extension. +18 tests
 (339 unit + 162 cucumber + 15 functional = 516 total, 0 FAIL, 1 SKIP).
 

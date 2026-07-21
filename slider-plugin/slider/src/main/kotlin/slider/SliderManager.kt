@@ -4,40 +4,23 @@ import slider.SliderManager.Configuration.CONFIG_PATH_KEY
 import slider.SliderManager.Configuration.localConf
 import slider.SliderManager.Configuration.yamlMapper
 import slider.SliderManager.Git.pushSlides
-import slider.SliderManager.Tasks.registerAsciidoctorRevealJsTask
-import slider.SliderManager.Tasks.registerCleanSlidesBuildTask
 import slider.SliderManager.Tasks.registerTasks
-import slider.Slides.RevealJsSlides
-import slider.Slides.RevealJsSlides.BUILD_GRADLE_KEY
-import slider.Slides.RevealJsSlides.CODERAY_CSS_KEY
-import slider.Slides.RevealJsSlides.ENDPOINT_URL_KEY
 import slider.Slides.RevealJsSlides.GROUP_TASK_SLIDER
-import slider.Slides.RevealJsSlides.SOURCE_HIGHLIGHTER_KEY
 import slider.Slides.RevealJsSlides.TASK_ASCIIDOCTOR_REVEALJS
-import slider.Slides.RevealJsSlides.TASK_CLEAN_SLIDES_BUILD
-import slider.capsule.AsciidocSpeakerNoteParser
-import slider.capsule.CapsuleScriptWriter
-import slider.Slides.RevealJsSlides.TASK_DASHBOARD_SLIDES_BUILD
 import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
-import slider.Slides.RevealJsSlides.TASK_SERVE_SLIDES
-import slider.Slides.RevealJsSlides.TASK_VISUAL_TEST
-import slider.Slides.RevealJsSlides.TASK_INSTALL_PLAYWRIGHT
 import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
 import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
 import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
+import slider.capsule.AsciidocSpeakerNoteParser
+import slider.capsule.CapsuleScriptWriter
 import slider.config.SlidesConfigLoader
 import slider.config.YamlMapperFactory
 import slider.translation.registerTranslateDeckTask
-import slider.Slides.Serve.SERVE_DEP
 import slider.Slides.Slide.DEFAULT_SLIDES_FOLDER
-import slider.Slides.Slide.IMAGES
 import slider.Slides.Slide.SLIDES_CONTEXT_YML
 import slider.Slides.Slide.SLIDES_FOLDER
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.gradle.node.npm.task.NpxTask
-import org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.OUT_OF_PROCESS
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
-import org.asciidoctor.gradle.jvm.slides.AsciidoctorJRevealJSTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -45,7 +28,6 @@ import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.register
 import java.io.File
-import java.io.File.separator
 
 /**
  * Root manager object for the Slider plugin.
@@ -237,9 +219,11 @@ object SliderManager {
     /**
      * Configures all Maven and Ivy repositories required by the plugin.
      *
-     * Repository routing strategy:
-     * - rubygems group  → gem-capable mirrors only (xillio, jcenter-backup, rubygems Ivy)
-     * - everything else → mavenCentral, plugins.gradle.org, repo.gradle.org
+     * Thin Gradle adapter — pure repository declarations live in the
+     * `slider.wiring` domain: [slider.wiring.GradleWiring] (driven by
+     * [slider.wiring.WiringSpec.DEFAULT]). Repository routing strategy
+     * (rubygems include/exclude per mirror) is encoded as
+     * [slider.wiring.GroupRouting] in the spec.
      */
     object Repositories {
 
@@ -251,36 +235,14 @@ object SliderManager {
          * - Standard JVM artifacts (mavenCentral)
          *
          * The rubygems group is explicitly included/excluded per repository
-         * to prevent resolution conflicts between gem and JVM artifact mirrors.
+         * via [slider.wiring.GroupRouting] to prevent resolution conflicts
+         * between gem and JVM artifact mirrors.
          */
-        internal fun Project.configureRepositories() {
-            // Gradle plugin artifacts
-            repositories.maven { it.url = uri("https://plugins.gradle.org/m2/") }
-            // grolifant — transitive dep of jruby-gradle-core, only available here
-            repositories.maven {
-                it.url = uri("https://repo.gradle.org/gradle/libs-releases/")
-                it.content { c -> c.excludeGroup("rubygems") }
-            }
-            // rubygems fallback mirror
-            repositories.maven {
-                it.url = uri("https://repo.gradle.org/ui/native/jcenter-backup/")
-                it.content { c -> c.includeGroup("rubygems") }
-            }
-            // rubygems primary mirror
-            repositories.maven {
-                it.url = uri("https://maven.xillio.com/artifactory/libs-release/")
-                it.content { c -> c.includeGroup("rubygems") }
-            }
-            // standard JVM artifacts — rubygems excluded to avoid interception
-            repositories.mavenCentral { it.content { c -> c.excludeGroup("rubygems") } }
-            // actual .gem file resolution via Ivy artifact layout
-            repositories.ivy {
-                it.url = uri("https://rubygems.org/gems/")
-                it.patternLayout { layout -> layout.artifact("[module]-[revision].gem") }
-                it.metadataSources { s -> s.artifact() }
-                it.content { c -> c.includeGroup("rubygems") }
-            }
-        }
+        internal fun Project.configureRepositories() =
+            slider.wiring.GradleWiring.configureRepositories(
+                project = this,
+                repositories = slider.wiring.WiringSpec.DEFAULT.repositories,
+            )
     }
 
 // =========================================================================
@@ -290,8 +252,10 @@ object SliderManager {
     /**
      * Applies the external Gradle plugins required for slide generation.
      *
-     * The `.classic` suffix is mandatory since asciidoctor-gradle 5.0.0-alpha.1
-     * renamed the plugin IDs as part of a breaking API change.
+     * Thin Gradle adapter — plugin ids live in the `slider.wiring` domain
+     * ([slider.wiring.WiringSpec.DEFAULT.plugins]). The `.classic` suffix is
+     * mandatory since asciidoctor-gradle 5.0.0-alpha.1 renamed the plugin IDs
+     * as part of a breaking API change.
      */
     object Plugins {
 
@@ -301,11 +265,11 @@ object SliderManager {
          * - `org.asciidoctor.jvm.gems.classic`   → JRuby gem lifecycle (5.x API)
          * - `org.asciidoctor.jvm.revealjs.classic` → AsciidoctorJRevealJSTask (5.x API)
          */
-        internal fun Project.applyPlugins() {
-            plugins.apply("com.github.node-gradle.node")
-            plugins.apply("org.asciidoctor.jvm.gems.classic")
-            plugins.apply("org.asciidoctor.jvm.revealjs.classic")
-        }
+        internal fun Project.applyPlugins() =
+            slider.wiring.GradleWiring.applyPlugins(
+                project = this,
+                plugins = slider.wiring.WiringSpec.DEFAULT.plugins,
+            )
     }
 
 // =========================================================================
@@ -314,6 +278,9 @@ object SliderManager {
 
     /**
      * Declares the Ruby gem dependencies required for Reveal.js slide generation.
+     *
+     * Thin Gradle adapter — gem coordinates live in the `slider.wiring`
+     * domain ([slider.wiring.WiringSpec.DEFAULT.gems]).
      */
     object Dependencies {
 
@@ -321,12 +288,11 @@ object SliderManager {
          * Adds the asciidoctor-revealjs gem to the asciidoctorGems configuration.
          * The `@gem` classifier is mandatory for Ivy-based gem resolution.
          */
-        internal fun Project.configureDependencies() {
-            dependencies.add(
-                "asciidoctorGems",
-                "rubygems:asciidoctor-revealjs:5.2.0@gem"
+        internal fun Project.configureDependencies() =
+            slider.wiring.GradleWiring.configureDependencies(
+                project = this,
+                gems = slider.wiring.WiringSpec.DEFAULT.gems,
             )
-        }
     }
 
 // =========================================================================
@@ -376,124 +342,19 @@ object SliderManager {
          * is resolvable when [registerAsciidoctorRevealJsTask] calls dependsOn.
          */
         internal fun Project.registerTasks() {
-            registerCleanSlidesBuildTask()
-            registerAsciidoctorRevealJsTask()
+            // Reveal.js tasks (cleanBuild + asciidoctorRevealJs + generateDashboard)
+            // are registered by the slider.revealjs domain adapter.
+            slider.revealjs.RevealJsTaskRegistrar.register(this)
             registerAsciidoctorTask()
-            registerServeSlidesTask()
-            registerDashboardTask()
+            // Playwright tasks (serveSlides + installPlaywright + visualTest)
+            // are registered by the slider.playwright domain adapter.
+            slider.playwright.PlaywrightTaskRegistrar.register(this)
             registerPublishSlidesTask()
             registerAsciidocCapsuleTask()
             registerReportTestsTask()
             registerReportFunctionalTestsTask()
-            registerVisualTestTask()
-            registerInstallPlaywrightTask()
             registerGenerateRevealUiMessagesTask()
             registerTranslateDeckTask()
-        }
-
-        /**
-         * Deletes previously generated presentation artifacts from the build output:
-         * - slides.json
-         * - images/ directory
-         * - all .html files
-         *
-         * Always runs before asciidoctorRevealJs to guarantee a clean output.
-         */
-        private fun Project.registerCleanSlidesBuildTask() {
-            tasks.register<DefaultTask>(TASK_CLEAN_SLIDES_BUILD) {
-                group = "build"
-                description = "Delete generated presentation artifacts from the build directory."
-                doFirst {
-                    layout.buildDirectory.get().asFile
-                        .resolve("docs")
-                        .resolve("asciidocRevealJs")
-                        .run {
-                            resolve("slides.json").run { if (exists()) delete() }
-                            resolve("images").deleteRecursively()
-                            listFiles()
-                                ?.filter { file -> file.isFile && file.name.endsWith(".html") }
-                                ?.forEach { file -> file.delete() }
-                        }
-                }
-            }
-        }
-
-        /**
-         * Core task — compiles AsciiDoc sources into a Reveal.js HTML presentation.
-         *
-         * Key decisions:
-         * - OUT_OF_PROCESS: JAVA_EXEC was removed in asciidoctor-gradle 5.0.0-alpha.1
-         *   due to Gradle closure serialisation changes. OUT_OF_PROCESS is the replacement.
-         * - Source dir: resolved from slides/misc/ inside the consumer project.
-         * - Images: copied alongside generated HTML under an images/ subdirectory.
-         * - Attributes: configure syntax highlighting, Reveal.js theme, transitions,
-         *   history, and slide numbering.
-         */
-        @Suppress("MISSING_DEPENDENCY_SUPERCLASS_IN_TYPE_ARGUMENT")
-        private fun Project.registerAsciidoctorRevealJsTask() {
-            tasks.getByName<AsciidoctorJRevealJSTask>(TASK_ASCIIDOCTOR_REVEALJS) {
-                group = "generate"
-                description = "Compile AsciiDoc sources into a Reveal.js HTML presentation."
-                setExecutionMode(OUT_OF_PROCESS)
-                dependsOn(TASK_CLEAN_SLIDES_BUILD)
-                finalizedBy(TASK_DASHBOARD_SLIDES_BUILD)
-                // RTL — driven by -Planguage=<code> when the resolved
-                // language is a RTL one (Arabic, Urdu). Defaults to LTR.
-                val resolvedLanguage = project.findProperty("language") as? String
-                    ?: ""
-                if (slider.i18n.RevealRtlResolver.resolveRtl(resolvedLanguage)) {
-                    revealjsOptions.setRightToLeft(true)
-                }
-                doFirst {
-                    val cssOutput = layout.buildDirectory.get().asFile
-                        .resolve("docs")
-                        .resolve("asciidocRevealJs")
-                    cssOutput.mkdirs()
-                    javaClass.getResourceAsStream("/revealjs/theme/talaria.css")?.use { input ->
-                        cssOutput.resolve("talaria.css").outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                }
-                revealjsOptions {
-                    // Resolve and log the AsciiDoc source directory
-                    layout.projectDirectory.asFile
-                        .resolve(SLIDES_FOLDER)
-                        .resolve(DEFAULT_SLIDES_FOLDER)
-                        .apply { println("Slide source absolute path: $absolutePath") }
-                        .let(::setSourceDir)
-                    // Output path mirrors the source file location
-                    baseDirFollowsSourceFile()
-                    // Copy images and theme CSS alongside the generated HTML
-                    resources { spec ->
-                        spec.from(sourceDir.resolve(IMAGES)) { copy ->
-                            copy.include("**")
-                            copy.into(IMAGES)
-                        }
-                    }
-                    // Asciidoctor + Reveal.js rendering attributes
-                    attributes(
-                        mapOf(
-                            BUILD_GRADLE_KEY to layout.projectDirectory.asFile.resolve("build.gradle.kts"),
-                            ENDPOINT_URL_KEY to "https://github.com/pages-content/slides/",
-                            SOURCE_HIGHLIGHTER_KEY to "coderay",
-                            CODERAY_CSS_KEY to "style",
-                            RevealJsSlides.IMAGEDIR_KEY to ".${separator}images",
-                            RevealJsSlides.TOC_KEY to "left",
-                            RevealJsSlides.ICONS_KEY to "font",
-                            RevealJsSlides.SETANCHORS_KEY to "",
-                            RevealJsSlides.IDPREFIX_KEY to "slide-",
-                            RevealJsSlides.IDSEPARATOR_KEY to "-",
-                            RevealJsSlides.DOCINFO_KEY to "shared",
-                            RevealJsSlides.REVEALJS_THEME_KEY to "black",
-                            RevealJsSlides.REVEALJS_CUSTOMCSS_KEY to "talaria.css",
-                            RevealJsSlides.REVEALJS_TRANSITION_KEY to "slide",
-                            RevealJsSlides.REVEALJS_HISTORY_KEY to "true",
-                            RevealJsSlides.REVEALJS_SLIDENUMBER_KEY to "true"
-                        )
-                    )
-                }
-            }
         }
 
         /**
@@ -505,99 +366,6 @@ object SliderManager {
             tasks.register<AsciidoctorTask>("asciidoctor") {
                 group = "generate"
                 dependsOn(TASK_ASCIIDOCTOR_REVEALJS)
-            }
-        }
-
-        /**
-         * Serves the generated presentation locally via the `serve` npm package
-         * executed through npx. No browser is launched automatically.
-         * Depends on asciidoctorRevealJs to ensure slides are built first.
-         */
-        private fun Project.registerServeSlidesTask() {
-            tasks.register<NpxTask>(TASK_SERVE_SLIDES) {
-                group = "info"
-                description = "Serve slides using the serve package executed via npx."
-                dependsOn(TASK_ASCIIDOCTOR_REVEALJS)
-                command.set(SERVE_DEP)
-                layout.buildDirectory.get().asFile
-                    .resolve("docs")
-                    .resolve("asciidocRevealJs")
-                    .absolutePath
-                    .run(::listOf)
-                    .run(args::set)
-                workingDir.set(layout.projectDirectory.asFile)
-                doFirst { println("Serving slides via npx serve...") }
-            }
-        }
-
-        /**
-         * Generates the presentation dashboard in the build output directory:
-         * - slides.json  → metadata list of all available presentations
-         * - index.html   → copied from slides/misc/index.html
-         *
-         * Scans slides/misc/ for .adoc files to populate slides.json.
-         * Finalises asciidoctorRevealJs so it always runs after generation.
-         */
-        private fun Project.registerDashboardTask() {
-            tasks.register<DefaultTask>(TASK_DASHBOARD_SLIDES_BUILD) {
-                group = "generate"
-                description = "Generate index.html and slides.json listing all Reveal.js presentations."
-                doLast {
-                    val slidesDir = layout.projectDirectory.asFile
-                        .resolve(SLIDES_FOLDER)
-                        .resolve(DEFAULT_SLIDES_FOLDER)
-                        .apply {
-                            // Log the source index.html content for traceability
-                            listFiles()?.find { it.name == "index.html" }
-                                ?.readText()?.trimIndent()
-                                ?.run { "index.html:\n$this" }
-                                ?.run(logger::info)
-                        }
-
-                    val outputDir = layout.buildDirectory.get().asFile
-                        .resolve("docs")
-                        .resolve("asciidocRevealJs")
-                        .also { logger.info("output dir path: $it") }
-
-                    val slidesJsonFile = outputDir.resolve("slides.json")
-
-                    // Ensure the output directory exists before writing
-                    outputDir.mkdirs()
-
-                    // Scan .adoc files and build the slides metadata list
-                    val adocFiles = slidesDir.listFiles { file ->
-                        file.isFile && file.extension == "adoc"
-                    }?.map { file ->
-                        mapOf(
-                            "name" to file.nameWithoutExtension,
-                            "filename" to "${file.nameWithoutExtension}.html"
-                        )
-                    }.also { println(it) } ?: emptyList()
-
-                    // Serialise slides metadata to JSON manually (no extra dependency)
-                    buildString {
-                        appendLine("[")
-                        adocFiles.forEachIndexed { index, slide ->
-                            append("  {")
-                            append("\"name\": \"${slide["name"]}\", ")
-                            append("\"filename\": \"${slide["filename"]}\"")
-                            append("}")
-                            if (index < adocFiles.size - 1) append(",")
-                            appendLine()
-                        }
-                        appendLine("]")
-                    }.run(slidesJsonFile::writeText)
-
-                    // Copy index.html from source to build output
-                    val indexFile = slidesDir.resolve("index.html")
-                    indexFile.copyTo(outputDir.resolve("index.html"), overwrite = true)
-
-                    println("✅ Dashboard generated successfully!")
-                    println("📁 Generated files:")
-                    println("   - ${indexFile.absolutePath}")
-                    println("   - ${slidesJsonFile.absolutePath}")
-                    println("📊 ${adocFiles.size} presentation(s) found")
-                }
             }
         }
 
@@ -711,33 +479,6 @@ object SliderManager {
                         .resolve("index.html")
                         .absolutePath
                 )
-            }
-        }
-
-        private fun Project.playwrightDir(): String =
-            projectDir.resolve("src/test/playwright").absolutePath
-
-        private fun Project.registerInstallPlaywrightTask() {
-            tasks.register<NpxTask>(TASK_INSTALL_PLAYWRIGHT) {
-                group = "setup"
-                description = "Install Playwright browsers (chromium) for visual testing."
-                command.set("playwright")
-                args.set(listOf("install", "chromium"))
-                workingDir.set(file(playwrightDir()))
-            }
-        }
-
-        private fun Project.registerVisualTestTask() {
-            tasks.register<NpxTask>(TASK_VISUAL_TEST) {
-                group = GROUP_TASK_SLIDER
-                description = "Run Playwright visual snapshot tests on generated slides."
-                dependsOn(TASK_ASCIIDOCTOR_REVEALJS)
-                command.set("playwright")
-                args.set(listOf(
-                    "test",
-                    "--config", "${playwrightDir()}/playwright.config.ts"
-                ))
-                workingDir.set(file(playwrightDir()))
             }
         }
 

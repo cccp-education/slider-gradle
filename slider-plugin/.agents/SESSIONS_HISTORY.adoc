@@ -2,6 +2,67 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 039 (2026-07-21) — SLD-6.5 Wiring + SLD-6.6 Reveal.js + SLD-6.7 Playwright
+
+Trois US de l'EPIC SLD-6 livrées en une session.
+
+SLD-6.5 — Domaine DDD `slider.wiring` créé (2 fichiers, ~210 lignes) :
+`WiringSpec.kt` (value objects purs : `GroupRouting` sealed None/IncludeGroup/
+ExcludeGroup, `IvyMetadataSource` enum, `RepositoryKind` sealed MAVEN/
+MAVEN_CENTRAL/IVY data class, `RepositorySpec`, `PluginSpec`, `GemDependency`
+`toCoordinates()`, `WiringSpec` agrégateur avec `WiringSpec.DEFAULT` 6 repos +
+3 plugins + 1 gem, validation `require` sur tous les champs) +
+`GradleWiring.kt` (thin Gradle adapter `configure(project, spec)`,
+`configureRepositories`, `applyPlugins`, `configureDependencies`,
+`applyRouting` générique sur `ArtifactRepository` Maven+Ivy). 3 nested objects
+`SliderManager.Repositories`/`Plugins`/`Dependencies` → thin adapters 1-ligne
+déléguant à `GradleWiring.configure*(project, WiringSpec.DEFAULT.*)`. Routing
+rubygems (include/exclude par mirror) encodé dans `GroupRouting` au lieu d'inline
+closures Gradle. 28 unit + 2 functional (GradleTestKit : 3 plugins applied +
+gem resolved) + 17 scénarios Cucumber (`19_wiring_decomposition.feature`).
+
+SLD-6.6 — Domaine DDD `slider.revealjs` créé (2 fichiers, ~240 lignes) :
+`RevealJsDomain.kt` (value objects purs : `RevealJsAttributeKeys` 16 clés,
+`RevealJsAttributesSpec` 14 attributs par défaut + `withOverrides` pour
+`build-gradle`+`endpoint-url` dynamiques, `RevealJsOutputDir`
+`<buildDir>/docs/asciidocRevealJs`, `SlideSourceDir` `<projectDir>/slides/misc`,
+`SlideMetadata` name+filename, `SlideMetadataScanner` scan `.adoc` trié,
+`DashboardJsonSerializer` rendu JSON `slides.json` escape quotes,
+`CleanBuildTarget`+`CleanReport` supprime slides.json+images/+.html préserve
+CSS/data) + `RevealJsTaskRegistrar.kt` (thin Gradle adapter `register(project)`
+ enregistre `cleanBuild`+`asciidoctorRevealJs`+`generateDashboard` en ordre
+de dépendance, `const val` task names possédés par le domaine). 3 méthodes
+privées supprimées de `SliderManager.Tasks` (cleanSlidesBuild 18l,
+asciidoctorRevealJs 65l, dashboard 60l). Imports morts nettoyés
+(`AsciidoctorJRevealJSTask`, `OUT_OF_PROCESS`, `BUILD_GRADLE_KEY`,
+`ENDPOINT_URL_KEY`, `SOURCE_HIGHLIGHTER_KEY`, `CODERAY_CSS_KEY`,
+`TASK_CLEAN_SLIDES_BUILD`, `TASK_DASHBOARD_SLIDES_BUILD`, `IMAGES`,
+`separator`). 24 unit + 17 scénarios Cucumber
+(`20_revealjs_decomposition.feature`). Steps utilisent `Files.createTempDirectory`
+(pas `@TempDir` JUnit, non injecté par Cucumber).
+
+SLD-6.7 — Domaine DDD `slider.playwright` créé (2 fichiers, ~170 lignes) :
+`PlaywrightDomain.kt` (value objects purs : `PlaywrightDir`
+`<projectDir>/src/test/playwright` + `configPath()` → `playwright.config.ts`,
+`ServeCommand` packageName+servedDir+`npxArgs()`, `InstallCommand`
+binary+browsers `DEFAULT` chromium+`npxArgs()`, `VisualTestCommand`
+binary+configPath+`npxArgs()` `test --config`, `PlaywrightTaskNames`
+`serveSlides`/`visualTest`/`installPlaywright`) + `PlaywrightTaskRegistrar.kt`
+(thin Gradle adapter `register(project)` enregistre 3 tâches, délègue à
+`RevealJsOutputDir` partagé avec slider.revealjs +
+`RevealJsTaskRegistrar.TASK_ASCIIDOCTOR_REVEALJS`). 3 méthodes privées supprimées
+de `SliderManager.Tasks` (serveSlides 16l, installPlaywright 8l, visualTest 13l)
++ helper `playwrightDir()` 2l. Imports morts nettoyés (`TASK_SERVE_SLIDES`,
+`TASK_VISUAL_TEST`, `TASK_INSTALL_PLAYWRIGHT`, `SERVE_DEP`, `NpxTask`).
+Shadowing `command` local vs propriété `NpxTask.command` → variables renommées
+`serveCommand`, `installCommand`, `visualCommand`. 16 unit + 19 scénarios
+Cucumber (`21_playwright_decomposition.feature`).
+
+`SliderManager.kt` ~844→~570 lignes, ~620 lignes extraites vers 3 nouveaux
+domaines DDD (6 nouveaux fichiers source). Baby-step TDD/BDD 3 niveaux :
++68 unit + 2 functional + 53 scénarios Cucumber. `./gradlew :slider:check`
+VERT — 633 PASS / 0 FAIL / 1 SKIP (+117 vs 516 S-038).
+
 == Session 038 (2026-07-22) — SLD-6.4 Extensions → slider.extension
 
 SLD-6.4 — Extraction `Extensions` → `slider.extension` (nouveau domaine DDD,

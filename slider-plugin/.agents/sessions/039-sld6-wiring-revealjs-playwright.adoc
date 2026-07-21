@@ -1,0 +1,157 @@
+= Session 039 — SLD-6.5 Wiring + SLD-6.6 Reveal.js + SLD-6.7 Playwright
+:session: 039
+:date: 2026-07-21
+
+== Objectif
+
+Trois US de l'EPIC SLD-6 (Refactor DDD SliderManager decomposition) livrées en
+une session : extraction des 3 derniers groupes de nested objects de
+`SliderManager` vers trois nouveaux domaines DDD dédiés (`slider.wiring`,
+`slider.revealjs`, `slider.playwright`). Méthode baby-step TDD/BDD 3 niveaux
+(unit → functional → cucumber), English only code/Gherkin.
+
+== SLD-6.5 — Extraction Wiring → slider.wiring (2 pts)
+
+Domaine DDD `slider.wiring` créé (2 fichiers, ~210 lignes) :
+
+- `WiringSpec.kt` (~165 lignes) — value objects purs. `GroupRouting` sealed
+  (None / IncludeGroup / ExcludeGroup), `IvyMetadataSource` enum,
+  `RepositoryKind` sealed (MAVEN / MAVEN_CENTRAL / IVY data class),
+  `RepositorySpec`, `PluginSpec`, `GemDependency` (`toCoordinates()`),
+  `WiringSpec` agrégateur avec `WiringSpec.DEFAULT` (6 repos + 3 plugins +
+  1 gem). Validation `require` sur tous les champs. Zéro dépendance Gradle.
+- `GradleWiring.kt` (~95 lignes) — thin Gradle adapter. `configure(project,
+  spec)`, `configureRepositories`, `applyPlugins`, `configureDependencies`.
+  `applyRouting` générique sur `ArtifactRepository` (Maven + Ivy).
+
+`SliderManager.Repositories` / `Plugins` / `Dependencies` → 3 thin adapters
+(1 ligne chacun) déléguant à `slider.wiring.GradleWiring.configure*(project,
+WiringSpec.DEFAULT.*)`. Routing rubygems (include/exclude par mirror) encodé
+dans `GroupRouting` au lieu d'être inline dans les closures Gradle.
+
+Baby-step TDD/BDD 3 niveaux :
+
+- 28 unit (`WiringSpecTest`) — GroupRouting, RepositorySpec, PluginSpec,
+  GemDependency, WiringSpec.DEFAULT (6 repos + 3 plugins + 1 gem, routing
+  rubygems, Ivy last).
+- 2 functional (`GradleWiringFunctionalTest`) — GradleTestKit valide
+  l'application des 3 plugins (asciidoctorRevealJs registered) + résolution
+  du gem via les repos wired (`dependencies --configuration asciidoctorGems`
+  SUCCESS, output contains `asciidoctor-revealjs`).
+- 17 scénarios Cucumber (`19_wiring_decomposition.feature` +
+  `WiringDecompositionSteps.kt`) — GroupRouting, RepositorySpec, PluginSpec,
+  GemDependency, WiringSpec.DEFAULT.
+
+== SLD-6.6 — Extraction Reveal.js tasks → slider.revealjs (3 pts)
+
+Domaine DDD `slider.revealjs` créé (2 fichiers, ~240 lignes) :
+
+- `RevealJsDomain.kt` (~175 lignes) — value objects purs. `RevealJsAttributeKeys`
+  (16 clés), `RevealJsAttributesSpec` (14 attributs par défaut + `withOverrides`
+  pour surcharges dynamiques `build-gradle` + `endpoint-url`), `RevealJsOutputDir`
+  (`<buildDir>/docs/asciidocRevealJs`), `SlideSourceDir`
+  (`<projectDir>/slides/misc`), `SlideMetadata` (name + filename), `SlideMetadataScanner`
+  (scan `.adoc` trié, empty list si dir manquant), `DashboardJsonSerializer`
+  (rendu JSON `slides.json`, escape quotes), `CleanBuildTarget` +
+  `CleanReport` (supprime slides.json + images/ + .html, préserve CSS/data).
+- `RevealJsTaskRegistrar.kt` (~95 lignes) — thin Gradle adapter. `register(project)`
+  enregistre `cleanBuild` + `asciidoctorRevealJs` + `generateDashboard` en
+  ordre de dépendance. Noms de tâches `const val` possédés par le domaine
+  (`TASK_CLEAN_SLIDES_BUILD`, `TASK_ASCIIDOCTOR_REVEALJS`,
+  `TASK_DASHBOARD_SLIDES_BUILD`).
+
+`SliderManager.Tasks` : 3 méthodes privées supprimées
+(`registerCleanSlidesBuildTask` ~18 lignes, `registerAsciidoctorRevealJsTask`
+~65 lignes, `registerDashboardTask` ~60 lignes) → `RevealJsTaskRegistrar.register(this)`.
+Imports morts nettoyés (`AsciidoctorJRevealJSTask`, `OUT_OF_PROCESS`,
+`BUILD_GRADLE_KEY`, `ENDPOINT_URL_KEY`, `SOURCE_HIGHLIGHTER_KEY`,
+`CODERAY_CSS_KEY`, `TASK_CLEAN_SLIDES_BUILD`, `TASK_DASHBOARD_SLIDES_BUILD`,
+`IMAGES`, `separator`, `registerAsciidoctorRevealJsTask`,
+`registerCleanSlidesBuildTask`).
+
+Baby-step TDD/BDD 3 niveaux :
+
+- 24 unit (`RevealJsDomainTest`) — RevealJsAttributesSpec (14 attributs,
+  coderay, talaria.css, black theme, overrides, validation), RevealJsOutputDir,
+  SlideSourceDir, SlideMetadata (validation), SlideMetadataScanner (tri,
+  dir manquant, no adoc), DashboardJsonSerializer (empty array, single,
+  multiple, escape quotes), CleanBuildTarget + CleanReport (deletions count,
+  missing dir, preserve CSS/data).
+- 17 scénarios Cucumber (`20_revealjs_decomposition.feature` +
+  `RevealJsDecompositionSteps.kt`) — RevealJsAttributesSpec, RevealJsOutputDir,
+  SlideSourceDir, SlideMetadata, SlideMetadataScanner, DashboardJsonSerializer,
+  CleanBuildTarget. Steps utilisent `Files.createTempDirectory` (pas
+  `@TempDir` JUnit, non injecté par Cucumber).
+
+== SLD-6.7 — Extraction Playwright tasks → slider.playwright (2 pts)
+
+Domaine DDD `slider.playwright` créé (2 fichiers, ~170 lignes) :
+
+- `PlaywrightDomain.kt` (~115 lignes) — value objects purs. `PlaywrightDir`
+  (`<projectDir>/src/test/playwright`, `configPath()` →
+  `playwright.config.ts`), `ServeCommand` (packageName + servedDir +
+  `npxArgs()`), `InstallCommand` (binary + browsers, `DEFAULT` chromium +
+  `npxArgs()`), `VisualTestCommand` (binary + configPath + `npxArgs()`
+  `test --config`), `PlaywrightTaskNames` (`serveSlides`, `visualTest`,
+  `installPlaywright`).
+- `PlaywrightTaskRegistrar.kt` (~95 lignes) — thin Gradle adapter. `register(project)`
+  enregistre `serveSlides` + `installPlaywright` + `visualTest`. Délègue à
+  `RevealJsOutputDir` (partagé avec slider.revealjs) + `RevealJsTaskRegistrar.TASK_ASCIIDOCTOR_REVEALJS`.
+
+`SliderManager.Tasks` : 3 méthodes privées supprimées
+(`registerServeSlidesTask` ~16 lignes, `registerInstallPlaywrightTask` ~8
+lignes, `registerVisualTestTask` ~13 lignes) + helper `playwrightDir()` 2
+lignes → `PlaywrightTaskRegistrar.register(this)`. Imports morts nettoyés
+(`TASK_SERVE_SLIDES`, `TASK_VISUAL_TEST`, `TASK_INSTALL_PLAYWRIGHT`,
+`SERVE_DEP`, `NpxTask`). Attention shadowing `command` local vs propriété
+`NpxTask.command` → variables renommées `serveCommand`, `installCommand`,
+`visualCommand`.
+
+Baby-step TDD/BDD 3 niveaux :
+
+- 16 unit (`PlaywrightDomainTest`) — PlaywrightDir (résolution, configPath,
+  validation), ServeCommand (packageName, servedDir, npxArgs, validation),
+  InstallCommand (DEFAULT chromium, custom, npxArgs, validation),
+  VisualTestCommand (binary, configPath, npxArgs, validation),
+  PlaywrightTaskNames (constantes stables).
+- 19 scénarios Cucumber (`21_playwright_decomposition.feature` +
+  `PlaywrightDecompositionSteps.kt`) — PlaywrightDir, ServeCommand,
+  InstallCommand, VisualTestCommand, PlaywrightTaskNames.
+
+== Build final
+
+`./gradlew :slider:check` VERT — **633 PASS / 0 FAIL / 1 SKIP**
+(+117 vs 516 S-038). Cumul session : +28 unit (wiring) + 24 unit (revealjs)
++ 16 unit (playwright) = +68 unit ; +2 functional (wiring) ; +17 + 17 + 19 =
++53 scénarios Cucumber. 3 nouveaux domaines DDD, 6 fichiers source créés,
+~620 lignes domaine pur extraites de `SliderManager.kt`.
+
+== EPIC SLD-6 — État après session 039
+
+8/11 US terminées (SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3
+prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright).
+Restent 6.8 (capsule task), 6.9 (publish task), 6.10 (thin orchestrator <
+100 lignes).
+
+== Domaines DDD créés (cumul session)
+
+- `slider.wiring` — GradleWiring facade (Repositories + Plugins + Dependencies)
+- `slider.revealjs` — Reveal.js tasks (cleanBuild + asciidoctorRevealJs +
+  generateDashboard) + value objects (attributes, output dir, source dir,
+  metadata, scanner, serializer, clean target)
+- `slider.playwright` — Playwright tasks (serveSlides + installPlaywright +
+  visualTest) + value objects (dir, serve/install/visual commands, task names)
+
+== Rappels méthodologiques
+
+- Baby-step TDD : RED (test échoue) → GREEN (implé min) → REFACTOR
+  (extraction + délégation thin adapter)
+- 3 niveaux tests/US : unit (domaine pur, zéro Gradle) → functional
+  (GradleTestKit end-to-end) → cucumber (BDD feature)
+- English only : code, Gherkin, commentaires — pas de français
+- Domaine DDD = value objects purs (zéro dépendance Gradle) + adapter Gradle
+  thin qui délègue
+- Pas de `@TempDir` JUnit dans steps Cucumber (non injecté) →
+  `Files.createTempDirectory` à la place
+- Shadowing `command` local vs `NpxTask.command` — toujours nommer les
+  variables locales différemment des propriétés du receiver

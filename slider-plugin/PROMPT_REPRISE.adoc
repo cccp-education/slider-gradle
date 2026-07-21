@@ -1,43 +1,49 @@
-= PROMPT_REPRISE — slider-gradle — Session 039
-:session: 039
+= PROMPT_REPRISE — slider-gradle — Session 040
+:session: 040
 :date: 2026-07-22
 
-== Session 038 terminée
+== Session 039 terminée
 
-SLD-6.4 — Extraction `Extensions` → `slider.extension` (nouveau domaine DDD,
-3 fichiers, ~110 lignes) :
+Trois US de l'EPIC SLD-6 livrées en une session :
 
-- `RevealJsPin.kt` (37 lignes) — value object data class. Pin Reveal.js
-  (version gem "5.2.0" + organisation "hakimel" + repository "reveal.js" +
-  tag "5.2.1"). Validation non-blanc sur les 4 champs. Pure — zéro Gradle.
-- `SliderExtension.kt` (30 lignes) — DSL `slider {}` déménagée depuis
-  `SliderPlugin.kt`. Propriétés `configPath`, `language`, `supportedLanguages`.
-  `@Inject constructor(objects: ObjectFactory)`. Contrat API public préservé.
-- `SliderExtensionRegistrar.kt` (53 lignes) — `configure(project, pin)`
-  enregistre DSL + pin Reveal.js. Méthodes publiques `registerSliderExtension`
-  + `pinRevealJsTemplate`.
+- **SLD-6.5 Wiring** → `slider.wiring` (2 fichiers, ~210 lignes) :
+  `WiringSpec.kt` (GroupRouting sealed, RepositoryKind sealed MAVEN/MAVEN_CENTRAL/IVY,
+  RepositorySpec, PluginSpec, GemDependency, WiringSpec.DEFAULT 6 repos + 3 plugins + 1 gem)
+  + `GradleWiring.kt` (adapter `configure(project, spec)`). 28 unit + 2 functional
+  + 17 cucumber (`19_wiring_decomposition.feature`).
+- **SLD-6.6 Reveal.js** → `slider.revealjs` (2 fichiers, ~240 lignes) :
+  `RevealJsDomain.kt` (RevealJsAttributesSpec 14 attrs, RevealJsOutputDir,
+  SlideSourceDir, SlideMetadata, SlideMetadataScanner, DashboardJsonSerializer,
+  CleanBuildTarget/CleanReport) + `RevealJsTaskRegistrar.kt` (register cleanBuild
+  + asciidoctorRevealJs + generateDashboard, const task names). 24 unit + 17 cucumber
+  (`20_revealjs_decomposition.feature`).
+- **SLD-6.7 Playwright** → `slider.playwright` (2 fichiers, ~170 lignes) :
+  `PlaywrightDomain.kt` (PlaywrightDir, ServeCommand, InstallCommand DEFAULT chromium,
+  VisualTestCommand, PlaywrightTaskNames) + `PlaywrightTaskRegistrar.kt` (register
+  serveSlides + installPlaywright + visualTest). 16 unit + 19 cucumber
+  (`21_playwright_decomposition.feature`).
 
-`SliderManager.Extensions` → thin adapter (12 lignes, délègue à
-`SliderExtensionRegistrar.configure(this)`). `SliderPlugin.SliderExtension`
-→ `typealias slider.extension.SliderExtension` (préserve référence
-`RagTasks.kt`). Imports morts nettoyés (SliderExtension + RevealJSExtension
-retirés de `SliderManager.kt` ; ObjectFactory/Property/Inject retirés de
-`SliderPlugin.kt`).
+`SliderManager.kt` : 3 nested objects (Repositories/Plugins/Dependencies) → thin
+adapters 1-ligne. 6 méthodes privées Tasks supprimées (cleanSlidesBuild,
+asciidoctorRevealJs, dashboard, serveSlides, installPlaywright, visualTest) +
+helper playwrightDir(). Imports morts nettoyés. SliderManager.kt ~844→~570
+lignes. 6 nouveaux fichiers domaine pur, ~620 lignes extraites.
 
-Baby-step TDD/BDD 3 niveaux : 9 unit (`RevealJsPinTest`) + 9 scénarios Cucumber
-(`18_extension_decomposition.feature` + `ExtensionDecompositionSteps.kt`).
-`./gradlew :slider:check` VERT — 516 PASS / 0 FAIL / 1 SKIP (+18 vs 498 S-037).
+Baby-step TDD/BDD 3 niveaux : +68 unit + 2 functional + 53 scénarios Cucumber.
+`./gradlew :slider:check` VERT — **633 PASS / 0 FAIL / 1 SKIP** (+117 vs 516 S-038).
 
-== Prochaine session — 039
+== Prochaine session — 040
 
-*Objectif* : SLD-6.5 — Extraction `Repositories` + `Plugins` + `Dependencies`
-→ `slider.wiring` (Gradle plumbing groupé). `GradleWiring` facade
-(`configureRepositories`, `applyPlugins`, `configureDependencies`). Les 3
-nested objects de `SliderManager` deviennent thin adapters qui délèguent au
-domaine.
+*Objectif* : SLD-6.8 — Extraction `registerAsciidocCapsuleTask` →
+`slider.capsule.CapsuleTaskRegistrar` (consolidation avec le domaine
+`slider.capsule` existant — CapsuleScript/SlideSegment/CapsuleScriptWriter/
+AsciidocSpeakerNoteParser déjà extraits S-020). La tâche Gradle
+`generateCapsule` déménage dans un `CapsuleTaskRegistrar` adapter.
+Functional GradleTestKit + Cucumber `22_capsule_task_decomposition.feature`.
 
-Enchaîner SLD-6.6 (Reveal.js tasks), SLD-6.7 (Playwright tasks), etc. jusqu'à
-SLD-6.10 (`SliderManager` thin orchestrator < 100 lignes).
+Enchaîner SLD-6.9 (registerPublishSlidesTask + Git → slider.repository.PublishTaskRegistrar +
+SlidePublisher consolidation), SLD-6.10 (SliderManager → thin orchestrator < 100 lignes,
+vérification 633 PASS maintenus). EPIC SLD-6 se termine à 11/11.
 
 == Rappels
 
@@ -54,19 +60,23 @@ SLD-6.10 (`SliderManager` thin orchestrator < 100 lignes).
 - Package Cucumber steps : `slider.steps`
 - Domaines DDD existants : `slider.repository`, `slider.capsule`, `slider.rtl`,
   `slider.i18n`, `slider.translate`, `slider.translation`, `slider.scaffold`,
-  `slider.config`, `slider.prerequisite`, `slider.extension`
-- Domaines DDD SLD-6 à créer : `slider.wiring`, `slider.revealjs`,
-  `slider.playwright`
+  `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
+  `slider.revealjs`, `slider.playwright`
+- Domaines DDD SLD-6 restants : `slider.capsule` (consolidation CapsuleTaskRegistrar),
+  `slider.repository` (consolidation PublishTaskRegistrar)
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playright)
-- `./gradlew :slider:check` est VERT (516 PASS depuis S-038)
+- `./gradlew :slider:check` est VERT (633 PASS depuis S-039)
 - EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11
-- EPIC en cours : SLD-6 (SLD-6.0 ✅, SLD-6.1 ✅, SLD-6.2 ✅, SLD-6.3 ✅,
-  SLD-6.4 ✅, SLD-6.5→6.10 ⏳)
+- EPIC en cours : SLD-6 (SLD-6.0 ✅, 6.1 ✅, 6.2 ✅, 6.3 ✅, 6.4 ✅, 6.5 ✅,
+  6.6 ✅, 6.7 ✅, SLD-6.8→6.10 ⏳)
 - Environnement : daemon Gradle reçoit parfois des signaux stop externes (autres
-  sessions Gradle parallèles). Lancer `./gradlew :slider:test` en arrière-plan
+  sessions Gradle parallèles). Lancer `./gradlew :slider:check` en arrière-plan
   `nohup ... &` si blocage, puis inspecter `build/test-results/`.
-- `SliderPlugin.SliderExtension` est désormais un `typealias` vers
-  `slider.extension.SliderExtension` — préserve la compat API
-  (`RagTasks.kt` référence `slider.SliderPlugin.SliderExtension`).
+- `SliderManager.kt` est désormais ~570 lignes (was 968 S-035). Cible SLD-6.10 :
+  thin orchestrator < 100 lignes. Restent à extraire : registerPublishSlidesTask
+  (~30 lignes) + Git object (~55 lignes) + registerAsciidocCapsuleTask (~25 lignes)
+  + registerReportTestsTask/registerReportFunctionalTestsTask (~30 lignes) +
+  registerGenerateRevealUiMessagesTask (~15 lignes) + registerTranslateDeckTask
+  (délègue déjà à slider.translation) + registerAsciidoctorTask (~7 lignes).

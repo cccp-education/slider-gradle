@@ -1,10 +1,30 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-07-22
+_.date: 2026-07-21
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== Session 039 (2026-07-21) — SLD-6.5 + SLD-6.6 + SLD-6.7 ✅ TERMINÉ
+
+Trois US de l'EPIC SLD-6 livrées en une session. Domaine DDD `slider.wiring`
+créé (2 fichiers : `WiringSpec.kt` value objects GroupRouting/RepositoryKind/
+RepositorySpec/PluginSpec/GemDependency/WiringSpec.DEFAULT 6 repos+3 plugins+1 gem
++ `GradleWiring.kt` adapter configureRepositories/applyPlugins/configureDependencies).
+Domaine DDD `slider.revealjs` créé (2 fichiers : `RevealJsDomain.kt`
+RevealJsAttributesSpec/RevealJsOutputDir/SlideSourceDir/SlideMetadata/
+SlideMetadataScanner/DashboardJsonSerializer/CleanBuildTarget +
+`RevealJsTaskRegistrar.kt` register cleanBuild+asciidoctorRevealJs+generateDashboard).
+Domaine DDD `slider.playwright` créé (2 fichiers : `PlaywrightDomain.kt`
+PlaywrightDir/ServeCommand/InstallCommand DEFAULT chromium/VisualTestCommand/
+PlaywrightTaskNames + `PlaywrightTaskRegistrar.kt` register serveSlides+
+installPlaywright+visualTest). `SliderManager.kt` ~844→~570 lignes, 3 nested
+objects → thin adapters, 6 méthodes Tasks supprimées, imports morts nettoyés.
+Baby-step TDD/BDD 3 niveaux : +68 unit + 2 functional + 53 scénarios Cucumber
+(features 19+20+21). `./gradlew :slider:check` VERT 633 PASS / 0 FAIL / 1 SKIP
+(+117 vs 516 S-038).
 
 '''
 == Session 038 (2026-07-22) — SLD-6.4 Extensions → slider.extension ✅ TERMINÉ
@@ -85,15 +105,15 @@ consolidation `slider.repository`/`slider.capsule` existants.
 | SLD-6.2 | Extraction `Configuration` → `slider.config` + fix deprecation `properties[...]` (lignes 80, 638). `ConfigPath` value object, `SlidesConfigLoader`, `YamlMapperFactory`. Unit + Cucumber `16_config_decomposition.feature` | ✅ TERMINÉ (S-036, 16 unit + 15 cucumber) | 3 pts
 | SLD-6.3 | Extraction `Prerequisites` → `slider.prerequisite` (`JavaVersionGuard`). Unit + Cucumber `17_prerequisite_decomposition.feature` | ✅ TERMINÉ (S-037, 9 unit + 9 cucumber) | 1 pt
 | SLD-6.4 | Extraction `Extensions` → `slider.extension` (`SliderExtensionRegistrar`). Unit + Cucumber `18_extension_decomposition.feature` | ✅ TERMINÉ (S-038, 9 unit + 9 cucumber) | 2 pts
-| SLD-6.5 | Extraction `Repositories`+`Plugins`+`Dependencies` → `slider.wiring` (`GradleWiring`). Functional GradleTestKit | ⏳ À FAIRE | 2 pts
-| SLD-6.6 | Extraction `registerAsciidoctorRevealJsTask`+clean+dashboard → `slider.revealjs` (`RevealJsTaskRegistrar`). Functional GradleTestKit | ⏳ À FAIRE | 3 pts
-| SLD-6.7 | Extraction `serveSlides`+`visualTest`+`installPlaywright` → `slider.playwright` (`PlaywrightTaskRegistrar`). Functional GradleTestKit | ⏳ À FAIRE | 2 pts
+| SLD-6.5 | Extraction `Repositories`+`Plugins`+`Dependencies` → `slider.wiring` (`GradleWiring`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 28 unit + 2 functional + 17 cucumber) | 2 pts
+| SLD-6.6 | Extraction `registerAsciidoctorRevealJsTask`+clean+dashboard → `slider.revealjs` (`RevealJsTaskRegistrar`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 24 unit + 17 cucumber) | 3 pts
+| SLD-6.7 | Extraction `serveSlides`+`visualTest`+`installPlaywright` → `slider.playwright` (`PlaywrightTaskRegistrar`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 16 unit + 19 cucumber) | 2 pts
 | SLD-6.8 | Extraction `registerAsciidocCapsuleTask` → `slider.capsule.CapsuleTaskRegistrar`. Functional + Cucumber `19_capsule_task_decomposition.feature` | ⏳ À FAIRE | 1 pt
 | SLD-6.9 | Consolidation `registerPublishSlidesTask`+`Git` → `slider.repository.PublishTaskRegistrar`+`SlidePublisher`. Functional + Cucumber `20_publish_task_decomposition.feature` | ⏳ À FAIRE | 2 pts
 | SLD-6.10 | `SliderManager` → thin orchestrator < 100 lignes. `SliderPlugin.apply()` délègue à tous les registrars. Vérification 428 PASS maintenus | ⏳ À FAIRE | 2 pts
 |===
 
-_Total_ : 11 US, ~20 pts (5/11 terminées — SLD-6.0 cadrage + SLD-6.1 scaffold + SLD-6.2 config + SLD-6.3 prerequisite + SLD-6.4 extension). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 516 PASS.
+_Total_ : 11 US, ~20 pts (8/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 633 PASS.
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.11 ✅ TERMINE (Session 034, 2026-07-15)
