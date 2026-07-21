@@ -2,25 +2,32 @@
 
 _Date creation_ : 2026-05-10
 
-== Session 040 (2026-07-22) — SLD-6.8 Capsule task decomposition
+== Session 040 (2026-07-22) — SLD-6.8 Capsule task decomposition + Publication 0.0.12
 
 US SLD-6.8 — Extraction `registerAsciidocCapsuleTask` (~30 lignes) depuis
 `SliderManager.Tasks` vers une consolidation du domaine `slider.capsule`
 (déjà extracted S-020). Domaine `slider.capsule` consolidé (2 nouveaux fichiers,
 ~138 lignes) : `CapsuleTaskDomain.kt` (value objects purs `CapsuleAdocDir`
 résout `<projectDir>/slides/misc` + `adocFiles()` triés, `CapsuleScriptDir`
-résout `<buildDir>/capsule` + `ensureCreated()` idempotent +
-`scriptFileFor(name)`, `CapsuleTaskNames` constantes `generateCapsule`/`slider`/
-description) + `CapsuleTaskRegistrar.kt` (thin Gradle adapter `register(project)`
-— comportement bit-for-bit préservé : `outputs.upToDateWhen { false }`, skip
+résout `<buildDir>/capsule` + `ensureCreated()` idempotent + `scriptFileFor(name)`,
+`CapsuleTaskNames` constantes `generateCapsule`/`slider`/description) +
+`CapsuleTaskRegistrar.kt` (thin Gradle adapter `register(project)` —
+comportement bit-for-bit préservé : `outputs.upToDateWhen { false }`, skip
 empty scripts, log slide count). `SliderManager.Tasks.registerAsciidocCapsuleTask`
-supprimé, délègue à `slider.capsule.CapsuleTaskRegistrar.register(this)`. Imports
-morts nettoyés (`AsciidocSpeakerNoteParser`/`CapsuleScriptWriter` retirés de
-SliderManager). `SliderManager.kt` 570→552 lignes (was 968 S-035). Baby-step
+(~30 lignes) supprimé, délègue à `slider.capsule.CapsuleTaskRegistrar.register(this)`.
+Imports morts nettoyés (`AsciidocSpeakerNoteParser`/`CapsuleScriptWriter` retirés
+de SliderManager). `SliderManager.kt` 570→552 lignes (was 968 S-035). Baby-step
 TDD/BDD 3 niveaux : 12 unit (`CapsuleTaskDomainTest`) + 13 scénarios Cucumber
 (`22_capsule_task_decomposition.feature` + `CapsuleTaskDecompositionSteps`,
 steps préfixés `capsule`). `./gradlew :slider:check` VERT — **654 PASS / 0 FAIL /
 1 SKIP** (+21 vs 633 S-039). 9/11 US SLD-6 terminées.
+
+Publication Maven Central slider 0.0.12 (bundle `842a5a72` AUTOMATIC, 3 artefacts
+signés) + BOM workspace-bom 0.0.11 (bundle `261de995` AUTOMATIC, slider
+constraint 0.0.11→0.0.12). Bump 0.0.11→0.0.12 sur 3 fichiers slider-gradle +
+BOM 0.0.10→0.0.11 sur 2 fichiers workspace-bom. Consommateurs : tous les
+boroughs utilisant `workspace-bom:0.0.11` bénéficient automatiquement de
+slider 0.0.12 via la constraint BOM.
 
 == Session 039 (2026-07-21) — SLD-6.5 Wiring + SLD-6.6 Reveal.js + SLD-6.7 Playwright
 

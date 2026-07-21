@@ -50,8 +50,8 @@ vérification 654 PASS maintenus). EPIC SLD-6 se termine à 11/11.
 
 - GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
   `education.cccp.slider.translator`
-- Version publiée Central : 0.0.11 (build.gradle.kts hardcodé 0.0.11)
-- BOM workspace-bom : Central 0.0.10
+- Version publiée Central : 0.0.12 (build.gradle.kts hardcodé 0.0.12)
+- BOM workspace-bom : Central 0.0.11
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5

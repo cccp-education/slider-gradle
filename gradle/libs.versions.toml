@@ -1,5 +1,5 @@
 [versions]
-slider = "0.0.11"
+slider = "0.0.12"
 readme = "0.0.1"
 
 [libraries]

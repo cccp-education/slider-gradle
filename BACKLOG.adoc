@@ -135,6 +135,19 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 _Total_ : 11 US, ~20 pts (9/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright + 6.8 capsule). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
 
 '''
+== EPIC PUB — Publication Maven Central 0.0.12 ✅ TERMINE (Session 040, 2026-07-22)
+
+Bump 0.0.11 → 0.0.12 sur 3 fichiers (SLD-6.8 capsule task decomposition S-040).
+Bundle nmcp `842a5a72-fded-4856-b4f6-e3a6793f7fd1` AUTOMATIC, 3 artefacts signés
+(slider:0.0.12 + 2 plugin markers). BOM 0.0.11 publiée (bundle
+`261de995-7767-4e11-83e4-9c62196ab43a`), slider constraint 0.0.11 → 0.0.12.
+
+| Artefact | URL |
+|---|---|
+| slider 0.0.12 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.12 |
+| workspace-bom 0.0.11 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.11 |
+
+'''
 == EPIC PUB — Publication Maven Central 0.0.11 ✅ TERMINE (Session 034, 2026-07-15)
 
 Bump 0.0.10 → 0.0.11 sur 4 fichiers (Playwright @Disabled fix). Bundle nmcp

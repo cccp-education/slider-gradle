@@ -109,6 +109,28 @@ PublishTaskRegistrar + SlidePublisher consolidation, 2 pts) + SLD-6.10
 `slider.wiring`, `slider.revealjs`, `slider.playwright` + `SliderManager`
 résiduel (552 lignes, cible < 100 SLD-6.10).
 
+== Publication Maven Central 0.0.12
+
+Bump 0.0.11 → 0.0.12 sur 3 fichiers slider-gradle (build.gradle.kts + 2
+catalogues libs.versions.toml). Bundle nmcp `842a5a72-fded-4856-b4f6-e3a6793f7fd1`
+AUTOMATIC, 3 artefacts signés (slider:0.0.12 + 2 plugin markers
+`education.cccp.slider` + `education.cccp.slider.translator`).
+
+BOM workspace-bom 0.0.10 → 0.0.11 publiée (bundle
+`261de995-7767-4e11-83e4-9c62196ab43a`), slider constraint 0.0.11 → 0.0.12.
+
+|===
+| Artefact | URL
+
+| slider 0.0.12 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.12
+| workspace-bom 0.0.11 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.11
+|===
+
+Consommateurs : tous les boroughs utilisant `workspace-bom:0.0.11` bénéficient
+automatiquement de slider 0.0.12 via la constraint BOM. codebase-gradle
+(dormant, BOM 0.0.4) et document-gradle (BOM 0.0.11 déjà référencée) non
+touchés — pas de bump propagé dans leur catalogue (BOM porte la constraint).
+
 == Vérification fin de session
 
 - `git status` : copie de travail propre avant session, modifications SLD-6.8
