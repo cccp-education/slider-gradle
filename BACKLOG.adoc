@@ -1,10 +1,29 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-07-21
+_.date: 2026-07-22
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== Session 040 (2026-07-22) — SLD-6.8 Capsule task decomposition ✅ TERMINÉ
+
+US SLD-6.8 livrée. Domaine DDD `slider.capsule` consolidé (2 nouveaux fichiers,
+~138 lignes) : `CapsuleTaskDomain.kt` (78l value objects purs `CapsuleAdocDir`
+résout `<projectDir>/slides/misc` + `adocFiles()` triés, `CapsuleScriptDir`
+résout `<buildDir>/capsule` + `ensureCreated()` idempotent + `scriptFileFor(name)`,
+`CapsuleTaskNames` constantes `generateCapsule`/`slider`/description) +
+`CapsuleTaskRegistrar.kt` (60l thin Gradle adapter `register(project)` —
+comportement bit-for-bit préservé : `outputs.upToDateWhen { false }`, skip empty
+scripts, log slide count). `SliderManager.Tasks.registerAsciidocCapsuleTask`
+(~30 lignes) supprimé, délègue à `slider.capsule.CapsuleTaskRegistrar.register(this)`.
+Imports morts nettoyés (`AsciidocSpeakerNoteParser`/`CapsuleScriptWriter` retirés
+de SliderManager). `SliderManager.kt` 570→552 lignes (was 968 S-035). Baby-step
+TDD/BDD 3 niveaux : 12 unit (`CapsuleTaskDomainTest`) + 13 scénarios Cucumber
+(`22_capsule_task_decomposition.feature` + `CapsuleTaskDecompositionSteps`,
+steps préfixés `capsule`). `./gradlew :slider:check` VERT — **654 PASS / 0 FAIL /
+1 SKIP** (+21 vs 633 S-039).
 
 '''
 == Session 039 (2026-07-21) — SLD-6.5 + SLD-6.6 + SLD-6.7 ✅ TERMINÉ
@@ -95,8 +114,8 @@ niveaux, jusqu'à ce que `SliderManager` devienne un thin orchestrator (< 100
 lignes). Fix deprecation `properties[...]` (lignes 82, 744).
 
 _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisite`,
-`slider.extension`, `slider.wiring`, `slider.revealjs`, `slider.playwright` +
-consolidation `slider.repository`/`slider.capsule` existants.
+`slider.extension`, `slider.wiring`, `slider.revealjs`, `slider.playwright`,
+`slider.capsule` (consolidé) + consolidation `slider.repository` existant restant.
 
 |===
 | US | Description | Statut | Estimation
@@ -108,12 +127,12 @@ consolidation `slider.repository`/`slider.capsule` existants.
 | SLD-6.5 | Extraction `Repositories`+`Plugins`+`Dependencies` → `slider.wiring` (`GradleWiring`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 28 unit + 2 functional + 17 cucumber) | 2 pts
 | SLD-6.6 | Extraction `registerAsciidoctorRevealJsTask`+clean+dashboard → `slider.revealjs` (`RevealJsTaskRegistrar`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 24 unit + 17 cucumber) | 3 pts
 | SLD-6.7 | Extraction `serveSlides`+`visualTest`+`installPlaywright` → `slider.playwright` (`PlaywrightTaskRegistrar`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 16 unit + 19 cucumber) | 2 pts
-| SLD-6.8 | Extraction `registerAsciidocCapsuleTask` → `slider.capsule.CapsuleTaskRegistrar`. Functional + Cucumber `19_capsule_task_decomposition.feature` | ⏳ À FAIRE | 1 pt
+| SLD-6.8 | Extraction `registerAsciidocCapsuleTask` → `slider.capsule.CapsuleTaskRegistrar`. Functional + Cucumber `22_capsule_task_decomposition.feature` | ✅ TERMINÉ (S-040, 12 unit + 13 cucumber) | 1 pt
 | SLD-6.9 | Consolidation `registerPublishSlidesTask`+`Git` → `slider.repository.PublishTaskRegistrar`+`SlidePublisher`. Functional + Cucumber `20_publish_task_decomposition.feature` | ⏳ À FAIRE | 2 pts
 | SLD-6.10 | `SliderManager` → thin orchestrator < 100 lignes. `SliderPlugin.apply()` délègue à tous les registrars. Vérification 428 PASS maintenus | ⏳ À FAIRE | 2 pts
 |===
 
-_Total_ : 11 US, ~20 pts (8/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 633 PASS.
+_Total_ : 11 US, ~20 pts (9/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright + 6.8 capsule). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.11 ✅ TERMINE (Session 034, 2026-07-15)

@@ -11,8 +11,7 @@ import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
 import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
 import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
 import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
-import slider.capsule.AsciidocSpeakerNoteParser
-import slider.capsule.CapsuleScriptWriter
+import slider.capsule.CapsuleTaskRegistrar
 import slider.config.SlidesConfigLoader
 import slider.config.YamlMapperFactory
 import slider.translation.registerTranslateDeckTask
@@ -350,7 +349,7 @@ object SliderManager {
             // are registered by the slider.playwright domain adapter.
             slider.playwright.PlaywrightTaskRegistrar.register(this)
             registerPublishSlidesTask()
-            registerAsciidocCapsuleTask()
+            slider.capsule.CapsuleTaskRegistrar.register(this)
             registerReportTestsTask()
             registerReportFunctionalTestsTask()
             registerGenerateRevealUiMessagesTask()
@@ -408,37 +407,6 @@ object SliderManager {
             }
         }
 
-
-        @Suppress("UnstableApiUsage")
-        private fun Project.registerAsciidocCapsuleTask() {
-            val adocDir = projectDir.resolve("slides/misc")
-            val buildDir = layout.buildDirectory
-
-            tasks.register<DefaultTask>("generateCapsule") {
-                group = "slider"
-                description = "Extract speaker notes from AsciiDoc decks and generate a capsule script (consumed by capsule-gradle)."
-                outputs.upToDateWhen { false }
-
-                doLast {
-                    val scriptDir = buildDir.get().asFile.resolve("capsule")
-                    scriptDir.mkdirs()
-
-                    adocDir.listFiles { f -> f.extension == "adoc" }?.forEach { adoc ->
-                        val script = AsciidocSpeakerNoteParser.parse(
-                            adocContent = adoc.readText(),
-                            deckName = adoc.nameWithoutExtension,
-                        )
-                        if (script.isEmpty) {
-                            logger.lifecycle("⚠ Capsule script skipped for ${adoc.name} (no speaker notes found)")
-                            return@forEach
-                        }
-                        val scriptFile = scriptDir.resolve("${adoc.nameWithoutExtension}-script.txt")
-                        scriptFile.writeText(CapsuleScriptWriter.write(script))
-                        logger.lifecycle("✅ Capsule script → ${scriptFile.name} (${script.segments.size} slides)")
-                    }
-                }
-            }
-        }
 
         /**
          * Runs all checks and opens the unit test HTML report in Firefox.

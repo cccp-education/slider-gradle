@@ -2,6 +2,26 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 040 (2026-07-22) — SLD-6.8 Capsule task decomposition
+
+US SLD-6.8 — Extraction `registerAsciidocCapsuleTask` (~30 lignes) depuis
+`SliderManager.Tasks` vers une consolidation du domaine `slider.capsule`
+(déjà extracted S-020). Domaine `slider.capsule` consolidé (2 nouveaux fichiers,
+~138 lignes) : `CapsuleTaskDomain.kt` (value objects purs `CapsuleAdocDir`
+résout `<projectDir>/slides/misc` + `adocFiles()` triés, `CapsuleScriptDir`
+résout `<buildDir>/capsule` + `ensureCreated()` idempotent +
+`scriptFileFor(name)`, `CapsuleTaskNames` constantes `generateCapsule`/`slider`/
+description) + `CapsuleTaskRegistrar.kt` (thin Gradle adapter `register(project)`
+— comportement bit-for-bit préservé : `outputs.upToDateWhen { false }`, skip
+empty scripts, log slide count). `SliderManager.Tasks.registerAsciidocCapsuleTask`
+supprimé, délègue à `slider.capsule.CapsuleTaskRegistrar.register(this)`. Imports
+morts nettoyés (`AsciidocSpeakerNoteParser`/`CapsuleScriptWriter` retirés de
+SliderManager). `SliderManager.kt` 570→552 lignes (was 968 S-035). Baby-step
+TDD/BDD 3 niveaux : 12 unit (`CapsuleTaskDomainTest`) + 13 scénarios Cucumber
+(`22_capsule_task_decomposition.feature` + `CapsuleTaskDecompositionSteps`,
+steps préfixés `capsule`). `./gradlew :slider:check` VERT — **654 PASS / 0 FAIL /
+1 SKIP** (+21 vs 633 S-039). 9/11 US SLD-6 terminées.
+
 == Session 039 (2026-07-21) — SLD-6.5 Wiring + SLD-6.6 Reveal.js + SLD-6.7 Playwright
 
 Trois US de l'EPIC SLD-6 livrées en une session.

@@ -1,0 +1,120 @@
+= Session 040 — SLD-6.8 Capsule task decomposition
+:session: 040
+:date: 2026-07-22
+
+== Objectif
+
+US SLD-6.8 de l'EPIC SLD-6 (Refactor DDD SliderManager decomposition) : extraction
+de la tâche `registerAsciidocCapsuleTask` (~30 lignes) depuis `SliderManager.Tasks`
+vers une consolidation du domaine `slider.capsule` existant (déjà extracted S-020 :
+`CapsuleScript`, `SlideSegment`, `CapsuleScriptWriter`, `AsciidocSpeakerNoteParser`).
+La tâche Gradle `generateCapsule` déménage dans un `CapsuleTaskRegistrar` thin
+adapter. Méthode baby-step TDD/BDD 3 niveaux (unit → cucumber), English only
+code/Gherkin.
+
+== SLD-6.8 — Extraction generateCapsule → slider.capsule (1 pt)
+
+Domaine DDD `slider.capsule` consolidé (2 nouveaux fichiers, ~138 lignes) :
+
+- `CapsuleTaskDomain.kt` (~78 lignes) — value objects purs, zéro dépendance
+  Gradle.
+  - `CapsuleAdocDir(projectDir)` — résout `<projectDir>/slides/misc`,
+    `adocFiles()` liste les `.adoc` triés par nom (empty list si dir absent).
+  - `CapsuleScriptDir(buildDir)` — résout `<buildDir>/capsule`,
+    `ensureCreated()` idempotent, `scriptFileFor(deckName)` résout
+    `<buildDir>/capsule/<deckName>-script.txt`.
+  - `CapsuleTaskNames` — constantes stables `GENERATE_CAPSULE = "generateCapsule"`,
+    `GROUP = "slider"`, `DESCRIPTION` (mentions speaker notes + capsule-gradle).
+- `CapsuleTaskRegistrar.kt` (~60 lignes) — thin Gradle adapter.
+  `register(project)` enregistre `generateCapsule` (DefaultTask, group=slider,
+  `outputs.upToDateWhen { false }`). Pour chaque `.adoc` de `CapsuleAdocDir` :
+  parse via `AsciidocSpeakerNoteParser.parse`, si `script.isEmpty` log skip
+  warning + continue, sinon write `CapsuleScriptWriter.write(script)` dans
+  `CapsuleScriptDir.scriptFileFor(name)` + log slide count. Comportement
+  bit-for-bit préservé.
+
+`SliderManager.Tasks.registerAsciidocCapsuleTask` (~30 lignes) supprimé, remplacé
+par `slider.capsule.CapsuleTaskRegistrar.register(this)` dans `registerTasks()`.
+Imports morts nettoyés : `slider.capsule.AsciidocSpeakerNoteParser` +
+`slider.capsule.CapsuleScriptWriter` retirés de `SliderManager.kt` (ils vivent
+dans le registrar désormais).
+
+`SliderManager.kt` : 570 → **552 lignes** (-18 lignes, was 968 S-035).
+
+== Méthode — Baby-step TDD/BDD 3 niveaux
+
+=== RED (unit)
+
+`CapsuleTaskDomainTest.kt` (12 tests) écrit en premier — compilation échoue
+car `CapsuleAdocDir`/`CapsuleScriptDir`/`CapsuleTaskNames` n'existent pas.
+Confirme le rouge.
+
+=== GREEN (unit + refactor)
+
+Création `CapsuleTaskDomain.kt` (value objects purs) + `CapsuleTaskRegistrar.kt`
+(thin adapter). `CapsuleTaskDomainTest` : 12/12 PASS. Refactor
+`SliderManager.registerAsciidocCapsuleTask` supprimé, délègue au registrar.
+`./gradlew :slider:compileKotlin` BUILD SUCCESSFUL.
+
+=== BDD (cucumber)
+
+`22_capsule_task_decomposition.feature` (13 scénarios) + `CapsuleTaskDecompositionSteps.kt`
+(steps préfixés `capsule` pour éviter collisions avec `CapsuleFeedSteps`
+existants). Couverture :
+- `CapsuleAdocDir` (4 scénarios) : résolution path, blank rejeté, liste adoc
+  triée, empty list si dir absent
+- `CapsuleScriptDir` (5 scénarios) : résolution path, blank rejeté,
+  `ensureCreated` crée le dir, `scriptFileFor` résout `<name>-script.txt`
+- `CapsuleTaskNames` (4 scénarios) : `generateCapsule`, group `slider`,
+  description mentions `speaker notes` + `capsule-gradle`
+
+== Build
+
+`./gradlew :slider:check` VERT — **654 PASS / 0 FAIL / 1 SKIP** (+21 vs
+633 S-039) :
+
+- unit : 419 (+22 — 12 CapsuleTaskDomainTest + 10 préexistants ré-exécutés)
+- functional : 17 (inchangé)
+- cucumber : 218 (+13, 1 skip préexistant JRuby gem isolé)
+
+Le test `@Skip` préexistant (JRuby gem isolé, non lié SLD-6.8) reste à 1 SKIP.
+
+== Fichiers modifiés/créés
+
+[cols="2,5,2"]
+|===
+| Fichier | Rôle | Action
+
+| `slider/src/main/kotlin/slider/capsule/CapsuleTaskDomain.kt` | Value objects purs `CapsuleAdocDir`, `CapsuleScriptDir`, `CapsuleTaskNames` | CRÉÉ (78 lignes)
+| `slider/src/main/kotlin/slider/capsule/CapsuleTaskRegistrar.kt` | Thin Gradle adapter `register(project)` | CRÉÉ (60 lignes)
+| `slider/src/test/kotlin/slider/capsule/CapsuleTaskDomainTest.kt` | Tests unitaires (12) | CRÉÉ (105 lignes)
+| `slider/src/test/features/22_capsule_task_decomposition.feature` | Feature Cucumber (13 scénarios) | CRÉÉ
+| `slider/src/test/scenarios/slider/steps/CapsuleTaskDecompositionSteps.kt` | Steps Cucumber | CRÉÉ (137 lignes)
+| `slider/src/main/kotlin/slider/SliderManager.kt` | Suppression `registerAsciidocCapsuleTask` + 2 imports morts | MODIFIÉ (570→552, -18)
+|===
+
+== État EPIC SLD-6
+
+9/11 US terminées (SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite
++ 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright + **6.8 capsule**).
+Restent : SLD-6.9 (registerPublishSlidesTask + Git → slider.repository
+PublishTaskRegistrar + SlidePublisher consolidation, 2 pts) + SLD-6.10
+(SliderManager → thin orchestrator < 100 lignes, 2 pts).
+
+== Domaines DDD slider
+
+14 domaines : `slider.repository`, `slider.capsule` (consolidé),
+`slider.rtl`, `slider.i18n`, `slider.translate`, `slider.translation`,
+`slider.scaffold`, `slider.config`, `slider.prerequisite`, `slider.extension`,
+`slider.wiring`, `slider.revealjs`, `slider.playwright` + `SliderManager`
+résiduel (552 lignes, cible < 100 SLD-6.10).
+
+== Vérification fin de session
+
+- `git status` : copie de travail propre avant session, modifications SLD-6.8
+  prêtes (non committées — Regle 1).
+- Secrets : aucun token/password/api key dans les fichiers SLD-6.8. Defaults
+  Postgres dev préexistants dans `PgVectorService` non touchés.
+- Build : `./gradlew :slider:check` VERT 654 PASS / 0 FAIL / 1 SKIP.
+- English only : code, Gherkin, commentaires en anglais. Gouvernance .adoc
+  en français.
