@@ -2,6 +2,50 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 038 (2026-07-22) — SLD-6.4 Extensions → slider.extension
+
+SLD-6.4 — Extraction `Extensions` → `slider.extension` (nouveau domaine DDD,
+3 fichiers, ~110 lignes) :
+
+- `RevealJsPin.kt` (37 lignes) — value object data class. Pin Reveal.js
+  (version gem "5.2.0" + organisation "hakimel" + repository "reveal.js" +
+  tag "5.2.1"). Validation non-blanc sur les 4 champs. Pure — zéro Gradle.
+- `SliderExtension.kt` (30 lignes) — DSL `slider {}` déménagée depuis
+  `SliderPlugin.kt`. Propriétés `configPath`, `language`, `supportedLanguages`.
+  `@Inject constructor(objects: ObjectFactory)`. Contrat API public préservé.
+- `SliderExtensionRegistrar.kt` (53 lignes) — `configure(project, pin)`
+  enregistre DSL + pin Reveal.js. Méthodes publiques `registerSliderExtension`
+  + `pinRevealJsTemplate`.
+
+`SliderManager.Extensions` → thin adapter (12 lignes, délègue à
+`SliderExtensionRegistrar.configure(this)`). `SliderPlugin.SliderExtension`
+→ `typealias slider.extension.SliderExtension` (préserve référence
+`RagTasks.kt`). Imports morts nettoyés (SliderExtension + RevealJSExtension
+retirés de `SliderManager.kt` ; ObjectFactory/Property/Inject retirés de
+`SliderPlugin.kt`).
+
+Baby-step TDD/BDD 3 niveaux : 9 unit (`RevealJsPinTest`) + 9 scénarios Cucumber
+(`18_extension_decomposition.feature` + `ExtensionDecompositionSteps.kt`).
+`./gradlew :slider:check` VERT — 516 PASS / 0 FAIL / 1 SKIP (+18 vs 498 S-037).
+
+== Session 037 (2026-07-21) — SLD-6.3 Prerequisites → slider.prerequisite
+
+SLD-6.3 — Extraction `Prerequisites` → `slider.prerequisite` (nouveau domaine
+DDD, 1 fichier, ~45 lignes) :
+
+- `JavaVersionGuard.kt` (45 lignes) — object pur. `requireJava23(currentMajor: Int)`
+  validation pure + `requireJava23FromMajor(majorVersionString: String)` parse
+  String (issue de `JavaVersion.current().majorVersion`). Zéro dépendance Gradle,
+  zéro JVM introspection. Le caller fournit la version.
+- `SliderManager.Prerequisites` → thin adapter (11 lignes). Passe
+  `JavaVersion.current().majorVersion` au guard. Signature publique
+  (`SliderPlugin.apply()` continue d'appeler `Prerequisites.checkJavaVersion()`)
+  préservée — zéro régression.
+
+Baby-step TDD/BDD 3 niveaux : 9 unit (`JavaVersionGuardTest`) + 9 scénarios
+Cucumber (`17_prerequisite_decomposition.feature` + `PrerequisiteDecompositionSteps.kt`).
+`./gradlew :slider:check` VERT — 498 PASS / 0 FAIL / 1 SKIP (+32 vs 466 S-036).
+
 == Session 036 (2026-07-21) — SLD-6.2 Configuration → slider.config
 
 SLD-6.2 — Extraction `Configuration` → `slider.config` (nouveau domaine DDD, 3

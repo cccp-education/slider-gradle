@@ -1,45 +1,43 @@
-= PROMPT_REPRISE — slider-gradle — Session 037
-:session: 037
-:date: 2026-07-21
+= PROMPT_REPRISE — slider-gradle — Session 039
+:session: 039
+:date: 2026-07-22
 
-== Session 036 terminée
+== Session 038 terminée
 
-SLD-6.2 — Extraction `Configuration` → `slider.config` (nouveau domaine DDD, 3
-fichiers, ~110 lignes) :
+SLD-6.4 — Extraction `Extensions` → `slider.extension` (nouveau domaine DDD,
+3 fichiers, ~110 lignes) :
 
-- `ConfigPath.kt` (21 lignes) — value object `@JvmInline value class`, validation
-  non-blanc, résolution relative/absolue contre base dir. Pure, zéro Gradle.
-- `YamlMapperFactory.kt` (34 lignes) — factory du `ObjectMapper` partagé
-  (YAMLFactory + Kotlin + Arrow + WRITE_DATES_AS_TIMESTAMPS disabled). Remplace
-  l'extension property `SliderManager.Configuration.yamlMapper`.
-- `SlidesConfigLoader.kt` (70 lignes) — domain service. `load(File, mapper)` +
-  `load(configPath, baseDir, mapper)` + `emptyConfiguration()` fallback. Remplace
-  `SliderManager.Configuration.readSlidesConfigurationFile`.
+- `RevealJsPin.kt` (37 lignes) — value object data class. Pin Reveal.js
+  (version gem "5.2.0" + organisation "hakimel" + repository "reveal.js" +
+  tag "5.2.1"). Validation non-blanc sur les 4 champs. Pure — zéro Gradle.
+- `SliderExtension.kt` (30 lignes) — DSL `slider {}` déménagée depuis
+  `SliderPlugin.kt`. Propriétés `configPath`, `language`, `supportedLanguages`.
+  `@Inject constructor(objects: ObjectFactory)`. Contrat API public préservé.
+- `SliderExtensionRegistrar.kt` (53 lignes) — `configure(project, pin)`
+  enregistre DSL + pin Reveal.js. Méthodes publiques `registerSliderExtension`
+  + `pinRevealJsTemplate`.
 
-`SliderManager.Configuration` → thin adapter. `Project.localConf` :
-`properties[CONFIG_PATH_KEY]` → `findProperty(CONFIG_PATH_KEY)` (zéro warning).
-`registerPublishSlidesTask` (ligne 638) : re-désérialisation `YAMLMapper().readValue`
-supprimée — réutilise `localConf`. Imports morts nettoyés (5 imports Jackson/Arrow
-retirés de `SliderManager.kt`). Baby-step TDD/BDD 3 niveaux : 16 unit
-(ConfigPathTest 4 + YamlMapperFactoryTest 5 + SlidesConfigLoaderTest 7) + 15
-scénarios Cucumber (`16_config_decomposition.feature` + `ConfigDecompositionSteps.kt`).
-`./gradlew :slider:check` VERT 466 PASS / 0 FAIL / 1 SKIP (+11 vs 455).
+`SliderManager.Extensions` → thin adapter (12 lignes, délègue à
+`SliderExtensionRegistrar.configure(this)`). `SliderPlugin.SliderExtension`
+→ `typealias slider.extension.SliderExtension` (préserve référence
+`RagTasks.kt`). Imports morts nettoyés (SliderExtension + RevealJSExtension
+retirés de `SliderManager.kt` ; ObjectFactory/Property/Inject retirés de
+`SliderPlugin.kt`).
 
-== Prochaine session — 037
+Baby-step TDD/BDD 3 niveaux : 9 unit (`RevealJsPinTest`) + 9 scénarios Cucumber
+(`18_extension_decomposition.feature` + `ExtensionDecompositionSteps.kt`).
+`./gradlew :slider:check` VERT — 516 PASS / 0 FAIL / 1 SKIP (+18 vs 498 S-037).
 
-*Objectif* : SLD-6.3 — extraction `Prerequisites` → `slider.prerequisite`.
-`JavaVersionGuard` (value object + `requireJava23()`). Extraction de la logique
-pure (parse version + guard) hors du contexte Gradle. `SliderManager.Prerequisites`
-(lignes ~126-141) contient :
+== Prochaine session — 039
 
-- `checkJavaVersion()` — `JavaVersion.current().majorVersion.toInt()` + `require(...)
-  Java 23+` avec message d'erreur.
+*Objectif* : SLD-6.5 — Extraction `Repositories` + `Plugins` + `Dependencies`
+→ `slider.wiring` (Gradle plumbing groupé). `GradleWiring` facade
+(`configureRepositories`, `applyPlugins`, `configureDependencies`). Les 3
+nested objects de `SliderManager` deviennent thin adapters qui délèguent au
+domaine.
 
-Migration : `JavaVersionGuard` domaine pur (prend `JavaVersion` en input, zéro
-dépendance Gradle), `SliderManager.Prerequisites` devient thin adapter qui passe
-`JavaVersion.current()` au guard.
-
-Enchaîner SLD-6.4 (Extensions → `slider.extension`), SLD-6.5 (Wiring), etc.
+Enchaîner SLD-6.6 (Reveal.js tasks), SLD-6.7 (Playwright tasks), etc. jusqu'à
+SLD-6.10 (`SliderManager` thin orchestrator < 100 lignes).
 
 == Rappels
 
@@ -56,12 +54,19 @@ Enchaîner SLD-6.4 (Extensions → `slider.extension`), SLD-6.5 (Wiring), etc.
 - Package Cucumber steps : `slider.steps`
 - Domaines DDD existants : `slider.repository`, `slider.capsule`, `slider.rtl`,
   `slider.i18n`, `slider.translate`, `slider.translation`, `slider.scaffold`,
-  `slider.config`
-- Domaines DDD SLD-6 à créer : `slider.prerequisite`, `slider.extension`,
-  `slider.wiring`, `slider.revealjs`, `slider.playwright`
+  `slider.config`, `slider.prerequisite`, `slider.extension`
+- Domaines DDD SLD-6 à créer : `slider.wiring`, `slider.revealjs`,
+  `slider.playwright`
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playright)
-- `./gradlew :slider:check` est VERT (466 PASS depuis S-036)
+- `./gradlew :slider:check` est VERT (516 PASS depuis S-038)
 - EPICs clos : SLD-0→5 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11
-- EPIC en cours : SLD-6 (SLD-6.0 ✅, SLD-6.1 ✅, SLD-6.2 ✅, SLD-6.3→6.10 ⏳)
+- EPIC en cours : SLD-6 (SLD-6.0 ✅, SLD-6.1 ✅, SLD-6.2 ✅, SLD-6.3 ✅,
+  SLD-6.4 ✅, SLD-6.5→6.10 ⏳)
+- Environnement : daemon Gradle reçoit parfois des signaux stop externes (autres
+  sessions Gradle parallèles). Lancer `./gradlew :slider:test` en arrière-plan
+  `nohup ... &` si blocage, puis inspecter `build/test-results/`.
+- `SliderPlugin.SliderExtension` est désormais un `typealias` vers
+  `slider.extension.SliderExtension` — préserve la compat API
+  (`RagTasks.kt` référence `slider.SliderPlugin.SliderExtension`).

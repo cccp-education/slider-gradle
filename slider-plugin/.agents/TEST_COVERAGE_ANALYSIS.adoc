@@ -1,5 +1,33 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 038_ : SLD-6.4 Extensions → slider.extension. +18 tests
+(339 unit + 162 cucumber + 15 functional = 516 total, 0 FAIL, 1 SKIP).
+
+Nouveaux tests session 038 :
+
+. `RevealJsPinTest.kt` (9 unit) — defaults Reveal.js pin (tag 5.2.1, organisation
+  hakimel, repository reveal.js, version 5.2.0), rejets blank sur les 4 champs
+  (version, tag, organisation, repository), custom pin préserve valeurs.
+. `18_extension_decomposition.feature` (9 scénarios cucumber) — BDD end-to-end
+  pin Reveal.js : defaults (tag/organisation/repository/version), rejets blank,
+  custom pin avec toutes valeurs préservées.
+. `ExtensionDecompositionSteps.kt` (5 step defs `When`/`Then`) — capture
+  `pin`/`constructionError`, assert via AssertJ.
+
+_Statut session 037_ : SLD-6.3 Prerequisites → slider.prerequisite. +18 tests
+(330 unit + 153 cucumber + 15 functional = 498 total, 0 FAIL, 1 SKIP).
+
+Nouveaux tests session 037 :
+
+. `JavaVersionGuardTest.kt` (9 unit) — `requireJava23` accept/reject aux bornes
+  (23 accepté, 24/25 au-dessus, 22/17 rejetés), `requireJava23FromMajor` parse
+  String numérique (accept/reject), rejette strings blank et non-numériques.
+. `17_prerequisite_decomposition.feature` (9 scénarios cucumber) — BDD end-to-end
+  garde Java version : version au-dessus/exactement/en-dessous du minimum, string
+  numérique acceptée/rejetée, string non-numérique/blank rejetée (parse error).
+. `PrerequisiteDecompositionSteps.kt` (3 step defs `When`/`Then`) — capture
+  `guardError`/`guardPassed`, assert via AssertJ.
+
 _Statut session 031_ : README i18n (9 fichiers doc). Aucun test modifié —
 session de documentation i18n pure. 425 PASS / 0 FAIL / 2 SKIP inchangés
 (UP-TO-DATE).

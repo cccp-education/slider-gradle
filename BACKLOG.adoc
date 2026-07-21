@@ -1,10 +1,38 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-07-21
+_.date: 2026-07-22
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== Session 038 (2026-07-22) — SLD-6.4 Extensions → slider.extension ✅ TERMINÉ
+
+SLD-6.4 — Extraction `Extensions` → `slider.extension` (nouveau domaine DDD,
+3 fichiers, ~110 lignes) : `RevealJsPin.kt` value object pin Reveal.js 5.2.1,
+`SliderExtension.kt` DSL déménagée depuis SliderPlugin, `SliderExtensionRegistrar.kt`
+`configure(project, pin)` enregistre DSL + pin. `SliderManager.Extensions` →
+thin adapter (délègue à `SliderExtensionRegistrar.configure(this)`).
+`SliderPlugin.SliderExtension` → `typealias slider.extension.SliderExtension`
+(préserve référence `RagTasks.kt`). Imports morts nettoyés. Baby-step TDD/BDD
+3 niveaux : 9 unit (`RevealJsPinTest`) + 9 scénarios Cucumber
+(`18_extension_decomposition.feature`). `./gradlew :slider:check` VERT 516 PASS /
+0 FAIL / 1 SKIP (+18 vs 498 S-037).
+
+'''
+== Session 037 (2026-07-21) — SLD-6.3 Prerequisites → slider.prerequisite ✅ TERMINÉ
+
+SLD-6.3 — Extraction `Prerequisites` → `slider.prerequisite` (nouveau domaine
+DDD, 1 fichier, ~45 lignes) : `JavaVersionGuard.kt` object pur.
+`requireJava23(currentMajor: Int)` validation pure + `requireJava23FromMajor(majorVersionString: String)`
+parse String (issue de `JavaVersion.current().majorVersion`, zéro dépendance Gradle).
+`SliderManager.Prerequisites` → thin adapter 11 lignes (passe
+`JavaVersion.current().majorVersion` au guard). Signature publique
+`SliderPlugin.apply()` préservée, zéro régression. Baby-step TDD/BDD 3 niveaux :
+9 unit (`JavaVersionGuardTest`) + 9 scénarios Cucumber
+(`17_prerequisite_decomposition.feature`). `./gradlew :slider:check` VERT 498 PASS /
+0 FAIL / 1 SKIP (+32 vs 466 S-036).
 
 '''
 == Session 036 (2026-07-21) — SLD-6.2 Configuration → slider.config ✅ TERMINÉ
@@ -55,8 +83,8 @@ consolidation `slider.repository`/`slider.capsule` existants.
 | SLD-6.0 | Cadrage EPIC — vision, découpage US, dépendances. MàJ INDEX/BACKLOG/PROMPT_REPRISE | ✅ TERMINÉ (S-035) | 1 pt
 | SLD-6.1 | Extraction `Scaffold` → `slider.scaffold` (3 méthodes, value object `ScaffoldResult`). Unit + Cucumber `15_scaffold_decomposition.feature` | ✅ TERMINÉ (S-035, 12 unit + 15 cucumber) | 3 pts
 | SLD-6.2 | Extraction `Configuration` → `slider.config` + fix deprecation `properties[...]` (lignes 80, 638). `ConfigPath` value object, `SlidesConfigLoader`, `YamlMapperFactory`. Unit + Cucumber `16_config_decomposition.feature` | ✅ TERMINÉ (S-036, 16 unit + 15 cucumber) | 3 pts
-| SLD-6.3 | Extraction `Prerequisites` → `slider.prerequisite` (`JavaVersionGuard`). Unit + Cucumber `17_prerequisite_decomposition.feature` | ⏳ À FAIRE | 1 pt
-| SLD-6.4 | Extraction `Extensions` → `slider.extension` (`SliderExtensionRegistrar`). Unit + Cucumber `18_extension_decomposition.feature` | ⏳ À FAIRE | 2 pts
+| SLD-6.3 | Extraction `Prerequisites` → `slider.prerequisite` (`JavaVersionGuard`). Unit + Cucumber `17_prerequisite_decomposition.feature` | ✅ TERMINÉ (S-037, 9 unit + 9 cucumber) | 1 pt
+| SLD-6.4 | Extraction `Extensions` → `slider.extension` (`SliderExtensionRegistrar`). Unit + Cucumber `18_extension_decomposition.feature` | ✅ TERMINÉ (S-038, 9 unit + 9 cucumber) | 2 pts
 | SLD-6.5 | Extraction `Repositories`+`Plugins`+`Dependencies` → `slider.wiring` (`GradleWiring`). Functional GradleTestKit | ⏳ À FAIRE | 2 pts
 | SLD-6.6 | Extraction `registerAsciidoctorRevealJsTask`+clean+dashboard → `slider.revealjs` (`RevealJsTaskRegistrar`). Functional GradleTestKit | ⏳ À FAIRE | 3 pts
 | SLD-6.7 | Extraction `serveSlides`+`visualTest`+`installPlaywright` → `slider.playwright` (`PlaywrightTaskRegistrar`). Functional GradleTestKit | ⏳ À FAIRE | 2 pts
@@ -65,7 +93,7 @@ consolidation `slider.repository`/`slider.capsule` existants.
 | SLD-6.10 | `SliderManager` → thin orchestrator < 100 lignes. `SliderPlugin.apply()` délègue à tous les registrars. Vérification 428 PASS maintenus | ⏳ À FAIRE | 2 pts
 |===
 
-_Total_ : 11 US, ~20 pts (3/11 terminées — SLD-6.0 cadrage + SLD-6.1 scaffold + SLD-6.2 config). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 466 PASS.
+_Total_ : 11 US, ~20 pts (5/11 terminées — SLD-6.0 cadrage + SLD-6.1 scaffold + SLD-6.2 config + SLD-6.3 prerequisite + SLD-6.4 extension). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 516 PASS.
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.11 ✅ TERMINE (Session 034, 2026-07-15)

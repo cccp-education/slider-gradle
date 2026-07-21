@@ -1,0 +1,117 @@
+= Session 037 — 2026-07-21 — SLD-6.3 Prerequisites → slider.prerequisite
+:session: 037
+:date: 2026-07-21
+
+== Objectif
+
+SLD-6.3 — Extraction `Prerequisites` → `slider.prerequisite` (nouveau domaine
+DDD). `JavaVersionGuard` (value object + `requireJava23()` + `requireJava23FromMajor()`).
+Extraction de la logique pure (parse version + guard) hors du contexte Gradle.
+`SliderManager.Prerequisites` devient thin adapter qui passe
+`JavaVersion.current().majorVersion` au guard.
+
+== Livré
+
+=== Domaine DDD `slider.prerequisite` (nouveau, 1 fichier, ~45 lignes)
+
+- `JavaVersionGuard.kt` (45 lignes) — object pur encapsulant la garde de version
+  Java. Zéro dépendance Gradle, zéro JVM introspection. Le caller fournit la
+  version majeure (Int ou String).
+  - `requireJava23(currentMajor: Int)` — validation pure, `require(...) >= 23`
+    avec message clair `education.cccp.slider requires Java 23+. Current: Java N`.
+  - `requireJava23FromMajor(majorVersionString: String)` — parse la String
+    (issue de `JavaVersion.current().majorVersion`) et délègue à `requireJava23`.
+    Rejette les strings blank/non-numériques avec `IllegalArgumentException`.
+
+=== `SliderManager.Prerequisites` → thin adapter
+
+Avant (13 lignes de logique inline) :
+----
+object Prerequisites {
+    internal fun checkJavaVersion() = JavaVersion
+        .current().majorVersion.toInt().run {
+            require(JavaVersion.current().majorVersion.toInt() >= 23) {
+                "education.cccp.slider requires Java 23+. Current: Java $this"
+            }
+        }
+}
+----
+
+Après (thin adapter, 11 lignes) :
+----
+object Prerequisites {
+    internal fun checkJavaVersion() =
+        slider.prerequisite.JavaVersionGuard.requireJava23FromMajor(
+            JavaVersion.current().majorVersion,
+        )
+}
+----
+
+Le `SliderPlugin.apply()` continue d'appeler `Prerequisites.checkJavaVersion()`
+en première étape — signature publique préservée, zéro régression.
+
+=== Baby-step TDD/BDD 3 niveaux
+
+*Unit tests* (9 tests, `JavaVersionGuardTest.kt`) :
+- `requireJava23` accept/reject aux bornes (23 accepté, 24/25 au-dessus, 22/17 rejetés)
+- `requireJava23FromMajor` parse String numérique (accept/reject)
+- `requireJava23FromMajor` rejette strings blank et non-numériques
+
+*Cucumber BDD* (9 scénarios, `17_prerequisite_decomposition.feature`) :
+- Java version au-dessus du minimum acceptée
+- Java version exactement au minimum acceptée
+- Java version en dessous rejetée avec message clair
+- Java version très ancienne rejetée avec la valeur courante dans le message
+- String numérique au-dessus/au minimum acceptée
+- String numérique en dessous rejetée
+- String non-numérique rejetée (version parse error)
+- String blank rejetée (version parse error)
+
+*Steps* : `PrerequisiteDecompositionSteps.kt` (package `slider.steps`, 3 step
+definitions `When`/`Then`, captures `guardError`/`guardPassed`).
+
+=== Build
+
+`./gradlew :slider:check` VERT — 498 PASS / 0 FAIL / 1 SKIP (1 skip préexistant
+JRuby gem, non lié).
+- 330 unit (was 321 S-036, +9 JavaVersionGuard)
+- 153 cucumber (was 144, +9 prerequisite decomposition ; 1 skip inchangé)
+- 15 functional (inchangé)
+
+== Méthode
+
+Baby-step TDD/BDD — RED → GREEN → REFACTOR, trois niveaux (unit → cucumber),
+English only (code, Gherkin, comments). Pattern aligné sur `slider.scaffold`
+(S-035) et `slider.config` (S-036) — value object pur + thin adapter dans
+`SliderManager`.
+
+== Fichiers
+
+|===
+| Fichier | Action | Lignes
+
+| `slider/src/main/kotlin/slider/prerequisite/JavaVersionGuard.kt`
+| Créé
+| 45
+
+| `slider/src/test/kotlin/slider/prerequisite/JavaVersionGuardTest.kt`
+| Créé
+| 60
+
+| `slider/src/test/features/17_prerequisite_decomposition.feature`
+| Créé
+| 47
+
+| `slider/src/test/scenarios/slider/steps/PrerequisiteDecompositionSteps.kt`
+| Créé
+| 55
+
+| `slider/src/main/kotlin/slider/SliderManager.kt`
+| Refactor (Prerequisites → thin adapter)
+| -13 / +11 (lignes 117-137)
+|===
+
+== Suite
+
+SLD-6.4 — Extraction `Extensions` → `slider.extension` (`SliderExtensionRegistrar`
+crée DSL `slider {}` + pin RevealJS 5.2.1). Baby-step TDD/BDD 3 niveaux.

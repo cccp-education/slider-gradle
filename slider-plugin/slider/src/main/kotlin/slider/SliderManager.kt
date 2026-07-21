@@ -7,7 +7,6 @@ import slider.SliderManager.Git.pushSlides
 import slider.SliderManager.Tasks.registerAsciidoctorRevealJsTask
 import slider.SliderManager.Tasks.registerCleanSlidesBuildTask
 import slider.SliderManager.Tasks.registerTasks
-import slider.SliderPlugin.SliderExtension
 import slider.Slides.RevealJsSlides
 import slider.Slides.RevealJsSlides.BUILD_GRADLE_KEY
 import slider.Slides.RevealJsSlides.CODERAY_CSS_KEY
@@ -39,7 +38,6 @@ import com.github.gradle.node.npm.task.NpxTask
 import org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.OUT_OF_PROCESS
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.asciidoctor.gradle.jvm.slides.AsciidoctorJRevealJSTask
-import org.asciidoctor.gradle.jvm.slides.RevealJSExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -116,8 +114,10 @@ object SliderManager {
 
     /**
      * Guards the build against unsupported Java versions.
-     * The plugin requires Java 23+ due to asciidoctor-gradle OUT_OF_PROCESS
-     * behaviour and Gradle 9 compatibility requirements.
+     *
+     * Thin Gradle adapter — pure validation logic lives in the `slider.prerequisite`
+     * domain: [slider.prerequisite.JavaVersionGuard]. This object only bridges the
+     * Gradle [org.gradle.api.JavaVersion] API to the domain guard.
      */
     object Prerequisites {
 
@@ -125,15 +125,10 @@ object SliderManager {
          * Fails fast with a clear message if the current JVM is below Java 23.
          * Called as the very first step in [SliderPlugin.apply].
          */
-        internal fun checkJavaVersion() = JavaVersion
-            .current()
-            .majorVersion
-            .toInt()
-            .run {
-                require(JavaVersion.current().majorVersion.toInt() >= 23) {
-                    "education.cccp.slider requires Java 23+. Current: Java $this"
-                }
-            }
+        internal fun checkJavaVersion() =
+            slider.prerequisite.JavaVersionGuard.requireJava23FromMajor(
+                JavaVersion.current().majorVersion,
+            )
     }
 
 
@@ -340,6 +335,10 @@ object SliderManager {
 
     /**
      * Registers and configures Gradle extensions consumed by the plugin and its tasks.
+     *
+     * Thin Gradle adapter — pure registration logic lives in the
+     * `slider.extension` domain: [slider.extension.SliderExtensionRegistrar]
+     * (registers the `slider {}` DSL + pins the Reveal.js template).
      */
     object Extensions {
 
@@ -348,20 +347,8 @@ object SliderManager {
          * and pins the RevealJS template to reveal.js 5.2.1 from the hakimel/reveal.js
          * GitHub repository.
          */
-        internal fun Project.configureExtensions() {
-            // Expose the slider {} DSL block to the consumer
-            extensions.create(GROUP_TASK_SLIDER, SliderExtension::class.java)
-
-            // Pin reveal.js version and GitHub template source
-            extensions.getByType(RevealJSExtension::class.java).apply {
-                version = "5.2.0"
-                templateGitHub { gh ->
-                    gh.setOrganisation("hakimel")
-                    gh.setRepository("reveal.js")
-                    gh.setTag("5.2.1")
-                }
-            }
-        }
+        internal fun Project.configureExtensions() =
+            slider.extension.SliderExtensionRegistrar.configure(this)
     }
 
 // =========================================================================

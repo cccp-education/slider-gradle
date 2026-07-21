@@ -1,0 +1,143 @@
+= Session 038 — 2026-07-22 — SLD-6.4 Extensions → slider.extension
+:session: 038
+:date: 2026-07-22
+
+== Objectif
+
+SLD-6.4 — Extraction `Extensions` → `slider.extension` (nouveau domaine DDD).
+`SliderExtensionRegistrar` (crée DSL `slider {}` + pin RevealJS 5.2.1).
+`SliderExtension` déménage dans le domaine. `SliderManager.Extensions` devient
+thin adapter.
+
+== Livré
+
+=== Domaine DDD `slider.extension` (nouveau, 3 fichiers, ~110 lignes)
+
+- `RevealJsPin.kt` (37 lignes) — value object data class encapsulant le pin
+  Reveal.js (version gem + organisation/repo/tag GitHub template). Defaults
+  immuables : version "5.2.0", organisation "hakimel", repository "reveal.js",
+  tag "5.2.1" (pin en vigueur depuis SLD-1). Validation non-blanc sur les 4
+  champs. Pure — zéro Gradle.
+- `SliderExtension.kt` (30 lignes) — DSL extension `slider {}` déménagée depuis
+  `SliderPlugin.kt`. Propriétés `configPath`, `language`, `supportedLanguages`
+  (Property<String>). `@Inject constructor(objects: ObjectFactory)` pour
+  injection Gradle. Contrat API public préservé.
+- `SliderExtensionRegistrar.kt` (53 lignes) — object orchestrateur Gradle.
+  `configure(project, pin)` enregistre la DSL + pin Reveal.js. Méthodes
+  publiques `registerSliderExtension(project)` et `pinRevealJsTemplate(project,
+  pin)` (utiles pour tests). Dépend de `RevealJSExtension` (AsciidoctorJ) et
+  `GROUP_TASK_SLIDER` (constant publique `slider.Slides.RevealJsSlides`).
+
+=== `SliderManager.Extensions` → thin adapter
+
+Avant (14 lignes de logique inline) :
+----
+object Extensions {
+    internal fun Project.configureExtensions() {
+        extensions.create(GROUP_TASK_SLIDER, SliderExtension::class.java)
+        extensions.getByType(RevealJSExtension::class.java).apply {
+            version = "5.2.0"
+            templateGitHub { gh -> gh.setOrganisation("hakimel"); ... }
+        }
+    }
+}
+----
+
+Après (thin adapter, 12 lignes) :
+----
+object Extensions {
+    internal fun Project.configureExtensions() =
+        slider.extension.SliderExtensionRegistrar.configure(this)
+}
+----
+
+Imports morts nettoyés dans `SliderManager.kt` :
+- `import slider.SliderPlugin.SliderExtension` (ligne 10)
+- `import org.asciidoctor.gradle.jvm.slides.RevealJSExtension` (ligne 41)
+
+=== `SliderPlugin.SliderExtension` → typealias
+
+`SliderPlugin.kt` : la nested `open class SliderExtension` est supprimée
+(15 lignes). Remplacée par `typealias SliderExtension = slider.extension.SliderExtension`
+à l'intérieur du companion `SliderPlugin` — préserve la référence
+`slider.SliderPlugin.SliderExtension` utilisée par `RagTasks.kt` (ligne 5) et
+`SliderManager.kt` (avant cleanup). Imports morts retirés (`ObjectFactory`,
+`Property`, `Inject`).
+
+=== Baby-step TDD/BDD 3 niveaux
+
+*Unit tests* (9 tests, `RevealJsPinTest.kt`) :
+- defaults (tag 5.2.1, organisation hakimel, repository reveal.js, version 5.2.0)
+- rejets blank sur les 4 champs (version, tag, organisation, repository)
+- custom pin préserve toutes les valeurs fournies
+
+*Cucumber BDD* (9 scénarios, `18_extension_decomposition.feature`) :
+- defaults Reveal.js pin (tag, organisation, repository, version)
+- rejets blank (version, tag, organisation, repository)
+- custom pin préserve valeurs
+
+*Steps* : `ExtensionDecompositionSteps.kt` (package `slider.steps`, 5 step
+definitions `When`/`Then`, capture `pin`/`constructionError`).
+
+=== Build
+
+`./gradlew :slider:check` VERT — 516 PASS / 0 FAIL / 1 SKIP (1 skip préexistant
+JRuby gem, non lié).
+- 339 unit (was 330 S-037, +9 RevealJsPin)
+- 162 cucumber (was 153, +9 extension decomposition ; 1 skip inchangé)
+- 15 functional (inchangé, confirme SliderExtension déménagement sans régression)
+
+== Méthode
+
+Baby-step TDD/BDD — RED → GREEN → REFACTOR, trois niveaux (unit → cucumber),
+English only (code, Gherkin, comments). Pattern aligné sur `slider.scaffold`
+(S-035), `slider.config` (S-036), `slider.prerequisite` (S-037) — value object
+pur + thin adapter dans `SliderManager`.
+
+Note : le step Cucumber `Then the pin construction should fail with a validation
+error` a initialement échoué — utilisation erronée de `assertThatThrownBy {
+constructionError }` (qui wrap un lambda au lieu de vérifier la variable).
+Corrigé en `assertThat(constructionError).isNotNull()`.
+
+== Fichiers
+
+|===
+| Fichier | Action | Lignes
+
+| `slider/src/main/kotlin/slider/extension/RevealJsPin.kt`
+| Créé
+| 37
+
+| `slider/src/main/kotlin/slider/extension/SliderExtension.kt`
+| Créé
+| 30
+
+| `slider/src/main/kotlin/slider/extension/SliderExtensionRegistrar.kt`
+| Créé
+| 53
+
+| `slider/src/test/kotlin/slider/extension/RevealJsPinTest.kt`
+| Créé
+| 60
+
+| `slider/src/test/features/18_extension_decomposition.feature`
+| Créé
+| 52
+
+| `slider/src/test/scenarios/slider/steps/ExtensionDecompositionSteps.kt`
+| Créé
+| 65
+
+| `slider/src/main/kotlin/slider/SliderManager.kt`
+| Refactor (Extensions → thin adapter, -2 imports morts)
+| -14 / +12 (lignes 335-362)
+
+| `slider/src/main/kotlin/slider/SliderPlugin.kt`
+| Refactor (SliderExtension → typealias, -15 lignes, -3 imports)
+| -25 / +8
+|===
+
+== Suite
+
+SLD-6.5 — Extraction `Repositories` + `Plugins` + `Dependencies` → `slider.wiring`
+(`GradleWiring` facade). Baby-step TDD/BDD 3 niveaux.

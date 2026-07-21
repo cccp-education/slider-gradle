@@ -12,9 +12,6 @@ import slider.SliderManager.Tasks.registerTasks
 import slider.ai.AssistantManager.createChatTasks
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-import javax.inject.Inject
 
 
 /**
@@ -54,23 +51,12 @@ class SliderPlugin : Plugin<Project> {
     }
 
     /**
-     * DSL extension for the slider plugin.
+     * Backward-compatible alias for the slider DSL extension.
      *
-     * Usage in build.gradle.kts:
-     * ```
-     * slider {
-     *     configPath = file("slides-context.yml").absolutePath
-     * }
-     * ```
+     * The extension now lives in the `slider.extension` domain
+     * ([slider.extension.SliderExtension]). This alias preserves the
+     * `slider.SliderPlugin.SliderExtension` reference path used by callers
+     * (e.g. `RagTasks`) without keeping a duplicate definition.
      */
-    open class SliderExtension @Inject constructor(objects: ObjectFactory) {
-        @Suppress("unused")
-        val configPath: Property<String> = objects.property(String::class.java)
-
-        @Suppress("unused")
-        val language: Property<String> = objects.property(String::class.java)
-
-        @Suppress("unused")
-        val supportedLanguages: Property<String> = objects.property(String::class.java)
-    }
+    typealias SliderExtension = slider.extension.SliderExtension
 }
