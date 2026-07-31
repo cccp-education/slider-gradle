@@ -76,4 +76,7 @@ object CapsuleTaskNames {
     const val GROUP = "slider"
     const val DESCRIPTION =
         "Extract speaker notes from AsciiDoc decks and generate a capsule script (consumed by capsule-gradle)."
+    const val TRANSLATE_AND_GENERATE_CAPSULE = "translateAndGenerateCapsule"
+    const val TRANSLATE_AND_GENERATE_DESCRIPTION =
+        "Translate a deck into multiple languages then generate capsule scripts for all translated decks. Depends on translateDeck and generateCapsule."
 }

@@ -102,4 +102,15 @@ class CapsuleTaskDomainTest {
         assertTrue(CapsuleTaskNames.DESCRIPTION.contains("speaker notes"))
         assertTrue(CapsuleTaskNames.DESCRIPTION.contains("capsule-gradle"))
     }
+
+    @Test
+    fun `the translate and generate capsule task name is translateAndGenerateCapsule`() {
+        assertEquals("translateAndGenerateCapsule", CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE)
+    }
+
+    @Test
+    fun `the translate and generate capsule task description mentions translateDeck and generateCapsule`() {
+        assertTrue(CapsuleTaskNames.TRANSLATE_AND_GENERATE_DESCRIPTION.contains("translateDeck"))
+        assertTrue(CapsuleTaskNames.TRANSLATE_AND_GENERATE_DESCRIPTION.contains("generateCapsule"))
+    }
 }

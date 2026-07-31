@@ -1,10 +1,25 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-07-22
+_.date: 2026-07-31
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== Session 041 (2026-07-31) — SLD-7 Câblage Explicite translateDeck → Capsule ✅ TERMINÉ
+
+EPIC SLD-7 TERMINÉ (3/3 US, ~6 pts). US SLD-7.0 cadrage (contrat d'interface
+slider↔capsule formalisé). US SLD-7.1 tâche composite `translateAndGenerateCapsule`
+(dependsOn translateDeck → generateCapsule, domaine `slider.capsule` enrichi :
+`CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE` + `CapsuleTaskRegistrar.
+registerTranslateAndGenerateCapsule`). US SLD-7.2 Cucumber BDD pipeline complet
+slider→capsule (feature `23_translate_and_generate_capsule.feature` +
+`TranslateAndGenerateCapsuleSteps`). Baby-step TDD/BDD 3 niveaux : 2 unit
+(CapsuleTaskDomainTest) + 2 functional (TranslateAndGenerateCapsuleFunctionalTest)
++ 3 cucumber (23_translate_and_generate_capsule.feature). `./gradlew :slider:check`
+VERT — 660 PASS / 0 FAIL / 1 SKIP (+6 vs 654 S-040). `SliderManager.kt` 552→553
+lignes (registerTranslateAndGenerateCapsuleTask ajouté dans registerTasks).
 
 '''
 == Session 040 (2026-07-22) — SLD-6.8 Capsule task decomposition ✅ TERMINÉ
@@ -370,3 +385,16 @@ i18n fallback (8_i18n_fallback.feature 6 scenarios). 57 unit + 3 functional +
 
 _Total_ : 7 US, ~15 pts.
 _Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-3-detail-us[INDEX → EPIC SLD-3].
+
+'''
+== 🔲 SLD-7 — Câblage Explicite translateDeck → Capsule (Session 097)
+
+[cols="2,3,2,2", options="header"]
+|===
+| US | Description | Pts | Priorité
+| SLD-7.0 | Cadrage EPIC — contrat d'interface slider↔capsule pour pipeline multi-langue | 1 | P0
+| SLD-7.1 | Tâche composite `translateAndGenerateCapsule` — dependsOn translateDeck → generateCapsule | 2 | P0
+| SLD-7.2 | Tests Cucumber — scénario BDD pipeline complet slider→capsule | 3 | P1
+|===
+
+_Total_ : 3 US, ~6 pts. _Dépendance_ : SLD-6 terminé. _Source_ : Session 097.

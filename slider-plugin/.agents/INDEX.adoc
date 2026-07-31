@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-07-22
-_Session terminee_ : 040 — SLD-6.8 Capsule task decomposition. US SLD-6.8 livrée. Domaine DDD `slider.capsule` consolidé (2 nouveaux fichiers, ~138 lignes) : `CapsuleTaskDomain.kt` 78l value objects purs (`CapsuleAdocDir` résout `<projectDir>/slides/misc` + `adocFiles()` triés, `CapsuleScriptDir` résout `<buildDir>/capsule` + `ensureCreated()` idempotent + `scriptFileFor(name)`, `CapsuleTaskNames` constantes `generateCapsule`/`slider`/description) + `CapsuleTaskRegistrar.kt` 60l thin Gradle adapter `register(project)` (comportement bit-for-bit préservé : `outputs.upToDateWhen { false }`, skip empty scripts, log slide count). `SliderManager.Tasks.registerAsciidocCapsuleTask` (~30 lignes) supprimé, délègue à `slider.capsule.CapsuleTaskRegistrar.register(this)`. Imports morts nettoyés (`AsciidocSpeakerNoteParser`/`CapsuleScriptWriter` retirés de SliderManager). `SliderManager.kt` 570→552 lignes (was 968 S-035). Baby-step TDD/BDD 3 niveaux : 12 unit (`CapsuleTaskDomainTest`) + 13 scénarios Cucumber (`22_capsule_task_decomposition.feature` + `CapsuleTaskDecompositionSteps`, steps préfixés `capsule`). `./gradlew :slider:check` VERT — 654 PASS / 0 FAIL / 1 SKIP (+21 vs 633 S-039).
-_Prochaine session_ : 041 — SLD-6.9 Consolidation `registerPublishSlidesTask` + `Git` object → `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. Fix deprecation `properties[CONFIG_PATH_KEY]` ligne 744. Baby-step TDD/BDD 3 niveaux (unit → cucumber).
+_Derniere mise a jour_ : 2026-07-31
+_Session terminee_ : 041 — SLD-7 Câblage Explicite translateDeck → Capsule. EPIC SLD-7 TERMINÉ (3/3 US, ~6 pts). US SLD-7.0 cadrage (contrat d'interface slider↔capsule formalisé). US SLD-7.1 tâche composite `translateAndGenerateCapsule` (dependsOn translateDeck → generateCapsule, domaine `slider.capsule` enrichi : `CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE` + `CapsuleTaskRegistrar.registerTranslateAndGenerateCapsule`). US SLD-7.2 Cucumber BDD pipeline complet slider→capsule (feature `23_translate_and_generate_capsule.feature` + `TranslateAndGenerateCapsuleSteps`). Baby-step TDD/BDD 3 niveaux : 2 unit (CapsuleTaskDomainTest) + 2 functional (TranslateAndGenerateCapsuleFunctionalTest) + 3 cucumber (23_translate_and_generate_capsule.feature). `./gradlew :slider:check` VERT — 660 PASS / 0 FAIL / 1 SKIP (+6 vs 654 S-040). `SliderManager.kt` 552→553 lignes (registerTranslateAndGenerateCapsuleTask ajouté dans registerTasks).
+_Prochaine session_ : 042 — SLD-6.9 Consolidation `registerPublishSlidesTask` + `Git` object → `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. Fix deprecation `properties[CONFIG_PATH_KEY]` ligne 744. Baby-step TDD/BDD 3 niveaux (unit → cucumber).
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -86,6 +86,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-4 | Refactor DDD slider.repository — extraction domaine depuis SliderManager.Git (SlideDeploymentRequest, GitCredentials, SlideDeployer, JGitSlidePusher, CommitResult, SlidePushResult) | ✅ TERMINÉ (S-025 + S-027, 8/8 US) | P1
 | SLD-5 | Deck Translation Pipeline — génère 10 decks localisés (one-to-many) depuis un deck source (deck-context.yml + .adoc). Domaine DDD `slider.translation` + tâche `translateDeck`. Aligné sur `LanguageCatalog.supportedCodes()` (en, zh, hi, es, fr, ar, bn, pt, ru, ur — top 10 langues les plus parlées). | ✅ TERMINÉ (S-029 + S-030, 7/7 US) | P1
 | SLD-6 | Refactor DDD SliderManager decomposition — `SliderManager.kt` (968 lignes, 9 nested objects) est un god-object. Extraction de chaque responsabilité dans un domaine dédié (`slider.scaffold`, `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`, `slider.revealjs`, `slider.playwright`, `slider.capsule` consolidé) + consolidation `slider.repository` existant. Cible : `SliderManager` thin orchestrator < 100 lignes. Fix deprecation `properties[...]` (lignes 82, 744). Baby-step TDD/BDD 3 niveaux, English only. | 🚧 EN COURS (S-040, US-6.0→6.8 ✅, US-6.9→6.10 ⏳) | P1
+| SLD-7 | Câblage Explicite translateDeck → Capsule — tâche composite `translateAndGenerateCapsule` (dependsOn translateDeck → generateCapsule). Contrat d'interface slider↔capsule pour pipeline multi-langue. | ✅ TERMINÉ (S-041, 3/3 US) | P1
 |===
 
 '''
@@ -310,6 +311,26 @@ _Dépendances_ :
 _Total_ : 11 US, ~20 pts (9/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright + 6.8 capsule).
 _Pattern de référence_ : `slider.repository` (S-025/027) — value objects purs + adaptateur infrastructure + tâche thin.
 _Prérequis_ : SLD-0→5 terminés (✅), CNV-6/7/8 terminés (✅), build vert 654 PASS (✅).
+
+'''
+== EPIC SLD-7 — Câblage Explicite translateDeck → Capsule
+
+_Source_ : Session 097 — Audit CTO MVP SaaS. Le pipeline `translateDeck` (SLD-5,
+10 langues, 425 tests PASS) et le pipeline capsule `generateCapsuleVideo`
+(capsule-gradle, 217 tests PASS) sont fonctionnels mais non câblés explicitement.
+SLD-7 crée le contrat d'interface slider↔capsule pour le pipeline multi-langue.
+
+_Dépendance_ : SLD-6 terminé, CAP-29 (capsule-gradle).
+
+[cols="1,3,2,2", options="header"]
+|===
+| US | Description | Pts | Priorité
+| SLD-7.0 | Cadrage EPIC — contrat d'interface slider↔capsule pour pipeline multi-langue | 1 | P0
+| SLD-7.1 | Tâche composite `translateAndGenerateCapsule` — dependsOn translateDeck → generateCapsule | 2 | P0
+| SLD-7.2 | Tests Cucumber — scénario BDD pipeline complet slider→capsule | 3 | P1
+|===
+
+_Total_ : 3 US, ~6 pts. ✅ TERMINÉ (Session 041, 2026-07-31).
 
 '''
 == Fichiers Associes

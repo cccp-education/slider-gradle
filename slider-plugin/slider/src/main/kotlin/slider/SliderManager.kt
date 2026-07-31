@@ -350,6 +350,7 @@ object SliderManager {
             slider.playwright.PlaywrightTaskRegistrar.register(this)
             registerPublishSlidesTask()
             slider.capsule.CapsuleTaskRegistrar.register(this)
+            slider.capsule.CapsuleTaskRegistrar.registerTranslateAndGenerateCapsule(this)
             registerReportTestsTask()
             registerReportFunctionalTestsTask()
             registerGenerateRevealUiMessagesTask()

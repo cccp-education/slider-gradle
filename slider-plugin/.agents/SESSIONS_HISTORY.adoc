@@ -2,6 +2,20 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 041 (2026-07-31) — SLD-7 Câblage Explicite translateDeck → Capsule
+
+EPIC SLD-7 TERMINÉ (3/3 US, ~6 pts). US SLD-7.0 cadrage (contrat d'interface
+slider↔capsule formalisé). US SLD-7.1 tâche composite `translateAndGenerateCapsule`
+(dependsOn translateDeck → generateCapsule, domaine `slider.capsule` enrichi :
+`CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE` + `CapsuleTaskRegistrar.
+registerTranslateAndGenerateCapsule`). US SLD-7.2 Cucumber BDD pipeline complet
+slider→capsule (feature `23_translate_and_generate_capsule.feature` +
+`TranslateAndGenerateCapsuleSteps`). Baby-step TDD/BDD 3 niveaux : 2 unit
+(CapsuleTaskDomainTest) + 2 functional (TranslateAndGenerateCapsuleFunctionalTest)
++ 3 cucumber (23_translate_and_generate_capsule.feature). `./gradlew :slider:check`
+VERT — 660 PASS / 0 FAIL / 1 SKIP (+6 vs 654 S-040). `SliderManager.kt` 552→553
+lignes (registerTranslateAndGenerateCapsuleTask ajouté dans registerTasks).
+
 == Session 040 (2026-07-22) — SLD-6.8 Capsule task decomposition + Publication 0.0.12
 
 US SLD-6.8 — Extraction `registerAsciidocCapsuleTask` (~30 lignes) depuis

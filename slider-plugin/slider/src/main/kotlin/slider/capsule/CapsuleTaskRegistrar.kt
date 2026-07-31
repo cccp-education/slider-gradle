@@ -58,4 +58,21 @@ object CapsuleTaskRegistrar {
             }
         }
     }
+
+    /**
+     * Registers the `translateAndGenerateCapsule` composite task on [project].
+     *
+     * This task depends on both `translateDeck` and `generateCapsule`, wiring
+     * the translation pipeline (SLD-5) to the capsule feed pipeline (SLD-2.5)
+     * so that a single Gradle invocation produces capsule scripts for all
+     * translated decks.
+     */
+    fun registerTranslateAndGenerateCapsule(project: Project) {
+        project.tasks.register<DefaultTask>(CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE) {
+            group = CapsuleTaskNames.GROUP
+            description = CapsuleTaskNames.TRANSLATE_AND_GENERATE_DESCRIPTION
+            dependsOn(CapsuleTaskNames.GENERATE_CAPSULE)
+            dependsOn("translateDeck")
+        }
+    }
 }

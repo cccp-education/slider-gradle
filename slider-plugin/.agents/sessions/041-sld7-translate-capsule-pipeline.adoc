@@ -1,0 +1,58 @@
+= Session 041 — SLD-7 Câblage Explicite translateDeck → Capsule
+:date: 2026-07-31
+:epic: SLD-7
+:status: TERMINÉ
+:score: 10/10
+
+== Objectif
+
+Câbler explicitement le pipeline `translateDeck` (SLD-5, 10 langues) au pipeline
+capsule `generateCapsule` (SLD-2.5) via une tâche composite
+`translateAndGenerateCapsule`. Les deux pipelines étaient fonctionnels mais
+indépendants — SLD-7 crée le contrat d'interface slider↔capsule.
+
+== US livrées
+
+|===
+| US | Description | Pts | Statut
+| SLD-7.0 | Cadrage EPIC — contrat d'interface slider↔capsule pour pipeline multi-langue | 1 | ✅
+| SLD-7.1 | Tâche composite `translateAndGenerateCapsule` — dependsOn translateDeck → generateCapsule | 2 | ✅
+| SLD-7.2 | Tests Cucumber — scénario BDD pipeline complet slider→capsule | 3 | ✅
+|===
+
+== Fichiers modifiés
+
+[cols="2,3,2"]
+|===
+| Fichier | Changement | Type
+| `CapsuleTaskDomain.kt` | +2 constantes (`TRANSLATE_AND_GENERATE_CAPSULE`, `TRANSLATE_AND_GENERATE_DESCRIPTION`) | production
+| `CapsuleTaskRegistrar.kt` | +`registerTranslateAndGenerateCapsule()` — tâche composite dependsOn translateDeck + generateCapsule | production
+| `SliderManager.kt` | +1 ligne câblage dans `registerTasks()` | production
+| `CapsuleTaskDomainTest.kt` | +2 tests unitaires (nom + description) | test
+| `TranslateAndGenerateCapsuleFunctionalTest.kt` | +2 tests GradleTestKit (registration + dependsOn) | test
+| `23_translate_and_generate_capsule.feature` | +3 scénarios Cucumber BDD | test
+| `TranslateAndGenerateCapsuleSteps.kt` | Step definitions | test
+|===
+
+== Tests
+
+Baby-step TDD/BDD 3 niveaux :
+- 2 unit (CapsuleTaskDomainTest)
+- 2 functional (TranslateAndGenerateCapsuleFunctionalTest)
+- 3 cucumber (23_translate_and_generate_capsule.feature)
+
+`./gradlew :slider:check` VERT — 660 PASS / 0 FAIL / 1 SKIP (+6 vs 654 S-040).
+
+== Usage
+
+[source,shell]
+----
+./gradlew translateAndGenerateCapsule -Pdeck.context=slides/misc/kotlin-deck-context.yml
+----
+
+Exécute `translateDeck` puis `generateCapsule` en une seule commande.
+
+== Prochaine session
+
+042 — SLD-6.9 Consolidation `registerPublishSlidesTask` + `Git` object →
+`slider.repository.PublishTaskRegistrar` + `SlidePublisher`.
