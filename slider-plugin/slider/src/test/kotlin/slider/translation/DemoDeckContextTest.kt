@@ -5,7 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import slider.AuthorContext
 import slider.DeckContext
-import slider.SliderManager.Configuration.yamlMapper
+import slider.SliderConfig.yamlMapper
 import java.io.File
 
 /**

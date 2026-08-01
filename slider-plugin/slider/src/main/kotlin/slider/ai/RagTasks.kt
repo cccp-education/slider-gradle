@@ -1,7 +1,7 @@
 package slider.ai
 
 import slider.DeckContext
-import slider.SliderManager.Configuration.yamlMapper
+import slider.SliderConfig.yamlMapper
 import slider.SliderPlugin.SliderExtension
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel

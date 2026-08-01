@@ -7,7 +7,7 @@ import arrow.core.Either.Companion.catch
 import arrow.core.Either.Left
 import arrow.core.Either.Right
 import slider.DeckContext
-import slider.SliderManager.Configuration.localConf
+import slider.SliderConfig.localConf
 import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.chat.StreamingChatModel
 import dev.langchain4j.model.chat.response.ChatResponse

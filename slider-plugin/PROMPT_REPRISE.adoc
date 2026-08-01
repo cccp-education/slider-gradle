@@ -1,38 +1,31 @@
-= PROMPT_REPRISE — slider-gradle — Session 042
-:session: 042
-:date: 2026-07-31
+= PROMPT_REPRISE — slider-gradle — Session 043
+:session: 043
+:date: 2026-08-01
 
-== Session 041 terminée
+== Session 042 terminée
 
-EPIC SLD-7 TERMINÉ (3/3 US, ~6 pts) — Câblage Explicite translateDeck → Capsule.
+EPIC SLD-6 TERMINÉ (11/11 US, ~20 pts) — SliderManager decomposition.
 
-- **SLD-7.0** (1 pt) : Cadrage EPIC — contrat d'interface slider↔capsule formalisé.
-- **SLD-7.1** (2 pts) : Tâche composite `translateAndGenerateCapsule` — dependsOn
-  translateDeck → generateCapsule. Domaine `slider.capsule` enrichi :
-  `CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE` +
-  `CapsuleTaskRegistrar.registerTranslateAndGenerateCapsule`. Câblé dans
-  `SliderManager.Tasks.registerTasks()`.
-- **SLD-7.2** (3 pts) : Cucumber BDD pipeline complet slider→capsule — feature
-  `23_translate_and_generate_capsule.feature` (3 scénarios) +
-  `TranslateAndGenerateCapsuleSteps`.
+- **SLD-6.9** (2 pts) : Consolidation `registerPublishSlidesTask` + `Git` object
+  → `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. `SlidePublisher.kt`
+  (thin Gradle adapter, ex-`SliderManager.Git.pushSlides`) + `PublishTaskRegistrar.kt`
+  (task registrar, ex-`SliderManager.Tasks.registerPublishSlidesTask`). Cucumber
+  `20_publish_task_decomposition.feature` 3/3 PASS. Deprecation
+  `properties[CONFIG_PATH_KEY]` déjà résolue US-6.2 — `localConf` utilise
+  `findProperty()`.
+- **SLD-6.10** (2 pts) : `SliderManager` supprimé, `SliderPlugin` 30 lignes délègue
+  directement à 5 registrars (SliderConfig, SliderPrerequisiteRegistrar,
+  SliderScaffoldRegistrar, SliderWiringRegistrar, SliderTasks). 15 domaines DDD.
 
-Baby-step TDD/BDD 3 niveaux : 2 unit (CapsuleTaskDomainTest) + 2 functional
-(TranslateAndGenerateCapsuleFunctionalTest) + 3 cucumber
-(23_translate_and_generate_capsule.feature). `./gradlew :slider:check` VERT —
-660 PASS / 0 FAIL / 1 SKIP (+6 vs 654 S-040). `SliderManager.kt` 552→553 lignes
-(registerTranslateAndGenerateCapsuleTask ajouté dans registerTasks).
+Baby-step TDD/BDD 3 niveaux : 3 Cucumber (20_publish_task_decomposition.feature).
+`./gradlew :slider:check` VERT — 421 unit (+2 Playwright préexistants) + functional
+OK + Cucumber OK.
 
-== Prochaine session — 042
+== Prochaine session — 043
 
-*Objectif* : SLD-6.9 — Consolidation `registerPublishSlidesTask` + `Git` object
-→ `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. Le nested object
-`Git` (~55 lignes, déjà thin adapter vers `slider.repository` depuis S-025/027)
-déménage dans le domaine `slider.repository`. Fix deprecation
-`properties[CONFIG_PATH_KEY]` ligne 744 (déjà traité US-6.2 pour ligne 82, ici
-pour 744). Functional GradleTestKit + Cucumber `20_publish_task_decomposition.feature`.
-
-Enchaîner SLD-6.10 (SliderManager → thin orchestrator < 100 lignes,
-vérification 660 PASS maintenus). EPIC SLD-6 se termine à 11/11.
+*Objectif* : À définir. Tous les EPICs SLD-0→7 sont terminés. Backlog vide.
+Prochaines pistes : SLD-8 (nouvel EPIC à cadrer), publication 0.0.13, ou
+maintenance.
 
 == Rappels
 
@@ -47,26 +40,14 @@ vérification 660 PASS maintenus). EPIC SLD-6 se termine à 11/11.
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
 - Package Cucumber steps : `slider.steps`
-- Domaines DDD existants (14) : `slider.repository`, `slider.capsule` (consolidé),
-  `slider.rtl`, `slider.i18n`, `slider.translate`, `slider.translation`,
-  `slider.scaffold`, `slider.config`, `slider.prerequisite`, `slider.extension`,
-  `slider.wiring`, `slider.revealjs`, `slider.playwright` + `SliderManager`
-  résiduel (553 lignes)
-- Domaines DDD SLD-6 restants : `slider.repository` (consolidation
-  PublishTaskRegistrar + SlidePublisher + Git object déménagement)
+- Domaines DDD (15) : `slider.repository`, `slider.capsule`, `slider.rtl`,
+  `slider.i18n`, `slider.translate`, `slider.translation`, `slider.scaffold`,
+  `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
+  `slider.revealjs`, `slider.playwright` + `SliderConfig` + `SliderTasks`
+- `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
-- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playright)
-- `./gradlew :slider:check` est VERT (660 PASS depuis S-041)
-- EPICs clos : SLD-0→5 + SLD-7 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11/0.0.12
-- EPIC en cours : SLD-6 (SLD-6.0→6.8 ✅, SLD-6.9→6.10 ⏳)
-- Environnement : daemon Gradle reçoit parfois des signaux stop externes (autres
-  sessions Gradle parallèles). Lancer `./gradlew :slider:check` en arrière-plan
-  `nohup ... &` si blocage, puis inspecter `build/test-results/`.
-- `SliderManager.kt` est désormais ~553 lignes (was 968 S-035). Cible SLD-6.10 :
-  thin orchestrator < 100 lignes. Restent à extraire : registerPublishSlidesTask
-  (~30 lignes) + Git object (~55 lignes) + registerReportTestsTask/
-  registerReportFunctionalTestsTask (~30 lignes) +
-  registerGenerateRevealUiMessagesTask (~15 lignes) + registerTranslateDeckTask
-  (délègue déjà à slider.translation) + registerAsciidoctorTask (~7 lignes).
-- Build se lance depuis `slider-plugin/` (project `:slider`).
+- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
+- `./gradlew :slider:check` est VERT (421 unit + functional OK + Cucumber OK)
+- EPICs clos : SLD-0→7 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11/0.0.12
+- Build se lance depuis `slider-plugin/` (project `:slider`)

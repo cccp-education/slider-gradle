@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import slider.DeckContext
 import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
-import slider.SliderManager.Configuration.yamlMapper
+import slider.SliderConfig.yamlMapper
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel
 import java.io.File

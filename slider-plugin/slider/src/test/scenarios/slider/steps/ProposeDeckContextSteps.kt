@@ -2,7 +2,7 @@
 
 package slider.steps
 
-import slider.SliderManager.Configuration.yamlMapper
+import slider.SliderConfig.yamlMapper
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then

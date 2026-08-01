@@ -4,7 +4,7 @@ import contracts.i18n.LanguageCatalog
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
 import slider.DeckContext
-import slider.SliderManager.Configuration.yamlMapper
+import slider.SliderConfig.yamlMapper
 import java.io.File
 
 /**
