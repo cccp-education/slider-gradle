@@ -1,0 +1,7 @@
+= COMPLETED_TASKS_ARCHIVE — Août 2026
+
+== Session 042 (2026-08-01) — SLD-6.9 + SLD-6.10
+
+- SLD-6.9 : Consolidation `registerPublishSlidesTask` + `Git` object → `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. Cucumber 3/3 PASS.
+- SLD-6.10 : `SliderManager` supprimé, `SliderPlugin` 30 lignes délègue directement à 5 registrars. 15 domaines DDD.
+- EPIC SLD-6 TERMINÉ 11/11 US.

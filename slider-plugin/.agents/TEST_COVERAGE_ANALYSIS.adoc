@@ -1,5 +1,16 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 042_ : SLD-6.9 + SLD-6.10 — EPIC SLD-6 TERMINÉ 11/11 US.
++3 tests Cucumber (20_publish_task_decomposition.feature). 421 unit (+2 Playwright
+préexistants) + functional OK + Cucumber OK. `SliderManager` supprimé,
+`SliderPlugin` 30 lignes, 15 domaines DDD.
+
+Nouveaux tests session 042 :
+
+. `20_publish_task_decomposition.feature` (3 scénarios cucumber) — deploySlides
+  task registered in deploy group, depends on asciidoctor, SlidePublisher
+  orchestrates full pipeline (bare remote push).
+
 _Statut session 040_ : SLD-6.8 Capsule task decomposition.
 +25 tests (419 unit + 218 cucumber + 17 functional = 654 total, 0 FAIL, 1 SKIP).
 Domaine DDD `slider.capsule` consolidé, 2 nouveaux fichiers source + 1 test +

@@ -1,10 +1,43 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-07-31
+_.date: 2026-08-01
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
+
+'''
+== Session 042 (2026-08-01) — SLD-6.9 + SLD-6.10 — EPIC SLD-6 TERMINÉ ✅
+
+EPIC SLD-6 TERMINÉ (11/11 US, ~20 pts). SLD-6.9 : Consolidation
+`registerPublishSlidesTask` + `Git` object → `slider.repository.PublishTaskRegistrar`
++ `SlidePublisher`. `SlidePublisher.kt` (thin Gradle adapter,
+ex-`SliderManager.Git.pushSlides`) + `PublishTaskRegistrar.kt` (task registrar,
+ex-`SliderManager.Tasks.registerPublishSlidesTask`). Cucumber
+`20_publish_task_decomposition.feature` 3/3 PASS. SLD-6.10 : `SliderManager`
+supprimé, `SliderPlugin` 30 lignes délègue directement à 5 registrars
+(SliderConfig, SliderPrerequisiteRegistrar, SliderScaffoldRegistrar,
+SliderWiringRegistrar, SliderTasks). 15 domaines DDD. `./gradlew :slider:check`
+VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
+
+== EPICs — Statut final
+
+[cols="2,3,2,2"]
+|===
+| EPIC | Description | Statut | US
+| SLD-0 | Bootstrap gouvernance | ✅ | 0/0
+| SLD-1 | Upgrade Reveal.js 5.2.1 | ✅ | 5/5
+| SLD-2 | Playwright E2E + Capsule feed | ✅ | 5/5
+| SLD-3 | i18n 10 langues | ✅ | 7/7
+| SLD-4 | Refactor DDD slider.repository | ✅ | 8/8
+| SLD-5 | Deck Translation Pipeline | ✅ | 7/7
+| SLD-6 | SliderManager decomposition | ✅ | 11/11
+| SLD-7 | Câblage translateDeck → Capsule | ✅ | 3/3
+| CNV-6/7/8 | Conventions plugins | ✅ | 3/3
+| PUB | Publications Maven Central 0.0.1→0.0.12 | ✅ | 6/6
+|===
+
+_Tous les EPICs sont terminés. Backlog vide._
 
 '''
 == Session 041 (2026-07-31) — SLD-7 Câblage Explicite translateDeck → Capsule ✅ TERMINÉ
