@@ -103,7 +103,10 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 Voir `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (convention ADR workspace) :
 * **Decision 001** — PicoContainer : rejet assumé de la DI conteneur (✅ ADOPTÉE, S-046)
-* **Decision 002** — koog + R2DBC : socle N1 existant, câblage slider à cadrer (🟡 EN COURS, S-046)
+* **Decision 002** — Consommer codebase (N1) comme socle LLM unifié (🟡 EN COURS, S-046)
+
+_Discussion architecturale complète_ : `slider-plugin/.agents/ARCHITECTURE_DISCUSSION_SLD8.adoc`
+(audit éparpillement 8 boroughs, gap codebase, stratégie transferts unitaires, risques).
 
 '''
 == EPIC SLD-1 — Detail US

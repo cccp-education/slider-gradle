@@ -1,0 +1,183 @@
+= Discussion Architecturale — SLD-8 : slider consomme codebase (N1) comme socle LLM unifié
+:date: 2026-08-04
+:session: 046 (post-cadrage)
+:statut: ✅ DÉCISION PRAGMATIQUE — direction adoptée, implémentation incrémentale
+
+'''
+== Résumé exécutif
+
+**Décision** : slider ne réimplémente pas koog+langchain4j+RAG — il consomme le
+socle N1 codebase-gradle (Central 0.0.5) qui les unifie déjà. L'implémentation
+se fait par transferts unitaires (provider par provider), pas par big bang.
+
+**Raison** : le socle existe, il est publié, il est testé. Le dupliquer dans
+slider (comme le faisait le cadrage SLD-8 initial : "ajouter koog via BOM +
+domaine slider.koog autonome") serait de la dette technique immédiate.
+
+**Risque accepté** : codebase n'expose pas encore d'API de services consommable
+(BuildService, Provider<ChatModel>). L'US-8.1 lève ce gap. Si l'US-8.1 est
+bloquée, le plan B est documenté (critères de réévaluation Decision 002).
+
+'''
+
+== 1. Constat initial — l'éparpillement des appels LLM
+
+Audit du 4 août 2026 sur `foundry/public/` — 8 boroughs font du LLM chacun de
+leur côté, avec duplication massive :
+
+[cols="2,2,4", options="header"]
+|===
+| Borough | Fichiers LLM | Duplication constatée
+| bakery-gradle | 3 | `PooledOllamaLlmService`, `OllamaLlmService` — factories ChatModel
+| codebase-gradle | 16 | `LlmProviderResolver`, `OllamaPool` (N0 llm-pool-contracts), `OllamaLlmProvider`, `GeminiLlmProvider`, `GeminiVisionProvider` — **le socle de référence**
+| codex-gradle | 5 | `HttpOllamaChatClient` (port/adapter custom), OCR LLM
+| document-gradle | 3 | `OllamaTranslationAdapter`, `PooledOllamaTranslationAdapter`, `OllamaDocumentLlmProvider`
+| newpipe-gradle | 4 | `LlmClient` — factory ChatModel
+| planner-gradle | 2 | `OllamaBridge` — factory ChatModel
+| plantuml-gradle | 10 | `LlmService` — dispatch provider + factories
+| slider-gradle | 8 | `AssistantManager` (648 lignes, 4 factories + dispatch `resolveModel` + pools), `RagManager` (282 lignes, RAG pgvector+all-minilm refait), `OllamaLanguageModelAdapter`
+|===
+
+Patterns dupliqués dans **tous** les boroughs (sauf codebase) :
+. `OllamaChatModel.builder()` — chaque borough construit son propre client
+. Dispatch provider (`resolveModel`/`ai.provider`) — chaque borough refait le switch
+. Pools de ports Ollama — chaque borough gère sa propre rotation (ou hardcode un port)
+. RAG pgvector — slider et plantuml refont leur propre store
+
+'''
+
+== 2. Ce que codebase fournit déjà (et qu'on ne devrait pas refaire)
+
+[cols="2,3,3", options="header"]
+|===
+| Composant | Implémentation codebase | Équivalent slider (à supprimer)
+| Résolution de provider | `LlmProviderResolver` (env-based discovery, caching, fallback) | `AssistantManager.resolveModel()` (switch 4 cas)
+| Pool de ports Ollama | `OllamaPool` (ROUND_ROBIN, 29 ports 11437-11465, conforme N0 `llm-pool-contracts`) | `AssistantManager.createOllamaChatModel()` (hardcode `localhost:11439`)
+| Client ChatModel | `OllamaLlmProvider` (caching par baseUrl|model) | `AssistantManager.createOllamaChatModel()` (nouveau builder à chaque appel)
+| Client Gemini | `GeminiLlmProvider` | `AssistantManager.createGeminiChatModel()`
+| Orchestration koog | `VibecodingGraph`, `KoogAugmentedContextGraph`, `MultiChannelContextGraph` | **néant** (SLD-8 devait le créer)
+| RAG pgvector | `VectorStore` (JDBC), `VectorQueryService`, `EmbeddingPipeline` | `RagManager` (PgVectorEmbeddingStore langchain4j, Docker lifecycle)
+| Contrats N0 | `llm-pool-contracts`, `codebase-contracts`, `agent-contracts` (publiés Central via BOM) | **néant** (slider ne les utilise pas)
+|===
+
+'''
+
+== 3. Le gap — codebase n'expose pas d'API de services
+
+**Constat du 4 août 2026** : codebase-gradle (N1, Central 0.0.5) n'expose
+**aucune API de consommation de services** pour les plugins N2 consommateurs.
+
+- Zéro `BuildService` enregistré (grep `BuildService|sharedServices|registerService`
+  sur tout le main source : 0 résultat)
+- Zéro `Provider<ChatModel>` ou `Provider<LlmProvider>` sur une extension typée
+- Toutes les deps langchain4j/koog/R2DBC sont en `implementation` (pas `api`) —
+  un consommateur ne compile pas contre ces types
+- La seule "consommation" documentée est *par tâches et fichiers* :
+  `collectCompositeContext` → `composite-context.json`, `exposeExperts` →
+  `exposure-manifest.json`, `sessionProtocolDaemon` → stdin/stdout JSON-lines
+
+**Conséquence** : aujourd'hui, "slider consomme codebase" = appliquer le plugin
+et lire des fichiers JSON. Pas d'injection de services. L'US-8.1 est le
+prérequis bloquant pour une vraie consommation par services.
+
+'''
+
+== 4. Décision — direction adoptée
+
+**SLD-8 = slider consomme codebase (N1) comme socle LLM unifié.**
+
+Le cadrage initial (session 046, première version) prévoyait d'ajouter
+`ai.koog:koog-agents:1.0.0` en direct dans slider (via BOM workspace-bom) et
+de créer un domaine `slider.koog` autonome avec son propre `DeckPipelineGraph`.
+Ce cadrage a été **refondu** (post-046, même journée) pour la raison suivante :
+
+> koog arrive déjà *transitivement* chez slider via codebase (0.0.5).
+> L'ajouter en direct via BOM duplique la résolution de dépendance pour
+> zéro bénéfice architectural. Pire : ça perpétue le pattern "chaque
+> borough fait son LLM dans son coin" qu'on veut justement casser.
+
+**Nouveau cadrage SLD-8** (5 US, ~12 pts) :
+
+[cols="2,3,2,2", options="header"]
+|===
+| US | Description | Pts | Priorité
+| SLD-8.0 | Cadrage contrat de consommation slider↔codebase | 1 | P0
+| SLD-8.1 | **Côté codebase (Queens)** — exposer `BuildService` LLM (`Provider<ChatModel>` via `LlmProviderResolver`/`OllamaPool`), koog/langchain4j en `api` | 3 | P0
+| SLD-8.2 | slider consomme via `@Inject` — `AssistantManager` réduit à du câblage | 2 | P0
+| SLD-8.3 | `DeckPipelineGraph` sur services codebase, koog transitif | 3 | P1
+| SLD-8.4 | Tests 3 niveaux + Cucumber pipeline koog deck | 3 | P1
+|===
+
+'''
+
+== 5. Stratégie d'implémentation — transferts unitaires, pas big bang
+
+**Principe** : chaque provider est transféré indépendamment. Chaque transfert
+est testé, commité, et réversible. Pas de réécriture massive d'`AssistantManager`.
+
+[cols="2,3,3,2", options="header"]
+|===
+| Étape | Action slider | Action codebase | Impact
+| 1. Ollama | Remplacer `createOllamaChatModel()` par `@Inject Provider<ChatModel>` | Exposer le `BuildService` avec `OllamaLlmProvider` (US-8.1) | ~30 lignes slider, ~50 lignes codebase
+| 2. Gemini | Remplacer `createGeminiChatModel()` | `GeminiLlmProvider` déjà existant, juste à exposer | ~15 lignes slider
+| 3. Mistral | Remplacer `createMistralChatModel()` | Ajouter `MistralLlmProvider` dans codebase (ou adapter) | ~20 lignes slider, ~30 lignes codebase
+| 4. HuggingFace | Remplacer `createHuggingFaceChatModel()` | Ajouter `HuggingFaceLlmProvider` dans codebase | ~20 lignes slider, ~30 lignes codebase
+| 5. Koog | `DeckPipelineGraph` sur services codebase | koog déjà exposé en `api` (étape 1) | ~50 lignes slider
+|===
+
+**Ce qu'on ne touche PAS** (logique métier slider, pas infra LLM) :
+- `PromptManager` — prompts système E-3PO, logique deck
+- `RagTasks` (ReindexRagTask, ProposeDeckContextTask, GenerateDeckTask) —
+  elles restent, reçoivent juste leur `ChatModel` par injection
+- `OllamaLanguageModelAdapter` + `TranslateDeckTask` — restent, même principe
+- `PgVectorService` (Docker lifecycle BuildService) — infra slider spécifique
+- Smoke-test tasks (`helloOllama`, `helloGemini`…) — adaptables
+
+'''
+
+== 6. Bénéfices concrets (pas juste "c'est plus propre")
+
+. **Pool rotation** : codebase fait du ROUND_ROBIN sur 29 ports (11437-11465).
+   Slider hardcode `localhost:11439`. Gain opérationnel immédiat — plus de
+   collision de ports entre boroughs.
+. **Provider dispatch mature** : `LlmProviderResolver` (env-based discovery,
+   caching) vs le switch 4 cas de `AssistantManager.resolveModel()`.
+. **Un seul point de maintenance** : quand l'API Ollama change, on corrige
+   codebase, pas 8 boroughs.
+. **koog sans duplication** : koog arrive déjà transitivement chez slider.
+   L'ajouter en direct duplique la résolution.
+. **Contrats N0 respectés** : `llm-pool-contracts` (LlmInstancePool) est le
+   contrat cross-borough — codebase l'implémente, slider le consomme.
+. **Template pour les 7 autres boroughs** : une fois le pattern "consommer
+   codebase" prouvé sur slider, plantuml, document, bakery suivent.
+
+'''
+
+== 7. Risques et mitigations
+
+[cols="2,3,3", options="header"]
+|===
+| Risque | Probabilité | Mitigation
+| US-8.1 bloquée (codebase n'expose pas le service) | Moyenne | Transfert unitaire étape 1 = ~50 lignes codebase. Si refusé côté Queens, slider garde son `AssistantManager` actuel (plan B documenté dans Decision 002, critères de réévaluation)
+| DAG codebase (N1 dépend de codex N2) non régularisé | Élevée | Ne bloque pas SLD-8 — le `BuildService` LLM n'a pas de dépendance transitive vers codex. La régularisation du DAG est un EPIC codebase séparé
+| Périmètre LLM codebase ne couvre pas les besoins slider (streaming, providers cloud) | Faible | `OllamaLlmProvider` + `GeminiLlmProvider` couvrent déjà le scope. Mistral/HF sont des ajouts mineurs
+| Perte fonctionnelle par big bang | **Éliminée** | Stratégie de transferts unitaires (section 5) — chaque étape est testée indépendamment et réversible
+|===
+
+'''
+
+== 8. Références croisées
+
+- *Décision formelle* : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` Decision 002
+- *Cadrage EPIC* : `BACKLOG.adoc` § EPIC SLD-8
+- *Roadmap* : `slider-plugin/.agents/INDEX.adoc` ligne SLD-8
+- *Rapport de session* : `slider-plugin/.agents/sessions/046-vision-koog-r2dbc-cadrage.adoc` + addendum
+- *Doc pilotage* : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` (koog 1.0.0, EPIC L ✅)
+- *Codebase source* : `foundry/public/codebase-gradle/codebase-plugin/src/main/kotlin/codebase/koog/llm/`
+- *Contrats N0* : `foundry/public/workspace-bom/` → `llm-pool-contracts`, `codebase-contracts`
+
+'''
+
+_Document créé_ : 4 août 2026 (Session 046, post-refonte SLD-8)
+_Type_ : LAZY (consultation sur besoin)
+_Maintenu par_ : Agent OpenCode (fin de session)
