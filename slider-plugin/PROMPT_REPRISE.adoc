@@ -16,22 +16,26 @@ Analyse vision + gouvernance + cadrage (zéro code).
   KoogAugmentedContextGraph, MultiChannelContextGraph) + document-gradle
   (DocumentGenerationGraph). R2DBC implémenté (R2dbcAgenticChunkRepository). EPIC L ✅
   TERMINÉ (034-049). **Decision 002** : adopter koog+R2DBC comme socle IA slider.
-- **EPIC SLD-8 cadré** (BACKLOG) : koog Orchestration du pipeline deck
-  (`proposeDeckContext` → `generateDeck`), 5 US ~12 pts, méthode baby-step
-  DDD/TDD/BDD 3 niveaux.
+- **EPIC SLD-8 cadré + refondu post-046** (BACKLOG) : **slider consomme codebase (N1)
+  comme socle LLM unifié** — pas de koog en direct, pas de factories de modèles.
+  `AssistantManager` (648 lignes, 4 providers) réduit à du câblage. Graphe koog
+  `DeckPipelineGraph` (`proposeDeckContext` → `generateDeck`) sur services codebase.
+  5 US ~12 pts, méthode baby-step DDD/TDD/BDD 3 niveaux.
 - **Doc pilotage** : `KOOG_AGENTIC_PATTERNS.adoc` → koog 1.0.0, EPIC L ✅, note DI.
 - **Nouveau** : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (Decision 001 + 002).
+- **Constat post-046** : codebase n'expose **aucune API de services consommable**
+  (zéro BuildService, deps `implementation`) — c'est le gap que l'US-8.1 lève.
 
 == Prochaine session — 047
 
-*Objectif* : Planifier EPIC SLD-8 koog Orchestration.
-- **US-8.0** : cadrage contrat koog — graphe `proposeDeckContext` → `generateDeck`
-  sur la base RAG pgvector existante.
-- **US-8.1** : domaine DDD `slider.koog` — dépendance `ai.koog:koog-agents:1.0.0`
-  (via BOM workspace-bom) + `DeckPipelineGraph` (nodes : propose-context,
-  validate-context, generate-deck).
-- Nettoyage optionnel : sections obsolètes SLD-6 ("EN COURS 9/11") et SLD-7
-  ("🔲 ... Session 097") du BACKLOG — les deux EPICs sont en fait terminés.
+*Objectif* : Planifier EPIC SLD-8 (slider consomme codebase).
+- **US-8.0** : cadrage contrat de consommation slider↔codebase — périmètre slider
+  (`AssistantManager` 4 factories → câblage, `RagManager`, `OllamaLanguageModelAdapter`)
+  + contrat service LLM codebase consommable (N0 `llm-pool-contracts`/`codebase-contracts`).
+- **US-8.1** : côté codebase (N1, Queens) — exposer `BuildService` LLM
+  (`Provider<ChatModel>` via `LlmProviderResolver`/`OllamaPool`), koog/langchain4j en `api`
+  (slider consomme koog transitivement, sans BOM directe).
+- Nettoyage optionnel : sections obsolètes SLD-6/SLD-7 du BACKLOG — **déjà fait en S-046**.
 
 == Rappels
 
@@ -41,7 +45,7 @@ Analyse vision + gouvernance + cadrage (zéro code).
 - BOM workspace-bom : Central 0.0.11
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
-- codebase-plugin : Central 0.0.5 (koog 1.0.0, R2DBC — socle N1 consommable)
+- codebase-plugin : Central 0.0.5 (koog 1.0.0, R2DBC — socle N1, service LLM à exposer US-8.1)
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
@@ -56,7 +60,7 @@ Analyse vision + gouvernance + cadrage (zéro code).
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
 - `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP)
 - EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
-- EPIC cadré : SLD-8 koog Orchestration (5 US ~12 pts, à planifier)
+- EPIC cadré : SLD-8 slider consomme codebase (5 US ~12 pts, à planifier)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
-  rejeté, 002 koog+R2DBC socle N1)
+  rejeté, 002 slider consomme codebase comme socle LLM unifié)

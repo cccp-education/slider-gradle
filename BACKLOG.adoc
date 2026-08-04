@@ -61,30 +61,48 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | PUB | Publications Maven Central 0.0.1→0.0.13 | ✅ | 7/7
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
-| SLD-8 | koog Orchestration — graphe d'états du pipeline deck (proposeDeckContext → generateDeck) | 🟡 CADRÉ (S-046) — socle N1 existant | US à définir
+| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-8 (koog) cadré session 046 — à planifier._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046, refondu post-046 — à planifier._
 
 '''
-== 🟡 EPIC SLD-8 — koog Orchestration : graphe d'états du pipeline deck (Session 046 — Cadrage)
+== 🟡 EPIC SLD-8 — Consommation socle N1 codebase : unifier les appels LLM slider (Session 046 — Cadrage, refondu post-046)
+
+_Vision_ : les appels LLM de slider sont éparpillés dans sa logique métier au lieu
+de reposer sur un socle unifié. `AssistantManager.kt` (648 lignes) fabrique des
+modèles pour 4 providers (Ollama/Gemini/Mistral/HF) + dispatch `resolveModel` +
+pools ; `RagManager.kt` (282 lignes) refait un RAG pgvector+all-minilm ;
+`OllamaLanguageModelAdapter` refait un client de traduction. codebase-gradle (N1)
+**unifie déjà tout cela** (langchain4j : `LlmProviderResolver`/`OllamaPool` ;
+koog : graphes d'états `VibecodingGraph`/`KoogAugmentedContextGraph`). SLD-8 fait
+de slider le **premier consommateur** de la couche LLM codebase, par injection de
+services (`BuildService`/`Provider`, DI native Gradle — Decision 001), au lieu
+de réimplémenter le socle.
+
+_Prérequis côté codebase (N1)_ : codebase n'expose aujourd'hui **aucune API de
+consommation de services** (zéro `BuildService`, zéro `Provider<ChatModel>`, deps
+langchain4j/koog en `implementation`). L'US-8.1 lève ce gap — contrat de service
++ deps exposées en `api` — tracé ici comme dépendance cross-borough (Queens).
 
 [cols="2,3,2,2", options="header"]
 |===
 | US | Description | Pts | Priorité
-| SLD-8.0 | Cadrage — contrat koog : graphe d'orchestration `proposeDeckContext` → `generateDeck` sur la base RAG pgvector existante | 1 | P0
-| SLD-8.1 | Domaine DDD `slider.koog` — dépendance `ai.koog:koog-agents:1.0.0` (via BOM workspace-bom) + `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) | 3 | P0
-| SLD-8.2 | Intégration DI native Gradle : le graphe consomme `ChatModel` + `PgVectorEmbeddingStore` via `BuildService`/`Provider` (pas de conteneur DI — voir Decision 001) | 2 | P0
-| SLD-8.3 | Tests unitaires koog (StateGraph, ConditionalEdges : validation-contexte → retry ou generate) | 3 | P1
-| SLD-8.4 | Tests Cucumber — scénario BDD pipeline complet koog deck (2 appels orchestrés) | 3 | P1
+| SLD-8.0 | Cadrage contrat de consommation — périmètre slider (`AssistantManager` 4 factories → câblage, `RagManager`, `OllamaLanguageModelAdapter`) + contrat service codebase consommable (N0 `llm-pool-contracts`/`codebase-contracts`) | 1 | P0
+| SLD-8.1 | **Côté codebase (N1, Queens)** — exposer un `BuildService` LLM consommable : `Provider<ChatModel>` via `LlmProviderResolver`/`OllamaPool` ; koog-agents/langchain4j en `api` → slider n'ajoute pas koog via BOM, il le consomme transitivement | 3 | P0
+| SLD-8.2 | slider consomme le service codebase via `@Inject` — `AssistantManager` réduit à du câblage, suppression factories 4 providers + dispatch `ai.provider` + pools | 2 | P0
+| SLD-8.3 | Orchestration koog du pipeline deck — `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) sur les services codebase, DSL koog transitif | 3 | P1
+| SLD-8.4 | Tests 3 niveaux — unit (graphe koog, services mockés), functional, Cucumber pipeline koog deck (2 appels orchestrés) | 3 | P1
 |===
 
-_Total_ : 5 US, ~12 pts. _Dépendances_ : socle N1 codebase-gradle publié Central (koog 1.0.0) ;
-`proposeDeckContext`/`generateDeck` existants (AssistantManager). _Source_ : Session 046.
-_Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin.
+_Total_ : 5 US, ~12 pts. _Dépendances_ : US-8.1 = travail cross-borough codebase (Queens),
+cadré ici comme contrat côté consommateur ; `proposeDeckContext`/`generateDeck` existants
+(AssistantManager). _Source_ : Session 046 (refondu post-046 — slider consomme codebase
+plutôt que réimplémenter koog). _Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US
+(unit → functional → cucumber), English only code/Gherkin.
 _Alignement vision_ : `doc/agentic_gradle_1.adoc` §1 (koog) + `doc/agentic_gradle_5.adoc` (R2DBC).
-_Décisions_ : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` Decision 001 (PicoContainer rejeté)
-+ Decision 002 (koog+R2DBC socle N1 existant).
+_Décisions_ : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` Decision 001 (PicoContainer
+rejeté, DI native Gradle) + Decision 002 (consommer codebase comme socle IA unifié).
 
 '''
 

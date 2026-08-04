@@ -99,3 +99,25 @@ English only code/Gherkin.
 Session 047 — Planifier EPIC SLD-8 koog Orchestration : US-8.0/8.1 (cadrage +
 domaine DDD `slider.koog` + `DeckPipelineGraph`). Nettoyage optionnel : sections
 obsolètes SLD-6/SLD-7 du BACKLOG.
+
+== Addendum — Refonte du cadrage SLD-8 (post-046, même journée)
+
+Le cadrage SLD-8 a été **refondu après clôture** suite à l'arbitrage
+"slider consomme codebase" : au lieu d'ajouter `ai.koog:koog-agents` en direct
+(via BOM) et de faire vivre un domaine `slider.koog` autonome, SLD-8 fait de
+slider le **premier consommateur** de la couche LLM unifiée de codebase (N1).
+
+- Constat : `AssistantManager` (648 lignes, 4 factories de modèles + dispatch
+  `resolveModel` + pools) et `RagManager` (282 lignes, RAG pgvector refait)
+  dupliquent ce que codebase fournit déjà (`LlmProviderResolver`/`OllamaPool`,
+  langchain4j, koog). L'éparpillement touche 8 boroughs de `foundry/public`.
+- Gap identifié : codebase n'expose **aucune API de services consommable**
+  (zéro `BuildService`, zéro `Provider<ChatModel>`, deps langchain4j/koog en
+  `implementation`) — à lever par l'US-8.1 (contrat de service + deps `api`).
+- Nouvelles US : SLD-8.1 = exposition `BuildService` LLM côté codebase (cross-borough
+  Queens) ; SLD-8.2 = `AssistantManager` réduit à du câblage via `@Inject` ;
+  SLD-8.3 = `DeckPipelineGraph` sur services codebase, koog consommé transitivement.
+- Decision 002 reformulée : "Consommer codebase (N1) comme socle LLM unifié,
+  ne pas réimplémenter koog/langchain4j" (+ critères de réévaluation).
+- Fichiers impactés par la refonte : `BACKLOG.adoc`, `INDEX.adoc`,
+  `DECISIONS_ARCHITECTURE.adoc`, `PROMPT_REPRISE.adoc`.
