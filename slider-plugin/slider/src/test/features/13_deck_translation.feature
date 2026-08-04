@@ -24,6 +24,19 @@ Feature: Deck translation pipeline produces 10 localized variants from a source 
     Then the plan should contain 2 tasks
     And the plan should not contain a task from "fr" to "fr"
 
+  Scenario: A translation plan with only the source language produces no tasks
+    Given a source deck in language "fr"
+    When a translation plan is built from a request targeting "fr"
+    Then the plan should contain 0 tasks
+
+  Scenario: Translating a deck into only its own language produces an empty outcome
+    Given a source deck in language "fr"
+    And a stub LLM that returns content for "fr"
+    When the deck is translated into "fr"
+    Then the outcome should have 0 translated results
+    And the outcome should have 0 failed results
+    And the outcome should be all translated
+
   Scenario: A translation plan covers all 9 non-source languages
     Given a source deck in language "fr"
     When a translation plan is built from a request targeting all 10 languages

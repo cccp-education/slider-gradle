@@ -13,9 +13,6 @@ data class TranslationOutcome(
     val results: List<TranslationResult>,
 ) {
     init {
-        require(results.isNotEmpty()) {
-            "TranslationOutcome.results must not be empty"
-        }
         val targetLanguages = results.map { it.targetLanguage }
         require(targetLanguages.toSet().size == targetLanguages.size) {
             "TranslationOutcome.results must not contain duplicate target languages: $targetLanguages"
@@ -24,10 +21,13 @@ data class TranslationOutcome(
 
     companion object {
 
+        val EMPTY = TranslationOutcome(emptyList())
+
         /**
          * Factory that validates and wraps a list of results.
          */
-        fun of(results: List<TranslationResult>): TranslationOutcome = TranslationOutcome(results)
+        fun of(results: List<TranslationResult>): TranslationOutcome =
+            if (results.isEmpty()) EMPTY else TranslationOutcome(results)
     }
 
     val totalCount: Int get() = results.size

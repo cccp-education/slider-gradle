@@ -125,11 +125,15 @@ class TranslationOutcomeTest {
     }
 
     @Test
-    fun `outcome should reject empty results list`() {
-        assertThatThrownBy {
-            TranslationOutcome.of(emptyList())
-        }.isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("results")
+    fun `outcome should accept empty results list`() {
+        val outcome = TranslationOutcome.of(emptyList())
+
+        assertThat(outcome.results).isEmpty()
+        assertThat(outcome.totalCount).isZero()
+        assertThat(outcome.translatedCount).isZero()
+        assertThat(outcome.skippedCount).isZero()
+        assertThat(outcome.failedCount).isZero()
+        assertThat(outcome.isAllTranslated()).isTrue()
     }
 
     @Test

@@ -1,5 +1,19 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 
+== Session 045 (2026-08-04) — Fix CR-GLOBALE-002 + Publication 0.0.13
+
+- US-1 : Guard plan vide — `TranslationOutcome.EMPTY` + `of()` accepte liste vide, `DeckTranslator` guard, `TranslateDeckTask` skip avant LLM, clé i18n `task.translateDeck.noTargets` (11 Messages_*.properties). Tests 3 niveaux (2 unit + 1 functional + 2 cucumber).
+- US-2 : Regex `buildOutputFile` `_[a-z]{2}$` → `_[a-zA-Z]{2}$` (uppercase `_ZH`).
+- US-3 : `RagManager.buildStore` — `ssl`/`sslmode` scopés try/finally + `restoreSystemProperty`.
+- Publication Maven Central slider **0.0.13** (bundle `ec715b09`, AUTOMATIC), confirmé repo1.maven.org.
+- `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP.
+
+== Session 044 (2026-08-04) — SLD-CR3 Revue CR-GLOBALE-003
+
+- SLD-CR3-1 : Dépréciation `translate/` (doublon de `translation/`). `TranslationServiceAdapter.kt` supprimé (dead code). Import mort `getTranslatePromptMessage` retiré de `OllamaLanguageModelAdapter.kt`. `TranslatorManager` + `TranslatorPlugin` marqués `@Deprecated`.
+- SLD-CR3-2 : `CapsulePlugin.kt` (capsule-gradle) — `catch (_: Exception)` → `catch (e: UnknownPluginException)`. `logger.debug` → `logger.info`.
+- `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP. `./gradlew test` capsule-gradle VERT.
+
 == Session 043 (2026-08-04) — i18n Slider Plugin (pattern plantuml-gradle)
 
 - `SliderMessages.kt` : singleton ResourceBundle UTF-8 (pattern PlantumlMessages)

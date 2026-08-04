@@ -142,6 +142,23 @@ Let's dive in.
     }
 
     @Test
+    fun `translated deck output file should replace uppercase language segment`() {
+        val adapter = StubModelAdapter(mapOf("en" to "= Content"))
+        val sourceDeck = deck("fr").copy(outputFile = "kotlin-coroutines_ZH-deck.adoc")
+        val request = TranslationRequest(
+            sourceDeck = sourceDeck,
+            targetLanguages = listOf("en"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+        val translator = DeckTranslator(adapter, sampleAdoc)
+
+        val outcome = translator.translate(plan)
+        val translated = outcome.translatedResults().first()
+
+        assertThat(translated.translatedDeck.outputFile).isEqualTo("kotlin-coroutines_en-deck.adoc")
+    }
+
+    @Test
     fun `translated adoc content should match LLM response`() {
         val llmResponse = "= My Translated Deck\n\n== Slide 1\nHello"
         val adapter = StubModelAdapter(mapOf("es" to llmResponse))
@@ -298,5 +315,23 @@ Let's dive in.
         val translated = outcome.translatedResults().first()
 
         assertThat(translated.translatedAdoc).doesNotContain(":revealjs_direction: rtl")
+    }
+
+    @Test
+    fun `should return empty outcome when all target languages equal source`() {
+        val adapter = StubModelAdapter(emptyMap())
+        val request = TranslationRequest(
+            sourceDeck = deck("fr"),
+            targetLanguages = listOf("fr"),
+        )
+        val plan = DeckTranslationPlan.from(request)
+
+        assertThat(plan.tasks).isEmpty()
+
+        val translator = DeckTranslator(adapter, sampleAdoc)
+        val outcome = translator.translate(plan)
+
+        assertThat(outcome.results).isEmpty()
+        assertThat(outcome.totalCount).isZero()
     }
 }

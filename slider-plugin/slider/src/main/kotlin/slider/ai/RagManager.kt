@@ -144,21 +144,35 @@ object RagManager {
         // The pgvector Docker container has no SSL configured.
         // The PostgreSQL JDBC driver negotiates SSL by default → EOFException.
         // PgVectorEmbeddingStore.builder() uses PGSimpleDataSource internally
-        // with no way to pass sslmode. We override it via the system property
-        // recognised by the JDBC driver for all new connections.
-        System.setProperty("ssl", "false")
-        System.setProperty("sslmode", "disable")
-        return PgVectorEmbeddingStore.builder()
-            .host("localhost")
-            .port(pgService.port)
-            .database(pgService.database)
-            .user(pgService.user)
-            .password(pgService.password)
-            .table(pgService.table)
-            .dimension(EMBEDDING_DIM)
-            .createTable(true)
-            .dropTableFirst(false)
-            .build()
+        // with no way to pass sslmode. We override it via the system properties
+        // recognised by the JDBC driver for new connections.
+        //
+        // The properties are scoped to the builder call and restored afterwards
+        // so the JVM-wide driver defaults are never mutated globally.
+        val previousSsl = System.getProperty("ssl")
+        val previousSslMode = System.getProperty("sslmode")
+        return try {
+            System.setProperty("ssl", "false")
+            System.setProperty("sslmode", "disable")
+            PgVectorEmbeddingStore.builder()
+                .host("localhost")
+                .port(pgService.port)
+                .database(pgService.database)
+                .user(pgService.user)
+                .password(pgService.password)
+                .table(pgService.table)
+                .dimension(EMBEDDING_DIM)
+                .createTable(true)
+                .dropTableFirst(false)
+                .build()
+        } finally {
+            restoreSystemProperty("ssl", previousSsl)
+            restoreSystemProperty("sslmode", previousSslMode)
+        }
+    }
+
+    private fun restoreSystemProperty(key: String, previous: String?) {
+        if (previous == null) System.clearProperty(key) else System.setProperty(key, previous)
     }
 
     // -------------------------------------------------------------------------

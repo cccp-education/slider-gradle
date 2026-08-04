@@ -1,5 +1,29 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 045_ : Fix CR-GLOBALE-002 (Option A) 3 bugs + publication 0.0.13.
+`./gradlew :slider:check` VERT 0 FAIL / 1 SKIP (préexistant). Zéro régression.
+
+Nouveaux tests session 045 :
+
+. `TranslationOutcomeTest.kt` — test `should accept empty results list`
+  (remplace l'ancien reject-empty ; la liste vide est désormais valide → EMPTY).
+. `DeckTranslatorTest.kt` — +2 tests : `should return empty outcome when all
+  target languages equal source` (plan vide → EMPTY, sans appel adapter) et
+  `translated deck output file should replace uppercase language segment`
+  (`_ZH` → `_en`, RED→GREEN sur la regex).
+. `TranslateDeckFunctionalTest.kt` — +1 test fonctionnel GradleTestKit : guard
+  `-Ptarget.languages=fr` sur deck fr → build SUCCESS, sortie contient le message
+  noTargets, zéro fichier de sortie généré, aucun appel LLM. Fixture
+  `fixtures/decks/` (hors `slides/`, chemins absolus — le scaffold ré-extrait
+  `slides/` à la configuration et `File()` relatif est résolu contre le working
+  dir du daemon).
+. `13_deck_translation.feature` — +2 scénarios BDD : `A translation plan with
+  only the source language produces no tasks` (0 tasks) et `Translating a deck
+  into only its own language produces an empty outcome` (0/0 all-translated).
+
+Cucumber : `./gradlew :slider:cucumberTest` VERT.
+Functional : `./gradlew :slider:functionalTest` VERT.
+
 _Statut session 043_ : i18n Slider Plugin (pattern plantuml-gradle).
 +1 test unitaire (MessagesFrTranslationTest, 27 clés paramétrées EN≠FR).
 `./gradlew :slider:compileKotlin` BUILD SUCCESSFUL.

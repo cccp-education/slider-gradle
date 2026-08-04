@@ -89,6 +89,11 @@ abstract class TranslateDeckTask : DefaultTask() {
         )
         val plan = DeckTranslationPlan.from(request)
 
+        if (plan.tasks.isEmpty()) {
+            logger.lifecycle(SliderMessages.format("task.translateDeck.noTargets", lang, sourceDeck.languageCode))
+            return
+        }
+
         val provider = project.aiProvider
         val model = project.resolveModel(provider)
         val adapter = OllamaLanguageModelAdapter(model)

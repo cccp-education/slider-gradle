@@ -40,6 +40,8 @@ class DeckTranslator(
      * @return the aggregated [TranslationOutcome].
      */
     fun translate(plan: DeckTranslationPlan): TranslationOutcome {
+        if (plan.tasks.isEmpty()) return TranslationOutcome.EMPTY
+
         val results = plan.tasks.map { task ->
             val translatedAdoc = modelAdapter.translate(
                 deckContext = task.sourceDeck,
@@ -84,7 +86,7 @@ class DeckTranslator(
         val deckSuffix = "-deck.adoc"
         return if (original.endsWith(deckSuffix)) {
             val base = original.removeSuffix(deckSuffix)
-            val langPattern = Regex("_[a-z]{2}$")
+            val langPattern = Regex("_[a-zA-Z]{2}$")
             val cleanBase = if (langPattern.containsMatchIn(base)) {
                 langPattern.replace(base, "")
             } else {

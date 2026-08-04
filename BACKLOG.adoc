@@ -7,6 +7,30 @@ _.date: 2026-08-01
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 045 (2026-08-04) — Fix CR-GLOBALE-002 + Publication 0.0.13 ✅ TERMINÉ
+
+Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.
+US-1 : Guard plan vide — `DeckTranslator.translate` → `TranslationOutcome.EMPTY`
+si plan vide, `TranslationOutcome.of()` accepte liste vide, `TranslateDeckTask`
+skip avant résolution LLM (clé i18n `task.translateDeck.noTargets` dans 11
+Messages_*.properties). Tests 3 niveaux : 2 unit + 1 functional (guard
+`-Ptarget.languages=fr` sur deck fr, zéro fichier généré) + 2 scénarios Cucumber.
+US-2 : Regex `buildOutputFile` `_[a-z]{2}$` → `_[a-zA-Z]{2}$` (segment langue
+uppercase `_ZH`). US-3 : `RagManager.buildStore` propriétés système
+`ssl`/`sslmode` scopées try/finally + `restoreSystemProperty` (plus de mutation
+globale JVM). `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP. Publication slider
+**0.0.13** Maven Central (bundle `ec715b09`, AUTOMATIC), confirmé repo1.maven.org.
+
+== Session 044 (2026-08-04) — SLD-CR3 Revue CR-GLOBALE-003 ✅ TERMINÉ
+
+EPIC SLD-CR3 TERMINÉ (2/2 US). SLD-CR3-1 : Dépréciation `translate/` (doublon de
+`translation/`). `TranslationServiceAdapter.kt` supprimé (dead code). Import mort
+`getTranslatePromptMessage` retiré de `OllamaLanguageModelAdapter.kt`.
+`TranslatorManager` + `TranslatorPlugin` marqués `@Deprecated`. SLD-CR3-2 :
+`CapsulePlugin.kt` (capsule-gradle) — `catch (_: Exception)` → `catch (e:
+UnknownPluginException)`. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP.
+`./gradlew test` capsule-gradle VERT.
+
 == Session 042 (2026-08-01) — SLD-6.9 + SLD-6.10 — EPIC SLD-6 TERMINÉ ✅
 
 EPIC SLD-6 TERMINÉ (11/11 US, ~20 pts). SLD-6.9 : Consolidation
@@ -34,7 +58,9 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | SLD-6 | SliderManager decomposition | ✅ | 11/11
 | SLD-7 | Câblage translateDeck → Capsule | ✅ | 3/3
 | CNV-6/7/8 | Conventions plugins | ✅ | 3/3
-| PUB | Publications Maven Central 0.0.1→0.0.12 | ✅ | 6/6
+| PUB | Publications Maven Central 0.0.1→0.0.13 | ✅ | 7/7
+| SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
+| CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 |===
 
 _Tous les EPICs sont terminés._
@@ -53,14 +79,14 @@ _Focus_ : slider est la source des decks consommés par capsule ; nettoyer la ch
 | **Déprécier/expulser `translate/` (doublon de `translation/`)** — Deux implémentations parallèles
 de traduction coexistent (`translate/` vs `translation/`). `translation/` est le DDD pur (DeckTranslator).
 Converger : déprécier `translate/` puis l'expulser, ou fusionner.
-| ⬜ TODO
+| ✅ TERMINÉ (S-044)
 | 1
 
 | SLD-CR3-2
 | **Resserrer le `catch (_: Exception)` de `CapsulePlugin` auto-apply slider** — `CapsulePlugin.kt:10`
 avale toute exception quand il auto-applique `education.cccp.slider`. Rendre l'échec visible
 (logger.error + rethrow sur erreurs non « plugin absent ») pour ne pas masquer les soucis de chaîne.
-| ⬜ TODO
+| ✅ TERMINÉ (S-044)
 | 1
 |===
 
@@ -209,6 +235,17 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 |===
 
 _Total_ : 11 US, ~20 pts (9/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright + 6.8 capsule). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
+
+'''
+== EPIC PUB — Publication Maven Central 0.0.13 ✅ TERMINE (Session 045, 2026-08-04)
+
+Bump 0.0.12 → 0.0.13 (fix CR-GLOBALE-002 S-045 : guard plan vide + regex
+uppercase + SSL scopé). Bundle nmcp `ec715b09-9587-49e5-9b9b-5f46a579c870`
+AUTOMATIC, confirmé repo1.maven.org.
+
+| Artefact | URL |
+|---|---|
+| slider 0.0.13 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.13 |
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.12 ✅ TERMINE (Session 040, 2026-07-22)

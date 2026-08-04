@@ -1,0 +1,85 @@
+= Session 045 — Fix CR-GLOBALE-002 + Publication 0.0.13
+:session: 045
+:date: 2026-08-04
+:status: ✅ TERMINÉ
+
+== Objectif
+
+Fix des 3 bugs restants de CR-GLOBALE-002 (Option A validée) puis bump +
+publication Maven Central 0.0.13. Méthode baby-step TDD/BDD imposée :
+unit → functional → cucumber.
+
+== US livrées
+
+=== US-1 — Guard plan vide pipeline traduction
+
+Crash `DeckTranslator` sur plan vide (tous les targets = langue source).
+
+- **`TranslationOutcome.kt`** : `require(results.isNotEmpty())` supprimé.
+  Constante `TranslationOutcome.EMPTY` + `of()` retourne `EMPTY` si liste vide
+  (duplicate check conservé).
+- **`DeckTranslator.kt`** : guard `if (plan.tasks.isEmpty()) return TranslationOutcome.EMPTY`.
+- **`TranslateDeckTask.kt`** : guard avant résolution LLM (`project.aiProvider`) —
+  `logger.lifecycle(task.translateDeck.noTargets)` puis return. Aucun appel réseau.
+- **i18n** : clé `task.translateDeck.noTargets=` ajoutée après
+  `task.translateDeck.summary=` dans 11 fichiers Messages_*.properties (traductions
+  vérifiées, format `{0}`).
+- **Tests 3 niveaux** :
+  - 2 unit : `TranslationOutcomeTest` (accept-empty) + `DeckTranslatorTest` (empty-plan)
+  - 1 functional : `TranslateDeckFunctionalTest` guard — `-Ptarget.languages=fr` sur
+    deck fr → build SUCCESS, message noTargets, zéro fichier généré. Fixture
+    `fixtures/decks/` (hors `slides/` pour éviter l'écrasement scaffold), chemins absolus.
+  - 2 scénarios Cucumber `13_deck_translation.feature` : plan vide (0 tasks) +
+    outcome vide all-translated.
+
+=== US-2 — Regex `buildOutputFile` uppercase
+
+- **`DeckTranslator.kt`** : `Regex("_[a-z]{2}$")` → `Regex("_[a-zA-Z]{2}$")` —
+  le segment langue uppercase (`_ZH`) n'était pas détecté → double suffixe.
+- 1 unit test RED→GREEN : `kotlin-coroutines_ZH-deck.adoc` → `kotlin-coroutines_en-deck.adoc`.
+
+=== US-3 — SSL propriétés système scopées
+
+- **`RagManager.kt`** `buildStore` : `System.setProperty("ssl"/"sslmode")` global
+  remplacé par un try/finally avec `restoreSystemProperty` (restaure la valeur
+  précédente ou efface si absente). Le builder capture les valeurs avant la
+  restauration, donc le comportement est identique mais la JVM n'est plus mutée
+  globalement.
+- Zéro test modifié (comportement identique).
+
+== Tests
+
+- `./gradlew :slider:test --tests "slider.translation.*"` VERT
+- `./gradlew :slider:cucumberTest` VERT
+- `./gradlew :slider:functionalTest` VERT
+- `./gradlew :slider:check` VERT — 0 FAIL, 1 SKIP (préexistant)
+- `./gradlew build -x test` VERT (pré-requis nmcp)
+
+== Publication
+
+- Bump `version = "0.0.12"` → `"0.0.13"` (`slider/build.gradle.kts`)
+- `./gradlew publishAggregationToCentralPortal --no-daemon` — bundle
+  `ec715b09-9587-49e5-9b9b-5f46a579c870`, publishingType AUTOMATIC
+- Confirmé sur `repo1.maven.org/education/cccp/slider` : version 0.0.13 présente
+- Pré-requis vérifiés : nmcp 1.5.0 settings, POM `withType<MavenPublication>`,
+  dépendances education.cccp:* (codebase 0.0.5, i18n-contracts 0.0.2) publiées
+
+== Fichiers modifiés
+
+| Fichier | Action |
+|---|---|
+| `slider/build.gradle.kts` | version 0.0.12 → 0.0.13 |
+| `slider/src/main/kotlin/slider/translation/TranslationOutcome.kt` | EMPTY + of() accepte liste vide |
+| `slider/src/main/kotlin/slider/translation/DeckTranslator.kt` | guard empty plan + regex uppercase |
+| `slider/src/main/kotlin/slider/translation/TranslateDeckTask.kt` | guard plan vide avant LLM |
+| `slider/src/main/kotlin/slider/ai/RagManager.kt` | SSL/sslmode scopés try/finally + restoreSystemProperty |
+| `slider/src/main/resources/i18n/Messages*.properties` (11) | clé `task.translateDeck.noTargets` |
+| `slider/src/test/kotlin/slider/translation/TranslationOutcomeTest.kt` | test accept-empty |
+| `slider/src/test/kotlin/slider/translation/DeckTranslatorTest.kt` | test empty-plan + test uppercase |
+| `slider/src/functionalTest/kotlin/slider/TranslateDeckFunctionalTest.kt` | test guard plan vide |
+| `slider/src/test/features/13_deck_translation.feature` | 2 scénarios BDD |
+
+== Prochaine session
+
+Session 046 — À définir. Tous les EPICs SLD-0→7 + SLD-CR3 + fix CR-GLOBALE-002
+terminés. Pistes : maintenance, ou nouveau refactoring.

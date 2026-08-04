@@ -2,6 +2,31 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 045 (2026-08-04) — Fix CR-GLOBALE-002 + Publication 0.0.13
+
+Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.
+US-1 : Guard plan vide pipeline traduction — `DeckTranslator.translate` →
+`TranslationOutcome.EMPTY` si plan vide, `TranslationOutcome.of()` accepte liste
+vide, `TranslateDeckTask` skip avant résolution LLM (clé i18n
+`task.translateDeck.noTargets` dans 11 Messages_*.properties). Tests 3 niveaux :
+2 unit + 1 functional (guard `-Ptarget.languages=fr` sur deck fr, zéro fichier
+généré) + 2 scénarios Cucumber. US-2 : Regex `buildOutputFile` `_[a-z]{2}$` →
+`_[a-zA-Z]{2}$` (segment langue uppercase `_ZH`). US-3 : `RagManager.buildStore`
+propriétés système `ssl`/`sslmode` scopées try/finally + `restoreSystemProperty`
+(plus de mutation globale JVM). `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP.
+Publication slider **0.0.13** Maven Central (bundle `ec715b09`, AUTOMATIC)
+confirmé repo1.maven.org.
+
+== Session 044 (2026-08-04) — SLD-CR3 Revue CR-GLOBALE-003
+
+EPIC SLD-CR3 TERMINÉ (2/2 US). SLD-CR3-1 : Dépréciation `translate/` (doublon de
+`translation/`). `TranslationServiceAdapter.kt` supprimé (dead code). Import mort
+`getTranslatePromptMessage` retiré de `OllamaLanguageModelAdapter.kt`.
+`TranslatorManager` + `TranslatorPlugin` marqués `@Deprecated`. SLD-CR3-2 :
+`CapsulePlugin.kt` (capsule-gradle) — `catch (_: Exception)` → `catch (e:
+UnknownPluginException)`. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP.
+`./gradlew test` capsule-gradle VERT.
+
 == Session 043 (2026-08-04) — i18n Slider Plugin (pattern plantuml-gradle)
 
 i18n du plugin UI slider-gradle aligné sur le pattern plantuml-gradle.

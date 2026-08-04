@@ -1,37 +1,38 @@
-= PROMPT_REPRISE — slider-gradle — Session 043
-:session: 043
-:date: 2026-08-01
+= PROMPT_REPRISE — slider-gradle — Session 046
+:session: 046
+:date: 2026-08-05
 
-== Session 042 terminée
+== Session 045 terminée
 
-EPIC SLD-6 TERMINÉ (11/11 US, ~20 pts) — SliderManager decomposition.
+Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.
 
-- **SLD-6.9** (2 pts) : Consolidation `registerPublishSlidesTask` + `Git` object
-  → `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. `SlidePublisher.kt`
-  (thin Gradle adapter, ex-`SliderManager.Git.pushSlides`) + `PublishTaskRegistrar.kt`
-  (task registrar, ex-`SliderManager.Tasks.registerPublishSlidesTask`). Cucumber
-  `20_publish_task_decomposition.feature` 3/3 PASS. Deprecation
-  `properties[CONFIG_PATH_KEY]` déjà résolue US-6.2 — `localConf` utilise
-  `findProperty()`.
-- **SLD-6.10** (2 pts) : `SliderManager` supprimé, `SliderPlugin` 30 lignes délègue
-  directement à 5 registrars (SliderConfig, SliderPrerequisiteRegistrar,
-  SliderScaffoldRegistrar, SliderWiringRegistrar, SliderTasks). 15 domaines DDD.
+- **US-1** : Guard plan vide dans le pipeline de traduction. `DeckTranslator.translate`
+  retourne `TranslationOutcome.EMPTY` si plan vide (requis + plan avec uniquement
+  la langue source). `TranslationOutcome.of()` accepte une liste vide (constante
+  `EMPTY`). `TranslateDeckTask` skip proprement avant résolution LLM quand tous
+  les targets = langue source (message i18n `task.translateDeck.noTargets`, 11
+  fichiers Messages_*.properties). Tests 3 niveaux : 2 unit (TranslationOutcomeTest
+  + DeckTranslatorTest) + 1 functional (TranslateDeckFunctionalTest guard) +
+  2 scénarios Cucumber (`13_deck_translation.feature`).
+- **US-2** : Regex `buildOutputFile` — `_[a-z]{2}$` → `_[a-zA-Z]{2}$` (supporte
+  les segments de langue uppercase type `_ZH`). +1 unit test.
+- **US-3** : `RagManager.buildStore` — propriétés système `ssl`/`sslmode` scopées
+  dans try/finally avec restauration (`restoreSystemProperty`), plus de mutation
+  globale JVM. Zéro test modifié (comportement identique).
 
-Baby-step TDD/BDD 3 niveaux : 3 Cucumber (20_publish_task_decomposition.feature).
-`./gradlew :slider:check` VERT — 421 unit (+2 Playwright préexistants) + functional
-OK + Cucumber OK.
+`./gradlew :slider:check` VERT — 0 FAIL, 1 SKIP (préexistant).
+Publication Maven Central slider **0.0.13** (bundle `ec715b09`) AUTOMATIC, confirmé repo1.maven.org.
 
-== Prochaine session — 043
+== Prochaine session — 046
 
-*Objectif* : À définir. Tous les EPICs SLD-0→7 sont terminés. Backlog vide.
-Prochaines pistes : SLD-8 (nouvel EPIC à cadrer), publication 0.0.13, ou
-maintenance.
+*Objectif* : À définir. Tous les EPICs SLD-0→7 + SLD-CR3 + fix CR-GLOBALE-002
+sont terminés. Pistes : maintenance, ou nouveau refactoring.
 
 == Rappels
 
 - GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
-  `education.cccp.slider.translator`
-- Version publiée Central : 0.0.12 (build.gradle.kts hardcodé 0.0.12)
+  `education.cccp.slider.translator` (déprécié)
+- Version publiée Central : 0.0.13 (build.gradle.kts hardcodé 0.0.13)
 - BOM workspace-bom : Central 0.0.11
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
@@ -41,13 +42,13 @@ maintenance.
 - English only: code, Gherkin, comments — no French
 - Package Cucumber steps : `slider.steps`
 - Domaines DDD (15) : `slider.repository`, `slider.capsule`, `slider.rtl`,
-  `slider.i18n`, `slider.translate`, `slider.translation`, `slider.scaffold`,
+  `slider.i18n`, `slider.translate` (déprécié), `slider.translation`, `slider.scaffold`,
   `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
   `slider.revealjs`, `slider.playwright` + `SliderConfig` + `SliderTasks`
 - `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew :slider:check` est VERT (421 unit + functional OK + Cucumber OK)
-- EPICs clos : SLD-0→7 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11/0.0.12
+- `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP)
+- EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11/0.0.12/0.0.13
 - Build se lance depuis `slider-plugin/` (project `:slider`)
