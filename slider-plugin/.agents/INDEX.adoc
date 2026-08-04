@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-08-05
-_Session terminee_ : 048 — Vision SLD-10 Slide Content Model & Rendering Validation. Cadrage du besoin : domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser) + assertions Playwright (TextOverflow, NotesRendering, FontSize, Contrast). Zéro code modifié. SLD-9.2→9.4 mis en pause.
-_Prochaine session_ : 049 — Cadrage formel EPIC SLD-10 (Slide Content Model & Rendering Validation). Définition des US, estimation, dépendances, contrats de test.
+_Session terminee_ : 049 — Cadrage formel EPIC SLD-10 Slide Content Model & Rendering Validation + US SLD-10.1/10.2 livrées. Domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser) + assertions Playwright (TextOverflow, NotesRendering, FontSize, Contrast). 7 US ~18 pts, méthode baby-step DDD/TDD/BDD 3 niveaux. SLD-10.0 cadrage + SLD-10.1 `TextBlock`/`SlideLayout` (20 unit) + SLD-10.2 `OverflowDetector`/`OverflowResult` (12 unit). 522 unitaires, zéro régression. SLD-9.2→9.4 mis en pause.
+_Prochaine session_ : 050 — US SLD-10.3 `AsciidocContentParser` (parseur .adoc → `SlideContent`).
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -27,6 +27,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 | 046 | 2026-08-04 | vision+governance+cadrage | Vision & backlog non implémenté + arbitrage horizons E-3PO. Audit PicoContainer : zéro implémentation `org.picocontainer` dans le workspace ; `cucumber-picocontainer` (15 boroughs) = DI Cucumber test (World/Steps), pas DI production. **Decision 001** (`.agents/DECISIONS_ARCHITECTURE.adoc` créé) : rejet assumé PicoContainer, DI native Gradle (`BuildService`/`Provider`) suffit jusqu'à réévaluation. Audit koog+R2DBC : socle N1 **déjà publié** (codebase-gradle Central 0.0.5 — koog `ai.koog:koog-agents:1.0.0` 4 graphes + document-gradle DocumentGenerationGraph ; R2DBC `R2dbcAgenticChunkRepository` ; EPIC L ✅ 034-049). **Decision 002** : adopter koog+R2DBC socle IA slider. **EPIC SLD-8 cadré** (BACKLOG, refondu post-046) : **slider consomme codebase** comme socle LLM unifié — `BuildService` LLM côté codebase (US-8.1), `AssistantManager` réduit à du câblage (US-8.2), `DeckPipelineGraph` sur services codebase (US-8.3). 5 US ~12 pts, méthode baby-step DDD/TDD/BDD 3 niveaux. Doc pilotage `KOOG_AGENTIC_PATTERNS.adoc` : koog 0.8.0→1.0.0, EPIC L ✅, note DI. Zéro code modifié. | ✅ 9/10
 | 048 | 2026-08-05 | vision+cadrage | Vision SLD-10 Slide Content Model & Rendering Validation. Cadrage du besoin : domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser) + assertions Playwright (TextOverflow, NotesRendering, FontSize, Contrast). Zéro code modifié. SLD-9.2→9.4 mis en pause. | ✅ 8/10
+| 049 | 2026-08-05 | cadrage+feat+ddd+tdd | Cadrage formel EPIC SLD-10 Slide Content Model & Rendering Validation + US SLD-10.1/10.2 livrées. Domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser) + assertions Playwright (TextOverflow, NotesRendering, FontSize, Contrast). 7 US ~18 pts. SLD-10.0 cadrage + SLD-10.1 `TextBlock`/`SlideLayout` (20 unit) + SLD-10.2 `OverflowDetector`/`OverflowResult` sealed (12 unit). Pattern de référence `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`. 522 unitaires (+32), zéro régression. | ✅ 9/10
 | 047 | 2026-08-04 | feat(sld-9.1) | SLD-9.1 i18n AssistantManager via LLM. 13 clés × 10 langues (générées par `gpt-oss:120b-cloud`). `AssistantManager.kt` : 15 strings hardcodées → `SliderMessages.get()`/`format()`. Tests 3 niveaux : 29 unit (`SliderMessagesTest`) + 6 functional (`AssistantManagerI18nFunctionalTest`) + 12 Cucumber (`9_assistant_manager_i18n.feature`) = +47 tests. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP. | ✅ 10/10
 | 045 | 2026-08-04 | fix+tdd+bdd+pub | Fix CR-GLOBALE-002 (Option A) — 3/3 US + publication 0.0.13. US-1 : Guard plan vide pipeline translation. `DeckTranslator.translate` → `TranslationOutcome.EMPTY` si `plan.tasks.isEmpty()`. `TranslationOutcome.of()` accepte liste vide (constante `EMPTY`). `TranslateDeckTask` skip avant résolution LLM quand tous targets = langue source (clé i18n `task.translateDeck.noTargets` ajoutée dans 11 fichiers Messages_*.properties). Tests 3 niveaux : 2 unit (TranslationOutcomeTest accept-empty + DeckTranslatorTest empty-plan) + 1 functional (TranslateDeckFunctionalTest guard `-Ptarget.languages=fr` sur deck fr, aucun fichier généré, message noTargets) + 2 scénarios Cucumber (`13_deck_translation.feature` plan vide + outcome vide). US-2 : Regex `buildOutputFile` `_[a-z]{2}$` → `_[a-zA-Z]{2}$` (segment langue uppercase type `_ZH` remplacé) + 1 unit test RED→GREEN. US-3 : `RagManager.buildStore` propriétés système `ssl`/`sslmode` scopées try/finally avec restauration via `restoreSystemProperty` (plus de mutation globale JVM, le builder capture les valeurs avant restauration). Zéro test modifié. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP. Publication Maven Central slider **0.0.13** (bundle `ec715b09`, AUTOMATIC), confirmé repo1.maven.org. | ✅ 9/10
 | 044 | 2026-08-04 | cleanup+deprecation+fix | SLD-CR3 Revue CR-GLOBALE-003 — 2/2 US. SLD-CR3-1 : Dépréciation `translate/` (doublon de `translation/`). `TranslationServiceAdapter.kt` supprimé (dead code). Import mort `getTranslatePromptMessage` retiré de `OllamaLanguageModelAdapter.kt`. `TranslatorManager` + `TranslatorPlugin` marqués `@Deprecated`. SLD-CR3-2 : `CapsulePlugin.kt` (capsule-gradle) — `catch (_: Exception)` → `catch (e: UnknownPluginException)`. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP. `./gradlew test` capsule-gradle VERT. | ✅ 9/10
@@ -99,7 +100,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` doublon + resserrer `catch (_: Exception)` CapsulePlugin auto-apply slider. | ✅ TERMINÉ (S-044, 2/2 US) | P1
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider. Premier consommateur de la couche LLM codebase : `BuildService` LLM (Provider<ChatModel> via LlmProviderResolver/OllamaPool), koog/langchain4j en `api` (pas de koog direct via BOM), `AssistantManager` réduit à du câblage (4 factories supprimées), `DeckPipelineGraph` (propose-context/validate-context/generate-deck) sur services codebase. DI native Gradle (Decision 001). | 🟡 CADRÉ (S-046, refondu post-046, 5 US ~12 pts) — à planifier | P1
 | SLD-9 | i18n Completion via LLM — `AssistantManager` i18nisé (13 clés → 10 langues générées par LLM), 9 tests de traduction par langue (pattern plantuml), `TaskDescriptionsI18nTest` functional, `SliderMessagesTest` unitaire + Cucumber BDD. Périmètre restrictif : que de l'i18n, pas de refacto. | 🟡 EN PAUSE (S-047, 5 US ~10 pts) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | P1
-| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser) + assertions Playwright (TextOverflow, NotesRendering, FontSize, Contrast). Tests 3 niveaux (unit → functional → cucumber). Pattern de référence : `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`. | 🟡 À CADRER (S-048 vision, S-049 cadrage formel) — ~6-8 US, ~15-20 pts | P1
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser) + assertions Playwright (TextOverflow, NotesRendering, FontSize, Contrast). Tests 3 niveaux (unit → functional → cucumber). Pattern de référence : `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`. | 🟡 EN COURS (S-049, 3/7 US terminés — 10.0/10.1/10.2 ✅, reste 10.3/10.4/10.5/10.6) | P1
 |===
 
 '''
@@ -356,6 +357,101 @@ _Dépendance_ : SLD-6 terminé, CAP-29 (capsule-gradle).
 _Total_ : 3 US, ~6 pts. ✅ TERMINÉ (Session 041, 2026-07-31).
 
 '''
+== EPIC SLD-10 — Slide Content Model & Rendering Validation
+
+_Vision_ : slider génère des slides AsciiDoc → HTML via Reveal.js, mais n'a
+**aucun modèle de contenu de slide** qui permette d'évaluer le rendu. Les
+validations Playwright existantes (LTR/RTL) vérifient la structure globale
+(titre, slides, bounding box) mais pas le contenu textuel individuel.
+
+SLD-10 crée le domaine DDD `slider.content` modélisant le contenu d'une slide
+et des assertions de rendu Playwright pour valider que le texte est dans
+l'écran, que les notes orateur sont bien rendues, et que la lisibilité est
+correcte.
+
+_Périmètre_ :
+- `SlideContent` (aggregate root : titre, sous-titres, paragraphes, listes, notes orateur)
+- `TextBlock` (value object : texte, position estimée, bounding box)
+- `SlideLayout` (value object : dimensions viewport, marges, font sizes)
+- `OverflowDetector` (domain service : prédit si un TextBlock dépasse le viewport)
+- `AsciidocContentParser` (parseur .adoc → SlideContent, réutilise le pattern
+  `AsciidocSpeakerNoteParser` + étend aux titres/paragraphes/listes)
+- Assertions Playwright (pures, consomment un snapshot de rendu enrichi) :
+  `TextOverflowAssertion` (P0), `NotesRenderingAssertion` (P0),
+  `FontSizeAssertion` (P1), `ContrastAssertion` (P1)
+
+_Patterns de référence_ :
+* `slider.rtl.RtlSlideAssertion` (object pur, `assertAll(data) → Result`,
+  codes P0/P1 enum) — structure des assertions
+* `slider.capsule.AsciidocSpeakerNoteParser` (object pur, parseur `.adoc`
+  ligne par ligne) — structure du parseur
+
+_Méthode_ : baby-step DDD/TDD/BDD — RED → GREEN → REFACTOR. Trois niveaux de
+tests par US : unit (value objects purs, zéro Gradle/Playwright) → functional
+(Playwright fixtures + GradleTestKit) → cucumber (BDD end-to-end). English
+only dans le code, Gherkin, commentaires.
+
+_Contrats de test_ :
+* Unit : value objects purs et domain services, zéro dépendance
+  Gradle/Playwright. Test logique overflow/layout/parser isolée.
+* Functional : assertions exécutées via Playwright sur les fixtures HTML
+  existantes (LTR + RTL), asserts sur `ContentAssertionResult.passed` et
+  codes d'échec.
+* Cucumber : `24_slide_content_validation.feature` — scénarios BDD par
+  assertion (overflow, notes, font size, contrast).
+
+_Dépendances_ :
+* Aucune nouvelle dépendance externe — pure extraction de domaine + assertions pures
+* Réutilise `slider.rtl.SlideRenderData` (à enrichir ou étendre via nouveau
+  `ContentRenderData`)
+* Réutilise `slider.capsule.AsciidocSpeakerNoteParser` (pattern de parseur,
+  pas d'héritage direct — AsciidocContentParser couvre un périmètre plus large)
+* Playwright fixtures existantes (`./gradlew generatePlaywrightFixtures`) pour
+  les functional tests
+
+_Non-périmètre_ :
+* Pas de LLM (SLD-8/SLD-9 en pause)
+* Pas de refacto `SliderManager` (déjà fait SLD-6)
+* Pas de nouvelle tâche Gradle (assertions consommées par `visualTest` existant)
+
+|===
+| US | Description | Statut | Estimation
+
+| SLD-10.0
+| Cadrage EPIC — vision, domaine `slider.content`, découpage US, dépendances. MàJ INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI.
+| ✅ TERMINÉ (S-049) | 1 pt
+
+| SLD-10.1
+| Value object `TextBlock` (texte, position estimée, bounding box) + `SlideLayout` (viewport, marges, font sizes). *Unit tests purs* (zéro Gradle, zéro Playwright).
+| ✅ TERMINÉ (S-049, 20 unit) | 2 pts
+
+| SLD-10.2
+| `OverflowDetector` (domain service) — prédit si un `TextBlock` dépasse le viewport en fonction du `SlideLayout`. *Unit tests purs* (zéro Gradle, zéro Playwright).
+| ✅ TERMINÉ (S-049, 12 unit) | 3 pts
+
+| SLD-10.3
+| `AsciidocContentParser` (parseur .adoc → `SlideContent`) — étend `AsciidocSpeakerNoteParser` aux titres `==`, paragraphes, listes `* `, notes `[NOTE.speaker]`. *Unit tests purs*.
+| ⏳ À FAIRE | 3 pts
+
+| SLD-10.4
+| `SlideContent` aggregate root + `ContentAssertionCode`/`ContentAssertionResult`/`ContentAssertionFailure` (codes P0/P1) + `ContentSlideAssertion` object (`assertAll`). Pattern `RtlSlideAssertion`. *Unit tests purs*.
+| ⏳ À FAIRE | 3 pts
+
+| SLD-10.5
+| Assertions Playwright enrichies — `TextOverflowAssertion`, `NotesRenderingAssertion`, `FontSizeAssertion`, `ContrastAssertion` (pures, consomment snapshot de rendu enrichi). *Functional tests GradleTestKit* avec Playwright fixtures existantes (LTR + RTL).
+| ⏳ À FAIRE | 3 pts
+
+| SLD-10.6
+| Cucumber `24_slide_content_validation.feature` — scénarios BDD : texte overflow détecté, notes orateur rendues, font size lisible, contraste WCAG valide, slide sans note rejetée. *BDD end-to-end*.
+| ⏳ À FAIRE | 3 pts
+|===
+
+_Total_ : 7 US, ~18 pts. _Pattern de référence_ : `slider.repository` (S-025/027)
++ `slider.rtl` (S-021) — value objects purs + assertions pures + adaptateur
+infrastructure. _Prérequis_ : SLD-2/3/6 terminés (✅), build vert 660 PASS (✅).
+
+'''
+
 == Fichiers Associes
 
 |===

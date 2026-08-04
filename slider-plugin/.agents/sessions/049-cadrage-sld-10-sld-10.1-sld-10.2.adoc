@@ -1,0 +1,153 @@
+= Session 049 — Cadrage SLD-10 + SLD-10.1 + SLD-10.2
+:session: 049
+:date: 2026-08-05
+:type: cadrage+feat+ddd+tdd
+:score: 9/10
+
+== Résumé
+
+Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.
+Domaine DDD `slider.content` modélisant le contenu d'une slide AsciiDoc et des
+assertions de rendu Playwright. 7 US, ~18 pts. Pattern de référence
+`slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`.
+Gouvernance mise à jour (INDEX, BACKLOG racine, PROMPT_REPRISE, table AGENTS.adoc
+racine MIAMI). Deux US livrées en baby-step TDD (RED → GREEN) :
+- SLD-10.1 : value objects `TextBlock` + `SlideLayout` (10 + 10 unit)
+- SLD-10.2 : `OverflowDetector` domain service + `OverflowResult` sealed (12 unit)
+
+== Contexte
+
+- Session 048 terminée : vision SLD-10 (zéro code)
+- PROMPT_REPRISE pointait vers cadrage formel SLD-10
+- Build vert 660 PASS pré-session
+- Working tree propre sur `main`
+
+== Cadrage EPIC SLD-10
+
+=== Vision
+
+slider génère des slides AsciiDoc → HTML via Reveal.js, mais n'a aucun modèle
+de contenu de slide qui permette d'évaluer le rendu. Les validations Playwright
+existantes (LTR/RTL) vérifient la structure globale (titre, slides, bounding
+box) mais pas le contenu textuel individuel. SLD-10 crée le domaine DDD
+`slider.content` modélisant le contenu d'une slide et des assertions de rendu
+pour valider que le texte est dans l'écran, que les notes orateur sont bien
+rendues, et que la lisibilité est correcte.
+
+=== Périmètre
+
+- `SlideContent` (aggregate root : titre, sous-titres, paragraphes, listes, notes orateur)
+- `TextBlock` (value object : texte, position estimée, bounding box)
+- `SlideLayout` (value object : dimensions viewport, marges, font sizes)
+- `OverflowDetector` (domain service : prédit si un TextBlock dépasse le viewport)
+- `AsciidocContentParser` (parseur .adoc → SlideContent, étend `AsciidocSpeakerNoteParser`)
+- Assertions Playwright (pures) : TextOverflow, NotesRendering, FontSize, Contrast
+
+=== Patterns de référence
+
+- `slider.rtl.RtlSlideAssertion` (object pur, `assertAll(data) → Result`, codes P0/P1 enum)
+- `slider.capsule.AsciidocSpeakerNoteParser` (object pur, parseur `.adoc` ligne par ligne)
+
+=== Découpage US (7 US, ~18 pts)
+
+|===
+| US | Description | Pts | Statut
+
+| SLD-10.0 | Cadrage EPIC — vision, domaine, découpage US, dépendances. MàJ gouvernance | 1 | ✅ TERMINÉ
+| SLD-10.1 | Value object `TextBlock` + `SlideLayout`. Unit tests purs | 2 | ✅ TERMINÉ
+| SLD-10.2 | `OverflowDetector` (domain service) + `OverflowResult` sealed. Unit tests purs | 3 | ✅ TERMINÉ
+| SLD-10.3 | `AsciidocContentParser` (parseur .adoc → SlideContent). Unit tests purs | 3 | ⏳ À FAIRE
+| SLD-10.4 | `SlideContent` aggregate + `ContentAssertionCode`/`Result`/`Failure` + `ContentSlideAssertion`. Unit tests purs | 3 | ⏳ À FAIRE
+| SLD-10.5 | Assertions Playwright enrichies (TextOverflow, NotesRendering, FontSize, Contrast). Functional tests | 3 | ⏳ À FAIRE
+| SLD-10.6 | Cucumber `24_slide_content_validation.feature`. BDD end-to-end | 3 | ⏳ À FAIRE
+|===
+
+=== Non-périmètre
+
+- Pas de LLM (SLD-8/SLD-9 en pause)
+- Pas de refacto `SliderManager` (déjà fait SLD-6)
+- Pas de nouvelle tâche Gradle (assertions consommées par `visualTest` existant)
+
+== US SLD-10.1 — TextBlock + SlideLayout
+
+Baby-step TDD : RED (compilation échoue) → GREEN (10 + 10 = 20 tests PASS).
+
+=== `TextBlock` (value object pur)
+
+- Champs : `text`, `x`, `y`, `width`, `height`
+- Validation : `require(text.isNotBlank())`, `require(width >= 0.0)`, `require(height >= 0.0)`
+- Dérivés : `rightEdge` (`x + width`), `bottomEdge` (`y + height`), `characterCount` (`text.length`)
+- Pattern : `slider.capsule.SlideSegment` (value object, `init { require(...) }`)
+
+=== `SlideLayout` (value object pur)
+
+- Champs : `viewportWidth`, `viewportHeight`, `marginX`, `marginY`, `titleFontSize`, `bodyFontSize`
+- Validation : `require(viewportWidth > 0)`, `require(viewportHeight > 0)`, `require(marginX >= 0.0)`,
+  `require(marginY >= 0.0)`, `require(titleFontSize > 0.0)`, `require(bodyFontSize > 0.0)`
+- Dérivés : `contentWidth` (`viewportWidth - 2*marginX`), `contentHeight` (`viewportHeight - 2*marginY`)
+
+== US SLD-10.2 — OverflowDetector
+
+Baby-step TDD : RED (compilation échoue) → GREEN (12 tests PASS).
+
+=== `OverflowReason` (enum)
+
+- `HORIZONTAL_OVERFLOW` (P0 — block croise marge gauche ou dépasse viewport droite)
+- `VERTICAL_OVERFLOW` (P0 — block croise marge haut ou dépasse viewport bas)
+- `ESTIMATED_TEXT_TOO_LONG` (P1 — largeur estimée texte dépasse contentWidth)
+
+=== `OverflowResult` (sealed interface)
+
+- `Fits` (data object) — le block tient dans le content area
+- `Overflow(reason, message)` (data class) — le block dépasse pour une raison donnée
+
+=== `OverflowDetector` (domain service, object pur)
+
+- `detect(block, layout): OverflowResult` — vérifie 3 conditions ordonnées :
+  1. horizontalOverflow (marges gauche/droite viewport)
+  2. verticalOverflow (marges haut/bas viewport)
+  3. estimatedTextOverflow (largeur estimée `chars × bodyFontSize × 0.5` > contentWidth)
+- `overflows(block, layout): Boolean` — helper
+- Average glyph width ratio : `0.5` (conservatif pour polices proportionnelles Latin)
+
+== Décisions
+
+- **SLD-10 cadré en 7 US ~18 pts** — domaine DDD `slider.content` (16ème domaine de slider)
+- **SLD-10.1 + SLD-10.2 livrées en TDD** — 32 tests unitaires (+20 SLD-10.1, +12 SLD-10.2)
+- **SLD-9.2→9.4 (i18n completion) reste en pause** — le pilote priorise SLD-10
+- **Average glyph width ratio = 0.5** — estimation conservative pour polices proportionnelles Latin
+- **3 conditions ordonnées dans OverflowDetector** — horizontal avant vertical avant estimated text
+  (les conditions de positionnement sont prioritaires sur la longueur estimée)
+
+== Fichiers modifiés
+
+=== Gouvernance (5 fichiers)
+- `.agents/INDEX.adoc` — session 049 + ligne roadmap SLD-10 CADRÉ + section détaillée EPIC SLD-10
+- `BACKLOG.adoc` (racine slider-gradle) — session 049 + section SLD-10 refondue
+- `PROMPT_REPRISE.adoc` — pivot vers session 050 (SLD-10.3)
+- `AGENTS.adoc` (workspace root) — table MIAMI mise à jour
+- `.agents/SESSIONS_HISTORY.adoc` — à mettre à jour (étape 4)
+
+=== Code (3 fichiers main)
+- `slider/src/main/kotlin/slider/content/TextBlock.kt` (nouveau, 30 lignes)
+- `slider/src/main/kotlin/slider/content/SlideLayout.kt` (nouveau, 35 lignes)
+- `slider/src/main/kotlin/slider/content/OverflowResult.kt` (nouveau, 33 lignes)
+- `slider/src/main/kotlin/slider/content/OverflowDetector.kt` (nouveau, 72 lignes)
+
+=== Tests (3 fichiers test)
+- `slider/src/test/kotlin/slider/content/TextBlockTest.kt` (nouveau, 10 tests)
+- `slider/src/test/kotlin/slider/content/SlideLayoutTest.kt` (nouveau, 10 tests)
+- `slider/src/test/kotlin/slider/content/OverflowDetectorTest.kt` (nouveau, 12 tests)
+
+== Vérification
+
+- `./gradlew :slider:compileKotlin` ✅
+- `./gradlew :slider:test` ✅ — 522 unitaires (was 510, +32), 0 FAIL
+- `./gradlew :slider:check` ✅ BUILD SUCCESSFUL — zéro régression
+- Working tree : 7 nouveaux fichiers (4 main + 3 test)
+
+== Prochaine session
+
+Session 050 — US SLD-10.3 `AsciidocContentParser` (parseur .adoc → `SlideContent`).
+Étend `AsciidocSpeakerNoteParser` aux titres `==`, paragraphes, listes `* `,
+notes `[NOTE.speaker]`. Baby-step TDD, unit tests purs, English only.

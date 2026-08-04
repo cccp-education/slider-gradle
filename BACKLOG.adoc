@@ -7,6 +7,17 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 049 (2026-08-05) — Cadrage SLD-10 + SLD-10.1 + SLD-10.2 ✅ TERMINÉ
+
+Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.
+Domaine DDD `slider.content` modélisant le contenu d'une slide AsciiDoc et des
+assertions de rendu Playwright pour valider que le texte est dans l'écran,
+que les notes orateur sont bien rendues, et que la lisibilité est correcte.
+7 US, ~18 pts. Pattern de référence `slider.rtl.RtlSlideAssertion` +
+`slider.capsule.AsciidocSpeakerNoteParser`. Deux US livrées en baby-step TDD :
+SLD-10.1 (`TextBlock` + `SlideLayout`, 20 unit) + SLD-10.2 (`OverflowDetector`
++ `OverflowResult` sealed, 12 unit). 522 unitaires, zéro régression.
+
 == Session 048 (2026-08-05) — Vision SLD-10 Slide Content Model ✅ TERMINÉ
 
 Session de vision et cadrage (zéro code). Le pilote a exprimé le besoin d'un
@@ -70,36 +81,52 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
-| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 À CADRER (S-048 vision, S-049 cadrage) | ~6-8 US ~15-20 pts
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-049, 3/7 US — 10.0/10.1/10.2 ✅) | 7 US ~18 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) vision session 048, cadrage formel session 049._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2 ✅ (3/7 US), reste 10.3/10.4/10.5/10.6._
 
 '''
-== 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 048 — Vision, à cadrer S-049)
+== 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 049 — Cadrage, à planifier)
 
 _Vision_ : slider génère des slides AsciiDoc → HTML via Reveal.js, mais n'a
 **aucun modèle de contenu de slide** qui permette d'évaluer le rendu. Les
 validations Playwright existantes (LTR/RTL) vérifient la structure globale
 (titre, slides, bounding box) mais pas le contenu textuel individuel.
 
-SLD-10 crée un domaine DDD `slider.content` modélisant le contenu d'une slide
+SLD-10 crée le domaine DDD `slider.content` modélisant le contenu d'une slide
 et des assertions de rendu Playwright pour valider que le texte est dans
 l'écran, que les notes orateur sont bien rendues, et que la lisibilité est
 correcte.
 
 _Périmètre_ :
-- `SlideContent` (aggregate : titre, sous-titres, paragraphes, listes, notes)
+- `SlideContent` (aggregate root : titre, sous-titres, paragraphes, listes, notes)
 - `TextBlock` (value object : texte, position, bounding box estimée)
 - `SlideLayout` (value object : dimensions viewport, marges, font sizes)
 - `OverflowDetector` (domain service : prédit si le texte dépasse l'écran)
 - `AsciidocContentParser` (parseur .adoc → SlideContent, incluant `[NOTE.speaker]`)
 - Assertions Playwright : TextOverflow, NotesRendering, FontSize, Contrast
 
-_Pattern de référence_ : `slider.rtl.RtlSlideAssertion` (assertions pures +
+_Patterns de référence_ : `slider.rtl.RtlSlideAssertion` (assertions pures +
 Playwright adapter) + `slider.capsule.AsciidocSpeakerNoteParser` (parseur .adoc).
 
-_Estimation_ : ~6-8 US, ~15-20 pts. À cadrer formellement en session 049.
+[cols="2,3,2,2", options="header"]
+|===
+| US | Description | Pts | Priorité
+| SLD-10.0 | Cadrage EPIC — vision, domaine `slider.content`, découpage US, dépendances. MàJ INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI | 1 | P0
+| SLD-10.1 | Value object `TextBlock` (texte, position, bounding box) + `SlideLayout` (viewport, marges, font sizes). Unit tests purs | 2 | P0
+| SLD-10.2 | `OverflowDetector` (domain service) — prédit si un `TextBlock` dépasse le viewport en fonction du `SlideLayout`. Unit tests purs | 3 | P0
+| SLD-10.3 | `AsciidocContentParser` (parseur .adoc → `SlideContent`) — étend `AsciidocSpeakerNoteParser` aux titres, paragraphes, listes, notes `[NOTE.speaker]`. Unit tests purs | 3 | P0
+| SLD-10.4 | `SlideContent` aggregate root + `ContentAssertionCode`/`Result`/`Failure` (codes P0/P1) + `ContentSlideAssertion` object (`assertAll`). Pattern `RtlSlideAssertion`. Unit tests purs | 3 | P1
+| SLD-10.5 | Assertions Playwright enrichies — `TextOverflow`, `NotesRendering`, `FontSize`, `Contrast` (pures, consomment snapshot enrichi). Functional tests GradleTestKit + Playwright fixtures | 3 | P1
+| SLD-10.6 | Cucumber `24_slide_content_validation.feature` — scénarios BDD : overflow, notes rendues, font size, contraste WCAG, slide sans note. BDD end-to-end | 3 | P1
+|===
+
+_Total_ : 7 US, ~18 pts. _Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US
+(unit → functional → cucumber), English only code/Gherkin. _Pattern de référence_ :
+`slider.rtl` (S-021) + `slider.repository` (S-025/027) — value objects purs +
+assertions pures + adaptateur infrastructure. _Prérequis_ : SLD-2/3/6 terminés
+(✅), build vert 660 PASS (✅).
 
 '''
 == 🟡 EPIC SLD-8 — Consommation socle N1 codebase : unifier les appels LLM slider (Session 046 — Cadrage, refondu post-046)

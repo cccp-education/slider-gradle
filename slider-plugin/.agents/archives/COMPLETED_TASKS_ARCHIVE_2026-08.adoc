@@ -1,6 +1,24 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 049 — Cadrage SLD-10 + SLD-10.1 + SLD-10.2
+
+Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.
+Domaine DDD `slider.content` (16ème domaine de slider). 7 US, ~18 pts. Deux US
+livrées en baby-step TDD (RED → GREEN) :
+
+- SLD-10.0 : Cadrage EPIC — vision, domaine `slider.content`, découpage 7 US,
+  dépendances. MàJ INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI.
+- SLD-10.1 : Value object `TextBlock` (texte, position, bounding box, `rightEdge`/
+  `bottomEdge`/`characterCount`) + `SlideLayout` (viewport, marges, font sizes,
+  `contentWidth`/`contentHeight`). 10 + 10 = 20 unit tests purs.
+- SLD-10.2 : `OverflowDetector` domain service (object pur, 3 raisons ordonnées
+  HORIZONTAL_OVERFLOW/VERTICAL_OVERFLOW/ESTIMATED_TEXT_TOO_LONG) + `OverflowResult`
+  sealed (`Fits`/`Overflow`). 12 unit tests purs.
+
+522 unitaires (+32), zéro régression. `./gradlew :slider:check` VERT. SLD-9.2→9.4
+(i18n completion) mis en pause.
+
 == Session 048 — Vision SLD-10 Slide Content Model & Rendering Validation
 
 Session de vision et cadrage (zéro code). Le pilote a exprimé le besoin d'un
