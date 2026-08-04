@@ -19,6 +19,11 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import java.lang.System.getProperty
 
+@Deprecated(
+    message = "Replaced by slider.translation domain (EPIC SLD-5). Use translateDeck task instead.",
+    replaceWith = ReplaceWith("slider.translation.DeckTranslator"),
+    level = DeprecationLevel.WARNING,
+)
 object TranslatorManager {
     @JvmStatic
     val String.uppercaseFirstChar: String

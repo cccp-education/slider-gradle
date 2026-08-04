@@ -1,0 +1,51 @@
+= Session 044 — SLD-CR3 Revue CR-GLOBALE-003
+:session: 044
+:date: 2026-08-04
+:status: ✅ TERMINÉ
+
+== Objectif
+
+EPIC SLD-CR3 — Revue CR-GLOBALE-003 : nettoyage de la chaîne amont slider.
+
+== US livrées
+
+=== SLD-CR3-1 — Déprécier/expulser `translate/` (doublon de `translation/`)
+
+- **`TranslationServiceAdapter.kt`** supprimé — dead code, jamais importé ni instancié
+- **`OllamaLanguageModelAdapter.kt`** — import mort `getTranslatePromptMessage` retiré
+  (l'adaptateur construit son propre system message inline, n'utilisait pas l'import)
+- **`TranslatorManager`** marqué `@Deprecated` (WARNING) — remplacé par `slider.translation.DeckTranslator`
+- **`TranslatorPlugin`** marqué `@Deprecated` (WARNING) — remplacé par `slider.SliderPlugin`
+- Le plugin artifact `education.cccp.slider.translator` reste enregistré dans `build.gradle.kts`
+  mais est déprécié. Les 90 tâches de traduction ad-hoc sont obsolètes, remplacées par
+  `translateDeck` (EPIC SLD-5).
+
+=== SLD-CR3-2 — Resserrer le `catch (_: Exception)` de CapsulePlugin auto-apply slider
+
+- **Fichier** : `capsule-gradle/capsule-plugin/src/main/kotlin/capsule/CapsulePlugin.kt`
+- `catch (_: Exception)` → `catch (e: UnknownPluginException)` — ne capture que le cas
+  "plugin absent". Toute autre exception (Java version guard, classpath corruption,
+  version mismatch) propage et fail le build visiblement.
+- `logger.debug` → `logger.info` — message utile pour l'utilisateur
+- `./gradlew test` capsule-gradle BUILD SUCCESSFUL
+
+== Tests
+
+- `./gradlew :slider:check` VERT — 0 FAIL, 1 SKIP (préexistant)
+- `./gradlew test` capsule-gradle VERT
+- Compilation OK avec warnings de dépréciation attendus sur `translate/`
+
+== Fichiers modifiés
+
+| Fichier | Action |
+|---|---|
+| `slider/src/main/kotlin/slider/translation/TranslationServiceAdapter.kt` | Supprimé (dead code) |
+| `slider/src/main/kotlin/slider/translation/OllamaLanguageModelAdapter.kt` | Import mort retiré |
+| `slider/src/main/kotlin/slider/translate/TranslatorManager.kt` | `@Deprecated` |
+| `slider/src/main/kotlin/slider/translate/TranslatorPlugin.kt` | `@Deprecated` |
+| `capsule-gradle/capsule-plugin/src/main/kotlin/capsule/CapsulePlugin.kt` | `catch (_: Exception)` → `catch (e: UnknownPluginException)` |
+
+== Prochaine session
+
+Session 045 — À définir. Tous les EPICs SLD-0→7 + SLD-CR3 sont terminés.
+Pistes : publication 0.0.13, ou maintenance.

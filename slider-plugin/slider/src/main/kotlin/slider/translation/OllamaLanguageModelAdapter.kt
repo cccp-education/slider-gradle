@@ -5,7 +5,6 @@ import dev.langchain4j.data.message.SystemMessage
 import dev.langchain4j.data.message.UserMessage
 import dev.langchain4j.model.chat.ChatModel
 import slider.DeckContext
-import slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessage
 
 /**
  * Infrastructure adapter that implements [LanguageModelAdapter] using a
@@ -14,10 +13,6 @@ import slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessag
  * This is the bridge between the pure `slider.translation` domain and
  * the concrete LLM providers (Ollama, Gemini, Mistral, …). The domain
  * layer never references langchain4j — it only sees the port.
- *
- * The prompt reuses [TranslatorManager.PromptManager.getTranslatePromptMessage]
- * to stay consistent with the existing translation prompt format
- * (native names, ISO codes).
  *
  * @param model  the resolved langchain4j chat model for the active provider.
  */
