@@ -1,5 +1,25 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 047_ : SLD-9.1 i18n AssistantManager via LLM. 13 clés × 10 langues.
+`./gradlew :slider:check` VERT 0 FAIL / 1 SKIP (préexistant). +47 tests, zéro régression.
+
+Nouveaux tests session 047 :
+
+. `SliderMessagesTest.kt` — 29 tests unitaires : 13 clés × EN+FR (résolution),
+  format smoke test description with model name, missing key throws
+  MissingResourceException, fallback to English for unsupported language.
+. `MessagesFrTranslationTest.kt` — +11 clés (38 tests total, toutes les clés
+  EN≠FR vérifiées).
+. `AssistantManagerI18nFunctionalTest.kt` — 6 tests GradleTestKit : RAG tasks
+  EN+FR, smoke test tasks EN+FR, generate tasks EN+FR.
+. `9_assistant_manager_i18n.feature` — 12 scénarios Cucumber BDD : reindexRag
+  EN+FR, proposeDeckContext EN+FR, generateDeck EN+FR, helloOllama EN+FR,
+  helloGemini EN, helloHuggingFace EN, task groups collect/slider-ai.
+. `AssistantManagerI18nSteps.kt` — steps Cucumber (When/Then pour résolution
+  et formatage i18n).
+
+Totaux post-047 : 490 unit + 26 functional + 239 cucumber = 755 tests.
+
 _Statut session 045_ : Fix CR-GLOBALE-002 (Option A) 3 bugs + publication 0.0.13.
 `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP (préexistant). Zéro régression.
 

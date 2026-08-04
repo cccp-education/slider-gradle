@@ -1,5 +1,21 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 
+== Session 047 (2026-08-04) — SLD-9.1 i18n AssistantManager via LLM
+
+- SLD-9.0 : cadrage EPIC SLD-9 (5 US ~10 pts) dans BACKLOG + INDEX.
+- SLD-9.1 RED : `SliderMessagesTest.kt` créé (29 tests, 13 clés × EN+FR). Échec confirmé.
+- SLD-9.1 GREEN : 13 clés ajoutées à `Messages_en.properties` (reindexRag,
+  proposeDeckContext, generateDeck, helloOllama/OllamaStreaming/Gemini/
+  GeminiStreaming/Mistral/MistralStreaming/HuggingFace/HuggingFaceStreaming
+  descriptions + task.group.collect/slider-ai). 9 fichiers `Messages_*.properties` :
+  traductions générées par LLM (`gpt-oss:120b-cloud` port 11437, 99 lignes).
+  `AssistantManager.kt` : 15 strings hardcodées → `SliderMessages.get()`/`format()`
+  avec cascade `resolveLanguage()`.
+- SLD-9.1 REFACTOR : `MessagesFrTranslationTest.kt` +11 clés (38 tests).
+  `AssistantManagerI18nFunctionalTest.kt` créé (6 tests GradleTestKit EN+FR).
+  `9_assistant_manager_i18n.feature` créé (12 scénarios Cucumber) + Steps.
+- `./gradlew :slider:check` BUILD SUCCESSFUL 0 FAIL / 1 SKIP (+47 tests).
+
 == Session 046 (2026-08-04) — Vision : PicoContainer rejeté + koog/R2DBC cadrés + EPIC SLD-8
 
 - Audit PicoContainer : zéro implémentation `org.picocontainer` dans le workspace ; `cucumber-picocontainer` (15 boroughs) = DI Cucumber test, pas DI production.

@@ -1,0 +1,71 @@
+= Session 047 — SLD-9 i18n Completion via LLM : AssistantManager + tests 3 niveaux
+:session: 047
+:date: 2026-08-04
+:statut: ✅ TERMINÉ
+:epic: SLD-9.1
+
+== Objectif
+
+i18niser `AssistantManager.kt` (648 lignes, 15 strings hardcodées en anglais)
+avec `SliderMessages.get()`/`format()` + cascade `resolveLanguage()`. Générer
+les traductions 9 langues via LLM (`gpt-oss:120b-cloud`). Baby-step TDD/BDD
+3 niveaux (unit → functional → cucumber).
+
+== Travail réalisé
+
+=== SLD-9.0 — Cadrage EPIC
+
+- BACKLOG.adoc : EPIC SLD-9 ajouté (table + section détaillée, 5 US ~10 pts)
+- INDEX.adoc : roadmap SLD-9 + en-tête session 047
+- Périmètre restrictif : que de l'i18n, pas de refacto/koog/codebase
+
+=== SLD-9.1 — i18n AssistantManager (RED → GREEN → REFACTOR)
+
+*RED* :
+- `SliderMessagesTest.kt` créé — 29 tests (13 clés × EN+FR + format + missing key + fallback)
+- Échec confirmé : clés absentes des properties
+
+*GREEN* :
+- `Messages_en.properties` : +13 clés (reindexRag, proposeDeckContext, generateDeck,
+  helloOllama/OllamaStreaming/Gemini/GeminiStreaming/Mistral/MistralStreaming/
+  HuggingFace/HuggingFaceStreaming descriptions + task.group.collect/slider-ai)
+- 9 fichiers `Messages_*.properties` : traductions générées par LLM
+  (`gpt-oss:120b-cloud` port 11437, temperature 0.2, 99 lignes)
+- `AssistantManager.kt` : 15 strings hardcodées remplacées par
+  `SliderMessages.get()`/`format()` avec `resolveLanguage()` cascade
+  (3 RAG tasks + 8 smoke-test factories)
+
+*REFACTOR* :
+- `MessagesFrTranslationTest.kt` : +11 clés (38 tests total)
+- `AssistantManagerI18nFunctionalTest.kt` créé — 6 tests GradleTestKit
+  (RAG/smoke/generate en EN+FR)
+- `9_assistant_manager_i18n.feature` créé — 12 scénarios Cucumber BDD
+  (reindexRag, proposeDeckContext, generateDeck, helloOllama/Gemini/HuggingFace,
+  task groups collect/slider-ai)
+- `AssistantManagerI18nSteps.kt` créé — steps Cucumber
+
+== Tests
+
+- `./gradlew :slider:check` BUILD SUCCESSFUL 0 FAIL / 1 SKIP
+- +47 tests (29 unit + 6 functional + 12 cucumber)
+- Aucune régression
+
+== Fichiers modifiés
+
+| Fichier | Action |
+|---|---|
+| `BACKLOG.adoc` | EPIC SLD-9 ajouté (table + section) |
+| `slider-plugin/.agents/INDEX.adoc` | SLD-9 roadmap + en-tête session 047 |
+| `slider-plugin/slider/src/main/kotlin/slider/ai/AssistantManager.kt` | 15 strings hardcodées → `SliderMessages` |
+| `slider-plugin/slider/src/main/resources/i18n/Messages_en.properties` | +13 clés (base anglaise) |
+| `slider-plugin/slider/src/main/resources/i18n/Messages_*.properties` (9 fichiers) | +11 clés LLM-generated par langue |
+| `slider-plugin/slider/src/test/kotlin/slider/i18n/SliderMessagesTest.kt` | **créé** — 29 tests unitaires |
+| `slider-plugin/slider/src/test/kotlin/slider/i18n/MessagesFrTranslationTest.kt` | +11 clés |
+| `slider-plugin/slider/src/functionalTest/kotlin/slider/i18n/AssistantManagerI18nFunctionalTest.kt` | **créé** — 6 tests GradleTestKit |
+| `slider-plugin/slider/src/test/features/9_assistant_manager_i18n.feature` | **créé** — 12 scénarios Cucumber |
+| `slider-plugin/slider/src/test/scenarios/slider/steps/AssistantManagerI18nSteps.kt` | **créé** — steps Cucumber |
+
+== Prochaine session
+
+Session 048 — SLD-9.2 : 9 tests de traduction par langue (zh/hi/es/ar/bn/pt/ru/ur + en),
+pattern `MessagesFrTranslationTest`, vérification LLM que chaque clé diffère de l'anglais.

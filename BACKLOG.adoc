@@ -62,7 +62,7 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
-| SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 CADRÉ (S-047) — SLD-9.1 en cours | 5 US ~10 pts
+| SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN COURS (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
 |===
 
 _Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) cadré session 047 — SLD-9.1 en cours._
@@ -125,11 +125,11 @@ les traductions sont générées par LLM et validées par tests.
 [cols="2,3,2,2", options="header"]
 |===
 | US | Description | Pts | Priorité
-| SLD-9.0 | Cadrage — inventaire exhaustif des strings non i18nisées + contrat de complétion | 1 | P0
-| SLD-9.1 | i18niser `AssistantManager` — 13 clés → `Messages_*.properties` 10 langues (générées par LLM), remplacer strings hardcodées par `SliderMessages.get()` | 3 | P0
-| SLD-9.2 | Tests de traduction par langue — 9 classes paramétrées (zh/hi/es/ar/bn/pt/ru/ur + en référence), pattern `MessagesFrTranslationTest`, vérification que chaque clé diffère de l'anglais | 2 | P1
-| SLD-9.3 | `TaskDescriptionsI18nTest` — test fonctionnel GradleTestKit vérifiant que TOUTES les tâches enregistrées ont un groupe + description i18nisés pour chaque langue | 2 | P1
-| SLD-9.4 | `SliderMessagesTest` unitaire (get/format/fallback/missing key) + Cucumber BDD message resolution (pattern plantuml `I18nSteps.kt`) | 2 | P1
+| SLD-9.0 | Cadrage — inventaire exhaustif des strings non i18nisées + contrat de complétion | 1 | P0 | ✅ TERMINÉ (S-047)
+| SLD-9.1 | i18niser `AssistantManager` — 13 clés → `Messages_*.properties` 10 langues (générées par LLM), remplacer strings hardcodées par `SliderMessages.get()` | 3 | P0 | ✅ TERMINÉ (S-047, +47 tests)
+| SLD-9.2 | Tests de traduction par langue — 9 classes paramétrées (zh/hi/es/ar/bn/pt/ru/ur + en référence), pattern `MessagesFrTranslationTest`, vérification que chaque clé diffère de l'anglais | 2 | P1 | ⏳ À FAIRE
+| SLD-9.3 | `TaskDescriptionsI18nTest` — test fonctionnel GradleTestKit vérifiant que TOUTES les tâches enregistrées ont un groupe + description i18nisés pour chaque langue | 2 | P1 | ⏳ À FAIRE
+| SLD-9.4 | `SliderMessagesTest` unitaire (get/format/fallback/missing key) + Cucumber BDD message resolution (pattern plantuml `I18nSteps.kt`) | 2 | P1 | ⏳ À FAIRE
 |===
 
 _Total_ : 5 US, ~10 pts. _Dépendances_ : SLD-3 (socle i18n) ✅. _Source_ : Session 047.

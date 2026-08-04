@@ -1,41 +1,32 @@
-= PROMPT_REPRISE — slider-gradle — Session 047
-:session: 047
+= PROMPT_REPRISE — slider-gradle — Session 048
+:session: 048
 :date: 2026-08-04
 
-== Session 046 terminée
+== Session 047 terminée
 
-Analyse vision + gouvernance + cadrage (zéro code).
+SLD-9.1 — i18n AssistantManager via LLM (baby-step TDD/BDD 3 niveaux).
 
-- **Audit PicoContainer** : zéro implémentation `org.picocontainer` dans le
-  workspace. `cucumber-picocontainer` (15 boroughs) = DI Cucumber de test (World/
-  Steps), pas une DI de production. **Decision 001** : rejet assumé de PicoContainer
-  comme conteneur DI — DI native Gradle (`BuildService`/`Provider`) suffit, jusqu'à
-  réévaluation (critères listés).
-- **Audit koog + R2DBC** : socle N1 **déjà publié** (codebase-gradle Central 0.0.5) —
-  koog `ai.koog:koog-agents:1.0.0` (4 graphes : VibecodingGraph, KoogPlanningOrchestrator,
-  KoogAugmentedContextGraph, MultiChannelContextGraph) + document-gradle
-  (DocumentGenerationGraph). R2DBC implémenté (R2dbcAgenticChunkRepository). EPIC L ✅
-  TERMINÉ (034-049). **Decision 002** : adopter koog+R2DBC comme socle IA slider.
-- **EPIC SLD-8 cadré + refondu post-046** (BACKLOG) : **slider consomme codebase (N1)
-  comme socle LLM unifié** — pas de koog en direct, pas de factories de modèles.
-  `AssistantManager` (648 lignes, 4 providers) réduit à du câblage. Graphe koog
-  `DeckPipelineGraph` (`proposeDeckContext` → `generateDeck`) sur services codebase.
-  5 US ~12 pts, méthode baby-step DDD/TDD/BDD 3 niveaux.
-- **Doc pilotage** : `KOOG_AGENTIC_PATTERNS.adoc` → koog 1.0.0, EPIC L ✅, note DI.
-- **Nouveau** : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (Decision 001 + 002).
-- **Constat post-046** : codebase n'expose **aucune API de services consommable**
-  (zéro BuildService, deps `implementation`) — c'est le gap que l'US-8.1 lève.
+- **SLD-9.0** : cadrage EPIC SLD-9 (5 US ~10 pts) dans BACKLOG + INDEX.
+- **SLD-9.1 RED** : `SliderMessagesTest.kt` créé (29 tests, 13 clés × EN+FR).
+  Échec confirmé — clés absentes.
+- **SLD-9.1 GREEN** : 13 clés ajoutées à `Messages_en.properties` (reindexRag,
+  proposeDeckContext, generateDeck, helloOllama/OllamaStreaming/Gemini/
+  GeminiStreaming/Mistral/MistralStreaming/HuggingFace/HuggingFaceStreaming
+  descriptions + task.group.collect/slider-ai). 9 fichiers `Messages_*.properties` :
+  traductions générées par LLM (`gpt-oss:120b-cloud` port 11437, 99 lignes).
+  `AssistantManager.kt` : 15 strings hardcodées → `SliderMessages.get()`/`format()`
+  avec cascade `resolveLanguage()`.
+- **SLD-9.1 REFACTOR** : `MessagesFrTranslationTest.kt` +11 clés (38 tests).
+  `AssistantManagerI18nFunctionalTest.kt` créé (6 tests GradleTestKit EN+FR).
+  `9_assistant_manager_i18n.feature` créé (12 scénarios Cucumber) + Steps.
+- `./gradlew :slider:check` BUILD SUCCESSFUL 0 FAIL / 1 SKIP (+47 tests).
 
-== Prochaine session — 047
+== Prochaine session — 048
 
-*Objectif* : Planifier EPIC SLD-8 (slider consomme codebase).
-- **US-8.0** : cadrage contrat de consommation slider↔codebase — périmètre slider
-  (`AssistantManager` 4 factories → câblage, `RagManager`, `OllamaLanguageModelAdapter`)
-  + contrat service LLM codebase consommable (N0 `llm-pool-contracts`/`codebase-contracts`).
-- **US-8.1** : côté codebase (N1, Queens) — exposer `BuildService` LLM
-  (`Provider<ChatModel>` via `LlmProviderResolver`/`OllamaPool`), koog/langchain4j en `api`
-  (slider consomme koog transitivement, sans BOM directe).
-- Nettoyage optionnel : sections obsolètes SLD-6/SLD-7 du BACKLOG — **déjà fait en S-046**.
+*Objectif* : SLD-9.2 — 9 tests de traduction par langue (zh/hi/es/ar/bn/pt/ru/ur + en).
+Pattern `MessagesFrTranslationTest` : test paramétré vérifiant que chaque clé
+diffère de l'anglais pour chaque langue. Génération LLM si des traductions
+manquent.
 
 == Rappels
 
@@ -61,6 +52,7 @@ Analyse vision + gouvernance + cadrage (zéro code).
 - `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP)
 - EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
 - EPIC cadré : SLD-8 slider consomme codebase (5 US ~12 pts, à planifier)
+- EPIC en cours : SLD-9 i18n Completion (SLD-9.1 ✅, reste 9.2/9.3/9.4)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
   rejeté, 002 slider consomme codebase comme socle LLM unifié)

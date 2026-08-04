@@ -2,6 +2,24 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 047 (2026-08-04) — SLD-9.1 i18n AssistantManager via LLM
+
+SLD-9.1 — i18niser `AssistantManager.kt` (15 strings hardcodées → `SliderMessages`).
+Baby-step TDD/BDD 3 niveaux (RED → GREEN → REFACTOR).
+
+*RED* : `SliderMessagesTest.kt` créé (29 tests, 13 clés × EN+FR). Échec confirmé.
+*GREEN* : 13 clés ajoutées à `Messages_en.properties` (reindexRag, proposeDeckContext,
+generateDeck, helloOllama/OllamaStreaming/Gemini/GeminiStreaming/Mistral/
+MistralStreaming/HuggingFace/HuggingFaceStreaming descriptions + task.group.collect/
+slider-ai). 9 fichiers `Messages_*.properties` : traductions générées par LLM
+(`gpt-oss:120b-cloud` port 11437, temperature 0.2, 99 lignes). `AssistantManager.kt` :
+15 strings hardcodées remplacées par `SliderMessages.get()`/`format()` avec cascade
+`resolveLanguage()` (3 RAG tasks + 8 smoke-test factories).
+*REFACTOR* : `MessagesFrTranslationTest.kt` +11 clés (38 tests).
+`AssistantManagerI18nFunctionalTest.kt` créé (6 tests GradleTestKit EN+FR).
+`9_assistant_manager_i18n.feature` créé (12 scénarios Cucumber) + Steps.
+`./gradlew :slider:check` BUILD SUCCESSFUL 0 FAIL / 1 SKIP (+47 tests).
+
 == Session 046 (2026-08-04) — Vision : PicoContainer rejeté + koog/R2DBC cadrés + EPIC SLD-8
 
 Session analyse + gouvernance + cadrage (zéro code).
