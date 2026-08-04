@@ -2,6 +2,24 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 046 (2026-08-04) — Vision : PicoContainer rejeté + koog/R2DBC cadrés + EPIC SLD-8
+
+Session analyse + gouvernance + cadrage (zéro code).
+Audit PicoContainer : zéro implémentation `org.picocontainer` dans le workspace ;
+`cucumber-picocontainer` (15 boroughs) = DI Cucumber test (World/Steps), pas DI de
+production. **Decision 001** (`DECISIONS_ARCHITECTURE.adoc` créé) : rejet assumé de
+PicoContainer comme conteneur DI — DI native Gradle (`BuildService`/`Provider`)
+suffit jusqu'à réévaluation (critères listés). Audit koog+R2DBC : socle N1 **déjà
+publié** (codebase-gradle Central 0.0.5 — koog `ai.koog:koog-agents:1.0.0` 4 graphes :
+VibecodingGraph, KoogPlanningOrchestrator, KoogAugmentedContextGraph,
+MultiChannelContextGraph + document-gradle DocumentGenerationGraph ; R2DBC
+`R2dbcAgenticChunkRepository`/`AgenticChunkRepository`/`R2dbcInvalidChunkRepository` ;
+EPIC L ✅ TERMINÉ 034-049). **Decision 002** : adopter koog+R2DBC comme socle IA
+slider. **EPIC SLD-8 koog Orchestration cadré** (BACKLOG) : graphe d'orchestration
+`proposeDeckContext` → `generateDeck`, 5 US ~12 pts, méthode baby-step DDD/TDD/BDD
+3 niveaux. Doc pilotage `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` : koog
+0.8.0 → 1.0.0 (BOM workspace-bom), EPIC L ✅, note DI PicoContainer. Zéro code modifié.
+
 == Session 045 (2026-08-04) — Fix CR-GLOBALE-002 + Publication 0.0.13
 
 Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.

@@ -1,0 +1,125 @@
+= 📝 Décisions Architectures — Slider Gradle Plugin
+
+_Dernière mise à jour_ : 4 août 2026  
+_Session_ : 046  
+_Type_ : LAZY (consultation sur besoin)
+
+'''
+
+== 📁 Decision 001 — PicoContainer : rejet assumé de la DI conteneur
+
+_Date_ : 4 août 2026  
+_Statut_ : ✅ ADOPTÉE (choix technique assumé)  
+_Alternative considérée_ : PicoContainer, Koin, Spring DI, DI native Gradle
+
+=== Contexte
+
+Le manifeste E-3PO (`doc/agentic_gradle_1-5.adoc`) proposait **PicoContainer**
+(`org.picocontainer`, `DefaultPicoContainer`, `Caching()`) comme conteneur
+d'injection de dépendances "zéro-magie" pour la couche IA du plugin.
+
+_Problème_ : PicoContainer est-il pertinent pour l'assemblage des composants
+de production (modèle LLM, mémoire vectorielle, agent) du plugin ?
+
+=== État des lieux (audit 4 août 2026)
+
+. **Zéro implémentation** : aucun import `org.picocontainer` dans le code source
+  de slider-gradle (production ou test) ni dans aucun borough du workspace.
+. **Absent de tous les catalogues** : aucun `libs.versions.toml` ne déclare
+  `org.picocontainer:pico-container`.
+. **Présence trompeuse** : `io.cucumber:cucumber-picocontainer` (7.34.3) est
+  déclaré et consommé (via `libs.bundles.cucumber`, `testImplementation`) dans
+  15 boroughs — mais c'est le module officiel Cucumber d'injection des
+  `World`/`Steps` par scénario (BDD test), **pas** une DI de production.
+
+=== Décision
+
+**Ne pas utiliser PicoContainer comme conteneur DI de production.**
+
+_Choix technique assumé_ : la DI native de Gradle (`@Inject`, `BuildService`,
+`Provider<T>`, `Property<T>`) couvre déjà le besoin — injection par constructeur,
+cycle de vie géré par Gradle, zéro dépendance runtime, isolation classloader
+préservée (le premier ennemi des plugins Gradle). Le graphe de composants est
+minuscule (~5 éléments) : un conteneur est de la cérémonie.
+
+_Statut_ : cette décision reste en vigueur **jusqu'à réévaluation de la
+situation** (par ex. graphe atteignant des dizaines de composants, dépendances
+optionnelles runtime, ou abandon du modèle `BuildService`).
+
+=== Critères de réévaluation
+
+. Le graphe de composants IA dépasse ~15-20 services instanciés.
+. Besoin de remplacement dynamique de dépendances au runtime (scoping).
+. Migration hors `BuildService`/`Provider` Gradle (ex. agent autonome long-running).
+. Si réévaluation : privilégier Koin ou Spring (maintenus) — PicoContainer est
+  un projet sans mainteneur actif (dernière release stable ~2018).
+
+=== Références
+
+* Manifeste E-3PO : `doc/agentic_gradle_1.adoc` §4 (contexte de la proposition)
+* Code existant : `slider/src/main/kotlin/slider/ai/RagTask.kt`, `AssistantManager.kt` (pattern DI native Gradle)
+* Convention cucumber-picocontainer : `gradle/libs.versions.toml` (BDD test uniquement)
+
+'''
+
+== 📁 Decision 002 — koog + R2DBC : socle N1 existant, câblage slider à cadrer
+
+_Date_ : 4 août 2026  
+_Statut_ : 🟡 EN COURS (cadrage — câblage slider non commencé)  
+_Alternative considérée_ : rester sur le pipeline actuel à appel unique (`generateDeck`)
+
+=== Contexte
+
+Le manifeste E-3PO (`doc/agentic_gradle_1-5.adoc`) décrivait comme horizon :
+* koog (orchestration agentique par graphe d'états)
+* R2DBC (accès PostgreSQL réactif non bloquant)
+
+_Problème_ : ces technologies ne sont pas un horizon vision — un socle N1 **déjà publié
+sur Maven Central** existe dans les autres boroughs.
+
+=== État des lieux (audit 4 août 2026)
+
+. **koog** (`ai.koog:koog-agents:1.0.0`, JetBrains, Apache 2.0) — implémenté en production :
+  * codebase-gradle (N1, Central 0.0.5) : `VibecodingGraph`, `KoogPlanningOrchestrator`,
+    `KoogAugmentedContextGraph`, `MultiChannelContextGraph`
+  * document-gradle (N2) : `DocumentGenerationGraph`
+  * Déclaré aussi : planner, capsule, codex, training, workspace-bom (agent/vibecoding-contracts)
+. **R2DBC** — implémenté en production dans codebase-gradle :
+  * `r2dbc-postgresql:1.0.7.RELEASE`, `r2dbc-pool:1.0.2.RELEASE`, `r2dbc-spi:1.0.0.RELEASE`
+  * `R2dbcAgenticChunkRepository`, `AgenticChunkRepository`, `R2dbcInvalidChunkRepository`
+. **EPIC L** (migration langgraph4j → koog) : ✅ TERMINÉ (codebase-gradle, sessions 034-049)
+. **Référence pilotage** : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` (koog 1.0.0, maj 4 août 2026)
+
+=== Décision
+
+Adopter koog + R2DBC comme **socle technique de la couche IA slider**, en consommant
+le socle N1 existant plutôt qu'en le réimplémentant.
+
+_Règles d'alignement_ :
+* koog = orchestration (graphe d'états), langchain4j = exécution (LLM, pgvector, embeddings)
+* Version koog pilotée par la BOM workspace-bom (1.0.0)
+* R2DBC réservé aux accès réactifs au socle ; le store pgvector slider reste
+  accessible via la DI native Gradle (`BuildService`, voir Decision 001)
+* Premier usage cible : graphe d'orchestration `proposeDeckContext` → `generateDeck`
+
+=== Références
+
+* Doc patterns pilotage : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
+* Implémentations N1 : codebase-gradle `src/main/kotlin/codebase/koog/`
+* Vision : `doc/agentic_gradle_1.adoc` §1 (koog) et `doc/agentic_gradle_5.adoc` (R2DBC)
+
+'''
+
+== 🔗 Index des Décisions
+
+|===
+| # | Sujet | Fichier | Statut
+| 001 | PicoContainer : rejet assumé de la DI conteneur | Ce document | ✅ ADOPTÉE
+| 002 | koog + R2DBC : socle N1 existant, câblage slider à cadrer | Ce document | 🟡 EN COURS
+|===
+
+'''
+
+_Document créé_ : 4 août 2026 (Session 046)  
+_Type_ : LAZY (consultation sur besoin)  
+_Maintenu par_ : Agent OpenCode (fin de session)

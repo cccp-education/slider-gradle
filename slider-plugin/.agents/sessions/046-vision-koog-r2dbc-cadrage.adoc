@@ -1,0 +1,101 @@
+= Session 046 — Vision : PicoContainer rejeté + koog/R2DBC cadrés + EPIC SLD-8
+:session: 046
+:date: 2026-08-04
+:status: ✅ TERMINÉ
+
+== Objectif
+
+Répondre à la question : que reste-t-il dans le backlog et la vision qui n'a pas
+été implémenté ? Puis arbitrer les horizons vision (PicoContainer, koog, R2DBC)
+en s'appuyant sur l'existant des autres boroughs. Aucune US de feature livrée —
+session d'analyse + gouvernance + cadrage.
+
+== Analyse : backlog et vision non implémentés
+
+- **Backlog** : aucune US ouverte. 2 sections obsolètes identifiées :
+  * `BACKLOG.adoc` lignes ~211-237 : section SLD-6 marquée "🚧 EN COURS 9/11"
+    (US-6.9/6.10 "⏳ À FAIRE") alors que SLD-6 est terminé 11/11 (S-042).
+  * `BACKLOG.adoc` ligne ~488 : "🔲 SLD-7 — Câblage Explicite translateDeck →
+    Capsule (Session 097)" alors que SLD-7 est terminé 3/3 (S-041).
+- **Vision E-3PO** (`doc/agentic_gradle_1-5.adoc`) : koog (orchestration par
+  graphe d'états), PicoContainer (DI), R2DBC (accès réactif) — aucun n'était
+  implémenté dans slider.
+
+== Audit PicoContainer (Decision 001)
+
+- **Zéro implémentation** : aucun import `org.picocontainer` dans tout le
+  workspace (production ou test).
+- **Absent de tous les catalogues** : aucun `libs.versions.toml` ne déclare
+  `org.picocontainer:pico-container`.
+- **Confusion levée** : `io.cucumber:cucumber-picocontainer` (7.34.3) est déclaré
+  et consommé dans 15 boroughs (dont slider, via `libs.bundles.cucumber`) — c'est
+  le module officiel Cucumber d'injection des `World`/`Steps` par scénario (BDD
+  test), **pas** une DI de production.
+- **Décision** : rejet assumé de PicoContainer comme conteneur DI de production.
+  La DI native Gradle (`@Inject`, `BuildService`, `Provider<T>`, `Property<T>`)
+  couvre le besoin (injection par constructeur, cycle de vie Gradle, zéro
+  dépendance, isolation classloader). PicoContainer = projet sans mainteneur actif
+  (dernière release stable ~2018). Statut valable jusqu'à réévaluation (critères
+  listés dans la décision).
+
+== Audit koog + R2DBC (Decision 002)
+
+- **koog** (`ai.koog:koog-agents:1.0.0`, JetBrains, Apache 2.0) — socle N1
+  **déjà publié** sur Maven Central, implémenté en production :
+  * codebase-gradle (N1, Central 0.0.5) : `VibecodingGraph`, `KoogPlanningOrchestrator`,
+    `KoogAugmentedContextGraph`, `MultiChannelContextGraph`
+  * document-gradle (N2) : `DocumentGenerationGraph`
+  * Déclaré aussi : planner, capsule, codex, training, workspace-bom
+- **R2DBC** — implémenté en production dans codebase-gradle :
+  `r2dbc-postgresql:1.0.7.RELEASE`, `r2dbc-pool:1.0.2.RELEASE`, `r2dbc-spi:1.0.0.RELEASE`,
+  `R2dbcAgenticChunkRepository`, `AgenticChunkRepository`, `R2dbcInvalidChunkRepository`.
+- **EPIC L** (migration langgraph4j → koog) : ✅ TERMINÉ (codebase-gradle, sessions 034-049).
+- **Décision** : adopter koog + R2DBC comme socle technique de la couche IA slider,
+  en consommant le socle N1 existant. koog = orchestration, langchain4j = exécution.
+  Premier usage cible : graphe `proposeDeckContext` → `generateDeck`.
+
+== Cadrage EPIC SLD-8 — koog Orchestration
+
+5 US, ~12 pts, ajouté au BACKLOG slider :
+
+| US | Description | Pts | Priorité |
+|---|---|---|---|
+| SLD-8.0 | Cadrage — contrat koog : graphe d'orchestration `proposeDeckContext` → `generateDeck` | 1 | P0 |
+| SLD-8.1 | Domaine DDD `slider.koog` — dépendance `ai.koog:koog-agents:1.0.0` + `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) | 3 | P0 |
+| SLD-8.2 | Intégration DI native Gradle : `ChatModel` + `PgVectorEmbeddingStore` via `BuildService`/`Provider` (pas de conteneur DI — Decision 001) | 2 | P0 |
+| SLD-8.3 | Tests unitaires koog (StateGraph, ConditionalEdges : validation-contexte → retry ou generate) | 3 | P1 |
+| SLD-8.4 | Tests Cucumber — scénario BDD pipeline complet koog deck (2 appels orchestrés) | 3 | P1 |
+
+_Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber),
+English only code/Gherkin.
+
+== Doc pilotage mise à jour
+
+- `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` : koog `0.8.0` → `1.0.0`
+  (aligné BOM workspace-bom), EPIC L marqué ✅ TERMINÉ (sessions 034-049), note DI
+  PicoContainer (Decision 001) ajoutée, revdate 2026-08-04.
+
+== Décisions
+
+- `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` créé (convention ADR
+  workspace — cf. plantuml-gradle, workspace-bom) avec :
+  * **Decision 001** — PicoContainer : rejet assumé de la DI conteneur (✅ ADOPTÉE)
+  * **Decision 002** — koog + R2DBC : socle N1 existant, câblage slider à cadrer (🟡 EN COURS)
+
+== Tests
+
+- Aucun code modifié — aucune exécution de tests requise (session gouvernance/cadrage).
+
+== Fichiers modifiés
+
+| Fichier | Action |
+|---|---|
+| `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` | koog 0.8.0 → 1.0.0, EPIC L ✅, note DI PicoContainer |
+| `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` | **créé** — Decision 001 (PicoContainer rejeté) + Decision 002 (koog+R2DBC) |
+| `BACKLOG.adoc` | EPIC SLD-8 ajouté (table + section détaillée) + note EPICs |
+
+== Prochaine session
+
+Session 047 — Planifier EPIC SLD-8 koog Orchestration : US-8.0/8.1 (cadrage +
+domaine DDD `slider.koog` + `DeckPipelineGraph`). Nettoyage optionnel : sections
+obsolètes SLD-6/SLD-7 du BACKLOG.

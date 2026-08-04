@@ -1,5 +1,15 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 
+== Session 046 (2026-08-04) — Vision : PicoContainer rejeté + koog/R2DBC cadrés + EPIC SLD-8
+
+- Audit PicoContainer : zéro implémentation `org.picocontainer` dans le workspace ; `cucumber-picocontainer` (15 boroughs) = DI Cucumber test, pas DI production.
+- **Decision 001** : rejet assumé de PicoContainer comme conteneur DI — DI native Gradle (`BuildService`/`Provider`) suffit jusqu'à réévaluation.
+- Audit koog+R2DBC : socle N1 **déjà publié** (codebase-gradle Central 0.0.5 — koog 1.0.0 4 graphes + document-gradle ; R2DBC `R2dbcAgenticChunkRepository` ; EPIC L ✅).
+- **Decision 002** : adopter koog+R2DBC comme socle IA slider.
+- **EPIC SLD-8 koog Orchestration cadré** (BACKLOG) : graphe `proposeDeckContext`→`generateDeck`, 5 US ~12 pts, méthode baby-step DDD/TDD/BDD 3 niveaux.
+- Doc pilotage `KOOG_AGENTIC_PATTERNS.adoc` : koog 0.8.0 → 1.0.0, EPIC L ✅, note DI.
+- `DECISIONS_ARCHITECTURE.adoc` créé (Decision 001 + 002). Zéro code modifié.
+
 == Session 045 (2026-08-04) — Fix CR-GLOBALE-002 + Publication 0.0.13
 
 - US-1 : Guard plan vide — `TranslationOutcome.EMPTY` + `of()` accepte liste vide, `DeckTranslator` guard, `TranslateDeckTask` skip avant LLM, clé i18n `task.translateDeck.noTargets` (11 Messages_*.properties). Tests 3 niveaux (2 unit + 1 functional + 2 cucumber).

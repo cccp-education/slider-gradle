@@ -1,32 +1,37 @@
-= PROMPT_REPRISE — slider-gradle — Session 046
-:session: 046
-:date: 2026-08-05
+= PROMPT_REPRISE — slider-gradle — Session 047
+:session: 047
+:date: 2026-08-04
 
-== Session 045 terminée
+== Session 046 terminée
 
-Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.
+Analyse vision + gouvernance + cadrage (zéro code).
 
-- **US-1** : Guard plan vide dans le pipeline de traduction. `DeckTranslator.translate`
-  retourne `TranslationOutcome.EMPTY` si plan vide (requis + plan avec uniquement
-  la langue source). `TranslationOutcome.of()` accepte une liste vide (constante
-  `EMPTY`). `TranslateDeckTask` skip proprement avant résolution LLM quand tous
-  les targets = langue source (message i18n `task.translateDeck.noTargets`, 11
-  fichiers Messages_*.properties). Tests 3 niveaux : 2 unit (TranslationOutcomeTest
-  + DeckTranslatorTest) + 1 functional (TranslateDeckFunctionalTest guard) +
-  2 scénarios Cucumber (`13_deck_translation.feature`).
-- **US-2** : Regex `buildOutputFile` — `_[a-z]{2}$` → `_[a-zA-Z]{2}$` (supporte
-  les segments de langue uppercase type `_ZH`). +1 unit test.
-- **US-3** : `RagManager.buildStore` — propriétés système `ssl`/`sslmode` scopées
-  dans try/finally avec restauration (`restoreSystemProperty`), plus de mutation
-  globale JVM. Zéro test modifié (comportement identique).
+- **Audit PicoContainer** : zéro implémentation `org.picocontainer` dans le
+  workspace. `cucumber-picocontainer` (15 boroughs) = DI Cucumber de test (World/
+  Steps), pas une DI de production. **Decision 001** : rejet assumé de PicoContainer
+  comme conteneur DI — DI native Gradle (`BuildService`/`Provider`) suffit, jusqu'à
+  réévaluation (critères listés).
+- **Audit koog + R2DBC** : socle N1 **déjà publié** (codebase-gradle Central 0.0.5) —
+  koog `ai.koog:koog-agents:1.0.0` (4 graphes : VibecodingGraph, KoogPlanningOrchestrator,
+  KoogAugmentedContextGraph, MultiChannelContextGraph) + document-gradle
+  (DocumentGenerationGraph). R2DBC implémenté (R2dbcAgenticChunkRepository). EPIC L ✅
+  TERMINÉ (034-049). **Decision 002** : adopter koog+R2DBC comme socle IA slider.
+- **EPIC SLD-8 cadré** (BACKLOG) : koog Orchestration du pipeline deck
+  (`proposeDeckContext` → `generateDeck`), 5 US ~12 pts, méthode baby-step
+  DDD/TDD/BDD 3 niveaux.
+- **Doc pilotage** : `KOOG_AGENTIC_PATTERNS.adoc` → koog 1.0.0, EPIC L ✅, note DI.
+- **Nouveau** : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (Decision 001 + 002).
 
-`./gradlew :slider:check` VERT — 0 FAIL, 1 SKIP (préexistant).
-Publication Maven Central slider **0.0.13** (bundle `ec715b09`) AUTOMATIC, confirmé repo1.maven.org.
+== Prochaine session — 047
 
-== Prochaine session — 046
-
-*Objectif* : À définir. Tous les EPICs SLD-0→7 + SLD-CR3 + fix CR-GLOBALE-002
-sont terminés. Pistes : maintenance, ou nouveau refactoring.
+*Objectif* : Planifier EPIC SLD-8 koog Orchestration.
+- **US-8.0** : cadrage contrat koog — graphe `proposeDeckContext` → `generateDeck`
+  sur la base RAG pgvector existante.
+- **US-8.1** : domaine DDD `slider.koog` — dépendance `ai.koog:koog-agents:1.0.0`
+  (via BOM workspace-bom) + `DeckPipelineGraph` (nodes : propose-context,
+  validate-context, generate-deck).
+- Nettoyage optionnel : sections obsolètes SLD-6 ("EN COURS 9/11") et SLD-7
+  ("🔲 ... Session 097") du BACKLOG — les deux EPICs sont en fait terminés.
 
 == Rappels
 
@@ -36,7 +41,7 @@ sont terminés. Pistes : maintenance, ou nouveau refactoring.
 - BOM workspace-bom : Central 0.0.11
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
-- codebase-plugin : Central 0.0.5
+- codebase-plugin : Central 0.0.5 (koog 1.0.0, R2DBC — socle N1 consommable)
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
@@ -50,5 +55,8 @@ sont terminés. Pistes : maintenance, ou nouveau refactoring.
   → `build/playwright-fixtures/{ltr,rtl}/`
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
 - `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP)
-- EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1/0.0.8/0.0.9/0.0.10/0.0.11/0.0.12/0.0.13
+- EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
+- EPIC cadré : SLD-8 koog Orchestration (5 US ~12 pts, à planifier)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
+- Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
+  rejeté, 002 koog+R2DBC socle N1)

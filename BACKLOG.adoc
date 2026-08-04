@@ -61,9 +61,32 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | PUB | Publications Maven Central 0.0.1→0.0.13 | ✅ | 7/7
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
+| SLD-8 | koog Orchestration — graphe d'états du pipeline deck (proposeDeckContext → generateDeck) | 🟡 CADRÉ (S-046) — socle N1 existant | US à définir
 |===
 
-_Tous les EPICs sont terminés._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (koog) cadré session 046 — à planifier._
+
+'''
+== 🟡 EPIC SLD-8 — koog Orchestration : graphe d'états du pipeline deck (Session 046 — Cadrage)
+
+[cols="2,3,2,2", options="header"]
+|===
+| US | Description | Pts | Priorité
+| SLD-8.0 | Cadrage — contrat koog : graphe d'orchestration `proposeDeckContext` → `generateDeck` sur la base RAG pgvector existante | 1 | P0
+| SLD-8.1 | Domaine DDD `slider.koog` — dépendance `ai.koog:koog-agents:1.0.0` (via BOM workspace-bom) + `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) | 3 | P0
+| SLD-8.2 | Intégration DI native Gradle : le graphe consomme `ChatModel` + `PgVectorEmbeddingStore` via `BuildService`/`Provider` (pas de conteneur DI — voir Decision 001) | 2 | P0
+| SLD-8.3 | Tests unitaires koog (StateGraph, ConditionalEdges : validation-contexte → retry ou generate) | 3 | P1
+| SLD-8.4 | Tests Cucumber — scénario BDD pipeline complet koog deck (2 appels orchestrés) | 3 | P1
+|===
+
+_Total_ : 5 US, ~12 pts. _Dépendances_ : socle N1 codebase-gradle publié Central (koog 1.0.0) ;
+`proposeDeckContext`/`generateDeck` existants (AssistantManager). _Source_ : Session 046.
+_Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin.
+_Alignement vision_ : `doc/agentic_gradle_1.adoc` §1 (koog) + `doc/agentic_gradle_5.adoc` (R2DBC).
+_Décisions_ : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` Decision 001 (PicoContainer rejeté)
++ Decision 002 (koog+R2DBC socle N1 existant).
+
+'''
 
 '''
 == 🟠 EPIC SLD-CR3 — Revue CR-GLOBALE-003 : Création de Contenu Solide
@@ -208,7 +231,7 @@ adapter). Imports morts nettoyés. Baby-step TDD/BDD : 12 unit + 15 scénarios
 Cucumber. `./gradlew :slider:check` VERT 455 PASS / 0 FAIL / 1 SKIP (+27 vs 428).
 
 '''
-== EPIC SLD-6 — Refactor DDD SliderManager decomposition 🚧 EN COURS
+== EPIC SLD-6 — Refactor DDD SliderManager decomposition ✅ TERMINÉ
 
 _Vision_ : `SliderManager.kt` (968 lignes, 9 nested objects) est un god-object.
 Extraction de chaque responsabilité dans un domaine dédié, baby-step TDD/BDD 3
@@ -230,11 +253,11 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 | SLD-6.6 | Extraction `registerAsciidoctorRevealJsTask`+clean+dashboard → `slider.revealjs` (`RevealJsTaskRegistrar`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 24 unit + 17 cucumber) | 3 pts
 | SLD-6.7 | Extraction `serveSlides`+`visualTest`+`installPlaywright` → `slider.playwright` (`PlaywrightTaskRegistrar`). Functional GradleTestKit | ✅ TERMINÉ (S-039, 16 unit + 19 cucumber) | 2 pts
 | SLD-6.8 | Extraction `registerAsciidocCapsuleTask` → `slider.capsule.CapsuleTaskRegistrar`. Functional + Cucumber `22_capsule_task_decomposition.feature` | ✅ TERMINÉ (S-040, 12 unit + 13 cucumber) | 1 pt
-| SLD-6.9 | Consolidation `registerPublishSlidesTask`+`Git` → `slider.repository.PublishTaskRegistrar`+`SlidePublisher`. Functional + Cucumber `20_publish_task_decomposition.feature` | ⏳ À FAIRE | 2 pts
-| SLD-6.10 | `SliderManager` → thin orchestrator < 100 lignes. `SliderPlugin.apply()` délègue à tous les registrars. Vérification 428 PASS maintenus | ⏳ À FAIRE | 2 pts
+| SLD-6.9 | Consolidation `registerPublishSlidesTask`+`Git` → `slider.repository.PublishTaskRegistrar`+`SlidePublisher`. Functional + Cucumber `20_publish_task_decomposition.feature` | ✅ TERMINÉ (S-042, 3 cucumber) | 2 pts
+| SLD-6.10 | `SliderManager` → thin orchestrator < 100 lignes. `SliderPlugin.apply()` délègue à tous les registrars. Vérification 428 PASS maintenus | ✅ TERMINÉ (S-042, `SliderManager` supprimé) | 2 pts
 |===
 
-_Total_ : 11 US, ~20 pts (9/11 terminées — SLD-6.0 cadrage + 6.1 scaffold + 6.2 config + 6.3 prerequisite + 6.4 extension + 6.5 wiring + 6.6 revealjs + 6.7 playwright + 6.8 capsule). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
+_Total_ : 11 US, ~20 pts (11/11 terminées — S-035→S-042). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.13 ✅ TERMINE (Session 045, 2026-08-04)
@@ -485,7 +508,7 @@ _Total_ : 7 US, ~15 pts.
 _Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-3-detail-us[INDEX → EPIC SLD-3].
 
 '''
-== 🔲 SLD-7 — Câblage Explicite translateDeck → Capsule (Session 097)
+== ✅ SLD-7 — Câblage Explicite translateDeck → Capsule ✅ TERMINÉ (S-041, 2026-07-31)
 
 [cols="2,3,2,2", options="header"]
 |===
@@ -495,4 +518,4 @@ _Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-3-detail-
 | SLD-7.2 | Tests Cucumber — scénario BDD pipeline complet slider→capsule | 3 | P1
 |===
 
-_Total_ : 3 US, ~6 pts. _Dépendance_ : SLD-6 terminé. _Source_ : Session 097.
+_Total_ : 3 US, ~6 pts (3/3 terminées, S-041). _Dépendance_ : SLD-6 terminé. _Source_ : Session 097 (cadrage initial), livré Session 041.
