@@ -1,32 +1,26 @@
-= PROMPT_REPRISE — slider-gradle — Session 048
-:session: 048
-:date: 2026-08-04
+= PROMPT_REPRISE — slider-gradle — Session 049
+:session: 049
+:date: 2026-08-05
 
-== Session 047 terminée
+== Session 048 terminée
 
-SLD-9.1 — i18n AssistantManager via LLM (baby-step TDD/BDD 3 niveaux).
+Session de vision et cadrage (zéro code). Le pilote a exprimé le besoin d'un
+nouvel EPIC SLD-10 — Slide Content Model & Rendering Validation. SLD-9.2→9.4
+(i18n completion) mis en pause.
 
-- **SLD-9.0** : cadrage EPIC SLD-9 (5 US ~10 pts) dans BACKLOG + INDEX.
-- **SLD-9.1 RED** : `SliderMessagesTest.kt` créé (29 tests, 13 clés × EN+FR).
-  Échec confirmé — clés absentes.
-- **SLD-9.1 GREEN** : 13 clés ajoutées à `Messages_en.properties` (reindexRag,
-  proposeDeckContext, generateDeck, helloOllama/OllamaStreaming/Gemini/
-  GeminiStreaming/Mistral/MistralStreaming/HuggingFace/HuggingFaceStreaming
-  descriptions + task.group.collect/slider-ai). 9 fichiers `Messages_*.properties` :
-  traductions générées par LLM (`gpt-oss:120b-cloud` port 11437, 99 lignes).
-  `AssistantManager.kt` : 15 strings hardcodées → `SliderMessages.get()`/`format()`
-  avec cascade `resolveLanguage()`.
-- **SLD-9.1 REFACTOR** : `MessagesFrTranslationTest.kt` +11 clés (38 tests).
-  `AssistantManagerI18nFunctionalTest.kt` créé (6 tests GradleTestKit EN+FR).
-  `9_assistant_manager_i18n.feature` créé (12 scénarios Cucumber) + Steps.
-- `./gradlew :slider:check` BUILD SUCCESSFUL 0 FAIL / 1 SKIP (+47 tests).
+== Prochaine session — 049
 
-== Prochaine session — 048
+*Objectif* : Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.
 
-*Objectif* : SLD-9.2 — 9 tests de traduction par langue (zh/hi/es/ar/bn/pt/ru/ur + en).
-Pattern `MessagesFrTranslationTest` : test paramétré vérifiant que chaque clé
-diffère de l'anglais pour chaque langue. Génération LLM si des traductions
-manquent.
+Périmètre :
+- Domaine DDD `slider.content` : SlideContent, TextBlock, SlideLayout,
+  OverflowDetector, AsciidocContentParser
+- Assertions Playwright : TextOverflowAssertion, NotesRenderingAssertion,
+  FontSizeAssertion, ContrastAssertion
+- Tests 3 niveaux (unit → functional → cucumber), English only
+- Pattern de référence : `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`
+
+~6-8 US, ~15-20 pts. Définition des US, estimation, dépendances, contrats de test.
 
 == Rappels
 
@@ -36,7 +30,7 @@ manquent.
 - BOM workspace-bom : Central 0.0.11
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
-- codebase-plugin : Central 0.0.5 (koog 1.0.0, R2DBC — socle N1, service LLM à exposer US-8.1)
+- codebase-plugin : Central 0.0.5 (koog 1.0.0, R2DBC — socle N1)
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
@@ -52,7 +46,8 @@ manquent.
 - `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP)
 - EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
 - EPIC cadré : SLD-8 slider consomme codebase (5 US ~12 pts, à planifier)
-- EPIC en cours : SLD-9 i18n Completion (SLD-9.1 ✅, reste 9.2/9.3/9.4)
+- EPIC en pause : SLD-9 i18n Completion (SLD-9.1 ✅, reste 9.2/9.3/9.4)
+- EPIC à cadrer : SLD-10 Slide Content Model & Rendering Validation
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
   rejeté, 002 slider consomme codebase comme socle LLM unifié)

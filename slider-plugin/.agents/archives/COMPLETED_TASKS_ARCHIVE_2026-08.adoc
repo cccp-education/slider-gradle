@@ -1,0 +1,32 @@
+= COMPLETED_TASKS_ARCHIVE — Août 2026
+:date: 2026-08-05
+
+== Session 048 — Vision SLD-10 Slide Content Model & Rendering Validation
+
+Session de vision et cadrage (zéro code). Le pilote a exprimé le besoin d'un
+nouvel EPIC de modélisation du contenu de slide pour évaluer le rendu.
+
+- SLD-9.2→9.4 (i18n completion) mis en pause
+- SLD-10 vision posée : domaine DDD `slider.content` + assertions Playwright
+- ~6-8 US, ~15-20 pts. Cadrage formel en session 049.
+
+== Session 047 — SLD-9.1 i18n AssistantManager via LLM
+
+SLD-9.1 TERMINÉ. 13 clés × 10 langues (générées par `gpt-oss:120b-cloud`).
+`AssistantManager.kt` : 15 strings hardcodées → `SliderMessages.get()`/`format()`.
+Tests 3 niveaux : 29 unit + 6 functional + 12 Cucumber = +47 tests.
+`./gradlew :slider:check` VERT 0 FAIL / 1 SKIP.
+
+== Session 045 — Fix CR-GLOBALE-002 + Publication 0.0.13
+
+Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.
+US-1 : Guard plan vide pipeline traduction. US-2 : Regex `buildOutputFile`
+uppercase. US-3 : SSL propriétés système scopées. `./gradlew :slider:check`
+VERT 0 FAIL / 1 SKIP. Publication slider 0.0.13 Maven Central (bundle
+`ec715b09`, AUTOMATIC) confirmé repo1.maven.org.
+
+== Session 044 — SLD-CR3 Revue CR-GLOBALE-003
+
+EPIC SLD-CR3 TERMINÉ (2/2 US). SLD-CR3-1 : Dépréciation `translate/` (doublon
+de `translation/`). SLD-CR3-2 : `CapsulePlugin.kt` — `catch (_: Exception)` →
+`catch (e: UnknownPluginException)`. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP.

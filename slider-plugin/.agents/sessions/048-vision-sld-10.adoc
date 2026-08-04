@@ -1,0 +1,74 @@
+= Session 048 — Vision SLD-10 Slide Content Model & Rendering Validation
+:session: 048
+:date: 2026-08-05
+:type: vision+cadrage
+:score: 8/10
+
+== Résumé
+
+Session de vision et cadrage. Zéro code modifié. Le pilote a exprimé le besoin
+d'un nouvel EPIC de modélisation du contenu de slide pour évaluer le rendu —
+validation du texte dans l'écran (overflow), balise AsciiDoc `notes`, et autres
+assertions Playwright.
+
+== Contexte
+
+- Session 047 terminée : SLD-9.1 i18n AssistantManager via LLM ✅
+- PROMPT_REPRISE pointait vers SLD-9.2 (9 tests de traduction par langue)
+- Le pilote a pivoté : vision d'un EPIC SLD-10 avant de continuer SLD-9
+
+== Vision SLD-10 — Slide Content Model & Rendering Validation
+
+=== Problématique
+
+Aujourd'hui slider génère des slides AsciiDoc → HTML via Reveal.js, mais n'a
+**aucun modèle de contenu de slide** qui permette d'évaluer le rendu. Les
+validations Playwright existantes (LTR/RTL) vérifient la structure globale
+(titre, slides, bounding box) mais pas le contenu textuel individuel.
+
+=== Périmètre envisagé
+
+. **SlideContentModel** — domaine DDD `slider.content` modélisant :
+  * `SlideContent` (aggregate : titre, sous-titres, paragraphes, listes, notes)
+  * `TextBlock` (value object : texte, position, bounding box estimée)
+  * `SlideLayout` (value object : dimensions viewport, marges, font sizes)
+  * `OverflowDetector` (domain service : prédit si le texte dépasse l'écran)
+  * `AsciidocContentParser` (parseur .adoc → SlideContent, incluant `[NOTE.speaker]`)
+
+. **Playwright Rendering Assertions** — nouvelles assertions visuelles :
+  * `TextOverflowAssertion` — vérifie que le texte est dans le viewport
+  * `NotesRenderingAssertion` — vérifie que les notes orateur sont bien rendues
+  * `FontSizeAssertion` — vérifie la lisibilité (taille police > seuil)
+  * `ContrastAssertion` — vérifie le contraste texte/fond
+
+. **Tests 3 niveaux** (baby-step DDD/TDD/BDD) :
+  * Unit : SlideContentModel pur, OverflowDetector mocké
+  * Functional : GradleTestKit + Playwright-jvm assertions
+  * Cucumber : BDD end-to-end content validation
+
+=== Dépendances
+
+- `slider.capsule.AsciidocSpeakerNoteParser` — déjà existant, à étendre
+- `slider.rtl.RtlSlideAssertion` — pattern de référence pour les assertions
+- `slider.playwright.PlaywrightTaskRegistrar` — infrastructure Playwright existante
+- Playwright-jvm (déjà en testImplementation)
+
+=== Estimation
+
+~6-8 US, ~15-20 pts. À cadrer formellement en EPIC SLD-10.
+
+== Décisions
+
+- **SLD-9.2→9.4 (i18n completion) mis en pause** — le pilote priorise SLD-10
+- **SLD-10 à cadrer en session 049** — baby-step DDD/TDD/BDD, English only
+- **Pattern de référence** : `slider.rtl.RtlSlideAssertion` (assertions pures +
+  Playwright adapter) + `slider.capsule.AsciidocSpeakerNoteParser` (parseur .adoc)
+
+== Fichiers modifiés
+
+Aucun — session de vision pure.
+
+== Prochaine session
+
+Session 049 — Cadrage formel EPIC SLD-10 (Slide Content Model & Rendering
+Validation). Définition des US, estimation, dépendances, contrats de test.

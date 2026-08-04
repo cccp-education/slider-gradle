@@ -2,6 +2,25 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 048 (2026-08-05) — Vision SLD-10 Slide Content Model & Rendering Validation
+
+Session de vision et cadrage (zéro code). Le pilote a exprimé le besoin d'un
+nouvel EPIC de modélisation du contenu de slide pour évaluer le rendu —
+validation du texte dans l'écran (overflow), balise AsciiDoc `notes`, et autres
+assertions Playwright.
+
+Vision SLD-10 :
+- Domaine DDD `slider.content` : SlideContent (aggregate), TextBlock (VO),
+  SlideLayout (VO), OverflowDetector (domain service), AsciidocContentParser
+  (parseur .adoc → SlideContent, incluant `[NOTE.speaker]`)
+- Assertions Playwright : TextOverflowAssertion, NotesRenderingAssertion,
+  FontSizeAssertion, ContrastAssertion
+- Tests 3 niveaux (unit → functional → cucumber), English only
+- Pattern de référence : `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`
+- ~6-8 US, ~15-20 pts. À cadrer formellement en session 049.
+
+SLD-9.2→9.4 (i18n completion) mis en pause — le pilote priorise SLD-10.
+
 == Session 047 (2026-08-04) — SLD-9.1 i18n AssistantManager via LLM
 
 SLD-9.1 — i18niser `AssistantManager.kt` (15 strings hardcodées → `SliderMessages`).

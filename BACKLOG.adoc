@@ -1,12 +1,19 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-08-01
+_.date: 2026-08-05
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 048 (2026-08-05) — Vision SLD-10 Slide Content Model ✅ TERMINÉ
+
+Session de vision et cadrage (zéro code). Le pilote a exprimé le besoin d'un
+nouvel EPIC de modélisation du contenu de slide pour évaluer le rendu —
+validation du texte dans l'écran (overflow), balise AsciiDoc `notes`, et autres
+assertions Playwright. SLD-9.2→9.4 (i18n completion) mis en pause.
+
 == Session 045 (2026-08-04) — Fix CR-GLOBALE-002 + Publication 0.0.13 ✅ TERMINÉ
 
 Fix 3 bugs CR-GLOBALE-002 (Option A) + publication Maven Central 0.0.13.
@@ -62,10 +69,37 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
-| SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN COURS (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
+| SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 À CADRER (S-048 vision, S-049 cadrage) | ~6-8 US ~15-20 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) cadré session 047 — SLD-9.1 en cours._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) vision session 048, cadrage formel session 049._
+
+'''
+== 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 048 — Vision, à cadrer S-049)
+
+_Vision_ : slider génère des slides AsciiDoc → HTML via Reveal.js, mais n'a
+**aucun modèle de contenu de slide** qui permette d'évaluer le rendu. Les
+validations Playwright existantes (LTR/RTL) vérifient la structure globale
+(titre, slides, bounding box) mais pas le contenu textuel individuel.
+
+SLD-10 crée un domaine DDD `slider.content` modélisant le contenu d'une slide
+et des assertions de rendu Playwright pour valider que le texte est dans
+l'écran, que les notes orateur sont bien rendues, et que la lisibilité est
+correcte.
+
+_Périmètre_ :
+- `SlideContent` (aggregate : titre, sous-titres, paragraphes, listes, notes)
+- `TextBlock` (value object : texte, position, bounding box estimée)
+- `SlideLayout` (value object : dimensions viewport, marges, font sizes)
+- `OverflowDetector` (domain service : prédit si le texte dépasse l'écran)
+- `AsciidocContentParser` (parseur .adoc → SlideContent, incluant `[NOTE.speaker]`)
+- Assertions Playwright : TextOverflow, NotesRendering, FontSize, Contrast
+
+_Pattern de référence_ : `slider.rtl.RtlSlideAssertion` (assertions pures +
+Playwright adapter) + `slider.capsule.AsciidocSpeakerNoteParser` (parseur .adoc).
+
+_Estimation_ : ~6-8 US, ~15-20 pts. À cadrer formellement en session 049.
 
 '''
 == 🟡 EPIC SLD-8 — Consommation socle N1 codebase : unifier les appels LLM slider (Session 046 — Cadrage, refondu post-046)
@@ -107,7 +141,7 @@ rejeté, DI native Gradle) + Decision 002 (consommer codebase comme socle IA uni
 
 '''
 
-== 🟡 EPIC SLD-9 — i18n Completion via LLM : AssistantManager + tests de traduction 10 langues (Session 047 — Cadrage)
+== 🟡 EPIC SLD-9 — i18n Completion via LLM : AssistantManager + tests de traduction 10 langues (Session 047 — Cadrage, EN PAUSE)
 
 _Vision_ : SLD-3 (7/7 US) a posé le socle i18n — `SliderMessages`, 10 fichiers
 `Messages_*.properties` peuplés, 5 registrars i18nisés. Mais `AssistantManager.kt`
