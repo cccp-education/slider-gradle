@@ -7,6 +7,17 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 050 (2026-08-05) — SLD-10.3 AsciidocContentParser ✅ TERMINÉ
+
+US SLD-10.3 livrée — `AsciidocContentParser` (parseur `.adoc` → `SlideContent`).
+Domaine `slider.content` enrichi (2 nouveaux fichiers) : `SlideContent.kt`
+(aggregate root : title, subtitles, paragraphs, lists, speakerNote) +
+`AsciidocContentParser.kt` (parseur ligne par ligne `parseDeck(adoc):
+List<SlideContent>`, étend `AsciidocSpeakerNoteParser` aux titres `==`,
+sous-titres `===`, paragraphes, listes `* `, notes `[NOTE.speaker]`). 34
+nouveaux tests unitaires (12 SlideContent + 22 AsciidocContentParser). 556
+unitaires (was 522), zéro régression. `./gradlew :slider:check` VERT.
+
 == Session 049 (2026-08-05) — Cadrage SLD-10 + SLD-10.1 + SLD-10.2 ✅ TERMINÉ
 
 Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.
@@ -81,7 +92,7 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
-| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-049, 3/7 US — 10.0/10.1/10.2 ✅) | 7 US ~18 pts
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-050, 4/7 US — 10.0/10.1/10.2/10.3 ✅) | 7 US ~18 pts
 |===
 
 _Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2 ✅ (3/7 US), reste 10.3/10.4/10.5/10.6._

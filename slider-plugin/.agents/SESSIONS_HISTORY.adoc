@@ -2,6 +2,25 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 050 (2026-08-05) — SLD-10.3 AsciidocContentParser ✅
+
+US SLD-10.3 livrée — `AsciidocContentParser` (parseur `.adoc` → `SlideContent`).
+Domaine `slider.content` enrichi (2 nouveaux fichiers) :
+- `SlideContent.kt` (49l) — aggregate root (title, subtitles, paragraphs,
+  lists, speakerNote). Validations `require` : title non-blank, subtitles/
+  paragraphs/items non-blank, lists non-empty, speakerNote non-blank si
+  présent. Helpers `hasSpeakerNote()`, `isEmpty()`.
+- `AsciidocContentParser.kt` (205l) — parseur ligne par ligne `parseDeck
+  (adocContent): List<SlideContent>`. Reconnaît `== Title` (nouvelle slide),
+  `=== Subtitle`, `* item` (listes), `[NOTE.speaker]` + `--` (notes),
+  paragraphes (blocs de lignes). Ignore `= Title` (header doc), `:key:
+  value` (attributs), `[.slide,...]` (attribute lists), `//` (commentaires),
+  ligne auteur. Étend le pattern `AsciidocSpeakerNoteParser`.
+
+Baby-step TDD : 34 nouveaux tests unitaires (12 SlideContent + 22
+AsciidocContentParser). 556 unitaires (was 522, +34), zéro régression.
+`./gradlew :slider:check` VERT (0 FAIL, 1 SKIP cucumber préexistant JRuby).
+
 == Session 049 (2026-08-05) — Cadrage SLD-10 + SLD-10.1 + SLD-10.2 ✅
 
 Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.
