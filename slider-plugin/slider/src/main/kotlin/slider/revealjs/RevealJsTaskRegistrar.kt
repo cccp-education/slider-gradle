@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.register
+import slider.i18n.SliderMessages
 import java.io.File
 import java.io.File.separator
 
@@ -47,19 +48,21 @@ object RevealJsTaskRegistrar {
      * presentation artifacts via [CleanBuildTarget].
      */
     fun registerCleanBuildTask(project: Project) {
+        val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<DefaultTask>(TASK_CLEAN_SLIDES_BUILD) {
-            group = "build"
-            description = "Delete generated presentation artifacts from the build directory."
+            group = SliderMessages.get("task.group.build", lang)
+            description = SliderMessages.get("task.cleanBuild.description", lang)
             doFirst {
                 val outputDir = RevealJsOutputDir(project.layout.buildDirectory.get().asFile).asFile()
                 val report = CleanBuildTarget(outputDir).collect()
                 logger.lifecycle(
-                    "Cleaned {} artifacts from {} (slides.json={}, images={}, html={})",
-                    report.cleanedCount(),
-                    outputDir.absolutePath,
-                    report.slidesJsonDeleted,
-                    report.imagesDirDeleted,
-                    report.htmlFilesDeleted,
+                    SliderMessages.format("task.cleanBuild.cleaned", lang,
+                        report.cleanedCount(),
+                        outputDir.absolutePath,
+                        report.slidesJsonDeleted,
+                        report.imagesDirDeleted,
+                        report.htmlFilesDeleted,
+                    ),
                 )
             }
         }
@@ -83,8 +86,9 @@ object RevealJsTaskRegistrar {
         ).attributes
 
         project.tasks.getByName<AsciidoctorJRevealJSTask>(TASK_ASCIIDOCTOR_REVEALJS) {
-            group = "generate"
-            description = "Compile AsciiDoc sources into a Reveal.js HTML presentation."
+            val lang = SliderMessages.resolveLanguage(project)
+            group = SliderMessages.get("task.group.generate", lang)
+            description = SliderMessages.get("task.asciidoctorRevealJs.description", lang)
             setExecutionMode(OUT_OF_PROCESS)
             dependsOn(TASK_CLEAN_SLIDES_BUILD)
             finalizedBy(TASK_DASHBOARD_SLIDES_BUILD)
@@ -130,10 +134,11 @@ object RevealJsTaskRegistrar {
     fun registerDashboardTask(project: Project) {
         val sourceDir = SlideSourceDir(project.layout.projectDirectory.asFile)
         val outputDir = RevealJsOutputDir(project.layout.buildDirectory.get().asFile)
+        val lang = SliderMessages.resolveLanguage(project)
 
         project.tasks.register<DefaultTask>(TASK_DASHBOARD_SLIDES_BUILD) {
-            group = "generate"
-            description = "Generate index.html and slides.json listing all Reveal.js presentations."
+            group = SliderMessages.get("task.group.generate", lang)
+            description = SliderMessages.get("task.generateDashboard.description", lang)
             doLast {
                 // Log the source index.html content for traceability
                 sourceDir.asFile().listFiles()?.find { it.name == "index.html" }
@@ -158,11 +163,11 @@ object RevealJsTaskRegistrar {
                 val indexFile = sourceDir.asFile().resolve("index.html")
                 indexFile.copyTo(output.resolve("index.html"), overwrite = true)
 
-                println("✅ Dashboard generated successfully!")
-                println("📁 Generated files:")
+                println(SliderMessages.get("task.generateDashboard.success", lang))
+                println(SliderMessages.get("task.generateDashboard.generated", lang))
                 println("   - ${indexFile.absolutePath}")
                 println("   - ${slidesJsonFile.absolutePath}")
-                println("📊 ${metas.size} presentation(s) found")
+                println(SliderMessages.format("task.generateDashboard.presentations", lang, metas.size))
             }
         }
     }

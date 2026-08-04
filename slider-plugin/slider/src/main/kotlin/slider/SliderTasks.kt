@@ -6,6 +6,7 @@ import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
 import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
 import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
 import slider.capsule.CapsuleTaskRegistrar
+import slider.i18n.SliderMessages
 import slider.translation.registerTranslateDeckTask
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 import org.gradle.api.DefaultTask
@@ -33,16 +34,19 @@ object SliderTasks {
 
     @Suppress("MISSING_DEPENDENCY_SUPERCLASS_IN_TYPE_ARGUMENT")
     private fun Project.registerAsciidoctorTask() {
+        val lang = SliderMessages.resolveLanguage(this)
         tasks.register<AsciidoctorTask>("asciidoctor") {
-            group = "generate"
+            group = SliderMessages.get("task.group.generate", lang)
+            description = SliderMessages.get("task.asciidoctor.description", lang)
             dependsOn(TASK_ASCIIDOCTOR_REVEALJS)
         }
     }
 
     private fun Project.registerReportTestsTask() {
+        val lang = SliderMessages.resolveLanguage(this)
         tasks.register<Exec>("reportTests") {
-            group = "verify"
-            description = "Run checks and open the unit test report in Firefox."
+            group = SliderMessages.get("task.group.verify", lang)
+            description = SliderMessages.get("task.reportTests.description", lang)
             dependsOn("check")
             commandLine(
                 "firefox", "--new-tab",
@@ -57,9 +61,10 @@ object SliderTasks {
     }
 
     private fun Project.registerReportFunctionalTestsTask() {
+        val lang = SliderMessages.resolveLanguage(this)
         tasks.register<Exec>("reportFunctionalTests") {
-            group = "verify"
-            description = "Run checks and open the functional test report in Firefox."
+            group = SliderMessages.get("task.group.verify", lang)
+            description = SliderMessages.get("task.reportFunctionalTests.description", lang)
             dependsOn("check")
             commandLine(
                 "firefox", "--new-tab",
@@ -74,14 +79,17 @@ object SliderTasks {
     }
 
     private fun Project.registerGenerateRevealUiMessagesTask() {
+        val lang = SliderMessages.resolveLanguage(this)
         tasks.register<DefaultTask>(TASK_GENERATE_REVEAL_UI_MESSAGES) {
             group = GROUP_TASK_SLIDER
-            description = "Generate Reveal.js UI i18n messages_{code}.js files for all 10 supported languages."
+            description = SliderMessages.get("task.generateRevealUiMessages.description", lang)
             doLast {
                 val outputDir = layout.buildDirectory.get().asFile.resolve(REVEAL_I18N_OUTPUT_DIR)
                 outputDir.mkdirs()
                 val written = slider.i18n.RevealUiMessagesWriter.writeAll(outputDir)
-                logger.lifecycle("✅ ${written.size} Reveal.js i18n message files written to {}", outputDir.absolutePath)
+                logger.lifecycle(
+                    SliderMessages.format("task.generateRevealUiMessages.written", lang, written.size, outputDir.absolutePath),
+                )
             }
         }
     }

@@ -14,6 +14,7 @@ import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
 import slider.SliderConfig.yamlMapper
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel
+import slider.i18n.SliderMessages
 import java.io.File
 
 /**
@@ -61,8 +62,10 @@ abstract class TranslateDeckTask : DefaultTask() {
 
     @TaskAction
     fun run() {
+        val lang = SliderMessages.resolveLanguage(project)
+
         val contextFile = File(deckContextPath)
-            .also { require(it.exists()) { "Deck context file not found: $deckContextPath" } }
+            .also { require(it.exists()) { SliderMessages.format("translate.error.deckContextNotFound", lang, deckContextPath) } }
 
         val sourceDeck: DeckContext = yamlMapper.readValue(contextFile, DeckContext::class.java)
         sourceDeck.requireValidLanguage()
@@ -70,8 +73,7 @@ abstract class TranslateDeckTask : DefaultTask() {
         val adocFile = deckAdocPath?.let(::File)
             ?: contextFile.parentFile.resolve(sourceDeck.outputFile)
         require(adocFile.exists()) {
-            "Deck AsciiDoc file not found: ${adocFile.absolutePath}. " +
-                "Specify it with -Pdeck.adoc=<path>"
+            SliderMessages.format("translate.error.adocNotFound", lang, adocFile.absolutePath)
         }
         val adocContent = adocFile.readText()
 
@@ -92,9 +94,9 @@ abstract class TranslateDeckTask : DefaultTask() {
         val adapter = OllamaLanguageModelAdapter(model)
         val translator = DeckTranslator(adapter, adocContent)
 
-        logger.lifecycle("🌍 Translating deck '${sourceDeck.subject}' from ${plan.sourceLanguage} to ${plan.tasks.size} languages")
-        logger.lifecycle("   Provider: $provider")
-        logger.lifecycle("   Targets: ${plan.tasks.map { it.to }}")
+        logger.lifecycle(SliderMessages.format("task.translateDeck.translating", lang, sourceDeck.subject, plan.sourceLanguage, plan.tasks.size))
+        logger.lifecycle(SliderMessages.format("task.translateDeck.provider", lang, provider))
+        logger.lifecycle(SliderMessages.format("task.translateDeck.targets", lang, plan.tasks.map { it.to }))
 
         val outcome = translator.translate(plan)
 
@@ -108,14 +110,14 @@ abstract class TranslateDeckTask : DefaultTask() {
             val adocOut = outputDir.resolve(result.translatedDeck.outputFile)
             adocOut.writeText(result.translatedAdoc)
 
-            logger.lifecycle("✅ {} → {}", result.targetLanguage, adocOut.name)
+            logger.lifecycle(SliderMessages.format("task.translateDeck.translated", lang, result.targetLanguage, adocOut.name))
         }
 
         outcome.failures().forEach { failure ->
-            logger.error("❌ {} — {}", failure.targetLanguage, failure.errorMessage)
+            logger.error(SliderMessages.format("task.translateDeck.failed", lang, failure.targetLanguage, failure.errorMessage))
         }
 
-        logger.lifecycle("📊 {}", outcome.summary())
+        logger.lifecycle(SliderMessages.format("task.translateDeck.summary", lang, outcome.summary()))
     }
 }
 
@@ -123,9 +125,10 @@ abstract class TranslateDeckTask : DefaultTask() {
  * Registers the `translateDeck` task on the project.
  */
 fun Project.registerTranslateDeckTask() {
+    val lang = SliderMessages.resolveLanguage(this)
     tasks.register<TranslateDeckTask>(TASK_TRANSLATE_DECK) {
-        group = "translator"
-        description = "Translate a deck (deck-context.yml + .adoc) into multiple languages."
+        group = SliderMessages.get("task.group.translator", lang)
+        description = SliderMessages.get("task.translateDeck.description", lang)
 
         project.findProperty("deck.context")?.let { deckContextPath = it.toString() }
         project.findProperty("deck.adoc")?.let { deckAdocPath = it.toString() }

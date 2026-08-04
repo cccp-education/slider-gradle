@@ -2,6 +2,17 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 043 (2026-08-04) — i18n Slider Plugin (pattern plantuml-gradle)
+
+i18n du plugin UI slider-gradle aligné sur le pattern plantuml-gradle.
+11 fichiers Messages_*.properties (10 langues : en, zh, hi, es, fr, ar, bn, pt, ru, ur),
+singleton `SliderMessages.kt` (ResourceBundle UTF-8 + `get`/`format`/`resolveLanguage`),
+câblage dans 6 registrars (RevealJsTaskRegistrar, PlaywrightTaskRegistrar,
+PublishTaskRegistrar, CapsuleTaskRegistrar, SliderTasks, TranslateDeckTask).
+Test FR `MessagesFrTranslationTest` 27 clés EN≠FR PASS.
+`./gradlew :slider:compileKotlin` BUILD SUCCESSFUL.
+Backlog SLD-CR3 ajouté (revue CR-GLOBALE-003).
+
 == Session 042 (2026-08-01) — SLD-6.9 + SLD-6.10 — EPIC SLD-6 TERMINÉ
 
 EPIC SLD-6 TERMINÉ (11/11 US, ~20 pts). SLD-6.9 : Consolidation

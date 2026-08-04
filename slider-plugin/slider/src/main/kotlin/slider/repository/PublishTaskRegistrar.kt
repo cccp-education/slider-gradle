@@ -2,6 +2,7 @@ package slider.repository
 
 import slider.SliderConfig.localConf
 import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
+import slider.i18n.SliderMessages
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
@@ -24,9 +25,10 @@ object PublishTaskRegistrar {
      * publish pipeline to [SlidePublisher.publish].
      */
     fun register(project: Project) {
+        val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<DefaultTask>(TASK_PUBLISH_SLIDES) {
-            group = "deploy"
-            description = "Deploy generated slides to the configured remote repository."
+            group = SliderMessages.get("task.group.deploy", lang)
+            description = SliderMessages.get("task.deploySlides.description", lang)
             dependsOn("asciidoctor")
             doFirst { task ->
                 logger.info("Task description :\n\t${task.description}")

@@ -1,0 +1,18 @@
+= PROMPT_REPRISE — Slider Gradle
+
+_Session terminée_ : 043 — i18n Slider Plugin (pattern plantuml-gradle)
+_Prochaine session_ : 044 — SLD-CR3 (revue CR-GLOBALE-003)
+
+== Mission session 044
+
+. Déprécier/expulser `translate/` (doublon de `translation/`) — SLD-CR3-1
+. Resserrer `catch (_: Exception)` de `CapsulePlugin` auto-apply slider — SLD-CR3-2
+. Réactiver les tests Playwright E2E `@Disabled` (GradleRunner 9.6.1 / gem JRuby)
+
+== Contexte reprise
+
+- i18n slider livré (11 fichiers properties, 10 langues, tous les registrars câblés)
+- `SliderMessages.resolveLanguage(project)` disponible pour toute nouvelle tâche
+- Backlog SLD-CR3 ajouté dans BACKLOG.adoc racine
+- `./gradlew :slider:compileKotlin` BUILD SUCCESSFUL
+- `./gradlew :slider:test --tests "slider.i18n.MessagesFrTranslationTest"` BUILD SUCCESSFUL

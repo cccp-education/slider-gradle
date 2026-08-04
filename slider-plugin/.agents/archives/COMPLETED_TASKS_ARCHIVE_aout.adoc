@@ -1,5 +1,14 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 
+== Session 043 (2026-08-04) — i18n Slider Plugin (pattern plantuml-gradle)
+
+- `SliderMessages.kt` : singleton ResourceBundle UTF-8 (pattern PlantumlMessages)
+- 11 fichiers Messages_*.properties (10 langues : en, zh, hi, es, fr, ar, bn, pt, ru, ur)
+- Câblage dans 6 registrars (RevealJs, Playwright, Publish, Capsule, SliderTasks, TranslateDeckTask)
+- `MessagesFrTranslationTest.kt` : 27 clés EN≠FR PASS
+- `./gradlew :slider:compileKotlin` BUILD SUCCESSFUL
+- Backlog SLD-CR3 ajouté (revue CR-GLOBALE-003)
+
 == Session 042 (2026-08-01) — SLD-6.9 + SLD-6.10
 
 - SLD-6.9 : Consolidation `registerPublishSlidesTask` + `Git` object → `slider.repository.PublishTaskRegistrar` + `SlidePublisher`. Cucumber 3/3 PASS.

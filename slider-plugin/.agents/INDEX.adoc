@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-08-01
-_Session terminee_ : 042 — SLD-6.9 + SLD-6.10 TERMINÉS. EPIC SLD-6 clos 11/11 US. `SliderManager` supprimé, `SliderPlugin` 30 lignes délègue directement à 5 registrars (SliderConfig, SliderPrerequisiteRegistrar, SliderScaffoldRegistrar, SliderWiringRegistrar, SliderTasks). 15 domaines DDD. `./gradlew :slider:check` VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK (3/3 nouveaux `20_publish_task_decomposition.feature`).
-_Prochaine session_ : 043 — À définir (backlog vide, tous EPICs SLD-0→7 terminés).
+_Derniere mise a jour_ : 2026-08-04
+_Session terminee_ : 043 — i18n Slider Plugin (pattern plantuml-gradle). 11 fichiers Messages_*.properties (10 langues), singleton `SliderMessages.kt` (ResourceBundle UTF-8), câblage dans 6 registrars (RevealJs, Playwright, Publish, Capsule, SliderTasks, TranslateDeckTask), test FR 27 clés EN≠FR PASS. `./gradlew :slider:compileKotlin` BUILD SUCCESSFUL.
+_Prochaine session_ : 044 — SLD-CR3 (revue CR-GLOBALE-003) : déprécier `translate/` doublon + resserrer `catch (_: Exception)` capsule auto-apply + réactiver Playwright E2E `@Disabled`.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''

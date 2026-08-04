@@ -1,5 +1,16 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 043_ : i18n Slider Plugin (pattern plantuml-gradle).
++1 test unitaire (MessagesFrTranslationTest, 27 clés paramétrées EN≠FR).
+`./gradlew :slider:compileKotlin` BUILD SUCCESSFUL.
+
+Nouveaux tests session 043 :
+
+. `MessagesFrTranslationTest.kt` (1 test paramétré, 27 clés) — vérifie que chaque
+  clé de description/log a une traduction FR différente de EN. Les clés de groupe
+  Gradle (build/generate/info/setup/verify/deploy/slider/translator) et les clés
+  de format pur (translated/failed/summary) sont exclues car identiques par design.
+
 _Statut session 042_ : SLD-6.9 + SLD-6.10 — EPIC SLD-6 TERMINÉ 11/11 US.
 +3 tests Cucumber (20_publish_task_decomposition.feature). 421 unit (+2 Playwright
 préexistants) + functional OK + Cucumber OK. `SliderManager` supprimé,

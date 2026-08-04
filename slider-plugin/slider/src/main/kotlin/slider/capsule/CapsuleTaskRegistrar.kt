@@ -3,6 +3,7 @@ package slider.capsule
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import slider.i18n.SliderMessages
 
 /**
  * Thin Gradle adapter that registers the `generateCapsule` task previously
@@ -31,10 +32,11 @@ object CapsuleTaskRegistrar {
     fun register(project: Project) {
         val adocDir = CapsuleAdocDir(project.projectDir)
         val scriptDir = CapsuleScriptDir(project.layout.buildDirectory.get().asFile)
+        val lang = SliderMessages.resolveLanguage(project)
 
         project.tasks.register<DefaultTask>(CapsuleTaskNames.GENERATE_CAPSULE) {
             group = CapsuleTaskNames.GROUP
-            description = CapsuleTaskNames.DESCRIPTION
+            description = SliderMessages.get("task.generateCapsule.description", lang)
             outputs.upToDateWhen { false }
 
             doLast {
@@ -45,14 +47,14 @@ object CapsuleTaskRegistrar {
                     )
                     if (script.isEmpty) {
                         logger.lifecycle(
-                            "⚠ Capsule script skipped for ${adoc.name} (no speaker notes found)",
+                            SliderMessages.format("task.generateCapsule.skipped", lang, adoc.name),
                         )
                         return@forEach
                     }
                     val scriptFile = scriptDir.scriptFileFor(adoc.nameWithoutExtension)
                     scriptFile.writeText(CapsuleScriptWriter.write(script))
                     logger.lifecycle(
-                        "✅ Capsule script → ${scriptFile.name} (${script.segments.size} slides)",
+                        SliderMessages.format("task.generateCapsule.written", lang, scriptFile.name, script.segments.size),
                     )
                 }
             }
@@ -68,9 +70,10 @@ object CapsuleTaskRegistrar {
      * translated decks.
      */
     fun registerTranslateAndGenerateCapsule(project: Project) {
+        val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<DefaultTask>(CapsuleTaskNames.TRANSLATE_AND_GENERATE_CAPSULE) {
             group = CapsuleTaskNames.GROUP
-            description = CapsuleTaskNames.TRANSLATE_AND_GENERATE_DESCRIPTION
+            description = SliderMessages.get("task.translateAndGenerateCapsule.description", lang)
             dependsOn(CapsuleTaskNames.GENERATE_CAPSULE)
             dependsOn("translateDeck")
         }

@@ -37,7 +37,35 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | PUB | Publications Maven Central 0.0.1→0.0.12 | ✅ | 6/6
 |===
 
-_Tous les EPICs sont terminés. Backlog vide._
+_Tous les EPICs sont terminés._
+
+'''
+== 🟠 EPIC SLD-CR3 — Revue CR-GLOBALE-003 : Création de Contenu Solide
+
+_Source_ : `GLOBAL_CODE_REVIEW.adoc` (workspace root) — session CR-GLOBALE-003 (2026-08-04).
+_Focus_ : slider est la source des decks consommés par capsule ; nettoyer la chaîne amont.
+
+[cols="1,3,2,2"]
+|===
+| EPIC | Description | Statut | US
+
+| SLD-CR3-1
+| **Déprécier/expulser `translate/` (doublon de `translation/`)** — Deux implémentations parallèles
+de traduction coexistent (`translate/` vs `translation/`). `translation/` est le DDD pur (DeckTranslator).
+Converger : déprécier `translate/` puis l'expulser, ou fusionner.
+| ⬜ TODO
+| 1
+
+| SLD-CR3-2
+| **Resserrer le `catch (_: Exception)` de `CapsulePlugin` auto-apply slider** — `CapsulePlugin.kt:10`
+avale toute exception quand il auto-applique `education.cccp.slider`. Rendre l'échec visible
+(logger.error + rethrow sur erreurs non « plugin absent ») pour ne pas masquer les soucis de chaîne.
+| ⬜ TODO
+| 1
+|===
+
+_Note_ : les tests Playwright E2E `@Disabled` (GradleRunner 9.6.1 / gem JRuby) restent un bloqueur
+de validation réelle — à rouvrir avec la migration Gradle 9.6.1 résolue.
 
 '''
 == Session 041 (2026-07-31) — SLD-7 Câblage Explicite translateDeck → Capsule ✅ TERMINÉ

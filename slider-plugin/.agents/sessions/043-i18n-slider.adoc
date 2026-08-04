@@ -1,0 +1,78 @@
+= Session 043 — i18n Slider Plugin (pattern plantuml-gradle)
+
+_Date_ : 2026-08-04
+_Type_ : feat+i18n+tdd
+_Durée_ : ~2h
+_Score_ : 10/10
+
+== Contexte
+
+Le slider-gradle n'avait pas d'i18n de plugin UI (descriptions de tâches, logs).
+Les boroughs plantuml-gradle, bakery-gradle et document-gradle ont déjà leur
+propre système d'i18n. Le pattern plantuml-gradle (ResourceBundle UTF-8 +
+Messages_{code}.properties) est le gold standard pour l'i18n de plugin Gradle UI.
+
+== Travail réalisé
+
+=== SliderMessages.kt — singleton i18n
+- `slider/i18n/SliderMessages.kt` : singleton ResourceBundle UTF-8 (pattern PlantumlMessages)
+- `get(key, lang)` pour chaînes simples
+- `format(key, lang, args...)` pour chaînes paramétrées (MessageFormat)
+- `resolveLanguage(project)` : cascade CLI `-Planguage` > gradle.properties > DSL > default "en"
+- 10 langues supportées : en, zh, hi, es, fr, ar, bn, pt, ru, ur
+
+=== 11 fichiers Messages_*.properties
+- `src/main/resources/i18n/Messages.properties` (base/fallback EN)
+- `Messages_en.properties` (EN explicite)
+- `Messages_fr.properties` (FR)
+- `Messages_zh.properties` (中文)
+- `Messages_hi.properties` (हिन्दी)
+- `Messages_es.properties` (Español)
+- `Messages_ar.properties` (العربية)
+- `Messages_bn.properties` (বাংলা)
+- `Messages_pt.properties` (Português)
+- `Messages_ru.properties` (Русский)
+- `Messages_ur.properties` (اردو)
+
+=== Câblage dans tous les registrars
+- `RevealJsTaskRegistrar` : cleanBuild, asciidoctorRevealJs, generateDashboard
+- `PlaywrightTaskRegistrar` : serveSlides, installPlaywright, visualTest
+- `PublishTaskRegistrar` : deploySlides
+- `CapsuleTaskRegistrar` : generateCapsule, translateAndGenerateCapsule
+- `SliderTasks` : asciidoctor, reportTests, reportFunctionalTests, generateRevealUiMessages
+- `TranslateDeckTask` : translateDeck (descriptions + logs + erreurs)
+
+=== Test de traduction FR
+- `MessagesFrTranslationTest.kt` : 27 clés vérifiées (EN ≠ FR)
+- `./gradlew :slider:test --tests "slider.i18n.MessagesFrTranslationTest"` BUILD SUCCESSFUL
+
+== Fichiers modifiés/créés
+
+_Créés_ :
+- `slider-plugin/slider/src/main/kotlin/slider/i18n/SliderMessages.kt`
+- `slider-plugin/slider/src/main/resources/i18n/Messages.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_en.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_fr.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_zh.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_hi.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_es.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_ar.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_bn.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_pt.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_ru.properties`
+- `slider-plugin/slider/src/main/resources/i18n/Messages_ur.properties`
+- `slider-plugin/slider/src/test/kotlin/slider/i18n/MessagesFrTranslationTest.kt`
+
+_Modifiés_ :
+- `slider-plugin/slider/src/main/kotlin/slider/revealjs/RevealJsTaskRegistrar.kt`
+- `slider-plugin/slider/src/main/kotlin/slider/playwright/PlaywrightTaskRegistrar.kt`
+- `slider-plugin/slider/src/main/kotlin/slider/repository/PublishTaskRegistrar.kt`
+- `slider-plugin/slider/src/main/kotlin/slider/capsule/CapsuleTaskRegistrar.kt`
+- `slider-plugin/slider/src/main/kotlin/slider/SliderTasks.kt`
+- `slider-plugin/slider/src/main/kotlin/slider/translation/TranslateDeckTask.kt`
+- `BACKLOG.adoc` (racine slider-gradle)
+
+== Prochaine session
+
+044 — À définir. Backlog SLD-CR3 (revue CR-GLOBALE-003) : déprécier `translate/`
+doublon + resserrer `catch (_: Exception)` capsule auto-apply.

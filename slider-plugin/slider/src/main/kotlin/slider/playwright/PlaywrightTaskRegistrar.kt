@@ -3,6 +3,7 @@ package slider.playwright
 import com.github.gradle.node.npm.task.NpxTask
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import slider.i18n.SliderMessages
 import slider.revealjs.RevealJsOutputDir
 import slider.revealjs.RevealJsTaskRegistrar
 import slider.Slides.Serve.SERVE_DEP
@@ -45,14 +46,15 @@ object PlaywrightTaskRegistrar {
             packageName = SERVE_DEP,
             servedDir = outputDir,
         )
+        val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<NpxTask>(PlaywrightTaskNames.SERVE_SLIDES) {
-            group = "info"
-            description = "Serve slides using the serve package executed via npx."
+            group = SliderMessages.get("task.group.info", lang)
+            description = SliderMessages.get("task.serveSlides.description", lang)
             dependsOn(RevealJsTaskRegistrar.TASK_ASCIIDOCTOR_REVEALJS)
             command.set(serveCommand.packageName)
             args.set(serveCommand.npxArgs())
             workingDir.set(project.layout.projectDirectory.asFile)
-            doFirst { println("Serving slides via npx serve...") }
+            doFirst { println(SliderMessages.get("task.serveSlides.serving", lang)) }
         }
     }
 
@@ -64,9 +66,10 @@ object PlaywrightTaskRegistrar {
     fun registerInstallPlaywrightTask(project: Project) {
         val playwrightDir = PlaywrightDir(project.layout.projectDirectory.asFile)
         val installCommand = InstallCommand.DEFAULT
+        val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<NpxTask>(PlaywrightTaskNames.INSTALL_PLAYWRIGHT) {
-            group = "setup"
-            description = "Install Playwright browsers (chromium) for visual testing."
+            group = SliderMessages.get("task.group.setup", lang)
+            description = SliderMessages.get("task.installPlaywright.description", lang)
             command.set(installCommand.binary)
             args.set(installCommand.npxArgs())
             workingDir.set(project.file(playwrightDir.asFile()))
@@ -84,9 +87,10 @@ object PlaywrightTaskRegistrar {
             binary = "playwright",
             configPath = playwrightDir.configPath(),
         )
+        val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<NpxTask>(PlaywrightTaskNames.VISUAL_TEST) {
             group = GROUP_TASK_SLIDER
-            description = "Run Playwright visual snapshot tests on generated slides."
+            description = SliderMessages.get("task.visualTest.description", lang)
             dependsOn(RevealJsTaskRegistrar.TASK_ASCIIDOCTOR_REVEALJS)
             command.set(visualCommand.binary)
             args.set(visualCommand.npxArgs())
