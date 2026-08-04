@@ -35,6 +35,17 @@ class MessagesFrTranslationTest {
         "task.asciidoctor.description",
         "translate.error.deckContextNotFound",
         "translate.error.adocNotFound",
+        "task.reindexRag.description",
+        "task.proposeDeckContext.description",
+        "task.generateDeck.description",
+        "task.helloOllama.description",
+        "task.helloOllamaStreaming.description",
+        "task.helloGemini.description",
+        "task.helloGeminiStreaming.description",
+        "task.helloMistral.description",
+        "task.helloMistralStreaming.description",
+        "task.helloHuggingFace.description",
+        "task.helloHuggingFaceStreaming.description",
     ])
     fun `french translation differs from english for key`(key: String) {
         val en = SliderMessages.get(key, "en")

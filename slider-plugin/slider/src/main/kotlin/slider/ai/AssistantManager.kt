@@ -8,6 +8,7 @@ import arrow.core.Either.Left
 import arrow.core.Either.Right
 import slider.DeckContext
 import slider.SliderConfig.localConf
+import slider.i18n.SliderMessages
 import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.chat.StreamingChatModel
 import dev.langchain4j.model.chat.response.ChatResponse
@@ -146,8 +147,9 @@ object AssistantManager {
         pgServiceProvider: Provider<PgVectorService>
     ) {
         tasks.register("reindexRag", ReindexRagTask::class.java) {
-            it.group = "collect"
-            it.description = "Force a full rebuild of the RAG embedding index."
+            val lang = SliderMessages.resolveLanguage(this@registerReindexRagTask)
+            it.group = SliderMessages.get("task.group.collect", lang)
+            it.description = SliderMessages.get("task.reindexRag.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
         }
@@ -157,12 +159,9 @@ object AssistantManager {
         pgServiceProvider: Provider<PgVectorService>
     ) {
         tasks.register("proposeDeckContext", ProposeDeckContextTask::class.java) {
-            it.group = "generate"
-            it.description = buildString {
-                append("Propose a deck-context.yml for a given subject using RAG + LLM (step 1/2). ")
-                append("Required: -Psubject=<text>. ")
-                append("Optional: -Poutput=<path>, -Pai.provider=ollama|gemini|mistral|huggingface.")
-            }
+            val lang = SliderMessages.resolveLanguage(this@registerProposeDeckContextTask)
+            it.group = SliderMessages.get("task.group.generate", lang)
+            it.description = SliderMessages.get("task.proposeDeckContext.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
         }
@@ -172,12 +171,9 @@ object AssistantManager {
         pgServiceProvider: Provider<PgVectorService>
     ) {
         tasks.register("generateDeck", GenerateDeckTask::class.java) {
-            it.group = "generate"
-            it.description = buildString {
-                append("Generate a complete AsciiDoc/Reveal.js deck from a *-deck-context.yml (step 2/2). ")
-                append("Required: -Pdeck.context=<path>. ")
-                append("Optional: -Pai.provider=ollama|gemini|mistral|huggingface (default: ollama).")
-            }
+            val lang = SliderMessages.resolveLanguage(this@registerGenerateDeckTask)
+            it.group = SliderMessages.get("task.group.generate", lang)
+            it.description = SliderMessages.get("task.generateDeck.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
         }
@@ -380,64 +376,72 @@ object AssistantManager {
 
     private fun Project.registerHelloChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "Ollama $model — smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloOllama.description", lang, model)
             it.doFirst { project.runOllamaChat(model) }
         }
     }
 
     private fun Project.registerHelloStreamingChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "Ollama $model — streaming smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloStreamingChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloOllamaStreaming.description", lang, model)
             it.doFirst { runOllamaStreamChat(model) }
         }
     }
 
     private fun Project.registerHelloGeminiChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "Gemini $model — smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloGeminiChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloGemini.description", lang, model)
             it.doFirst { project.runGeminiChat(model) }
         }
     }
 
     private fun Project.registerHelloGeminiStreamingChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "Gemini $model — streaming smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloGeminiStreamingChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloGeminiStreaming.description", lang, model)
             it.doFirst { runGeminiStreamChat(model) }
         }
     }
 
     private fun Project.registerHelloMistralChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "Mistral $model — smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloMistralChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloMistral.description", lang, model)
             it.doFirst { project.runMistralChat(model) }
         }
     }
 
     private fun Project.registerHelloMistralStreamingChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "Mistral $model — streaming smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloMistralStreamingChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloMistralStreaming.description", lang, model)
             it.doFirst { runMistralStreamChat(model) }
         }
     }
 
     private fun Project.registerHelloHuggingFaceChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "HuggingFace $model — smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloHuggingFaceChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloHuggingFace.description", lang, model)
             it.doFirst { project.runHuggingFaceChat(model) }
         }
     }
 
     private fun Project.registerHelloHuggingFaceStreamingChatTask(model: String, taskName: String) {
         tasks.register(taskName) {
-            it.group = "slider-ai"
-            it.description = "HuggingFace $model — streaming smoke test."
+            val lang = SliderMessages.resolveLanguage(this@registerHelloHuggingFaceStreamingChatTask)
+            it.group = SliderMessages.get("task.group.slider-ai", lang)
+            it.description = SliderMessages.format("task.helloHuggingFaceStreaming.description", lang, model)
             it.doFirst { runHuggingFaceStreamChat(model) }
         }
     }

@@ -6,7 +6,7 @@ _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-08-04
 _Session terminee_ : 046 — Vision + gouvernance + cadrage (zéro code). Audit PicoContainer : rejet assumé (Decision 001, DI native Gradle suffit). Audit koog+R2DBC : socle N1 existant publié (codebase-gradle Central 0.0.5, koog 1.0.0). EPIC SLD-8 cadré (refondu post-046 : **slider consomme codebase** comme socle LLM unifié au lieu de réimplémenter koog). Doc pilotage KOOG_AGENTIC_PATTERNS mis à jour (koog 1.0.0, EPIC L ✅). DECISIONS_ARCHITECTURE.adoc créé.
-_Prochaine session_ : 047 — Planifier EPIC SLD-8 : US-8.0/8.1 (contrat de consommation slider↔codebase + exposition du service LLM `BuildService` côté codebase). Nettoyage optionnel sections obsolètes SLD-6/SLD-7 du BACKLOG (déjà fait en S-046).
+_Prochaine session_ : 047 — EPIC SLD-9 i18n Completion via LLM. SLD-9.1 : i18niser `AssistantManager` (13 clés → 10 langues générées par LLM, remplacer strings hardcodées par `SliderMessages.get()`). Baby-step TDD/BDD 3 niveaux.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -96,6 +96,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-7 | Câblage Explicite translateDeck → Capsule — tâche composite `translateAndGenerateCapsule` (dependsOn translateDeck → generateCapsule). Contrat d'interface slider↔capsule pour pipeline multi-langue. | ✅ TERMINÉ (S-041, 3/3 US) | P1
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` doublon + resserrer `catch (_: Exception)` CapsulePlugin auto-apply slider. | ✅ TERMINÉ (S-044, 2/2 US) | P1
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider. Premier consommateur de la couche LLM codebase : `BuildService` LLM (Provider<ChatModel> via LlmProviderResolver/OllamaPool), koog/langchain4j en `api` (pas de koog direct via BOM), `AssistantManager` réduit à du câblage (4 factories supprimées), `DeckPipelineGraph` (propose-context/validate-context/generate-deck) sur services codebase. DI native Gradle (Decision 001). | 🟡 CADRÉ (S-046, refondu post-046, 5 US ~12 pts) — à planifier | P1
+| SLD-9 | i18n Completion via LLM — `AssistantManager` i18nisé (13 clés → 10 langues générées par LLM), 9 tests de traduction par langue (pattern plantuml), `TaskDescriptionsI18nTest` functional, `SliderMessagesTest` unitaire + Cucumber BDD. Périmètre restrictif : que de l'i18n, pas de refacto. | 🟡 CADRÉ (S-047, 5 US ~10 pts) — SLD-9.1 en cours | P1
 |===
 
 '''
