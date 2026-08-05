@@ -7,6 +7,24 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 054 (2026-08-05) — SLD-10.6 BDD Content Validation ✅ TERMINÉ (EPIC SLD-10 TERMINÉ)
+
+US SLD-10.6 (Cucumber `24_slide_content_validation.feature`) livrée en
+baby-step TDD/BDD (RED → GREEN → REFACTOR). 2 fichiers test créés :
+feature `24_slide_content_validation.feature` (11 scénarios BDD end-to-end,
+tags `@content @validation`) + `ContentValidationSteps.kt` (141 lignes,
+package `slider.steps`, Java8 lambda style `En`). 3 groupes de steps : a
+priori (`ContentSlideAssertion` sur `SlideContent`+`SlideLayout` — 5
+scénarios), a posteriori (`ContentRenderAssertion` sur `ContentRenderData`
+snapshot DTO — 5 scénarios), cross-validation (1 scénario). Zéro fichier de
+production modifié (pure BDD — logique métier déjà livrée S-051/053). 237 →
+248 Cucumber (+11 scénarios : 5 a priori + 5 a posteriori + 1
+cross-validation). 585 unitaires (inchangé). 0 FAIL, 1 SKIP préexistant.
+`./gradlew :slider:check` VERT. Zéro régression. **EPIC SLD-10 TERMINÉ**
+(7/7 US — 10.0/10.1/10.2/10.3/10.4/10.5/10.6 ✅). Domaine `slider.content`
+clos (9 fichiers prod + 8 fichiers test).
+
+'''
 == Session 053 (2026-08-05) — SLD-10.5 Content Render Validation ✅ TERMINÉ
 
 US SLD-10.5 (Assertions Playwright enrichies) livrée selon cadrage S-052.
@@ -161,10 +179,10 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
-| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-053 SLD-10.5 livré, 6/7 US — 10.0/10.1/10.2/10.3/10.4/10.5 ✅, 10.6 à planifier) | 7 US ~18 pts
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | ✅ TERMINÉ (S-054, 7/7 US — 10.0→10.6) | 7 US ~18 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2/10.3/10.4/10.5 ✅ (6/7 US), SLD-10.6 à planifier/implémenter (Cucumber BDD end-to-end)._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
 
 '''
 == 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 049 — Cadrage, à planifier)
@@ -199,7 +217,7 @@ Playwright adapter) + `slider.capsule.AsciidocSpeakerNoteParser` (parseur .adoc)
 | SLD-10.3 | `AsciidocContentParser` (parseur .adoc → `SlideContent`) — étend `AsciidocSpeakerNoteParser` aux titres, paragraphes, listes, notes `[NOTE.speaker]`. Unit tests purs | 3 | P0
 | SLD-10.4 | `SlideContent` aggregate root + `ContentAssertionCode`/`Result`/`Failure` (codes P0/P1) + `ContentSlideAssertion` object (`assertAll`). Pattern `RtlSlideAssertion`. Unit tests purs | 3 | P1
 | SLD-10.5 | Assertions Playwright enrichies — `ContentRenderData` (snapshot DTO pur, mirroring `SlideRenderData` RTL) + `ContentRenderAssertion` (object pur, mesure a posteriori) + `ContentPlaywrightAdapter` (extraction Playwright → snapshot, port 4337) + `ContentPlaywrightFunctionalTest` (LTR fixture). Réutilise les 4 codes `ContentAssertionCode` existants. Nouvelle constante `MIN_CONTRAST_RATIO = 4.5` (WCAG AA). 3 baby-steps TDD : unit (8+9) → functional (1 Playwright). | ✅ TERMINÉ (S-053, 17 unit + 1 functional) | 3 pts
-| SLD-10.6 | Cucumber `24_slide_content_validation.feature` — scénarios BDD : overflow, notes rendues, font size, contraste WCAG, slide sans note. BDD end-to-end | 3 | P1
+| SLD-10.6 | Cucumber `24_slide_content_validation.feature` — scénarios BDD : overflow, notes rendues, font size, contraste WCAG, slide sans note. BDD end-to-end | ✅ TERMINÉ (S-054, 11 scénarios) | 3 pts
 |===
 
 _Total_ : 7 US, ~18 pts. _Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US

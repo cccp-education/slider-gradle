@@ -1,0 +1,160 @@
+= Session 054 — SLD-10.6 Slide Content Validation BDD (EPIC SLD-10 TERMINÉ)
+:date: 2026-08-05
+:session: 054
+
+== Objectif
+
+Implémentation de l'US SLD-10.6 (Cucumber
+`24_slide_content_validation.feature`) — BDD end-to-end couvrant les deux
+strategies d'assertion du domaine `slider.content` :
+
+. **Validation a priori** — `ContentSlideAssertion.assertAll(SlideContent,
+  SlideLayout)` : estimation depuis le `.adoc` parsé (avant rendu).
+. **Validation a posteriori** — `ContentRenderAssertion.assertAll(
+  ContentRenderData)` : mesure depuis le DOM rendu (snapshot DTO).
+
+Les deux strategies partagent les 4 codes de `ContentAssertionCode`
+(P0_OVERFLOW, P0_MISSING_NOTES, P1_FONT_SIZE, P1_CONTRAST) et le sealed
+`ContentAssertionResult` (Passed / Failed).
+
+== Méthode
+
+Baby-step DDD/TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber),
+RED → GREEN → REFACTOR. English only (code, Gherkin, commentaires, noms de
+tests). Pattern de référence : `10_rtl_visual_validation.feature` +
+`RtlVisualValidationSteps.kt` (S-021) — build pure value objects → assertAll
+→ assert on sealed result.
+
+== Périmètre livré
+
+. **Baby-step RED** — Feature `24_slide_content_validation.feature` (11
+  scénarios BDD end-to-end) écrite. Cucumber reporter : 11 failed (steps
+  undefined — pas de glue). RED confirmé.
+
+. **Baby-step GREEN** — Step definitions `ContentValidationSteps.kt`
+  (package `slider.steps`, Java8 lambda style `En`, 141 lignes) implémenté.
+  3 groupes de steps :
+
+  * **A priori** — `Given a slide content with title ... and a speaker note
+    ...` / `Given a slide layout with viewport ...x..., margin ..., title
+    font ..., body font ...` → `When the content slide assertion is
+    evaluated` → `Then all content assertions should pass` / `Then the
+    content assertion "..." should fail`.
+  * **A posteriori** — `Given a render snapshot with title ..., body font
+    ..., title font ..., contrast ..., notes in DOM "...", viewport
+    ...x...` → `When the content render assertion is evaluated` → `Then
+    all content render assertions should pass` / `Then the content render
+    assertion "..." should fail`.
+  * **Cross-validation** — `Given` slide content + slide layout + render
+    snapshot → `When` both assertions evaluated → `Then` both pass.
+
+  Cucumber : 11 scénarios PASS (248 total, was 237 S-053, +11). GREEN
+  confirmé.
+
+. **Baby-step REFACTOR** — `bypassInvariants = true` inutile retiré du
+  `copy()` dans le step `a text block at x ...` (les invariants
+  `ContentRenderData.init` ne portent pas sur `realTextBlocks`, le `init`
+  revalide des valeurs déjà valides). Compilation OK, check VERT.
+
+== Décisions architecturales
+
+. **A priori et a posteriori coexistent dans la même feature**. Justification
+  : les deux strategies partagent les 4 codes de `ContentAssertionCode`. La
+  feature documente cette coexistence dans son preamble et teste les deux
+  independamment puis en cross-validation (scénario 11).
+
+. **Snapshot DTO `ContentRenderData` construit directement dans les steps**
+  (pas de Playwright réel). Justification : le runner Cucumber exclude
+  `@integration` (Ollama) — les scénarios BDD testent la logique pure
+  (assertion sur snapshot), pas l'extraction Playwright. Le functional test
+  Playwright (S-053) couvre deja l'extraction réelle. Le scenario
+  `a text block at x ...` ajoute un `TextBlock` au snapshot via `copy()`.
+
+. **11 scénarios** (5 a priori + 5 a posteriori + 1 cross-validation).
+  Justification : couvrir les 4 codes × 2 strategies + le cas nominal Passed
+  × 2 + la cross-validation. Pas de scénario `@integration` (Playwright réel)
+  — laissé au functional test S-053.
+
+. **EPIC SLD-10 TERMINÉ** (7/7 US). Statut final :
+  SLD-10.0/10.1/10.2/10.3/10.4/10.5/10.6 ✅. Domaine `slider.content` clos
+  (9 fichiers prod + 8 fichiers test).
+
+== Fichiers créés
+
+Test (cucumber) :
+. `slider/src/test/features/24_slide_content_validation.feature` (11
+  scénarios BDD end-to-end, tags `@content @validation`)
+. `slider/src/test/scenarios/slider/steps/ContentValidationSteps.kt` (141
+  lignes, Java8 lambda, package `slider.steps`)
+
+Zéro fichier de production modifié (pure BDD — la logique métier est deja
+livrée S-051/053).
+
+== Résultats tests
+
+. `./gradlew :slider:check` VERT — BUILD SUCCESSFUL en 2m 3s
+. **585 unitaires** (inchangé — S-053 deja livré)
+. **237 → 248 Cucumber** (+11 scénarios : 5 a priori + 5 a posteriori + 1
+  cross-validation)
+. **26 Functional** (inchangé)
+. **0 FAIL, 1 SKIP** (préexistant — JRuby gem isolé, non lié)
+. Zéro régression sur les 585 unitaires + 26 functional existants
+
+== Critères de done (tous satisfaits)
+
+* Feature `24_slide_content_validation.feature` créée (11 scénarios BDD) ✅
+* Step definitions `ContentValidationSteps.kt` créée (package `slider.steps`) ✅
+* Scénarios a priori — `ContentSlideAssertion` (5 scénarios) ✅
+* Scénarios a posteriori — `ContentRenderAssertion` (5 scénarios) ✅
+* Scénario cross-validation (1 scénario) ✅
+* `./gradlew :slider:check` VERT (0 FAIL, 1 SKIP préexistant) ✅
+* 237 → 248 Cucumber (+11 attendus) ✅
+* Zéro régression sur les 585 unitaires + 26 functional ✅
+* Zéro fichier de production modifié (pure BDD) ✅
+* Zéro secret/token/api key dans le code ✅
+* English only (code, Gherkin, commentaires, noms de tests) ✅
+* Gouvernance mise à jour (INDEX, BACKLOG, PROMPT_REPRISE,
+  SESSIONS_HISTORY, archive) ✅
+* **EPIC SLD-10 TERMINÉ** (7/7 US) ✅
+
+== EPIC SLD-10 — Bilan final
+
+[cols="2,3,2"]
+|===
+| US | Description | Statut
+
+| SLD-10.0 | Cadrage EPIC — vision, domaine `slider.content`, découpage US | ✅ S-048
+| SLD-10.1 | Value object `TextBlock` + `SlideLayout` (20 unit) | ✅ S-049
+| SLD-10.2 | `OverflowDetector` + `OverflowResult` sealed (12 unit) | ✅ S-049
+| SLD-10.3 | `AsciidocContentParser` + `SlideContent` aggregate root (34 unit) | ✅ S-050
+| SLD-10.4 | `ContentSlideAssertion` + codes assertions P0/P1 (11 unit) | ✅ S-051
+| SLD-10.5 | `ContentRenderData` + `ContentRenderAssertion` + Playwright adapter (17 unit + 1 functional) | ✅ S-053
+| SLD-10.6 | Cucumber `24_slide_content_validation.feature` (11 scénarios BDD) | ✅ S-054
+|===
+
+Total : 7 US, ~18 pts. Domaine `slider.content` : 9 fichiers prod + 8 fichiers
+test. 585 unitaires + 26 functional + 248 cucumber. Pattern de référence
+`slider.rtl` (S-021) appliqué fidèlement (snapshot DTO + assertion pure +
+adaptateur infrastructure).
+
+== Prochaine session — 055
+
+EPIC SLD-10 TERMINÉ. Reste du backlog slider :
+
+. **SLD-8** (cadre S-046) — slider consomme codebase comme socle LLM unifié
+  (5 US ~12 pts, à planifier).
+. **SLD-9** (en pause S-047) — i18n Completion via LLM (SLD-9.1 ✅, reste
+  9.2/9.3/9.4, 4 US ~7 pts).
+
+Choix pilote au prochain démarrage.
+
+== Livrables de la session 054
+
+* 2 fichiers test (1 feature + 1 step definitions)
+* Rapport de session (ce document)
+* Mise à jour BACKLOG.adoc racine (section SLD-10.6 ✅, EPIC SLD-10 TERMINÉ)
+* Mise à jour INDEX.adoc (session 054, roadmap SLD-10 ✅ TERMINÉ)
+* Mise à jour PROMPT_REPRISE.adoc (contexte reprise session 055)
+* Mise à jour SESSIONS_HISTORY.adoc (entrée session 054)
+* Mise à jour COMPLETED_TASKS_ARCHIVE_2026-08.adoc (SLD-10.6 livré, EPIC clos)
+* Zéro secret, build VERT, zéro régression
