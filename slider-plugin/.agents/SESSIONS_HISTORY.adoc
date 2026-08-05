@@ -2,6 +2,25 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 055 (2026-08-05) — Publication slider 0.0.14 + synchronisation consommateurs ✅
+
+Publication slider 0.0.14 sur Maven Central + synchronisation des
+consommateurs (capsule-gradle + workspace-bom). Aucune feature livrée —
+session pure ops/release. Bump 0.0.13 → 0.0.14 (SLD-9.1 AssistantManager
+i18n + SLD-10 content domain complet 7/7 US). Bundle nmcp
+`6f7b84be-93db-4f31-a83f-bebe1b656c2a` (AUTOMATIC), 3 artefacts signés GPG
+(slider:0.0.14 POM+JAR+sources+module + 2 plugin markers
+education.cccp.slider + education.cccp.slider.translator). `./gradlew
+:slider:check` VERT pré-publication. Vérification repo1.maven.org : POM
+HTTP 200 à 03:52, markers HTTP 200 à 03:56. Synchronisation capsule-gradle
+(2 catalogues slider 0.0.6 → 0.0.14 + plugin ID `com.cheroliv.slider` →
+`education.ccp.slider` — ancien namespace inexistant sur Central).
+Publication workspace-bom 0.0.14 (bundle `c8bf911c`, constraint slider
+0.0.14, POM HTTP 200 à 04:11). Commits + push 3 repos (slider-gradle
+`6b975ef`, capsule-gradle `993c59b`, workspace-bom `4d6f175`). Zéro code de
+production modifié. Rapport :
+`slider-plugin/.agents/sessions/055-publish-slider-0.0.14.adoc`.
+
 == Session 054 (2026-08-05) — SLD-10.6 BDD Content Validation ✅ (EPIC SLD-10 TERMINÉ)
 
 US SLD-10.6 (Cucumber `24_slide_content_validation.feature`) livrée en

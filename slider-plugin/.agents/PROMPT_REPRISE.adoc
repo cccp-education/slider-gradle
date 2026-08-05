@@ -1,18 +1,22 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminée_ : 043 — i18n Slider Plugin (pattern plantuml-gradle)
-_Prochaine session_ : 044 — SLD-CR3 (revue CR-GLOBALE-003)
+_Session terminée_ : 055 — Publication slider 0.0.14 + synchronisation consommateurs
+_Prochaine session_ : 056 — SLD-8 ou SLD-9 (choix pilote)
 
-== Mission session 044
+== Mission session 055 (TERMINÉE)
 
-. Déprécier/expulser `translate/` (doublon de `translation/`) — SLD-CR3-1
-. Resserrer `catch (_: Exception)` de `CapsulePlugin` auto-apply slider — SLD-CR3-2
-. Réactiver les tests Playwright E2E `@Disabled` (GradleRunner 9.6.1 / gem JRuby)
+. Publication slider 0.0.14 Maven Central (bundle 6f7b84be, 3 artefacts signés)
+. Synchronisation capsule-gradle (slider 0.0.6 → 0.0.14 + plugin ID education.cccp.slider)
+. Publication workspace-bom 0.0.14 (bundle c8bf911c, constraint slider 0.0.14)
+. Commits + push 3 repos (slider-gradle, capsule-gradle, workspace-bom)
 
 == Contexte reprise
 
-- i18n slider livré (11 fichiers properties, 10 langues, tous les registrars câblés)
-- `SliderMessages.resolveLanguage(project)` disponible pour toute nouvelle tâche
-- Backlog SLD-CR3 ajouté dans BACKLOG.adoc racine
-- `./gradlew :slider:compileKotlin` BUILD SUCCESSFUL
-- `./gradlew :slider:test --tests "slider.i18n.MessagesFrTranslationTest"` BUILD SUCCESSFUL
+- slider 0.0.14 publié sur Maven Central (SLD-9.1 + SLD-10 content domain)
+- BOM 0.0.14 publiée (constraint slider 0.0.14)
+- capsule-gradle synchronisé sur slider 0.0.14 + plugin ID corrigé
+- `./gradlew :slider:check` VERT (prérequis publication respecté)
+- Backlog restant : SLD-8 (consommer codebase, 5 US ~12 pts, CADRÉ) ou
+  SLD-9 (i18n Completion, en pause, reste 9.2/9.3/9.4)
+- Décisions architecture : Decision 001 (PicoContainer rejeté),
+  Decision 002 (consommer codebase N1)

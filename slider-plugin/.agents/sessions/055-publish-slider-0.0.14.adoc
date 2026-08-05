@@ -1,0 +1,85 @@
+= Session 055 — Publication slider 0.0.14 + synchronisation consommateurs
+
+_Date_ : 2026-08-05
+_Type_ : publish + deps sync
+_Score_ : 9/10
+
+== Objectif
+
+Bump et publication slider sur Maven Central, synchronisation des
+consommateurs (capsule-gradle + workspace-bom). Aucune feature livrée —
+session pure ops/release.
+
+== Livraisons
+
+=== 1. Publication slider 0.0.14 (Maven Central)
+
+* Version : 0.0.13 → 0.0.14 (`slider-plugin/slider/build.gradle.kts`)
+* Catalogues slider alignés : `gradle/libs.versions.toml` (0.0.12 → 0.0.14) +
+  `slider-plugin/gradle/libs.versions.toml` (0.0.12 → 0.0.14)
+* Bundle nmcp `6f7b84be-93db-4f31-a83f-bebe1b656c2a` (AUTOMATIC)
+* 3 artefacts signés (GPG `CBE2926CD46D8E8B`) :
+  - `education.cccp:slider:0.0.14` (POM + JAR + sources + module)
+  - `education.cccp.slider.gradle.plugin:0.0.14` (marker)
+  - `education.ccp.slider.translator.gradle.plugin:0.0.14` (marker)
+* Prérequis : `./gradlew :slider:check` VERT (UP-TO-DATE) pré-publication
+* Vérification repo1.maven.org : POM HTTP 200 à 03:52, markers HTTP 200 à 03:56
+
+=== 2. Synchronisation consommateur capsule-gradle
+
+* `gradle/libs.versions.toml` : slider 0.0.6 → 0.0.14
+* `gradle/libs.versions.toml` : plugin ID `com.cheroliv.slider` → `education.cccp.slider`
+  (le marker `com.cheroliv.slider` n'existe pas sur Maven Central — ancien namespace
+  pré-renommage S-007, jamais publié sous ce groupId)
+* `capsule-plugin/gradle/libs.versions.toml` : slider 0.0.6 → 0.0.14
+* `./gradlew compileKotlin` VERT (capsule-plugin compile contre slider 0.0.14)
+
+=== 3. Publication workspace-bom 0.0.14
+
+* Version BOM : 0.0.13 → 0.0.14 (`build.gradle.kts`)
+* Constraint slider : 0.0.12 → 0.0.14 (`gradle/libs.versions.toml`)
+* Bundle nmcp `c8bf911c-f8bc-4ba6-87e7-64fb1bb774af` (AUTOMATIC)
+* Vérification repo1.maven.org : POM HTTP 200 à 04:11, constraint slider 0.0.14 confirmée
+
+=== 4. Commits + push (3 repos)
+
+|===
+| Repo | Commit | Push
+
+| slider-gradle
+| `6b975ef` publish(slider): bump 0.0.13 -> 0.0.14 (SLD-9.1 + SLD-10 content domain)
+| ✅ origin/main
+
+| capsule-gradle
+| `993c59b` deps(capsule): sync slider 0.0.6 -> 0.0.14 + plugin ID com.cheroliv.slider -> education.cccp.slider
+| ✅ origin/main
+
+| workspace-bom
+| `4d6f175` publish(bom): bump 0.0.13 -> 0.0.14, slider constraint 0.0.12 -> 0.0.14
+| ✅ origin/main
+|===
+
+== Features incluses dans 0.0.14 (depuis 0.0.13 publiée S-045)
+
+* SLD-9.1 : AssistantManager i18n (13 clés × 10 langues, +47 tests)
+* SLD-10 (7/7 US TERMINÉ) : domaine `slider.content` complet — SlideContent,
+  TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser,
+  ContentSlideAssertion, ContentRenderData, ContentRenderAssertion,
+  adaptateur Playwright (+100 tests unit/functional/cucumber)
+
+== Méthode
+
+* Baby-step : un bump à la fois, vérification build après chaque
+* `./gradlew :slider:check` pré-publication (garantie non-régression)
+* Vérification artefacts sur repo1.maven.org (HTTP 200) avant synchronisation
+  consommateurs
+* Publication BOM séparée (slider doit être sur Central avant BOM — ordre DAG
+  respecté)
+
+== Prochaine session
+
+Reste backlog slider :
+* SLD-8 (consommer codebase, 5 US ~12 pts, CADRÉ)
+* SLD-9 (i18n Completion, en pause, reste 9.2/9.3/9.4)
+
+Choix pilote au démarrage.
