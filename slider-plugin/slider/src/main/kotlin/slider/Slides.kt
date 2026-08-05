@@ -29,6 +29,7 @@ object Slides {
         const val TASK_GENERATE_REVEAL_UI_MESSAGES = "generateRevealUiMessages"
         const val REVEAL_I18N_OUTPUT_DIR = "reveal-i18n"
         const val TASK_TRANSLATE_DECK = "translateDeck"
+        const val TASK_GENERATE_DECK_PIPELINE = "generateDeckPipeline"
     }
 
     object Serve {

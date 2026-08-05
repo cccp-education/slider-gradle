@@ -60,6 +60,7 @@ class TaskDescriptionsI18nFunctionalTest {
             "reindexRag",
             "proposeDeckContext",
             "generateDeck",
+            "generateDeckPipeline",
         )
 
         for (taskName in i18nTaskNames) {

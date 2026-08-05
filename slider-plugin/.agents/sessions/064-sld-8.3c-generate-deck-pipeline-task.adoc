@@ -1,0 +1,179 @@
+= Session 064 — SLD-8.3c GenerateDeckPipelineTask (baby-step 8.3c)
+:session: 064
+:date: 2026-08-06
+:epic: SLD-8 US-8.3 baby-step 8.3c
+:type: feat+ddd+tdd
+:method: baby-step DDD/TDD/BDD (RED → GREEN → REFACTOR)
+:score: 9/10
+
+== Objectif
+
+Livrer le baby-step 8.3c de l'US SLD-8.3 : la tâche Gradle thin
+`generateDeckPipeline` qui orchestre le koog `DeckPipelineGraph`
+(propose-context → validate-context → generate-deck) en un seul appel, +
+2 adaptateurs concrets (`PromptManagerDeckPromptBuilder`, `ChatModelDeckLlm`)
++ câblage dans `AssistantManager.createChatTasks` + clé i18n sur 10 langues.
+3ème baby-step du domaine `slider.pipeline`.
+
+== Contexte
+
+- SLD-8 (slider consomme codebase N1) en cours :
+  - US-8.0 ✅ Cadrage (S-046)
+  - US-8.1 ✅ BuildService LLM pont (S-176)
+  - US-8.2 ✅ AssistantManager câblage (S-060)
+  - US-8.3 🟡 EN COURS — baby-step 8.3c livré cette session
+    (8.3a ✅ S-062, 8.3b ✅ S-063, 8.3c ✅ cette session, 8.3d à faire)
+  - US-8.4 🟡 À PLANIFIER (fusionné dans baby-steps 8.3a-d)
+
+- Cadrage 8.3 (S-061) : 4 baby-steps prévus (~9 pts) :
+  - 8.3a `DeckState` + `DeckContextValidator` ✅ (S-062, 35 unit)
+  - 8.3b `DeckPipelineGraph` ✅ (S-063, 17 unit)
+  - 8.3c `GenerateDeckPipelineTask` (5-8 functional) ← cette session
+  - 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios)
+
+== Méthode
+
+Baby-step TDD strict (RED → GREEN → REFACTOR), 3 niveaux (functional only —
+la logique métier est déjà couverte par 8.3a/8.3b en unit tests ; la tâche est
+thin, donc functional tests suffisent).
+
+=== RED
+
+. `GenerateDeckPipelineFunctionalTest.kt` (7 tests) créé dans
+   `slider/src/functionalTest/kotlin/slider/` :
+  - `generateDeckPipeline task should be registered`
+  - `generateDeckPipeline task should be in the generate group in English`
+  - `generateDeckPipeline task should be in the generate group in French`
+  - `generateDeckPipeline task should have an i18n description in English`
+  - `generateDeckPipeline task should have an i18n description in French`
+  - `generateDeckPipeline without -Psubject should fail with a clear message`
+  - `generateDeckPipeline with -Psubject but no LLM should fail on the propose node`
+. `./gradlew :slider:functionalTest` → 7 FAILED (tâche inexistante)
+
+=== GREEN
+
+. Constante `TASK_GENERATE_DECK_PIPELINE = "generateDeckPipeline"` dans
+  `Slides.kt` (objet `RevealJsSlides`).
+. 2 adaptateurs concrets dans `slider.pipeline` :
+  - `PromptManagerDeckPromptBuilder.kt` — implémente `DeckPromptBuilder`,
+    wrap `AssistantManager.PromptManager` (system + user prompts des 2 étapes
+    existantes `contextSystemPrompt`/`contextUserMessage` +
+    `deckSystemPrompt`/`deckUserMessage`), parse le `deckContextJson` via
+    `SliderConfig.yamlMapper` pour le `deckUserMessage`.
+  - `ChatModelDeckLlm.kt` — implémente `DeckLlm`, wrap `ChatModel`
+    langchain4j. Prompt complet (system + user concaténés) envoyé comme
+    `UserMessage` unique (les instructions système sont déjà dans le texte).
+    `propose`/`generate` délèguent à `chat(prompt)`.
+. `GenerateDeckPipelineTask.kt` (thin Gradle adapter, package
+  `slider.pipeline`) :
+  - `@ServiceReference llmService` (LlmBuildService) — réutilise l'injection
+    codebase N1 (pas de pgvector, la tâche est RAG-free ; le RAG context
+    optionnel passe via `-Pdeck.ragContext`).
+  - Lit `-Psubject` (obligatoire, error sinon), `-Planguage` (default fr),
+    `-Pauthor.name`/`-Pauthor.email` (default git config), `-Pdeck.output`,
+    `-Pdeck.ragContext`, `-Pai.provider`.
+  - Instancie `DeckPipelineGraph(PromptManagerDeckPromptBuilder(),
+    ChatModelDeckLlm(model))`, exécute, écrit le `.adoc` résultat.
+  - `resolveModel` réutilise le mock-LLM fallback `-Pollama.baseUrl`
+    (préserve les tests Cucumber `01_propose_deck_context`).
+. `AssistantManager.createChatTasks` — `registerGenerateDeckPipelineTask
+  (llmServiceProvider)` ajouté (tâche dans le group `generate`, i18n via
+  `SliderMessages.get`).
+. Clé i18n `task.generateDeckPipeline.description` ajoutée aux 10 fichiers
+  `Messages_*.properties` (EN contient "koog pipeline", FR "pipeline koog",
+  + ar/bn/es/hi/pt/ru/ur/zh traduits).
+. 11 tests i18n mis à jour : `MessagesEnReferenceTest` +
+  `MessagesFrTranslationTest` + 8 `Messages{Xx}TranslationTest` (clé
+  `task.generateDeckPipeline.description` ajoutée à chaque `@ValueSource`).
+. `TaskDescriptionsI18nFunctionalTest` — `generateDeckPipeline` ajouté à la
+  liste des tâches i18nisées vérifiées dans les 10 langues.
+
+=== REFACTOR
+
+. Imports morts nettoyés (`SliderMessages`, `GROUP_TASK_SLIDER`, `AssistantManager`
+  retirés de `GenerateDeckPipelineTask.kt`).
+. KDoc complet sur les 3 nouveaux fichiers prod + le registrar.
+. `./gradlew :slider:check` VERT.
+
+== Livrables
+
+[cols="2,3"]
+|===
+| Fichier | Rôle
+
+| `slider/src/main/kotlin/slider/pipeline/GenerateDeckPipelineTask.kt`
+| Tâche Gradle thin `generateDeckPipeline` — orchestre `DeckPipelineGraph`
+
+| `slider/src/main/kotlin/slider/pipeline/PromptManagerDeckPromptBuilder.kt`
+| Adaptateur `DeckPromptBuilder` ← `AssistantManager.PromptManager`
+
+| `slider/src/main/kotlin/slider/pipeline/ChatModelDeckLlm.kt`
+| Adaptateur `DeckLlm` ← `ChatModel` langchain4j
+
+| `slider/src/main/kotlin/slider/Slides.kt`
+| Constante `TASK_GENERATE_DECK_PIPELINE`
+
+| `slider/src/main/kotlin/slider/ai/AssistantManager.kt`
+| `registerGenerateDeckPipelineTask` + câblage dans `createChatTasks`
+
+| `slider/src/main/resources/i18n/Messages_*.properties` (10 fichiers)
+| Clé `task.generateDeckPipeline.description` (10 langues)
+
+| `slider/src/test/kotlin/slider/i18n/Messages{En,Fr,Ar,Bn,Es,Hi,Pt,Ru,Ur,Zh}*Test.kt` (11 fichiers)
+| Clé ajoutée aux `@ValueSource`
+
+| `slider/src/functionalTest/kotlin/slider/i18n/TaskDescriptionsI18nFunctionalTest.kt`
+| `generateDeckPipeline` ajouté à la liste i18n
+
+| `slider/src/functionalTest/kotlin/slider/GenerateDeckPipelineFunctionalTest.kt`
+| 7 functional tests GradleTestKit
+|===
+
+== Tests
+
+- Unit : 959 (was 949, +10 — clés i18n `MessagesEnReferenceTest` +
+  `MessagesFrTranslationTest` + 8 `Messages{Xx}TranslationTest`)
+- Functional : 45 (was 38, +7 — `GenerateDeckPipelineFunctionalTest`)
+- Cucumber : 254 (inchangé)
+- Total : 1258 (was 1241, +17), 0 FAIL, 1 SKIP préexistant
+- `./gradlew :slider:check` VERT. Zéro régression.
+
+== Décisions
+
+. *Adaptateurs concrets côté `slider.pipeline`* : les 2 adaptateurs
+  (`PromptManagerDeckPromptBuilder`, `ChatModelDeckLlm`) vivent dans le
+  domaine `slider.pipeline` (pas dans `slider.ai`) — ils sont les ports-out
+  du domaine, gardant le graphe koog pur. La dépendance vers `slider.ai`
+  (`PromptManager`) et `langchain4j` (`ChatModel`) est assumée : ce sont des
+  adaptateurs d'infrastructure, pas du domaine pur.
+
+. *Prompt flat en `UserMessage` unique* : `ChatModelDeckLlm` envoie le
+  prompt complet (system + user concaténés par `PromptManagerDeckPromptBuilder`)
+  comme un seul `UserMessage`. Les modèles Ollama/langchain4j gèrent le prompt
+  merged identiquement à system+user séparés. Contrat simple (string unique)
+  garde `DeckPipelineGraph` libre de types langchain4j.
+
+. *Tâche RAG-free* : `generateDeckPipeline` ne touche pas pgvector
+  (contrairement à `proposeDeckContext`/`generateDeck`). Le RAG context
+  optionnel passe via `-Pdeck.ragContext` (string). Le pipeline koog reste
+  pur LLM orchestration — le RAG est une préoccupation des tâches existantes.
+
+. *Mock-LLM fallback préservé* : `resolveModel` réutilise le fallback
+  `-Pollama.baseUrl` → `createOllamaChatModel` legacy. Les tests
+  fonctionnels `generateDeckPipeline with -Psubject but no LLM` utilisent
+  `-Pollama.baseUrl=http://localhost:1` + `-Pollama.timeout=1` pour déclencher
+  un échec propre sur le nœud propose (pas de réseau réel).
+
+== Prochaine session (065)
+
+SLD-8.3 baby-step 8.3d — Cucumber `26_deck_pipeline_koog.feature` (8-12
+scénarios BDD end-to-end). Domaine `slider.pipeline` clos (10 fichiers prod
++ 4 test). Puis US-8.4 à planifier (fusionné dans baby-steps 8.3a-d → US-8.3
+intègre les 3 niveaux par baby-step, US-8.4 devient caduque).
+
+== Score
+
+9/10 — baby-step livré en TDD strict, 7 functional + 10 unit i18n, zéro
+régression. Un point de retenu : la clé i18n ajoutée à 11 fichiers de test
+est mécanique (pourrait être générée), mais respecte la méthodologie
+existante (pattern plantuml-gradle).

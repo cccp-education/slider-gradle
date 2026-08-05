@@ -48,6 +48,7 @@ class MessagesEnReferenceTest {
         "task.reindexRag.description",
         "task.proposeDeckContext.description",
         "task.generateDeck.description",
+        "task.generateDeckPipeline.description",
         "task.helloOllama.description",
         "task.helloOllamaStreaming.description",
         "task.helloGemini.description",

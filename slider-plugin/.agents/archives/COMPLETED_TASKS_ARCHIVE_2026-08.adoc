@@ -1,5 +1,17 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
-:date: 2026-08-05
+:date: 2026-08-06
+
+== Session 064 — SLD-8.3 baby-step 8.3c GenerateDeckPipelineTask ✅
+
+Baby-step 8.3c de l'US SLD-8.3 `GenerateDeckPipelineTask` livré en TDD strict
+(RED → GREEN → REFACTOR). Domaine `slider.pipeline` enrichi (3 fichiers prod).
+`PromptManagerDeckPromptBuilder.kt` (adaptateur `DeckPromptBuilder` ←
+`AssistantManager.PromptManager`), `ChatModelDeckLlm.kt` (adaptateur `DeckLlm`
+← `ChatModel` langchain4j), `GenerateDeckPipelineTask.kt` (thin Gradle adapter
+`generateDeckPipeline`). Câblage `AssistantManager.createChatTasks` →
+`registerGenerateDeckPipelineTask`. Clé i18n 10 langues + 11 tests i18n. 7
+functional tests. `./gradlew :slider:check` VERT (959 unit +10, 45 functional
++7, 254 cucumber = 1258, 0 FAIL, 1 SKIP préexistant). Zéro régression.
 
 == Session 063 — SLD-8.3 baby-step 8.3b DeckPipelineGraph ✅
 

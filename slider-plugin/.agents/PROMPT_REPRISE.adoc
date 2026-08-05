@@ -1,43 +1,52 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 063 — SLD-8.3 baby-step 8.3b `DeckPipelineGraph` (graphe koog)
-_Prochaine session_ : 064 — SLD-8.3 baby-step 8.3c `GenerateDeckPipelineTask`
+_Session terminee_ : 064 — SLD-8.3 baby-step 8.3c `GenerateDeckPipelineTask` (tâche Gradle thin)
+_Prochaine session_ : 065 — SLD-8.3 baby-step 8.3d Cucumber `26_deck_pipeline_koog.feature`
 
-== Mission session 063 (TERMINÉE)
+== Mission session 064 (TERMINÉE)
 
-. SLD-8.3 baby-step 8.3b livré en TDD strict (RED → GREEN → REFACTOR)
-. Domaine `slider.pipeline` enrichi (3 fichiers prod purs : `DeckPromptBuilder`
-  port, `DeckLlm` port, `DeckPipelineGraph` graphe koog `strategy<DeckState,
-  DeckState>` + execute séquentiel pattern `KoogAugmentedContextGraph`)
-. 17 unit tests purs (happy path + 4 failure modes + transitions stage +
-  appels prompt builder + LLM forwarding + asMermaidDiagram)
-. Dépendance `koog-agents:1.0.0` ajoutée directe slider (BOM 0.0.16 constraint,
-  exclude `org.jetbrains:annotations` pour conflit testcontainers)
-. `./gradlew :slider:check` VERT (949 unit +17, 38 functional, 254 cucumber
-  = 1241, 0 FAIL, 1 SKIP préexistant). Zéro régression.
+. SLD-8.3 baby-step 8.3c livré en TDD strict (RED → GREEN → REFACTOR)
+. Tâche Gradle thin `generateDeckPipeline` (package `slider.pipeline`)
+  orchestre `DeckPipelineGraph` en un seul appel (propose → validate →
+  generate), RAG-free (RAG context optionnel via `-Pdeck.ragContext`)
+. 2 adaptateurs concrets dans `slider.pipeline` :
+  - `PromptManagerDeckPromptBuilder` ← `AssistantManager.PromptManager`
+  - `ChatModelDeckLlm` ← `ChatModel` langchain4j (prompt flat en `UserMessage`)
+. Câblage `AssistantManager.createChatTasks` → `registerGenerateDeckPipelineTask`
+  (group `generate`, i18n via `SliderMessages.get`)
+. Clé i18n `task.generateDeckPipeline.description` ajoutée aux 10 fichiers
+  `Messages_*.properties` + 11 tests i18n (`MessagesEnReferenceTest` +
+  `MessagesFrTranslationTest` + 8 `Messages{Xx}TranslationTest`) +
+  `TaskDescriptionsI18nFunctionalTest`
+. `./gradlew :slider:check` VERT (959 unit +10, 45 functional +7, 254
+  cucumber = 1258, 0 FAIL, 1 SKIP préexistant). Zéro régression.
 
 == Contexte reprise
 
 - EPIC SLD-8 (slider consomme codebase N1) EN COURS :
   - US-8.0/8.1/8.2 ✅ terminés
-  - US-8.3 baby-steps : 8.3a ✅ (S-062), 8.3b ✅ (S-063), 8.3c/d à faire
-  - US-8.4 à planifier (fusionné dans baby-steps 8.3a-d)
-- Domaine `slider.pipeline` : 7 fichiers prod + 3 test (DeckStage, DeckState,
-  ValidationResult, DeckContextValidator, DeckPromptBuilder, DeckLlm,
-  DeckPipelineGraph)
-- 2 ports introduits 8.3b : `DeckPromptBuilder` (prompts propose/generate
-  depuis DeckState) + `DeckLlm` (propose/generate synchrones, mockable).
-  Adaptateurs concrets côté `slider.ai` à câbler en 8.3c :
-  - `DeckPromptBuilder` ← `AssistantManager.PromptManager` (slider.ai)
-  - `DeckLlm` ← wrapper sur `LlmProviderChatModelAdapter` (slider.ai)
+  - US-8.3 baby-steps : 8.3a ✅ (S-062), 8.3b ✅ (S-063), 8.3c ✅ (S-064),
+    8.3d à faire
+  - US-8.4 à planifier (fusionné dans baby-steps 8.3a-d → caduque)
+- Domaine `slider.pipeline` : 10 fichiers prod + 4 test (DeckStage,
+  DeckState, ValidationResult, DeckContextValidator, DeckPromptBuilder,
+  DeckLlm, DeckPipelineGraph, PromptManagerDeckPromptBuilder,
+  ChatModelDeckLlm, GenerateDeckPipelineTask)
+- 2 adaptateurs concrets 8.3c : `PromptManagerDeckPromptBuilder` (wrap
+  `AssistantManager.PromptManager` — system+user prompts des 2 étapes) +
+  `ChatModelDeckLlm` (wrap `ChatModel` langchain4j, prompt flat en
+  `UserMessage` unique)
 - Pattern référence : `codebase.koog.KoogAugmentedContextGraph` (graphe koog +
   execute séquentiel avec try/catch par nœud)
 - Dépendance koog-agents 1.0.0 directe slider (BOM 0.0.16 constraint)
 - slider 0.0.15 publié Central, BOM 0.0.16 publiée Central (S-062)
-- `./gradlew :slider:check` VERT (949 unit + 38 functional + 254 cucumber
-  = 1241, 0 FAIL, 1 SKIP préexistant)
-- Backlog restant : SLD-8.3 (8.3c `GenerateDeckPipelineTask` 5-8 functional,
-  8.3d Cucumber `26_deck_pipeline_koog.feature` 8-12 scénarios), US-8.4 à planifier
+- `./gradlew :slider:check` VERT (959 unit + 45 functional + 254 cucumber
+  = 1258, 0 FAIL, 1 SKIP préexistant)
+- Backlog restant : SLD-8.3 (8.3d Cucumber `26_deck_pipeline_koog.feature`
+  8-12 scénarios BDD end-to-end), US-8.4 caduque
 - Décisions architecture : Decision 001 (PicoContainer rejeté, DI native Gradle),
   Decision 002 (slider consomme codebase N1 comme socle LLM unifié)
-- Rapport 063 : `slider-plugin/.agents/sessions/063-sld-8.3b-deck-pipeline-graph.adoc`
+- Décisions 8.3c : adaptateurs concrets côté `slider.pipeline` (ports-out),
+  prompt flat en `UserMessage` unique, tâche RAG-free, mock-LLM fallback
+  `-Pollama.baseUrl` préservé
+- Rapport 064 : `slider-plugin/.agents/sessions/064-sld-8.3c-generate-deck-pipeline-task.adoc`

@@ -138,6 +138,7 @@ object AssistantManager {
         registerReindexRagTask(pgServiceProvider, llmServiceProvider)
         registerProposeDeckContextTask(pgServiceProvider, llmServiceProvider)
         registerGenerateDeckTask(pgServiceProvider, llmServiceProvider)
+        registerGenerateDeckPipelineTask(llmServiceProvider)
     }
 
     // =========================================================================
@@ -184,6 +185,18 @@ object AssistantManager {
             it.description = SliderMessages.get("task.generateDeck.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
+            it.llmService.set(llmServiceProvider)
+            it.usesService(llmServiceProvider)
+        }
+    }
+
+    private fun Project.registerGenerateDeckPipelineTask(
+        llmServiceProvider: Provider<LlmBuildService>,
+    ) {
+        tasks.register("generateDeckPipeline", slider.pipeline.GenerateDeckPipelineTask::class.java) {
+            val lang = SliderMessages.resolveLanguage(this@registerGenerateDeckPipelineTask)
+            it.group = SliderMessages.get("task.group.generate", lang)
+            it.description = SliderMessages.get("task.generateDeckPipeline.description", lang)
             it.llmService.set(llmServiceProvider)
             it.usesService(llmServiceProvider)
         }

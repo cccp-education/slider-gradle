@@ -2,6 +2,29 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 064 (2026-08-06) — SLD-8.3c GenerateDeckPipelineTask ✅
+
+Baby-step 8.3c de l'US SLD-8.3 `GenerateDeckPipelineTask` livré en TDD strict
+(RED → GREEN → REFACTOR). Domaine `slider.pipeline` enrichi (3 fichiers prod).
+`PromptManagerDeckPromptBuilder.kt` (adaptateur `DeckPromptBuilder` ←
+`AssistantManager.PromptManager` — assemblage system+user prompts des 2 étapes
+existantes, parse `deckContextJson` via `SliderConfig.yamlMapper`),
+`ChatModelDeckLlm.kt` (adaptateur `DeckLlm` ← `ChatModel` langchain4j — prompt
+complet envoyé comme `UserMessage` unique, `propose`/`generate` délèguent à
+`chat(prompt)`), `GenerateDeckPipelineTask.kt` (thin Gradle adapter
+`generateDeckPipeline` — `@ServiceReference llmService`, lit
+`-Psubject`/`-Planguage`/`-Pauthor.*`/`-Pdeck.output`/`-Pdeck.ragContext`/
+`-Pai.provider`, instancie `DeckPipelineGraph`, exécute, écrit `.adoc`, RAG-free,
+mock-LLM fallback `-Pollama.baseUrl` préservé). Câblage
+`AssistantManager.createChatTasks` → `registerGenerateDeckPipelineTask`. Clé
+i18n `task.generateDeckPipeline.description` ajoutée aux 10
+`Messages_*.properties` + 11 tests i18n + `TaskDescriptionsI18nFunctionalTest`.
+7 functional tests GradleTestKit. `./gradlew :slider:check` VERT (959 unit +10,
+45 functional +7, 254 cucumber = 1258, 0 FAIL, 1 SKIP préexistant). Zéro
+régression. Domaine `slider.pipeline` : 10 fichiers prod + 4 test.
+
+Rapport : `slider-plugin/.agents/sessions/064-sld-8.3c-generate-deck-pipeline-task.adoc`.
+
 == Session 063 (2026-08-05) — SLD-8.3b DeckPipelineGraph ✅
 
 Baby-step 8.3b de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD strict (RED →
