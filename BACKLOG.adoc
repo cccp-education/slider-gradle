@@ -7,6 +7,20 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 051 (2026-08-05) — SLD-10.4 ContentSlideAssertion ✅ TERMINÉ
+
+US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
+Domaine `slider.content` enrichi (3 nouveaux fichiers) :
+`ContentAssertionCode.kt` (enum P0_OVERFLOW/P0_MISSING_NOTES/P1_FONT_SIZE/
+P1_CONTRAST), `ContentAssertionResult.kt` (sealed Passed/Failed +
+`ContentAssertionFailure`), `ContentSlideAssertion.kt` (object `assertAll
+(content, layout): ContentAssertionResult`, délègue overflow à
+`OverflowDetector` via `TextBlock` synthétiques, constantes
+`MIN_BODY_FONT_SIZE=14.0` + `MIN_TITLE_BODY_RATIO=1.25`). Pattern de
+référence `slider.rtl.RtlSlideAssertion` (sealed result pour `when`
+exhaustif). 11 nouveaux tests unitaires. 567 unitaires (was 556), zéro
+régression. `./gradlew :slider:check` VERT.
+
 == Session 050 (2026-08-05) — SLD-10.3 AsciidocContentParser ✅ TERMINÉ
 
 US SLD-10.3 livrée — `AsciidocContentParser` (parseur `.adoc` → `SlideContent`).
@@ -92,10 +106,10 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
-| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-050, 4/7 US — 10.0/10.1/10.2/10.3 ✅) | 7 US ~18 pts
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-051, 5/7 US — 10.0/10.1/10.2/10.3/10.4 ✅) | 7 US ~18 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2 ✅ (3/7 US), reste 10.3/10.4/10.5/10.6._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2/10.3/10.4 ✅ (5/7 US), reste 10.5/10.6._
 
 '''
 == 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 049 — Cadrage, à planifier)

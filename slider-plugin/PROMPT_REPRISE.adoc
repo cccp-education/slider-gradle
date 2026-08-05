@@ -1,32 +1,33 @@
-= PROMPT_REPRISE — slider-gradle — Session 051
-:session: 051
+= PROMPT_REPRISE — slider-gradle — Session 052
+:session: 052
 :date: 2026-08-05
 
-== Session 050 terminée
+== Session 051 terminée
 
-US SLD-10.3 livrée — `AsciidocContentParser` (parseur `.adoc` →
-`SlideContent`). Domaine `slider.content` enrichi (2 nouveaux fichiers) :
-`SlideContent.kt` (aggregate root : title, subtitles, paragraphs, lists,
-speakerNote, validations `require`) + `AsciidocContentParser.kt` (parseur
-ligne par ligne `parseDeck(adoc): List<SlideContent>`, étend
-`AsciidocSpeakerNoteParser` aux titres `==`, sous-titres `===`, paragraphes,
-listes `* `, notes `[NOTE.speaker]`). 34 nouveaux tests unitaires (12
-SlideContent + 22 AsciidocContentParser). 556 unitaires (was 522), zéro
+US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
+Domaine `slider.content` enrichi (3 nouveaux fichiers) :
+`ContentAssertionCode.kt` (enum P0_OVERFLOW/P0_MISSING_NOTES/P1_FONT_SIZE/
+P1_CONTRAST), `ContentAssertionResult.kt` (sealed Passed/Failed +
+ContentAssertionFailure), `ContentSlideAssertion.kt` (object `assertAll
+(content, layout): ContentAssertionResult`, délègue overflow à
+`OverflowDetector` via `TextBlock` synthétiques, constantes
+`MIN_BODY_FONT_SIZE=14.0` + `MIN_TITLE_BODY_RATIO=1.25`). Pattern de
+référence `slider.rtl.RtlSlideAssertion` (sealed result pour `when`
+exhaustif). 11 nouveaux tests unitaires. 567 unitaires (was 556), zéro
 régression. `./gradlew :slider:check` VERT.
 
-== Prochaine session — 051
+== Prochaine session — 052
 
-*Objectif* : US SLD-10.4 — `ContentSlideAssertion` + codes assertions.
+*Objectif* : US SLD-10.5 — Assertions Playwright enrichies.
 
 Périmètre :
-- `ContentAssertionCode` enum (P0/P1 — overflow, missing notes, font size,
-  contrast)
-- `ContentAssertionResult` sealed (Passed/Failed)
-- `ContentAssertionFailure` (code + message + slide ref)
-- `ContentSlideAssertion` object (`assertAll(content, layout) → Result`)
-- Pattern de référence : `slider.rtl.RtlSlideAssertion`
+- `TextOverflow`, `NotesRendering`, `FontSize`, `Contrast` (pures,
+  consomment snapshot enrichi)
+- Functional tests GradleTestKit + Playwright fixtures
+- Pattern de référence : `slider.rtl.RtlSlideAssertion` (assertions pures
+  + Playwright adapter)
 - Baby-step TDD : RED → GREEN → REFACTOR
-- Unit tests purs (zéro Gradle, zéro Playwright)
+- Functional tests (GradleTestKit)
 - English only : code, commentaires, noms de tests
 
 == Rappels
@@ -50,12 +51,12 @@ Périmètre :
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP, 556 unitaires +34 S-050)
+- `./gradlew :slider:check` est VERT (0 FAIL, 0 SKIP, 567 unitaires +11 S-051)
 - EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
 - EPIC cadré : SLD-8 slider consomme codebase (5 US ~12 pts, à planifier)
 - EPIC en pause : SLD-9 i18n Completion (SLD-9.1 ✅, reste 9.2/9.3/9.4)
 - EPIC en cours : SLD-10 Slide Content Model & Rendering Validation
-  (SLD-10.0/10.1/10.2/10.3 ✅, reste 10.4/10.5/10.6)
+  (SLD-10.0/10.1/10.2/10.3/10.4 ✅, reste 10.5/10.6)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
   rejeté, 002 slider consomme codebase comme socle LLM unifié)

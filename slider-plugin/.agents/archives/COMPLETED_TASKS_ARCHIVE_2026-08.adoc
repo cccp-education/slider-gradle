@@ -1,6 +1,26 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 051 — SLD-10.4 ContentSlideAssertion
+
+US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
+Domaine `slider.content` enrichi (3 nouveaux fichiers) :
+`ContentAssertionCode.kt` (enum 4 codes), `ContentAssertionResult.kt`
+(sealed Passed/Failed + ContentAssertionFailure), `ContentSlideAssertion.kt`
+(object `assertAll`, délègue overflow à `OverflowDetector`, constantes
+`MIN_BODY_FONT_SIZE=14.0` + `MIN_TITLE_BODY_RATIO=1.25`). Pattern
+`RtlSlideAssertion` (sealed result pour `when` exhaustif). 11 nouveaux
+tests unitaires. 567 unitaires (was 556), zéro régression.
+`./gradlew :slider:check` VERT.
+
+== Session 050 — SLD-10.3 AsciidocContentParser
+
+US SLD-10.3 livrée — `AsciidocContentParser` (parseur `.adoc` →
+`SlideContent`). Domaine `slider.content` enrichi (2 nouveaux fichiers) :
+`SlideContent.kt` (aggregate root) + `AsciidocContentParser.kt` (parseur
+ligne par ligne). 34 nouveaux tests unitaires. 556 unitaires (was 522),
+zéro régression. `./gradlew :slider:check` VERT.
+
 == Session 049 — Cadrage SLD-10 + SLD-10.1 + SLD-10.2
 
 Cadrage formel EPIC SLD-10 — Slide Content Model & Rendering Validation.

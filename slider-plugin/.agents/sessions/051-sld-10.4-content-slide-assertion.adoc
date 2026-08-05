@@ -1,0 +1,84 @@
+= Session 051 — SLD-10.4 ContentSlideAssertion
+:date: 2026-08-05
+:session: 051
+
+== Objectif
+
+US SLD-10.4 — `ContentSlideAssertion` + codes assertions P0/P1. Domaine
+`slider.content` enrichi (3 nouveaux fichiers) : assertions de rendu
+consommant `SlideContent` + `SlideLayout`, pattern de référence
+`slider.rtl.RtlSlideAssertion`.
+
+== Méthode
+
+Baby-step DDD/TDD — RED → GREEN → REFACTOR. Unit tests purs (zéro Gradle,
+zéro Playwright). English only (code, commentaires, noms de tests).
+
+. RED — `ContentSlideAssertionTest.kt` (11 tests) écrit en premier,
+  référence des types inexistants → échec compilation attendu.
+. GREEN — 3 fichiers de production créés dans l'ordre :
+  `ContentAssertionCode.kt` (enum P0/P1), `ContentAssertionResult.kt`
+  (sealed Passed/Failed + Failure), `ContentSlideAssertion.kt` (object
+  `assertAll`). 1 test corrigé (P1_CONTRAST nécessite ratio title/body
+  plat, pas body minuscule).
+. REFACTOR — code calqué sur `RtlSlideAssertion` (object + `buildList` +
+  `failure()` helper). Sealed `ContentAssertionResult` pour `when`
+  exhaustif vs `data class` du pattern RTL.
+
+== Livrables
+
+=== Domaine `slider.content` (3 nouveaux fichiers)
+
+. `ContentAssertionCode.kt` (22l) — enum 4 codes :
+  - P0_OVERFLOW — un paragraphe ou le titre déborde l'aire de contenu
+  - P0_MISSING_NOTES — la slide n'a pas de note orateur
+  - P1_FONT_SIZE — body font size < 14 CSS px (MIN_BODY_FONT_SIZE)
+  - P1_CONTRAST — ratio title/body < 1.25 (MIN_TITLE_BODY_RATIO)
+
+. `ContentAssertionResult.kt` (41l) — sealed interface `Passed` (data
+  object) + `Failed` (data class, `failures: List<ContentAssertionFailure>`,
+  `init { require(failures.isNotEmpty()) }`, `failureCodes()`).
+  `ContentAssertionFailure` (data class : code, message, slideRef).
+
+. `ContentSlideAssertion.kt` (88l) — object `assertAll(content, layout):
+  ContentAssertionResult`. Délègue l'estimation d'overflow à
+  `OverflowDetector` via `TextBlock` synthétiques (title + chaque
+  paragraphe). Constantes publiques `MIN_BODY_FONT_SIZE = 14.0`,
+  `MIN_TITLE_BODY_RATIO = 1.25`.
+
+=== Tests (11 nouveaux unitaires)
+
+. `ContentSlideAssertionTest.kt` — 11 tests :
+  - slide complète avec note → Passed
+  - P0_OVERFLOW (paragraphe 200 chars)
+  - P0_MISSING_NOTES (slide sans note)
+  - P1_FONT_SIZE (body 8px < 14)
+  - P1_CONTRAST (ratio 22/20 = 1.1 < 1.25)
+  - title-only sans note → exactement P0_MISSING_NOTES
+  - tous échecs signalés d'un coup (4 codes)
+  - slideRef = titre de la slide sur chaque failure
+  - message contient le code name
+  - Passed est un data object
+  - Failed expose la liste failures
+
+== Résultats
+
+. `./gradlew :slider:check` VERT (3m 32s)
+. 567 unitaires (was 556, +11) — 0 FAIL, 0 SKIP
+. Cucumber + functional inchangés (zéro régression)
+. Zéro secret dans le code
+. Domaine `slider.content` : 9 fichiers (6 prod + 5 test, was 6/4 S-050)
+
+== Patterns de référence
+
+. `slider.rtl.RtlSlideAssertion` — object + `assertAll` + `buildList` +
+   helper `failure(code, actual)`. Calqué fidèlement, adapté en sealed
+   result pour exhaustive `when`.
+. `slider.content.OverflowDetector` — réutilisé pour l'estimation
+   d'overflow (P0_OVERFLOW) sans réinventer l'heuristique.
+
+== Prochaine session — 052
+
+US SLD-10.5 — Assertions Playwright enrichies — `TextOverflow`,
+`NotesRendering`, `FontSize`, `Contrast` (pures, consomment snapshot
+enrichi). Functional tests GradleTestKit + Playwright fixtures.

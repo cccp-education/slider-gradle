@@ -2,6 +2,30 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 051 (2026-08-05) — SLD-10.4 ContentSlideAssertion ✅
+
+US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
+Domaine `slider.content` enrichi (3 nouveaux fichiers) :
+- `ContentAssertionCode.kt` (22l) — enum 4 codes : P0_OVERFLOW,
+  P0_MISSING_NOTES, P1_FONT_SIZE, P1_CONTRAST.
+- `ContentAssertionResult.kt` (41l) — sealed interface `Passed` (data
+  object) + `Failed` (data class, `failures: List<ContentAssertionFailure>`,
+  `init { require(nonEmpty) }`, `failureCodes()`). `ContentAssertionFailure`
+  (data class : code, message, slideRef).
+- `ContentSlideAssertion.kt` (88l) — object `assertAll(content, layout):
+  ContentAssertionResult`. Délègue l'estimation d'overflow à
+  `OverflowDetector` via `TextBlock` synthétiques (title + chaque
+  paragraphe). Constantes `MIN_BODY_FONT_SIZE = 14.0`,
+  `MIN_TITLE_BODY_RATIO = 1.25`. Pattern `RtlSlideAssertion` (object +
+  `buildList` + helper `failure`), adapté en sealed result pour `when`
+  exhaustif.
+
+Baby-step TDD : RED (11 tests, compilation échec — types manquants) →
+GREEN (3 fichiers prod, 1 test corrigé : P1_CONTRAST nécessite ratio
+title/body plat, pas body minuscule) → REFACTOR (code calqué sur
+`RtlSlideAssertion`). 11 nouveaux tests unitaires. 567 unitaires (was
+556, +11), zéro régression. `./gradlew :slider:check` VERT (0 FAIL, 0 SKIP).
+
 == Session 050 (2026-08-05) — SLD-10.3 AsciidocContentParser ✅
 
 US SLD-10.3 livrée — `AsciidocContentParser` (parseur `.adoc` → `SlideContent`).
