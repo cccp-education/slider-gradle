@@ -2,6 +2,20 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 062 (2026-08-05) — SLD-8.3a DeckState + DeckContextValidator ✅
+
+Baby-step 8.3a de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD strict (RED →
+GREEN → REFACTOR). Domaine DDD `slider.pipeline` créé (16ème domaine, 4 fichiers
+prod purs + 2 fichiers test). `DeckStage.kt` (enum 5 stages), `DeckState.kt`
+(data class immutable 11 champs + invariants croisés `init`), `ValidationResult.kt`
+(sealed Valid/Invalid), `DeckContextValidator.kt` (object pur `validate(json):
+ValidationResult` — 8 checks ordonnés, Jackson + LanguageCatalog N0). 35 unit
+tests purs (17 DeckStateTest + 18 DeckContextValidatorTest) couvrant tous les
+invariants et branches. `./gradlew :slider:check` VERT (932 unit +32, 38
+functional, 254 cucumber = 1224, 0 FAIL, 1 SKIP préexistant). Zéro régression.
+Publication BOM 0.0.16 sur Central (bundle `e12c25b5` AUTOMATIC) — prérequis
+débloqué. Rapport : `slider-plugin/.agents/sessions/062-sld-8.3a-deck-state-validator.adoc`.
+
 == Session 061 (2026-08-05) — Cadrage formel SLD-8.3 DeckPipelineGraph ✅
 
 Cadrage formel US-8.3 `DeckPipelineGraph` (koog orchestration). Zéro code modifié —

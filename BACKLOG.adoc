@@ -7,6 +7,22 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 062 (2026-08-05) — SLD-8.3a DeckState + DeckContextValidator ✅ TERMINÉ
+
+SLD-8.3 baby-step 8.3a livré en TDD strict (RED → GREEN → REFACTOR). Domaine DDD
+`slider.pipeline` créé (16ème domaine). 4 fichiers prod purs : `DeckStage.kt`
+(enum 5 stages), `DeckState.kt` (data class immutable 11 champs + invariants
+croisés), `ValidationResult.kt` (sealed Valid/Invalid), `DeckContextValidator.kt`
+(object pur `validate(json): ValidationResult` — 8 checks ordonnés, Jackson +
+LanguageCatalog N0). 35 unit tests purs (17 DeckStateTest + 18
+DeckContextValidatorTest). `./gradlew :slider:check` VERT (932 unit +32, 38
+functional, 254 cucumber = 1224, 0 FAIL, 1 SKIP préexistant). Zéro régression.
+Publication BOM 0.0.16 sur Central (bundle `e12c25b5` AUTOMATIC) — prérequis
+débloqué.
+
+Rapport complet : `slider-plugin/.agents/sessions/062-sld-8.3a-deck-state-validator.adoc`.
+
+'''
 == Session 061 (2026-08-05) — Cadrage formel SLD-8.3 DeckPipelineGraph ✅ TERMINÉ
 
 Cadrage formel US-8.3 `DeckPipelineGraph` (koog orchestration). Zéro code modifié —
@@ -327,7 +343,7 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | PUB | Publications Maven Central 0.0.1→0.0.15 | ✅ | 9/9
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
-| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 EN COURS (S-061 cadrage US-8.3, US-8.0/8.1/8.2 ✅, US-8.3 à implémenter, US-8.4 à planifier) | 3/5 US
+| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 EN COURS (S-062 baby-step 8.3a ✅, US-8.0/8.1/8.2 ✅, US-8.3 8.3a ✅ 8.3b/c/d à faire, US-8.4 à planifier) | 3.25/5 US
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | ✅ TERMINÉ (S-057, 5/5 US — 9.0/9.1/9.2/9.3/9.4) | 5 US ~10 pts
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | ✅ TERMINÉ (S-054, 7/7 US — 10.0→10.6) | 7 US ~18 pts
 | SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | ✅ TERMINÉ (S-058, 6/6 US — 11.0 cadrage S-056 + 11.1→11.6) | 6 US ~14 pts
@@ -467,7 +483,7 @@ langchain4j/koog en `implementation`). L'US-8.1 lève ce gap — contrat de serv
 | SLD-8.0 | Cadrage contrat de consommation — périmètre slider (`AssistantManager` 4 factories → câblage, `RagManager`, `OllamaLanguageModelAdapter`) + contrat service codebase consommable (N0 `llm-pool-contracts`/`codebase-contracts`) | 1 | P0 | ✅ TERMINÉ (S-046)
 | SLD-8.1 | **Côté codebase (N1, Queens)** — exposer un `BuildService` LLM consommable : `Provider<ChatModel>` via `LlmProviderResolver`/`OllamaPool` ; koog-agents/langchain4j en `api` → slider n'ajoute pas koog via BOM, il le consomme transitivement | 3 | P0 | ✅ TERMINÉ (S-176)
 | SLD-8.2 | slider consomme le service codebase via `@Inject` — `AssistantManager` réduit à du câblage, suppression factories 4 providers + dispatch `ai.provider` + pools | 2 | P0 | ✅ TERMINÉ (S-060)
-| SLD-8.3 | Orchestration koog du pipeline deck — `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) sur les services codebase, DSL koog transitif. 4 baby-steps : 8.3a `DeckState`+`DeckContextValidator` (20-25 unit) → 8.3b `DeckPipelineGraph` graphe koog (15-20 unit mock LLM) → 8.3c `GenerateDeckPipelineTask` (5-8 functional) → 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios). Domaine `slider.pipeline`. | 3 | P1 | 🟡 CADRÉ (S-061)
+| SLD-8.3 | Orchestration koog du pipeline deck — `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) sur les services codebase, DSL koog transitif. 4 baby-steps : 8.3a `DeckState`+`DeckContextValidator` (20-25 unit) → 8.3b `DeckPipelineGraph` graphe koog (15-20 unit mock LLM) → 8.3c `GenerateDeckPipelineTask` (5-8 functional) → 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios). Domaine `slider.pipeline`. | 3 | P1 | 🟡 8.3a ✅ (S-062) — 8.3b/c/d à faire
 | SLD-8.4 | Tests 3 niveaux — unit (graphe koog, services mockés), functional, Cucumber pipeline koog deck (2 appels orchestrés). Fusionné dans baby-steps 8.3a-d (US-8.3 intègre les 3 niveaux par baby-step). | 3 | P1 | 🟡 À PLANIFIER
 |===
 

@@ -253,3 +253,38 @@ Tests : 900 unit (was 895, +5) + 38 functional (was 40, -2) + 254 cucumber
 / 1 SKIP préexistant.
 
 Rapport : `slider-plugin/.agents/sessions/060-sld8-assistant-manager-wiring.adoc`.
+
+'''
+
+== Session 062 (2026-08-05) — SLD-8.3 baby-step 8.3a DeckState + DeckContextValidator ✅
+
+Baby-step 8.3a de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD strict (RED →
+GREEN → REFACTOR). Domaine DDD `slider.pipeline` créé (16ème domaine, 4 fichiers
+prod purs + 2 fichiers test).
+
+Fichiers prod (slider/src/main/kotlin/slider/pipeline/) :
+- `DeckStage.kt` — enum 5 stages (INITIALIZED, CONTEXT_PROPOSED,
+  CONTEXT_VALIDATED, DECK_GENERATED, FAILED)
+- `DeckState.kt` — data class immutable 11 champs + invariants croisés `init`
+  (contextValid⟹validationError null⟹stage>INITIALIZED, stage CONTEXT_PROPOSED⟹
+  deckContextJson non-blank, deckAdoc non-blank⟹stage∈{DECK_GENERATED,FAILED},
+  error non-null⟹stage FAILED)
+- `ValidationResult.kt` — sealed interface Valid(json)/Invalid(error)
+- `DeckContextValidator.kt` — object pur `validate(json): ValidationResult`,
+  8 checks ordonnés (blank→malformed→object→subject→audience→duration positive→
+  languageCode ∈ LanguageCatalog.supportedCodes()→outputFile→author object→
+  author.name→author.email), Jackson + LanguageCatalog N0
+
+Fichiers test (slider/src/test/kotlin/slider/pipeline/) :
+- `DeckStateTest.kt` — 17 tests (invariants, rejets blank, copy immutabilité)
+- `DeckContextValidatorTest.kt` — 18 tests (branches validateur, sealed result)
+
+Tests : 932 unit (was 900, +32) + 38 functional (unchanged) + 254 cucumber
+(unchanged, 1 SKIP préexistant) = 1224 total (was 1192, +32). 0 FAIL.
+`./gradlew :slider:check` VERT. Zéro régression.
+
+Publication BOM 0.0.16 sur Maven Central (bundle `e12c25b5` AUTOMATIC) —
+prérequis débloqué pour future publication slider 0.0.16. codebase-plugin 0.0.5
+déjà sur Central.
+
+Rapport : `slider-plugin/.agents/sessions/062-sld-8.3a-deck-state-validator.adoc`.

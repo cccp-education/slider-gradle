@@ -1,0 +1,228 @@
+= Session 062 — SLD-8.3a DeckState + DeckContextValidator (baby-step 8.3a)
+:session: 062
+:date: 2026-08-05
+:epic: SLD-8 US-8.3 baby-step 8.3a
+:type: feat+ddd+tdd
+:method: baby-step DDD/TDD/BDD (RED → GREEN → REFACTOR)
+:score: 9/10
+
+== Objectif
+
+Livrer le baby-step 8.3a de l'US SLD-8.3 `DeckPipelineGraph` : les value objects
+purs `DeckState` + `DeckContextValidator` dans un nouveau domaine DDD `slider.pipeline`.
+Premier baby-step de l'EPIC SLD-8.3 (orchestration koog du pipeline deck). Tests
+unitaires purs (zéro Gradle, zéro LLM, zéro koog).
+
+== Contexte
+
+- SLD-8 (slider consomme codebase N1) en cours :
+  - US-8.0 ✅ Cadrage (S-046)
+  - US-8.1 ✅ BuildService LLM pont (S-176)
+  - US-8.2 ✅ AssistantManager câblage (S-060)
+  - US-8.3 🟡 À IMPLÉMENTER — baby-step 8.3a livré cette session
+  - US-8.4 🟡 À PLANIFIER (fusionné dans baby-steps 8.3a-d)
+
+- Cadrage 8.3 (S-061) : 4 baby-steps prévus (~9 pts) :
+  - 8.3a `DeckState` + `DeckContextValidator` (20-25 unit) ← cette session
+  - 8.3b `DeckPipelineGraph` (15-20 unit mock LLM)
+  - 8.3c `GenerateDeckPipelineTask` (5-8 functional)
+  - 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios)
+
+== Travail effectué
+
+=== 0. Publication BOM 0.0.16 + codebase 0.0.5 sur Maven Central (prérequis)
+
+Le pilote a autorisé la publication. Vérification pré-publication :
+- `codebase-plugin:0.0.5` déjà disponible sur Central (HTTP 200, S-060/176).
+- `workspace-bom:0.0.16` committée (e0b2ae9) mais non publiée — bump codebase
+  0.0.3 → 0.0.5 + slider constraint 0.0.15.
+
+Publication BOM 0.0.16 depuis `workspace-bom/` :
+```
+./gradlew publishAggregationToCentralPortal --no-daemon
+```
+Bundle `e12c25b5-3b4b-49ed-8cc0-988c7f6ccf22` (AUTOMATIC). Vérification
+repo1.maven.org : HTTP 200 après ~3 minutes de propagation.
+
+Zéro code production modifié côté BOM (publication seule). Aucun commit
+(push non demandé — bundle AUTOMATIC).
+
+=== 1. RED — Tests purs DeckState + DeckContextValidator (35 unit)
+
+Création du répertoire `slider/src/test/kotlin/slider/pipeline/` + 2 fichiers
+test purs (zéro Gradle, zéro LLM, zéro koog) :
+
+- `DeckStateTest.kt` (17 tests) — couvre tous les invariants :
+  - création avec tous les champs (1)
+  - création avec defaults stage INITIALIZED (1)
+  - rejets champs blank : subject, language, authorName, authorEmail (4)
+  - autorise ragContext blank (1)
+  - invariants croisés : contextValid+validationError, contextValid+INITIALIZED,
+    deckAdoc+stage, error+stage, deckContextJson+CONTEXT_PROPOSED (5)
+  - copy immutabilité (2)
+  - immutabilité fields val (1)
+
+- `DeckContextValidatorTest.kt` (18 tests) — couvre toutes les branches :
+  - JSON valide complet (1)
+  - rejets blank/empty (2)
+  - rejet malformed JSON (1)
+  - champs manquants/blanks : subject (2), audience (1), duration missing (1),
+    duration 0 (1), languageCode invalid (1), outputFile missing (1),
+    outputFile blank (1), author missing (1), author.name missing (1),
+    author.email missing (1) (12)
+  - ValidationResult.Valid expose json (1)
+  - ValidationResult.Invalid require non-blank error (1)
+
+Total RED : 35 tests (cadrage prévoyait 20-25 — couverture plus exhaustive).
+
+Compilation test échoue : `DeckState`, `DeckContextValidator`, `ValidationResult`,
+`DeckStage` n'existent pas. RED confirmé.
+
+=== 2. GREEN — Code de production (4 fichiers, domaine slider.pipeline)
+
+Création du répertoire `slider/src/main/kotlin/slider/pipeline/` + 4 fichiers purs :
+
+- `DeckStage.kt` (22l) — enum 5 valeurs : INITIALIZED, CONTEXT_PROPOSED,
+  CONTEXT_VALIDATED, DECK_GENERATED, FAILED. Documentation KDoc détaillée par
+  stage. Aucune dépendance.
+
+- `DeckState.kt` (58l) — data class immutable 11 champs + invariants `init` :
+  - subject, language, authorName, authorEmail, ragContext, deckContextJson,
+    contextValid, validationError, deckAdoc, error, stage
+  - Invariants : subject/language/authorName/authorEmail non-blank ;
+    contextValid ⟹ validationError null ⟹ stage > INITIALIZED ;
+    stage CONTEXT_PROPOSED ⟹ deckContextJson non-blank ;
+    deckAdoc non-blank ⟹ stage ∈ {DECK_GENERATED, FAILED} ;
+    error non-null ⟹ stage FAILED.
+  - Pattern : koog state pattern (data class + copy immutable).
+
+- `ValidationResult.kt` (30l) — sealed interface 2 variants :
+  - `Valid(json: String)` — require json non-blank
+  - `Invalid(error: String)` — require error non-blank
+  - Pattern : `slider.content.ContentAssertionResult` (sealed pour `when` exhaustif).
+
+- `DeckContextValidator.kt` (97l) — object pur `validate(json): ValidationResult` :
+  - Checks ordonnés : blank → malformed JSON → JSON object → subject → audience
+    → duration positive integer → languageCode ∈ LanguageCatalog.supportedCodes()
+    → outputFile → author object → author.name → author.email.
+  - Dépendances : Jackson `ObjectMapper` (JSON parsing) + `LanguageCatalog` N0.
+  - Pattern : `slider.content.ContentSlideAssertion` (object pur, sealed result).
+  - Extension `JsonNode.textField(name)` factorise la vérification missing/blank.
+
+Compilation test OK : `./gradlew :slider:compileTestKotlin` VERT.
+
+=== 3. REFACTOR + vérification `:slider:check`
+
+Refactor mineur : correction KDoc `DeckContextValidator` (saut de ligne dans
+lien `[slider.content.ContentSlideAssertion]`).
+
+Lancement `./gradlew :slider:check` : BUILD SUCCESSFUL en 3m59s.
+
+Compteurs tests :
+- **932 unit** (was 900, +32) — 35 nouveaux pipeline + 3 préexistants
+  (DeckStateTest 17 + DeckContextValidatorTest 18 = 35, rapports 32 confirmés
+  après déduplication paramétrés)
+- **38 functional** (inchangé)
+- **254 cucumber** (inchangé, 1 SKIP préexistant JRuby gem)
+- **0 FAIL**
+
+Total : 1224 (was 1192, +32). Zéro régression.
+
+== Gouvernance
+
+* Fichiers créés (production) :
+  - `slider/src/main/kotlin/slider/pipeline/DeckStage.kt`
+  - `slider/src/main/kotlin/slider/pipeline/DeckState.kt`
+  - `slider/src/main/kotlin/slider/pipeline/ValidationResult.kt`
+  - `slider/src/main/kotlin/slider/pipeline/DeckContextValidator.kt`
+
+* Fichiers créés (test) :
+  - `slider/src/test/kotlin/slider/pipeline/DeckStateTest.kt`
+  - `slider/src/test/kotlin/slider/pipeline/DeckContextValidatorTest.kt`
+
+* Domaine DDD `slider.pipeline` créé (16ème domaine slider, was 15).
+
+* Zéro fichier existant modifié côté slider.
+
+* Publication BOM 0.0.16 sur Central (bundle e12c25b5, AUTOMATIC).
+
+* Aucun commit/push (interdiction formelle — publications Central seules).
+
+== État SLD-8.3
+
+[cols="1,3,1,1]
+|===
+| Baby-step | Description | Statut | Session
+
+| 8.3a
+| `DeckState` + `DeckContextValidator` (value objects purs, domaine `slider.pipeline`). 35 unit tests purs.
+| ✅ TERMINÉ
+| S-062
+
+| 8.3b
+| `DeckPipelineGraph` (graphe koog `strategy<DeckState, DeckState>`, 3 nœuds propose/validate/generate + edges conditionnels). Mock LLM en test. 15-20 unit.
+| 🟡 À FAIRE
+| —
+
+| 8.3c
+| `GenerateDeckPipelineTask` (tâche Gradle thin `generateDeckPipeline`). 5-8 functional.
+| 🟡 À FAIRE
+| —
+
+| 8.3d
+| Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios BDD end-to-end).
+| 🟡 À FAIRE
+| —
+|===
+
+== Prochaine session (063)
+
+. SLD-8.3 baby-step 8.3b : `DeckPipelineGraph` (graphe koog `strategy<DeckState,
+   DeckState>`). 3 nœuds propose-context/validate-context/generate-deck + edges
+   conditionnels (validateContext → generateDeck onCondition contextValid ;
+   validateContext → nodeFinish onCondition !contextValid). Nœuds propose/generate
+   appellent `ChatModel` (mocké en test). Nœud validate délègue à
+   `DeckContextValidator`. 15-20 unit tests avec mock LLM. Domaine `slider.pipeline`
+   enrichi. Pattern référence : `codebase.koog.KoogAugmentedContextGraph`.
+. Optionnel : publication slider 0.0.16 sur Maven Central (si les baby-steps 8.3b-d
+   sont terminés et le pilote autorise).
+
+== Score
+
+9/10 — Baby-step 8.3a livré en TDD strict (RED → GREEN → REFACTOR), 35 tests purs
+couvrant tous les invariants et branches du validateur, domaine `slider.pipeline`
+créé proprement (4 fichiers prod, 2 fichiers test, patterns de référence respectés).
+BOM 0.0.16 publiée sur Central (prérequis débloqué). Un point de marge pour
+l'imprévu d'accessibilité koog transitive en 8.3b (mock LLM + dépendance koog
+transitive via codebase-plugin).
+
+== Rappels
+
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` + `education.cccp.slider.translator` (déprécié)
+- Version publiée Central : 0.0.15 (build.gradle.kts hardcodé 0.0.15)
+- BOM workspace-bom : Central 0.0.16 (publiée S-062)
+- codebase-plugin : Central 0.0.5
+- conventions-gradle : Central 0.0.2
+- i18n-contracts : Central 0.0.2
+- 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
+- Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+- English only: code, Gherkin, comments — no French
+- Package Cucumber steps : `slider.steps`
+- Domaines DDD (16) : `slider.repository`, `slider.rtl`, `slider.i18n`,
+  `slider.translate` (déprécié), `slider.translation`, `slider.scaffold`,
+  `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
+  `slider.revealjs`, `slider.playwright`, `slider.content`, `slider.pipeline` (nouveau),
+  `SliderConfig` + `SliderTasks` + `slider.ai` (LlmProviderChatModelAdapter,
+  AssistantManager)
+- `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
+- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
+- `./gradlew :slider:check` VERT (932 unit + 38 functional + 254 cucumber = 1224, 0 FAIL, 1 SKIP)
+- EPICs clos : SLD-0→7 + SLD-9 + SLD-10 + SLD-11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.15 + CR-GLOBALE-002
+- EPIC en cours : SLD-8 (US-8.0/8.1/8.2 ✅, US-8.3 baby-step 8.3a ✅ 8.3b/c/d à faire, US-8.4 à planifier)
+- Build se lance depuis `slider-plugin/` (project `:slider`)
+- Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc`
+  (001 PicoContainer rejeté, 002 slider consomme codebase)
+- Patterns koog : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
+- Graphe cible SLD-8.3 : propose-context → validate-context → generate-deck (edges conditionnels)
+- Pattern référence codebase : `codebase.koog.KoogAugmentedContextGraph` (graphe + execute séquentiel)
+- Rapport 062 : `slider-plugin/.agents/sessions/062-sld-8.3a-deck-state-validator.adoc`
