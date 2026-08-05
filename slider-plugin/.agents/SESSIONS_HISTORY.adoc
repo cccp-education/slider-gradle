@@ -2,6 +2,52 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 066 (2026-08-06) — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule ✅ TERMINÉ
+
+Session pure ops/release (zéro code de production modifié, zéro test
+modifié). Publication slider 0.0.16 sur Maven Central via nmcp + BOM
+0.0.17 (constraint slider 0.0.16) + synchronisation consommateur
+capsule-gradle.
+
+Cette publication reflète le delta non publié accumulé depuis la
+dernière publication slider 0.0.15 (S-059) :
+
+* **AssistantManager réécrit** (652 → 300 lignes, -352) — US-8.2 S-060 :
+  suppression 3 factories gemini/mistral/huggingface + 4 streaming +
+  8 hello* tasks + catalogues, délégation à `LlmBuildService` codebase
+  N1 via `LlmProviderChatModelAdapter` (nouveau, 48l). Injection
+  `@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask`.
+  Mock-LLM fallback (`-Pollama.baseUrl` → `createOllamaChatModel` legacy)
+  préservé.
+* **Domaine `slider.pipeline` complet** (10 fichiers prod + 4 test) —
+  US-8.3 baby-steps 8.3a-d S-062→065 : `DeckState`, `DeckContextValidator`,
+  `DeckPipelineGraph` (graphe koog `strategy<DeckState, DeckState>`),
+  `GenerateDeckPipelineTask` (tâche Gradle thin), `PromptManagerDeckPromptBuilder`,
+  `ChatModelDeckLlm`, Cucumber BDD `26_deck_pipeline_koog.feature`.
+* **Dépendance `koog-agents:1.0.0`** ajoutée directe slider (BOM 0.0.16
+  constraint, exclude `org.jetbrains:annotations`).
+
+Bundle nmcp slider `106d110f-27de-43c1-869e-9e9a70026f5d` (AUTOMATIC,
+3 artefacts signés GPG — slider:0.0.16 POM+JAR+sources+javadoc + 2 plugin
+markers). BOM 0.0.17 publiée (bundle `b432cc13-f08b-489c-8f67-c80d9d5d8b04`
+AUTOMATIC, constraint slider 0.0.16 — BOM 0.0.16 publiée S-062 gardait
+constraint 0.0.15). Sync capsule-gradle (catalogue
+`capsule-plugin/gradle/libs.versions.toml` slider 0.0.15→0.0.16,
+`./gradlew compileKotlin` VERT avec slider 0.0.16 mavenLocal).
+
+Vérification repo1.maven.org : POM slider 0.0.16 HTTP 200 (après ~6 min
+de propagation VALIDATING → publishing), POM BOM 0.0.17 HTTP 200.
+`./gradlew :slider:check` VERT pré-publication (UP-TO-DATE 22s, 959
+unit + 45 functional + 265 cucumber, 0 FAIL, 1 SKIP préexistant).
+
+4 fichiers build bumpés sur 3 repos (slider `build.gradle.kts` version,
+BOM `build.gradle.kts` version + `libs.versions.toml` slider-plugin,
+capsule `libs.versions.toml` slider) — non committés (Règle 1, accord
+pilote pour publish mais pas pour commit). Secret-scan fin de session :
+zéro match dans le code de production.
+
+Rapport : `slider-plugin/.agents/sessions/066-pub-slider-0.0.16.adoc`.
+
 == Session 065 (2026-08-06) — SLD-8.3d Cucumber `26_deck_pipeline_koog.feature` ✅ US-8.3 clôturée
 
 Baby-step 8.3d de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD/BDD strict

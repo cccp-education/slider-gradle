@@ -1,52 +1,60 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 064 — SLD-8.3 baby-step 8.3c `GenerateDeckPipelineTask` (tâche Gradle thin)
-_Prochaine session_ : 065 — SLD-8.3 baby-step 8.3d Cucumber `26_deck_pipeline_koog.feature`
+_Session terminee_ : 066 — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule
+_Prochaine session_ : 067 — à arbitrer par le pilote (tous EPICs terminés)
 
-== Mission session 064 (TERMINÉE)
+== Mission session 066 (TERMINÉE)
 
-. SLD-8.3 baby-step 8.3c livré en TDD strict (RED → GREEN → REFACTOR)
-. Tâche Gradle thin `generateDeckPipeline` (package `slider.pipeline`)
-  orchestre `DeckPipelineGraph` en un seul appel (propose → validate →
-  generate), RAG-free (RAG context optionnel via `-Pdeck.ragContext`)
-. 2 adaptateurs concrets dans `slider.pipeline` :
-  - `PromptManagerDeckPromptBuilder` ← `AssistantManager.PromptManager`
-  - `ChatModelDeckLlm` ← `ChatModel` langchain4j (prompt flat en `UserMessage`)
-. Câblage `AssistantManager.createChatTasks` → `registerGenerateDeckPipelineTask`
-  (group `generate`, i18n via `SliderMessages.get`)
-. Clé i18n `task.generateDeckPipeline.description` ajoutée aux 10 fichiers
-  `Messages_*.properties` + 11 tests i18n (`MessagesEnReferenceTest` +
-  `MessagesFrTranslationTest` + 8 `Messages{Xx}TranslationTest`) +
-  `TaskDescriptionsI18nFunctionalTest`
-. `./gradlew :slider:check` VERT (959 unit +10, 45 functional +7, 254
-  cucumber = 1258, 0 FAIL, 1 SKIP préexistant). Zéro régression.
+. Session pure ops/release (zéro code de production, zéro test modifié).
+. Publication slider 0.0.16 sur Maven Central via nmcp — bundle
+  `106d110f-27de-43c1-869e-9e9a70026f5d` (AUTOMATIC, 3 artefacts signés
+  GPG : slider:0.0.16 POM+JAR+sources+javadoc + 2 plugin markers
+  `education.cccp.slider` + `education.ccp.slider.translator`).
+. BOM 0.0.17 publiée (bundle `b432cc13-f08b-489c-8f67-c80d9d5d8b04`
+  AUTOMATIC, constraint slider 0.0.16 — BOM 0.0.16 publiée S-062 gardait
+  constraint 0.0.15).
+. Sync capsule-gradle (catalogue `capsule-plugin/gradle/libs.versions.toml`
+  slider 0.0.15→0.0.16, `./gradlew compileKotlin` VERT avec slider 0.0.16
+  mavenLocal).
+. Vérification repo1.maven.org : POM slider 0.0.16 + BOM 0.0.17 HTTP 200
+  (après ~6 min propagation VALIDATING → publishing).
+. `./gradlew :slider:check` VERT pré-publication (UP-TO-DATE 22s, 959
+  unit + 45 functional + 265 cucumber, 0 FAIL, 1 SKIP préexistant).
+. 4 fichiers build bumpés sur 3 repos (slider, BOM, capsule) — non
+  committés (Règle 1, accord pilote pour publish mais pas pour commit).
+. Secret-scan fin de session : zéro match dans le code de production.
 
-== Contexte reprise
+== Contexte reprise session 067 — à arbitrer par le pilote
 
-- EPIC SLD-8 (slider consomme codebase N1) EN COURS :
-  - US-8.0/8.1/8.2 ✅ terminés
-  - US-8.3 baby-steps : 8.3a ✅ (S-062), 8.3b ✅ (S-063), 8.3c ✅ (S-064),
-    8.3d à faire
-  - US-8.4 à planifier (fusionné dans baby-steps 8.3a-d → caduque)
-- Domaine `slider.pipeline` : 10 fichiers prod + 4 test (DeckStage,
-  DeckState, ValidationResult, DeckContextValidator, DeckPromptBuilder,
-  DeckLlm, DeckPipelineGraph, PromptManagerDeckPromptBuilder,
-  ChatModelDeckLlm, GenerateDeckPipelineTask)
-- 2 adaptateurs concrets 8.3c : `PromptManagerDeckPromptBuilder` (wrap
-  `AssistantManager.PromptManager` — system+user prompts des 2 étapes) +
-  `ChatModelDeckLlm` (wrap `ChatModel` langchain4j, prompt flat en
-  `UserMessage` unique)
-- Pattern référence : `codebase.koog.KoogAugmentedContextGraph` (graphe koog +
-  execute séquentiel avec try/catch par nœud)
-- Dépendance koog-agents 1.0.0 directe slider (BOM 0.0.16 constraint)
-- slider 0.0.15 publié Central, BOM 0.0.16 publiée Central (S-062)
-- `./gradlew :slider:check` VERT (959 unit + 45 functional + 254 cucumber
-  = 1258, 0 FAIL, 1 SKIP préexistant)
-- Backlog restant : SLD-8.3 (8.3d Cucumber `26_deck_pipeline_koog.feature`
-  8-12 scénarios BDD end-to-end), US-8.4 caduque
-- Décisions architecture : Decision 001 (PicoContainer rejeté, DI native Gradle),
-  Decision 002 (slider consomme codebase N1 comme socle LLM unifié)
-- Décisions 8.3c : adaptateurs concrets côté `slider.pipeline` (ports-out),
-  prompt flat en `UserMessage` unique, tâche RAG-free, mock-LLM fallback
-  `-Pollama.baseUrl` préservé
-- Rapport 064 : `slider-plugin/.agents/sessions/064-sld-8.3c-generate-deck-pipeline-task.adoc`
+- *Tous les EPICs de feature sont terminés* (SLD-0→11 + CR-GLOBALE-002 +
+  CR3 + PUB 0.0.1→0.0.16). Aucun nouvel EPIC cadré.
+- *Arbitrage pilote session 066* : proposition 2 (cadrage nouvel EPIC)
+  écartée comme faux positif. Décision reportée à la session 067.
+- *Backlog en attente de décision* :
+  - Commit/push des 3 repos modifiés (slider, BOM, capsule) — accord
+    pilote requis (Règle 1).
+  - Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues — backlog
+    cross-borough évoqué AGENTS.adoc racine, borough HTOWN DORMANT).
+  - Optionnel : nouveaux EPICs à cadrer (le pilote arbitre la prochaine
+    direction — aucun EPIC n'est imposé).
+- *Baseline* : `main` propre, à jour `origin/main`. Dernier commit
+  `a7740ed feat(sld-8.3d)`. 4 fichiers build bumpés non committés dans 3
+  repos (working tree modifié). `./gradlew :slider:compileKotlin` VERT.
+- *Versions publiées Central* : slider 0.0.16, BOM 0.0.17.
+- *Règles* : Règle 1 — AUCUN commit sans permission. Règle 2 — AUCUN
+  publish sans permission (publishSlides inclus).
+- *Rapport 066* :
+  `slider-plugin/.agents/sessions/066-pub-slider-0.0.16.adoc`.
+
+== Rappels méthodologie (pilote)
+
+- *Baby-step DDD/TDD/BDD* : RED → GREEN → REFACTOR, 3 niveaux tests/US
+  (unit → functional → cucumber), non-regression stricte
+  (`./gradlew :slider:check` VERT avant de clore une US).
+- *English only* : code, Gherkin, commentaires. Gouvernance (.adoc) en
+  français.
+- *Domaines DDD* (16) : `slider.pipeline` clos (10 fichiers prod + 4
+  test). `slider.capsule` expulsé (S-058, cross-borough capsule).
+- *Décisions architecture* : Decision 001 (PicoContainer rejeté, DI
+  native Gradle), Decision 002 (slider consomme codebase N1 comme socle
+  LLM unifié).

@@ -1,0 +1,140 @@
+= Session 066 — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule
+:session: 066
+:date: 2026-08-06
+:epic: PUB (slider 0.0.16)
+:status: ✅ TERMINÉ
+:score: 9/10
+
+== Résumé
+
+Session pure ops/release (zéro code de production modifié, zéro test
+modifié). Publication slider 0.0.16 sur Maven Central via nmcp + BOM
+0.0.17 (constraint slider 0.0.16) + synchronisation consommateur
+capsule-gradle.
+
+Cette publication reflète le delta non publié accumulé depuis la
+dernière publication slider 0.0.15 (S-059) :
+
+* **AssistantManager réécrit** (652 → 300 lignes, -352) — US-8.2 S-060 :
+  suppression 3 factories gemini/mistral/huggingface + 4 streaming +
+  8 hello* tasks + catalogues, délégation à `LlmBuildService` codebase
+  N1 via `LlmProviderChatModelAdapter` (nouveau, 48l). Injection
+  `@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask`.
+  Mock-LLM fallback (`-Pollama.baseUrl` → `createOllamaChatModel` legacy)
+  préservé.
+* **Domaine `slider.pipeline` complet** (10 fichiers prod + 4 test) —
+  US-8.3 baby-steps 8.3a-d S-062→065 : `DeckState`, `DeckContextValidator`,
+  `DeckPipelineGraph` (graphe koog `strategy<DeckState, DeckState>`),
+  `GenerateDeckPipelineTask` (tâche Gradle thin), `PromptManagerDeckPromptBuilder`,
+  `ChatModelDeckLlm`, Cucumber BDD `26_deck_pipeline_koog.feature`.
+* **Dépendance `koog-agents:1.0.0`** ajoutée directe slider (BOM 0.0.16
+  constraint, exclude `org.jetbrains:annotations`).
+
+== Publications
+
+[cols="3,2,3"]
+|===
+| Artefact | Bundle nmcp | URL repo1.maven.org
+
+| slider 0.0.16
+| `106d110f-27de-43c1-869e-9e9a70026f5d` (AUTOMATIC)
+| `education/cccp/slider/0.0.16/slider-0.0.16.pom` HTTP 200 ✅
+
+| workspace-bom 0.0.17
+| `b432cc13-f08b-489c-8f67-c80d9d5d8b04` (AUTOMATIC)
+| `education/cccp/workspace-bom/0.0.17/workspace-bom-0.0.17.pom` HTTP 200 ✅
+|===
+
+3 artefacts slider signés GPG : `slider:0.0.16` (POM + JAR + sources +
+javadoc) + 2 plugin markers (`education.cccp.slider` +
+`education.ccp.slider.translator`). Vérification Central : POM HTTP 200
+après ~6 min de propagation (statut VALIDATING → publishing → 200).
+
+== Synchronisation consommateurs
+
+* **capsule-gradle** : catalogue `capsule-plugin/gradle/libs.versions.toml`
+  `slider = "0.0.15"` → `"0.0.16"`. `./gradlew compileKotlin` VERT avec
+  slider 0.0.16 (mavenLocal). Zéro code production modifié côté capsule.
+* **workspace-bom** : catalogue `gradle/libs.versions.toml`
+  `slider-plugin = "0.0.15"` → `"0.0.16"` + build.gradle.kts version
+  `0.0.16` → `0.0.17`. Publication BOM 0.0.17 (bundle AUTOMATIC).
+
+== Tests
+
+* Aucun test modifié cette session (pure ops/release).
+* `./gradlew :slider:check` VERT pré-publication (22s, UP-TO-DATE — déjà
+  validé S-065) : 959 unit + 45 functional + 265 cucumber = 0 FAIL,
+  1 SKIP préexistant (JRuby gem isolé — non lié).
+* `./gradlew :slider:publishToMavenLocal` VERT (sync capsule).
+* `./gradlew compileKotlin` VERT côté capsule (capsule-plugin) avec
+  slider 0.0.16.
+
+== Fichiers Modifiés
+
+[cols="2,3,1"]
+|===
+| Fichier | Rôle | Delta
+
+| `slider-plugin/slider/build.gradle.kts`
+| Bump version `0.0.15` → `0.0.16`
+| 1 ligne
+
+| `workspace-bom/build.gradle.kts`
+| Bump version `0.0.16` → `0.0.17`
+| 1 ligne
+
+| `workspace-bom/gradle/libs.versions.toml`
+| Bump constraint `slider-plugin` `0.0.15` → `0.0.16`
+| 1 ligne
+
+| `capsule-gradle/capsule-plugin/gradle/libs.versions.toml`
+| Bump consumer `slider` `0.0.15` → `0.0.16`
+| 1 ligne
+
+| `slider-plugin/.agents/PROMPT_REPRISE.adoc`
+| Mise à jour (pointage session 066)
+| réécriture
+|===
+
+*Total* : 4 fichiers build bumpés (3 repos) + 1 fichier gouvernance.
+Zéro code de production modifié. Zéro test modifié.
+
+== Vérifications fin de session
+
+* `git status` : 3 repos propres (modifications attendues, non committées
+  — Règle 1).
+* Secret-scan : `grep -rn "TOKEN\|SECRET\|PASSWORD\|API_KEY\|gho_\|ghp_"`
+  slider-plugin/ — zéro match dans le code de production (matches test
+  only, filtrés).
+* Central : POM slider 0.0.16 HTTP 200, POM BOM 0.0.17 HTTP 200.
+* Capsule compile avec slider 0.0.16 (mavenLocal).
+
+== Décisions
+
+* **BOM 0.0.17 (pas 0.0.16)** — la BOM 0.0.16 a déjà été publiée S-062
+  (bundle `e12c25b5`) avec constraint slider 0.0.15. Pour exposer le
+  slider 0.0.16 dans la BOM, il faut bump à 0.0.17 (strictement montant).
+* **Pas de commit/push** — Règle 1, accord pilote pour publish mais pas
+  pour commit. Les 3 repos restent en working tree modifié en attendant
+  décision pilote.
+
+== Prochaine session
+
+* Tous les EPICs de feature sont terminés (SLD-0→11 + CR-GLOBALE-002 +
+  CR3 + PUB 0.0.1→0.0.16). Aucun nouvel EPIC cadré.
+* Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues — backlog
+  cross-borough évoqué AGENTS.adoc racine), ou nouveaux EPICs à cadrer.
+* Gouvernance : décider du commit/push des 3 repos modifiés (slider,
+  BOM, capsule) — accord pilote requis.
+
+== Rappels
+
+* GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.ccp.slider.translator` (déprécié)
+* Version publiée Central : slider 0.0.16, BOM 0.0.17
+* Domaines DDD (16) : `slider.pipeline` clos (10 fichiers prod + 4 test)
+* `./gradlew :slider:check` VERT (959 unit + 45 functional + 265 cucumber,
+  0 FAIL, 1 SKIP préexistant)
+* Baby-step TDD/BDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+* English only : code, Gherkin, commentaires
+* Package Cucumber steps : `slider.steps`

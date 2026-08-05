@@ -1,6 +1,44 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-06
 
+== Session 066 — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule ✅
+
+Session pure ops/release (zéro code de production modifié, zéro test
+modifié). Publication slider 0.0.16 sur Maven Central via nmcp + BOM
+0.0.17 (constraint slider 0.0.16) + synchronisation consommateur
+capsule-gradle. Reflète le delta non publié accumulé depuis 0.0.15
+(S-059) : AssistantManager réécrit 652→300 lignes -352 (US-8.2 S-060) +
+domaine `slider.pipeline` complet US-8.3 baby-steps 8.3a-d S-062→065 +
+koog-agents 1.0.0 directe.
+
+Bundle nmcp slider `106d110f-27de-43c1-869e-9e9a70026f5d` (AUTOMATIC, 3
+artefacts signés GPG). BOM 0.0.17 publiée (bundle `b432cc13-f08b-489c-8f67-c80d9d5d8b04`
+AUTOMATIC, constraint slider 0.0.16). Sync capsule-gradle (catalogue
+slider 0.0.15→0.0.16, compileKotlin VERT mavenLocal). Vérification
+repo1.maven.org : POM slider 0.0.16 + BOM 0.0.17 HTTP 200 (après ~6 min
+propagation). `./gradlew :slider:check` VERT pré-pub (UP-TO-DATE, 959
+unit + 45 functional + 265 cucumber, 0 FAIL, 1 SKIP préexistant).
+
+Tâches terminées :
+. Bump version slider `slider-plugin/slider/build.gradle.kts` 0.0.15 → 0.0.16
+. `./gradlew :slider:check` VERT pré-publication (UP-TO-DATE 22s)
+. `./gradlew publishAggregationToCentralPortal` slider 0.0.16 (bundle
+  `106d110f` AUTOMATIC, 3 artefacts signés GPG)
+. Bump BOM `workspace-bom/build.gradle.kts` 0.0.16 → 0.0.17
+. Bump BOM `workspace-bom/gradle/libs.versions.toml` slider-plugin 0.0.15 → 0.0.16
+. `./gradlew publishAggregationToCentralPortal` BOM 0.0.17 (bundle
+  `b432cc13` AUTOMATIC)
+. Bump capsule `capsule-plugin/gradle/libs.versions.toml` slider 0.0.15 → 0.0.16
+. `./gradlew :slider:publishToMavenLocal` (sync capsule)
+. `./gradlew compileKotlin` capsule VERT avec slider 0.0.16 (mavenLocal)
+. Vérification repo1.maven.org : POM slider 0.0.16 + BOM 0.0.17 HTTP 200
+. Secret-scan fin de session : zéro match dans le code de production
+
+4 fichiers build bumpés sur 3 repos — non committés (Règle 1, accord
+pilote pour publish mais pas pour commit).
+
+Rapport : `slider-plugin/.agents/sessions/066-pub-slider-0.0.16.adoc`.
+
 == Session 064 — SLD-8.3 baby-step 8.3c GenerateDeckPipelineTask ✅
 
 Baby-step 8.3c de l'US SLD-8.3 `GenerateDeckPipelineTask` livré en TDD strict

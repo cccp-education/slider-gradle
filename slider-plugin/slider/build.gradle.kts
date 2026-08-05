@@ -23,7 +23,7 @@ plugins {
 }
 
 group = "education.cccp"
-version = "0.0.15"
+version = "0.0.16"
 
 repositories {
     mavenCentral()
