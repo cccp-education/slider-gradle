@@ -2,6 +2,40 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 065 (2026-08-06) — SLD-8.3d Cucumber `26_deck_pipeline_koog.feature` ✅ US-8.3 clôturée
+
+Baby-step 8.3d de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD/BDD strict
+(RED → GREEN → REFACTOR). *Pure BDD* — zéro fichier de production modifié
+(pattern SLD-10.6 / S-054 : la logique métier est déjà livrée par 8.3a/b/c,
+le baby-step 8.3d ajoute uniquement la couverture BDD end-to-end).
+
+2 fichiers test créés : `26_deck_pipeline_koog.feature` (12 scénarios BDD
+end-to-end, tags `@pipeline @koog`, English only Gherkin) +
+`DeckPipelineKoogSteps.kt` (222 lignes, package `slider.steps`, Java8 lambda
+style `En`, fakes `RecordingPromptBuilder` + `FakeDeckLlm` privés en mémoire
+mirroring `DeckPipelineGraphTest` 8.3b + `DeckTranslationSteps` SLD-5).
+
+12 scénarios : happy path (3 — pipeline complet génère deck, deckContextJson
+preserved, subject/language/ragContext preserved), invalid context → FAILED
+(3 — subject manquant, duration 0, languageCode "xx" non supporté), LLM
+failure modes (3 — propose throws ProposeContextFailed, propose blank,
+generate throws GenerateDeckFailed avec contextValid true), edge conditions
+(3 — generate non appelé si context invalide, transitions stage
+INITIALIZED→CONTEXT_VALIDATED via RecordingPromptBuilder, asMermaidDiagram
+non-blank).
+
+Domaine `slider.pipeline` inchangé (10 fichiers prod + 4 fichiers test de
+8.3a/b/c). `./gradlew :slider:check` VERT (959 unit inchangés, 45 functional
+inchangés, 265 cucumber +12, 0 FAIL, 1 SKIP préexistant). Zéro régression.
+
+**US-8.3 clôturée** (4/4 baby-steps : 8.3a 35 unit S-062, 8.3b 17 unit S-063,
+8.3c 7 functional + 11 i18n S-064, 8.3d 12 cucumber S-065 = 71 tests 3
+niveaux, ~9 pts). **EPIC SLD-8 terminé** (US-8.0/8.1/8.2/8.3 ✅, US-8.4
+caduque fusionné dans 8.3a-d). Domaine `slider.pipeline` clos (10 fichiers
+prod + 4 fichiers test).
+
+Rapport : `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumber.adoc`.
+
 == Session 064 (2026-08-06) — SLD-8.3c GenerateDeckPipelineTask ✅
 
 Baby-step 8.3c de l'US SLD-8.3 `GenerateDeckPipelineTask` livré en TDD strict

@@ -7,6 +7,39 @@ _.date: 2026-08-06
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 065 (2026-08-06) — SLD-8.3d Cucumber `26_deck_pipeline_koog.feature` ✅ US-8.3 clôturée
+
+SLD-8.3 baby-step 8.3d livré en TDD/BDD strict (RED → GREEN → REFACTOR).
+*Pure BDD* — zéro fichier de production modifié (pattern SLD-10.6 / S-054 :
+logique métier déjà livrée par 8.3a/b/c, le baby-step 8.3d ajoute uniquement
+la couverture BDD end-to-end). 2 fichiers test créés :
+`26_deck_pipeline_koog.feature` (12 scénarios BDD end-to-end, tags
+`@pipeline @koog`, English only Gherkin) + `DeckPipelineKoogSteps.kt`
+(222 lignes, package `slider.steps`, Java8 lambda `En`, fakes
+`RecordingPromptBuilder` + `FakeDeckLlm` privés en mémoire mirroring
+`DeckPipelineGraphTest` 8.3b + `DeckTranslationSteps` SLD-5).
+
+12 scénarios : happy path (3 — pipeline complet génère deck, deckContextJson
+preserved, subject/language/ragContext preserved), invalid context → FAILED
+(3 — subject manquant, duration 0, languageCode "xx" non supporté), LLM
+failure modes (3 — propose throws ProposeContextFailed, propose blank,
+generate throws GenerateDeckFailed avec contextValid true), edge conditions
+(3 — generate non appelé si context invalide, transitions stage
+INITIALIZED→CONTEXT_VALIDATED via RecordingPromptBuilder, asMermaidDiagram
+non-blank). Domaine `slider.pipeline` inchangé (10 fichiers prod + 4 fichiers
+test de 8.3a/b/c). `./gradlew :slider:check` VERT (959 unit inchangés, 45
+functional inchangés, 265 cucumber +12, 0 FAIL, 1 SKIP préexistant). Zéro
+régression.
+
+**US-8.3 clôturée** (4/4 baby-steps : 8.3a 35 unit S-062, 8.3b 17 unit S-063,
+8.3c 7 functional + 11 i18n S-064, 8.3d 12 cucumber S-065 = 71 tests 3
+niveaux, ~9 pts). **EPIC SLD-8 terminé** (US-8.0/8.1/8.2/8.3 ✅, US-8.4
+caduque fusionné dans 8.3a-d). Domaine `slider.pipeline` clos (10 fichiers
+prod + 4 fichiers test).
+
+Rapport complet : `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumber.adoc`.
+
+'''
 == Session 064 (2026-08-06) — SLD-8.3c GenerateDeckPipelineTask ✅ TERMINÉ
 
 SLD-8.3 baby-step 8.3c livré en TDD strict (RED → GREEN → REFACTOR). Domaine
@@ -388,7 +421,7 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | PUB | Publications Maven Central 0.0.1→0.0.15 | ✅ | 9/9
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
-| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 EN COURS (S-064 baby-step 8.3c ✅, US-8.0/8.1/8.2 ✅, US-8.3 8.3a/b/c ✅ 8.3d à faire, US-8.4 caduque) | 3.5/5 US
+| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | ✅ TERMINÉ (S-065, US-8.0/8.1/8.2/8.3 ✅, US-8.4 caduque fusionné dans 8.3a-d) | 3.5/5 US
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | ✅ TERMINÉ (S-057, 5/5 US — 9.0/9.1/9.2/9.3/9.4) | 5 US ~10 pts
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | ✅ TERMINÉ (S-054, 7/7 US — 10.0→10.6) | 7 US ~18 pts
 | SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | ✅ TERMINÉ (S-058, 6/6 US — 11.0 cadrage S-056 + 11.1→11.6) | 6 US ~14 pts

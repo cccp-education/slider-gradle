@@ -1,5 +1,31 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 065_ : SLD-8.3 baby-step 8.3d Cucumber `26_deck_pipeline_koog.feature`
+(12 scénarios BDD end-to-end, tags `@pipeline @koog`). *Pure BDD* — zéro fichier
+de production modifié (logique métier déjà livrée par 8.3a/b/c, pattern SLD-10.6).
+2 fichiers test créés : feature Gherkin + `DeckPipelineKoogSteps.kt` (222 lignes,
+fakes `RecordingPromptBuilder` + `FakeDeckLlm` privés en mémoire mirroring
+`DeckPipelineGraphTest` 8.3b + `DeckTranslationSteps` SLD-5). **US-8.3 clôturée**
+(4/4 baby-steps : 8.3a 35 unit, 8.3b 17 unit, 8.3c 7 functional + 11 i18n,
+8.3d 12 cucumber = 71 tests 3 niveaux). **EPIC SLD-8 terminé**. Domaine
+`slider.pipeline` clos (10 fichiers prod + 4 fichiers test). `./gradlew
+:slider:check` VERT 0 FAIL / 1 SKIP préexistant. Totaux post-065 : 959 unit
+(unchanged) + 45 functional (unchanged) + 265 cucumber (+12) = 1269 total
+(was 1258, +12).
+
+Tests ajoutés session 065 (BDD end-to-end) :
+. `26_deck_pipeline_koog.feature` + `DeckPipelineKoogSteps.kt` (12 cucumber) —
+  pipeline koog deck BDD : happy path (3 — pipeline complet génère deck,
+  deckContextJson preserved, subject/language/ragContext preserved),
+  invalid context → FAILED (3 — subject manquant, duration 0, languageCode
+  "xx" non supporté), LLM failure modes (3 — propose throws ProposeContextFailed,
+  propose blank, generate throws GenerateDeckFailed avec contextValid true),
+  edge conditions (3 — generate non appelé si context invalide, transitions
+  stage INITIALIZED→CONTEXT_VALIDATED via RecordingPromptBuilder,
+  asMermaidDiagram non-blank). Deux fakes privés : `RecordingPromptBuilder`
+  (capture états aux appels) + `FakeDeckLlm` (canned responses ou exceptions,
+  compteur generateCallCount).
+
 _Statut session 063_ : SLD-8.3 baby-step 8.3b `DeckPipelineGraph` (graphe koog
 `strategy<DeckState, DeckState>` + execute séquentiel pattern
 `KoogAugmentedContextGraph`). Domaine `slider.pipeline` enrichi (3 fichiers

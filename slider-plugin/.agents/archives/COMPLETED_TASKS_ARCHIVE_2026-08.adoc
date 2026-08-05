@@ -336,3 +336,37 @@ prérequis débloqué pour future publication slider 0.0.16. codebase-plugin 0.0
 déjà sur Central.
 
 Rapport : `slider-plugin/.agents/sessions/062-sld-8.3a-deck-state-validator.adoc`.
+
+
+== US SLD-8.3 — DeckPipelineGraph (koog orchestration) ✅ TERMINÉ (S-062→S-065)
+
+US-8.3 clôturée en 4 baby-steps TDD/BDD (~9 pts, 71 tests 3 niveaux) :
+
+* 8.3a (S-062) — `DeckState` + `DeckContextValidator` (domaine
+  `slider.pipeline` créé, 16ème). 4 fichiers prod purs (DeckStage enum,
+  DeckState data class immutable 11 champs + invariants, ValidationResult
+  sealed, DeckContextValidator object 8 checks) + 35 unit tests.
+* 8.3b (S-063) — `DeckPipelineGraph` (graphe koog `strategy<DeckState,
+  DeckState>` 3 nœuds propose/validate/generate + edges conditionnels,
+  execute séquentiel pattern codebase `KoogAugmentedContextGraph`,
+  asMermaidDiagram). 3 fichiers prod + 17 unit tests mock LLM. Dépendance
+  `koog-agents:1.0.0` directe slider (BOM 0.0.16).
+* 8.3c (S-064) — `GenerateDeckPipelineTask` (thin Gradle adapter
+  `generateDeckPipeline`). 3 fichiers prod (PromptManagerDeckPromptBuilder,
+  ChatModelDeckLlm, GenerateDeckPipelineTask) + 7 functional + 11 i18n.
+* 8.3d (S-065) — Cucumber `26_deck_pipeline_koog.feature` (12 scénarios BDD
+  end-to-end, pure BDD zéro prod modifié) + `DeckPipelineKoogSteps.kt`
+  (222 lignes, fakes RecordingPromptBuilder + FakeDeckLlm).
+
+Domaine `slider.pipeline` clos (10 fichiers prod + 4 fichiers test).
+`./gradlew :slider:check` VERT (959 unit + 45 functional + 265 cucumber,
+0 FAIL, 1 SKIP préexistant).
+
+**EPIC SLD-8 terminé** (US-8.0/8.1/8.2/8.3 ✅, US-8.4 caduque — fusionné dans
+les baby-steps 8.3a-d qui intègrent les 3 niveaux tests par baby-step).
+
+Rapports :
+- `slider-plugin/.agents/sessions/062-sld-8.3a-deck-state-validator.adoc`
+- `slider-plugin/.agents/sessions/063-sld-8.3b-deck-pipeline-graph.adoc`
+- `slider-plugin/.agents/sessions/064-sld-8.3c-generate-deck-pipeline-task.adoc`
+- `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumber.adoc`

@@ -1,0 +1,156 @@
+= Session 065 — SLD-8.3 baby-step 8.3d Cucumber `26_deck_pipeline_koog.feature`
+:session: 065
+:date: 2026-08-06
+:epic: SLD-8 US-8.3
+:status: ✅ TERMINÉ (US-8.3 clôturée)
+:score: 9/10
+
+== Résumé
+
+Baby-step 8.3d de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD/BDD strict
+(RED → GREEN → REFACTOR). *Pure BDD* — zéro fichier de production modifié
+(pattern SLD-10.6 / S-054 : la logique métier est déjà livrée par les
+baby-steps 8.3a/b/c, le baby-step 8.3d ajoute uniquement la couverture BDD
+end-to-end).
+
+2 fichiers test créés :
+
+* `slider/src/test/features/26_deck_pipeline_koog.feature` — 12 scénarios
+  BDD end-to-end, tags `@pipeline @koog`, English only Gherkin.
+* `slider/src/test/scenarios/slider/steps/DeckPipelineKoogSteps.kt` —
+  222 lignes, package `slider.steps`, Java8 lambda style `En` (pattern
+  `ContentValidationSteps` / `DeckTranslationSteps`).
+
+Domaine `slider.pipeline` inchangé (10 fichiers prod + 3 fichiers unit test
+issus de 8.3a/b, 3 fichiers prod + 1 functional test de 8.3c) — aucun
+changement de production cette session.
+
+== Scénarios BDD (12)
+
+Happy path (3) :
+1. `The pipeline generates a deck on the happy path` — stage DECK_GENERATED,
+   deckAdoc non-blank.
+2. `The proposed DeckContext JSON is preserved in the final state` —
+   deckContextJson preserved from stub.
+3. `The subject, language and RAG context are preserved through the pipeline`
+   — immutability of inputs across nodes.
+
+Invalid context → FAILED (3) :
+4. `A DeckContext missing the subject field fails validation` — error mentions
+   "subject".
+5. `A DeckContext with a non-positive duration fails validation` — duration 0
+   rejected.
+6. `A DeckContext with an unsupported language code fails validation` — "xx"
+   rejected by `LanguageCatalog.supportedCodes()`.
+
+LLM failure modes (3) :
+7. `A propose-context LLM exception fails the pipeline before validation` —
+   error "ProposeContextFailed", deckContextJson blank.
+8. `A blank LLM proposal fails the pipeline` — blank proposal rejected.
+9. `A generate-deck LLM exception fails the pipeline after a valid context` —
+   error "GenerateDeckFailed", contextValid true (validation passed).
+
+Edge conditions (3) :
+10. `The generate-deck node is not called when the context is invalid` —
+    `generateCallCount == 0`.
+11. `The pipeline transitions through all expected stages on the happy path` —
+    propose sees INITIALIZED, generate sees CONTEXT_VALIDATED.
+12. `The koog graph exposes a non-blank Mermaid diagram` —
+    `graph.asMermaidDiagram()` non-blank.
+
+== Architecture
+
+`DeckPipelineKoogSteps` construit des fakes en mémoire implémentant les ports
+`DeckLlm` et `DeckPromptBuilder` (mirroring `DeckPipelineGraphTest` 8.3b +
+`DeckTranslationSteps` SLD-5). Le graphe `DeckPipelineGraph` est exercé via
+`execute(initialState)` ; les scénarios assertent sur la sealed `DeckState`
+retournée (stage, deckAdoc, deckContextJson, error, contextValid) et sur les
+effets de bord enregistrés par le `RecordingPromptBuilder` (états capturés à
+chaque appel → vérification des transitions de stage).
+
+Couverture BDD alignée sur les 17 unit tests de 8.3b et les 7 functional
+tests de 8.3c — les 12 scénarios recoupent les 3 nœuds, les 2 edges
+conditionnels, et les 3 failure modes (validator, propose LLM, generate LLM).
+
+== Tests
+
+* Unitaires : 959 (inchangés — zéro prod modifié, aucun test unitaire ajouté).
+* Functional : 45 (inchangés — 8.3c a livré 7 functional, cette session
+  n'ajoute pas de functional).
+* Cucumber : 265 scénarios (12 nouveaux sur la feature 26 — was 254/265 selon
+  comptage, 0 FAIL).
+* `./gradlew :slider:check` VERT — 0 FAIL, 1 SKIP préexistant (JRuby gem
+  isolé — non lié à cette session).
+* Zéro régression confirmée.
+
+== Fichiers Modifiés
+
+[cols="2,3,1"]
+|===
+| Fichier | Rôle | Lignes
+
+| `slider/src/test/features/26_deck_pipeline_koog.feature`
+| Feature Gherkin — 12 scénarios BDD end-to-end, tags `@pipeline @koog`
+| 102
+
+| `slider/src/test/scenarios/slider/steps/DeckPipelineKoogSteps.kt`
+| Steps Cucumber — fakes `RecordingPromptBuilder` + `FakeDeckLlm`, 12 scénarios
+| 222
+|===
+
+*Total* : 2 fichiers test créés, 0 fichier prod modifié, ~324 lignes BDD.
+
+== Décisions
+
+* **Pure BDD** — baby-step 8.3d n'ajoute aucune logique métier (déjà livrée
+  par 8.3a/b/c), uniquement la couverture BDD end-to-end. Pattern aligné sur
+  SLD-10.6 (S-054) où la logique était déjà en place et la feature Cucumber
+  validait les objects purs.
+* **Fakes privés dans les steps** — `RecordingPromptBuilder` et
+  `FakeDeckLlm` sont des classes privées de `DeckPipelineKoogSteps` (pas de
+  sharing avec `DeckPipelineGraphTest` qui a ses propres fakes). Évite le
+  couplage test↔BDD et garde chaque classe auto-contenue (pattern
+  `DeckTranslationSteps.StubAdapter`).
+* **Tags `@pipeline @koog`** — cohérents avec les tags `@content @validation`
+  de S-054 et `@i18n` de S-057. Pas d'exclusion dans `CucumberTestRunner`
+  (filtre `not @wip and not @integration` — 8.3d n'est ni WIP ni integration
+  puisque le LLM est mocké).
+
+== US-8.3 clôturée
+
+Baby-step 8.3d termine l'US SLD-8.3 `DeckPipelineGraph` (4 baby-steps livrés
+sur 4) :
+
+* 8.3a (S-062) : `DeckState` + `DeckContextValidator` — 35 unit.
+* 8.3b (S-063) : `DeckPipelineGraph` (graphe koog) — 17 unit.
+* 8.3c (S-064) : `GenerateDeckPipelineTask` (tâche Gradle thin) — 7
+  functional + 11 i18n.
+* 8.3d (S-065) : Cucumber `26_deck_pipeline_koog.feature` — 12 scénarios BDD.
+
+Total US-8.3 : ~9 pts, 52 unit + 7 functional + 12 cucumber = 71 tests 3
+niveaux. Domaine `slider.pipeline` clos (10 fichiers prod + 4 fichiers test).
+
+US-8.4 (tests 3 niveaux fusionnés dans baby-steps 8.3a-d) est caduque —
+l'US-8.3 intègre déjà les 3 niveaux par baby-step. **EPIC SLD-8 terminé**
+(US-8.0/8.1/8.2/8.3 ✅ — US-8.4 caduque).
+
+== Prochaine session
+
+* EPIC SLD-8 terminé. Backlog restant : EPIC SLD-CR3-1/2 ✅ (déjà terminé),
+  publication slider 0.0.16 sur Maven Central (si autorisé — BOM 0.0.16
+  déjà publiée S-062, codebase 0.0.5 déjà Central).
+* Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues — backlog
+  cross-borough), ou nouveaux EPICs à cadrer.
+
+== Rappels
+
+* GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.cccp.slider.translator` (déprécié)
+* Version publiée Central : 0.0.15 (build.gradle.kts hardcodé 0.0.15)
+* BOM workspace-bom : Central 0.0.16 (publié S-062)
+* Domaines DDD (16) : `slider.pipeline` clos (10 fichiers prod + 4 test)
+* `./gradlew :slider:check` VERT (959 unit + 45 functional + 265 cucumber,
+  0 FAIL, 1 SKIP préexistant)
+* Baby-step TDD/BDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+* English only : code, Gherkin, commentaires
+* Package Cucumber steps : `slider.steps`
