@@ -2,6 +2,27 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 056 (2026-08-05) — Cadrage EPIC SLD-11 : expulsion slider.capsule → capsule ✅
+
+Cadrage formel EPIC SLD-11 — Expulsion `slider.capsule` : realignment
+boundary slider ↔ capsule. Audit cross-borough (slider + capsule) revelant
+une fuite de responsabilite : le domaine `slider.capsule` (4 fichiers
+production + 8 fichiers test, 1251 lignes) fait du travail de capsule
+(preparation de script video) a l'interieur de slider. Slider doit s'arreter
+a produire le HTML Reveal.js ; l'extraction des notes orateur et la
+serialisation `*-script.txt` sont des preoccupations de capsule. Symptomes :
+doublon de modele divergent `SlideSegment`/`CapsuleScript` (champs
+differents), format intermediaire proprietaire maintenu des deux cotes, 3
+features Cucumber + 5 classes test unitaire slider testent une logique non-
+slider. Boundary cible : capsule parse `.adoc` directement (nouveau domaine
+`capsule.feed`), slider s'arrete au HTML Reveal.js, format `.txt` supprime,
+`generateCapsule`/`translateAndGenerateCapsule` migrent vers capsule-side.
+6 US ~14 pts, methode baby-step DDD/TDD/BDD 3 niveaux, English only. Non-
+regression stricte (tests portes avant suppression source). Cross-borough
+(2 repos modifies en coordination). Zero code de production modifie —
+session pure gouvernance/cadrage. Rapport :
+`slider-plugin/.agents/sessions/056-sld-11-cadrage-expulsion.adoc`.
+
 == Session 055 (2026-08-05) — Publication slider 0.0.14 + synchronisation consommateurs ✅
 
 Publication slider 0.0.14 sur Maven Central + synchronisation des

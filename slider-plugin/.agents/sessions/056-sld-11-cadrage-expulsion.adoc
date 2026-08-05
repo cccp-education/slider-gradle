@@ -1,0 +1,93 @@
+= Session 056 — Cadrage EPIC SLD-11 : expulsion slider.capsule → capsule
+
+_Date_ : 2026-08-05
+_Type_ : vision + cadrage + audit cross-borough
+_Score_ : 9/10
+
+== Objectif
+
+Auditer l'overlapping de code entre la partie vidéo de slider et capsule,
+puis cadrer un EPIC de realignment boundary si necessaire.
+
+== Livraisons
+
+=== 1. Audit cross-borough slider ↔ capsule
+
+Audit des 2 boroughs revelant une *fuite de responsabilite* architecturale :
+
+* `slider.capsule` (4 fichiers production, 316 lignes) fait du travail de
+  capsule (preparation de script video) a l'interieur de slider :
+  `AsciidocSpeakerNoteParser.kt` (85l), `CapsuleScript.kt` (68l),
+  `CapsuleTaskDomain.kt` (82l), `CapsuleTaskRegistrar.kt` (81l)
+* 8 fichiers test slider testent une logique non-slider : 5 classes unitaire
+  (672l) + 3 steps Cucumber (289l) + 3 features (290l) = 1251 lignes
+* Doublon de modele divergent : `slider.capsule.SlideSegment`/`CapsuleScript`
+  vs `capsule.SlideSegment`/`CapsuleScript` (capsule ajoute `type`/`manimScene`,
+  renomme `segments`→`slides`)
+* Format intermediaire proprietaire `=== CAPSULE SCRIPT ===` maintenu des
+  deux cotes pour zero valeur ajoutee
+* Reveal.js desynchronise : capsule hardcode `reveal.js@5.1.0`
+  (`CapsuleVideoTask.kt:123`) alors que slider est sur 5.2.1
+  (`slider.extension.RevealJsPin`)
+
+=== 2. Diagnostic video
+
+* slider **ne fait pas de video** — `slider.capsule` ne fait qu'extraire les
+  notes orateur AsciiDoc → `*-script.txt` (feed pour capsule)
+* capsule fait toute la video : PlaywrightManager (capture WebM),
+  TtsManager (synthese audio), ManimEngine (animations), SubtitleBurnInService
+  (sous-titres), CapsuleVideoTask (799 lignes, orchestration complete)
+* Pipeline actuel : slider.capsule extrait notes → .txt → capsule re-parse →
+  TTS + Playwright + FFmpeg. Etape intermediaire supprimable.
+
+=== 3. Cadrage EPIC SLD-11
+
+*EPIC* : Expulsion `slider.capsule` : realignment boundary slider ↔ capsule.
+
+*Boundary cible* :
+- slider produit : HTML Reveal.js seulement (plus de `*-script.txt`)
+- capsule consomme : `.adoc` source directement (+ HTML existant)
+- Format intermediaire : supprime (capsule parse `.adoc` directement)
+- `generateCapsule`/`translateAndGenerateCapsule` : migrent vers capsule-side
+
+*6 US, ~14 pts* :
+- SLD-11.0 : Cadrage EPIC (cette session) ✅
+- SLD-11.1 : Capsule-side nouveau parseur `.adoc` (domaine `capsule.feed`,
+  port `AsciidocSpeakerNoteParser` + tests unit portes) — 3 pts
+- SLD-11.2 : Capsule-side tache `extractSpeakerNotes` (remplace
+  `generateCapsule` slider-side) — 3 pts
+- SLD-11.3 : Capsule-side Cucumber BDD (`capsule_speaker_notes.feature`,
+  port 13 scenarios) — 2 pts
+- SLD-11.4 : Capsule-side pipeline `translateAndExtractSpeakerNotes`
+  (remplace `translateAndGenerateCapsule`) — 2 pts
+- SLD-11.5 : Slider-side expulsion (suppression 4 fichiers prod + 8 test,
+  mise a jour `SliderTasks.kt` + KDoc `AsciidocContentParser`) — 2 pts
+- SLD-11.6 : Capsule-side integration `generateCapsuleVideo`
+  (consomme `extractSpeakerNotes` directement, non-regression) — 3 pts
+
+*Methode* : baby-step DDD/TDD/BDD, 3 niveaux tests (unit → functional →
+cucumber), RED → GREEN → REFACTOR, English only code/Gherkin.
+
+*Non-regression stricte* : tests portes cote capsule *avant* suppression
+cote slider (US-11.5 apres US-11.1→11.4). Cross-borough — 2 repos modifies
+en coordination.
+
+== Fichiers modifies
+
+* `slider-plugin/.agents/INDEX.adoc` — section EPIC SLD-11 (cadrage complet
+  + table US + roadmap + session 056) + table EPICs (SLD-11 ajoute)
+* `BACKLOG.adoc` — session 056 + section EPIC SLD-11 detaillee + table EPICs
+* `slider-plugin/.agents/PROMPT_REPRISE.adoc` — session 056 → 057, contexte
+  reprise SLD-11.1
+* `AGENTS.adoc` racine — table MIAMI (session 056) + historique
+
+== Verification
+
+* `./gradlew :slider:compileKotlin` VERT (UP-TO-DATE) — aucun code modifie
+* `git status` propre avant modifications
+* Zero code de production modifie — session pure gouvernance/cadrage
+
+== Prochaine session
+
+SLD-11.1 — port du parseur `.adoc` cote capsule (domaine `capsule.feed`),
+baby-step TDD : RED (tests portes) → GREEN (parseur porte) → REFACTOR.

@@ -1,22 +1,30 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminée_ : 055 — Publication slider 0.0.14 + synchronisation consommateurs
-_Prochaine session_ : 056 — SLD-8 ou SLD-9 (choix pilote)
+_Session terminee_ : 056 — Cadrage EPIC SLD-11 (expulsion `slider.capsule` → capsule)
+_Prochaine session_ : 057 — SLD-11.1 (capsule-side : nouveau parseur `.adoc`)
 
-== Mission session 055 (TERMINÉE)
+== Mission session 056 (TERMINÉE)
 
-. Publication slider 0.0.14 Maven Central (bundle 6f7b84be, 3 artefacts signés)
-. Synchronisation capsule-gradle (slider 0.0.6 → 0.0.14 + plugin ID education.cccp.slider)
-. Publication workspace-bom 0.0.14 (bundle c8bf911c, constraint slider 0.0.14)
-. Commits + push 3 repos (slider-gradle, capsule-gradle, workspace-bom)
+. Audit cross-borough slider ↔ capsule : revelation fuite de responsabilite
+  `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251 lignes font du
+  travail de capsule dans slider)
+. Cadrage EPIC SLD-11 — Expulsion `slider.capsule` : realignment boundary
+  slider ↔ capsule. 6 US ~14 pts, methode baby-step DDD/TDD/BDD
+. Mise a jour INDEX.adoc + BACKLOG.adoc + PROMPT_REPRISE.adoc
 
 == Contexte reprise
 
-- slider 0.0.14 publié sur Maven Central (SLD-9.1 + SLD-10 content domain)
-- BOM 0.0.14 publiée (constraint slider 0.0.14)
-- capsule-gradle synchronisé sur slider 0.0.14 + plugin ID corrigé
-- `./gradlew :slider:check` VERT (prérequis publication respecté)
-- Backlog restant : SLD-8 (consommer codebase, 5 US ~12 pts, CADRÉ) ou
+- EPIC SLD-11 CADRÉ — 6 US ~14 pts (11.0 cadrage ✅, reste 11.1→11.6)
+- Boundary cible : slider s'arrete au HTML Reveal.js, capsule parse `.adoc`
+  directement, format `*-script.txt` supprime
+- US-11.1 (prochaine) : port `AsciidocSpeakerNoteParser` + `CapsuleScript` +
+  `CapsuleScriptWriter` cote capsule (domaine `capsule.feed`), tests unit
+  portes (239l + 166l + 102l). Baby-step TDD : RED (tests portes) → GREEN
+- Non-regression stricte : tests portes avant suppression source (US-11.5)
+- Cross-borough : 2 repos modifies en coordination (slider-gradle + capsule-gradle)
+- slider 0.0.14 publié Maven Central, BOM 0.0.14 publiée
+- `./gradlew :slider:check` VERT (660 PASS)
+- Backlog restant : SLD-11 (expulsion, 6 US ~14 pts), SLD-8 (codebase, CADRÉ),
   SLD-9 (i18n Completion, en pause, reste 9.2/9.3/9.4)
 - Décisions architecture : Decision 001 (PicoContainer rejeté),
   Decision 002 (consommer codebase N1)

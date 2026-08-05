@@ -6,7 +6,7 @@ _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-08-05
 _Session terminee_ : 055 — Publication slider 0.0.14 Maven Central + synchronisation consommateurs. Bump 0.0.13 → 0.0.14 (SLD-9.1 + SLD-10 content domain). Bundle nmcp `6f7b84be-93db-4f31-a83f-bebe1b656c2a` (AUTOMATIC), 3 artefacts signés (slider:0.0.14 + 2 plugin markers education.cccp.slider + education.cccp.slider.translator). Vérification repo1.maven.org HTTP 200. Synchronisation capsule-gradle (slider 0.0.6 → 0.0.14 + plugin ID `com.cheroliv.slider` → `education.cccp.slider`, marker ancien namespace inexistant sur Central). Publication workspace-bom 0.0.14 (bundle `c8bf911c`, constraint slider 0.0.14). Commits + push 3 repos. `./gradlew :slider:check` VERT pré-publication.
-_Prochaine session_ : 056 — Reste backlog : SLD-8 (consommer codebase, 5 US ~12 pts, à planifier) ou SLD-9 (i18n Completion, en pause S-047, reste 9.2/9.3/9.4). Choix pilote au démarrage.
+_Prochaine session_ : 056 — Cadrage EPIC SLD-11 (expulsion `slider.capsule` → capsule) terminé. Reste backlog : SLD-11 (expulsion, 6 US ~14 pts, à planifier) ou SLD-8 (consommer codebase, 5 US ~12 pts, CADRÉ) ou SLD-9 (i18n Completion, en pause, reste 9.2/9.3/9.4). Choix pilote au démarrage.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -108,6 +108,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider. Premier consommateur de la couche LLM codebase : `BuildService` LLM (Provider<ChatModel> via LlmProviderResolver/OllamaPool), koog/langchain4j en `api` (pas de koog direct via BOM), `AssistantManager` réduit à du câblage (4 factories supprimées), `DeckPipelineGraph` (propose-context/validate-context/generate-deck) sur services codebase. DI native Gradle (Decision 001). | 🟡 CADRÉ (S-046, refondu post-046, 5 US ~12 pts) — à planifier | P1
 | SLD-9 | i18n Completion via LLM — `AssistantManager` i18nisé (13 clés → 10 langues générées par LLM), 9 tests de traduction par langue (pattern plantuml), `TaskDescriptionsI18nTest` functional, `SliderMessagesTest` unitaire + Cucumber BDD. Périmètre restrictif : que de l'i18n, pas de refacto. | 🟡 EN PAUSE (S-047, 5 US ~10 pts) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | P1
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser, ContentSlideAssertion, ContentRenderData, ContentRenderAssertion) + adaptateur Playwright (ContentPlaywrightAdapter). Tests 3 niveaux (unit → functional → cucumber). Pattern de référence : `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`. | ✅ TERMINÉ (S-054, 7/7 US — 10.0/10.1/10.2/10.3/10.4/10.5/10.6) | P1
+| SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Le domaine `slider.capsule` (4 fichiers prod + 8 fichiers test) est une fuite de responsabilite (preparation de script video dans slider). Expulsion vers capsule-side : capsule parse `.adoc` directement, slider s'arrete au HTML Reveal.js. 6 US ~14 pts. | 🟡 CADRÉ (S-056) — à planifier | P1
 |===
 
 '''
@@ -456,6 +457,184 @@ _Non-périmètre_ :
 _Total_ : 7 US, ~18 pts. _Pattern de référence_ : `slider.repository` (S-025/027)
 + `slider.rtl` (S-021) — value objects purs + assertions pures + adaptateur
 infrastructure. _Prérequis_ : SLD-2/3/6 terminés (✅), build vert 660 PASS (✅).
+
+'''
+== EPIC SLD-11 — Expulsion slider.capsule : realignment boundary slider ↔ capsule
+
+_Vision_ : Le domaine `slider.capsule` (4 fichiers production + 8 fichiers test)
+est une *fuite de responsabilite* — il fait du travail de capsule (preparation
+de script video) a l'interieur de slider. Slider doit s'arreter a produire le
+HTML Reveal.js ; l'extraction des notes orateur et la serialisation en
+`*-script.txt` sont des preoccupations de capsule, pas de slider.
+
+*Symptomes du probleme* :
+* Doublon de modele divergent : `slider.capsule.SlideSegment`/`CapsuleScript`
+  vs `capsule.SlideSegment`/`CapsuleScript` (champs differents — capsule ajoute
+  `type`/`manimScene`, renomme `segments`→`slides`).
+* Format intermediaire proprietaire `=== CAPSULE SCRIPT ===` maintenu des deux
+  cotes pour zero valeur ajoutee.
+* Couplage artificiel : slider produit `*-script.txt` que capsule re-parse
+  immediatement. Capsule peut parser le `.adoc` (ou le HTML genere) directement.
+* 3 features Cucumber slider (`9_capsule_feed`, `22_capsule_task_decomposition`,
+  `23_translate_and_generate_capsule`) testent une logique qui n'est pas slider.
+* 5 classes de test unitaire slider (672 lignes) + 3 classes steps (289 lignes)
+  testent une logique qui n'est pas slider.
+
+_Boundary cible_ :
+[cols="2,3,3"]
+|===
+| Boundary | Avant | Apres
+
+| slider produit
+| HTML Reveal.js + `*-script.txt`
+| HTML Reveal.js seulement
+
+| capsule consomme
+| `*-script.txt` + HTML
+| `.adoc` source directement (+ HTML existant)
+
+| Format intermediaire
+| `=== CAPSULE SCRIPT ===` (.txt proprietaire)
+| Supprime (capsule parse .adoc directement)
+
+| `SlideSegment`/`CapsuleScript`
+| Doublon divergent (2 modeles, 2 packages)
+| Un seul modele cote capsule
+
+| `generateCapsule` task
+| slider-side (extrait notes → .txt)
+| capsule-side (extrait notes → TTS directement)
+
+| `translateAndGenerateCapsule` task
+| slider-side (dependsOn translateDeck + generateCapsule)
+| capsule-side (dependsOn translateDeck + extraction interne)
+|===
+
+_Inventaire a expulser (slider-side)_ :
+* Production (4 fichiers, `slider.capsule`) :
+  `AsciidocSpeakerNoteParser.kt` (85l), `CapsuleScript.kt` (68l),
+  `CapsuleTaskDomain.kt` (82l), `CapsuleTaskRegistrar.kt` (81l)
+* Tests unitaires (5 fichiers, 672l) :
+  `AsciidocSpeakerNoteParserTest.kt` (239l), `CapsuleScriptWriterTest.kt` (166l),
+  `CapsuleTaskDomainTest.kt` (115l), `CapsuleFeedDemoDeckTest.kt` (102l),
+  `CapsuleSmokeRealDeckTest.kt` (50l)
+* Steps Cucumber (3 fichiers, 289l) :
+  `CapsuleFeedSteps.kt` (109l), `CapsuleTaskDecompositionSteps.kt` (141l),
+  `TranslateAndGenerateCapsuleSteps.kt` (39l)
+* Features Cucumber (3 fichiers, 290l) :
+  `9_capsule_feed.feature` (221l), `22_capsule_task_decomposition.feature` (50l),
+  `23_translate_and_generate_capsule.feature` (19l)
+* Câblage plugin : `SliderTasks.kt:26-27` (2 lignes `CapsuleTaskRegistrar`)
+* Reference documentation : `AsciidocContentParser.kt` KDoc reference a
+  `slider.capsule.AsciidocSpeakerNoteParser` (a mettre a jour)
+
+_Inventaire a recevoir (capsule-side)_ :
+* `CapsuleManager.parseScript` (lignes 160-224) parse deja le `.txt` — a
+  etendre pour parser le `.adoc` directement (nouveau `AsciidocSpeakerNoteParser`
+  cote capsule, ou fusion avec `parseScript` existant)
+* `CapsuleManager.resolveScriptDir`/`resolveDeckDir` (lignes 226-255) cherchent
+  les `*-script.txt` — a faire pointer vers `slides/misc/*.adoc`
+* `CapsuleBuildTask`/`CapsuleVideoTask` consomment `CapsuleScript` capsule —
+  aucun changement (le modele capsule est deja le bon)
+* `CapsuleExtension.sliderScriptDir` → renommer `adocSourceDir` (ou ajouter)
+* Tests capsule existants : `capsule.feature` (306l) + `HtmlSectionParserTest`
+  + 19 classes test — a enrichir avec les tests expulses de slider
+
+_Contrat de non-regression_ :
+* Zero perte de fonctionnalite — `generateCapsuleVideo` doit produire la meme
+  sortie video apres migration
+* Le pipeline `translateDeck → generateCapsule` (SLD-7) doit fonctionner
+  depuis capsule-side apres migration
+* Les 3 decks demo (`capsule-feed-demo-{fr,en,ar}-deck.adoc`) doivent produire
+  les memes scripts apres migration
+* `./gradlew :slider:check` doit rester VERT (tests slider sans `slider.capsule`)
+* `./gradlew :capsule:check` doit rester VERT (tests capsule enrichis)
+
+_Dependances_ :
+* SLD-6 terminé (✅ — `SliderManager` supprimé, `SliderTasks` thin orchestrator)
+* SLD-7 terminé (✅ — `translateAndGenerateCapsule` composite task)
+* SLD-10 terminé (✅ — `AsciidocContentParser` reference `AsciidocSpeakerNoteParser`
+  dans KDoc, a mettre a jour)
+* capsule-gradle stable (195 unit + 22 Cucumber PASS, session 068)
+* Aucune dependance cross-borough nouvelle — capsule parse `.adoc` (format
+  AsciiDoc standard), pas d'API slider a appeler
+
+_Methode_ : baby-step DDD/TDD/BDD — RED -> GREEN -> REFACTOR. Trois niveaux de
+tests par US : unit (value objects purs, zero Gradle) -> functional
+(GradleTestKit) -> cucumber (BDD end-to-end). English only dans le code,
+Gherkin, commentaires.
+
+_Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
+
+|===
+| US | Description | Statut | Estimation
+
+| SLD-11.0
+| *Cadrage EPIC* — vision, inventaire a expulser, boundary cible, non-regression.
+  Mise a jour INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI.
+| ⏳ A FAIRE | 1 pt
+
+| SLD-11.1
+| *Capsule-side : nouveau parseur `.adoc`* — domaine `capsule.feed` (nouveau) :
+  `AsciidocSpeakerNoteParser` (port depuis `slider.capsule`), `CapsuleScript`
+  modele unifie (utilise le modele capsule existant avec `type`/`manimScene`),
+  `CapsuleScriptWriter` (serialise `*-script.txt` pour compat arriere si
+  necessaire, ou supprime si capsule consomme directement). *Unit tests purs*
+  (port + adaptation des 239l `AsciidocSpeakerNoteParserTest` + 166l
+  `CapsuleScriptWriterTest` + 102l `CapsuleFeedDemoDeckTest` cote capsule).
+  Baby-step TDD : RED (tests portes) -> GREEN (parseur porte) -> REFACTOR.
+| ⏳ A FAIRE | 3 pts
+
+| SLD-11.2
+| *Capsule-side : tache `extractSpeakerNotes`* — `CapsuleTaskRegistrar` (nouveau,
+  cote capsule) register `extractSpeakerNotes` task (group `capsule`, lit
+  `slides/misc/*.adoc` → extrait notes → `CapsuleScript` modele capsule).
+  Remplace `generateCapsule` slider-side. *Functional tests GradleTestKit*
+  (port des tests fonctionnels slider + adaptation).
+| ⏳ A FAIRE | 3 pts
+
+| SLD-11.3
+| *Capsule-side : Cucumber BDD* — `capsule_speaker_notes.feature` (nouveau,
+  port des 13 scenarios `9_capsule_feed.feature` cote capsule) + steps portes
+  dans `capsule.scenarios`. Tags `@capsule @feed`. *BDD end-to-end*.
+| ⏳ A FAIRE | 2 pts
+
+| SLD-11.4
+| *Capsule-side : pipeline `translateAndExtract`* — tache composite
+  `translateAndExtractSpeakerNotes` (dependsOn `translateDeck` →
+  `extractSpeakerNotes`). Remplace `translateAndGenerateCapsule` slider-side.
+  Capsule devient autonome sur la chaine complete. *Functional + Cucumber*
+  (port de `23_translate_and_generate_capsule.feature`).
+| ⏳ A FAIRE | 2 pts
+
+| SLD-11.5
+| *Slider-side : expulsion `slider.capsule`* — suppression des 4 fichiers
+  production (`AsciidocSpeakerNoteParser`, `CapsuleScript`, `CapsuleTaskDomain`,
+  `CapsuleTaskRegistrar`), des 5 classes test unitaire (672l), des 3 steps
+  Cucumber (289l), des 3 features Cucumber (290l). Suppression câblage
+  `SliderTasks.kt:26-27`. Mise a jour KDoc `AsciidocContentParser.kt`
+  (reference `slider.capsule.AsciidocSpeakerNoteParser` → supprimee).
+  *Verification* : `./gradlew :slider:check` VERT, zero regression, tests
+  residuels passent (660 - ~55 tests expulses = ~605 tests attendus).
+| ⏳ A FAIRE | 2 pts
+
+| SLD-11.6
+| *Capsule-side : integration `generateCapsuleVideo`* — `CapsuleBuildTask` et
+  `CapsuleVideoTask` consomment directement `extractSpeakerNotes` output
+  (CapsuleScript capsule) au lieu de `parseScript(*-script.txt)`. Suppression
+  `CapsuleManager.parseScript` (devenu mort) ou conservation pour compat
+  arriere. *Verification non-regression* : `./gradlew :capsule:check` VERT,
+  pipeline `translateDeck → extractSpeakerNotes → generateCapsuleVideo` produit
+  la meme sortie video qu'avant. Cucumber `capsule.feature` enrichi.
+| ⏳ A FAIRE | 3 pts
+|===
+
+_Total_ : 6 US, ~14 pts. _Pattern de reference_ : SLD-6 (expulsion SliderManager
+→ domaines DDD) — meme methode baby-step, meme garantie zero regression.
+_Prerequis_ : SLD-6/7/10 termines (✅), capsule-gradle stable (✅), build vert
+slider 660 PASS (✅), build vert capsule 195 unit + 22 Cucumber PASS (✅).
+_Risque_ : cross-borough (2 repos modifies en coordination) — mitigé par
+non-regression stricte (tests portes avant suppression source).
 
 '''
 
