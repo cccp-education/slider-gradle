@@ -1,5 +1,6 @@
 package slider.ai
 
+import codebase.koog.llm.service.LlmBuildService
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.services.ServiceReference
@@ -23,12 +24,21 @@ import org.gradle.work.DisableCachingByDefault
  * Combined with `usesService()` in the registration block and
  * `maxParallelUsages(1)` on the service spec, this is the only approach
  * that fully prevents premature container shutdown.
+ *
+ * ## LlmBuildService (EPIC SLD-8)
+ *
+ * The codebase N1 LLM service is injected the same way as [PgVectorService].
+ * Tasks resolve their langchain4j [dev.langchain4j.model.chat.ChatModel]
+ * via [AssistantManager.resolveModel] passing this provider.
  */
 @DisableCachingByDefault(because = "jruby")
 abstract class RagTask : DefaultTask() {
 
     @get:ServiceReference
     abstract val pgVectorService: Property<PgVectorService>
+
+    @get:ServiceReference
+    abstract val llmService: Property<LlmBuildService>
 
     /**
      * Starts the container on first call (idempotent), then returns the live

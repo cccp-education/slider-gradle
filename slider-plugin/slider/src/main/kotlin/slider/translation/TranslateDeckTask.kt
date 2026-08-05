@@ -14,6 +14,9 @@ import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
 import slider.SliderConfig.yamlMapper
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel
+import codebase.koog.llm.service.LlmBuildService
+import org.gradle.api.provider.Property
+import org.gradle.api.services.ServiceReference
 import slider.i18n.SliderMessages
 import java.io.File
 
@@ -45,6 +48,9 @@ import java.io.File
  */
 @DisableCachingByDefault(because = "LLM call is non-deterministic")
 abstract class TranslateDeckTask : DefaultTask() {
+
+    @get:ServiceReference
+    abstract val llmService: Property<LlmBuildService>
 
     @set:Option(option = "deck.context", description = "Path to the source deck-context.yml")
     @get:Input
@@ -95,7 +101,7 @@ abstract class TranslateDeckTask : DefaultTask() {
         }
 
         val provider = project.aiProvider
-        val model = project.resolveModel(provider)
+        val model = project.resolveModel(provider, llmService)
         val adapter = OllamaLanguageModelAdapter(model)
         val translator = DeckTranslator(adapter, adocContent)
 
@@ -131,6 +137,9 @@ abstract class TranslateDeckTask : DefaultTask() {
  */
 fun Project.registerTranslateDeckTask() {
     val lang = SliderMessages.resolveLanguage(this)
+    val llmServiceProvider = slider.ai.AssistantManager.run {
+        this@registerTranslateDeckTask.registerLlmBuildService()
+    }
     tasks.register<TranslateDeckTask>(TASK_TRANSLATE_DECK) {
         group = SliderMessages.get("task.group.translator", lang)
         description = SliderMessages.get("task.translateDeck.description", lang)
@@ -138,5 +147,7 @@ fun Project.registerTranslateDeckTask() {
         project.findProperty("deck.context")?.let { deckContextPath = it.toString() }
         project.findProperty("deck.adoc")?.let { deckAdocPath = it.toString() }
         project.findProperty("target.languages")?.let { targetLanguagesRaw = it.toString() }
+        llmService.set(llmServiceProvider)
+        usesService(llmServiceProvider)
     }
 }

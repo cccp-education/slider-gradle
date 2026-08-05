@@ -116,7 +116,7 @@ abstract class ProposeDeckContextTask : RagTask() {
         else
             println("⚠️  [RAG] No relevant chunks found — proceeding without RAG context.")
 
-        val model = project.resolveModel(provider)
+        val model = project.resolveModel(provider, llmService)
         val systemMsg = SystemMessage.from(AssistantManager.PromptManager.contextSystemPrompt)
         val userMsg = UserMessage.from(AssistantManager.PromptManager.contextUserMessage(subject, language, authorName, authorEmail, ragContext))
 
@@ -202,7 +202,7 @@ abstract class GenerateDeckTask : RagTask() {
         else
             println("⚠️  [RAG] No relevant chunks found — relying on system prompt only.")
 
-        val model = project.resolveModel(provider)
+        val model = project.resolveModel(provider, llmService)
         val systemMsg = SystemMessage.from(AssistantManager.PromptManager.deckSystemPrompt)
         val userMsg = UserMessage.from(AssistantManager.PromptManager.deckUserMessage(ctx, ragContext))
 

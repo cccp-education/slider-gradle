@@ -52,6 +52,9 @@ dependencies {
     // N0 contracts — i18n (internationalisation deck, EPIC SLD-3)
     implementation(libs.i18n.contracts)
 
+    // N1 codebase — LLM socle (EPIC SLD-8 US-8.2): LlmBuildService + LlmProvider
+    implementation(libs.codebase.plugin)
+
     // Coroutines - IMPORTANT for the asynchronous tests
     testImplementation(libs.bundles.coroutines)
 

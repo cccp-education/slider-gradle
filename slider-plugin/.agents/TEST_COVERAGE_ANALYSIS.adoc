@@ -1,5 +1,31 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 060_ : SLD-8 US-8.2 AssistantManager câblage codebase LlmBuildService.
+`AssistantManager.kt` réécrit (-352 lignes, suppression 3 factories + 8 hello* tasks).
+Nouvel adaptateur `LlmProviderChatModelAdapter` (5 unit tests TDD). Injection
+`@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask`. Mock-LLM
+fallback préserve 9 scénarios Cucumber. `./gradlew :slider:check` VERT 0 FAIL /
+1 SKIP préexistant. Totaux post-060 : 900 unit + 38 functional + 254 cucumber
+= 1192 total (was 1189, +3).
+
+Tests ajoutés session 060 :
+. `LlmProviderChatModelAdapterTest.kt` (5 unit) — nouvel adaptateur `LlmProvider`
+  → `ChatModel` (TDD RED → GREEN) : chat String, chat messages concat, chat
+  ChatRequest, provider exception propagation
+
+Tests supprimés session 060 :
+. `AssistantManagerI18nFunctionalTest.kt` — 2 tests "smoke test tasks"
+  (hello* tasks supprimées du plugin)
+. (les 8 hello* tasks + 8 runners n'avaient pas de tests unitaires dédiés)
+
+Tests non modifiés (non-regression) :
+. 9 scénarios Cucumber `01_propose_deck_context` — préservés via mock-LLM
+  fallback (`-Pollama.baseUrl` détecté → `createOllamaChatModel` legacy)
+. 254 cucumber total inchangé
+. 900 unit (was 895, +5 nouvel adaptateur, -0 suppression — les hello* n'avaient
+  pas de tests unitaires)
+. 38 functional (was 40, -2 smoke test tasks supprimés)
+
 _Statut session 058_ : EPIC SLD-11 (expulsion `slider.capsule` → capsule) TERMINÉ.
 Cross-borough (slider + capsule). Suppression côté slider : -82 unit -6 functional
 -25 cucumber = -113 tests. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP préexistant.

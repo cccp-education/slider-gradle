@@ -44,38 +44,6 @@ class AssistantManagerI18nFunctionalTest {
     }
 
     @Test
-    fun `smoke test tasks have i18n descriptions in English`() {
-        writeBuildFile()
-        writeSettingsFile()
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments("tasks", "--group", "slider-ai", "-Planguage=en")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
-
-        assertThat(result.output).contains("helloOllama")
-        assertThat(result.output).contains("smoke test")
-    }
-
-    @Test
-    fun `smoke test tasks have i18n descriptions in French`() {
-        writeBuildFile()
-        writeSettingsFile()
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments("tasks", "--group", "slider-ai", "-Planguage=fr")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
-
-        assertThat(result.output).contains("helloOllama")
-        assertThat(result.output).contains("test de fumée")
-    }
-
-    @Test
     fun `generate tasks have i18n descriptions in English`() {
         writeBuildFile()
         writeSettingsFile()

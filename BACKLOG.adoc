@@ -7,6 +7,28 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 060 (2026-08-05) — SLD-8 US-8.2 AssistantManager câblage codebase ✅
+
+SLD-8 US-8.2 livrée en baby-step TDD/BDD 3 niveaux. `AssistantManager.kt`
+réécrit (652 → 300 lignes, -352) : suppression 3 factories gemini/mistral/
+huggingface + 4 streaming + 8 hello* tasks + catalogues. `resolveModel
+(provider, serviceProvider)` délègue à `LlmBuildService` (codebase N1)
+wrappé dans `LlmProviderChatModelAdapter` (nouveau, 48l, `LlmProvider`
+suspend → `ChatModel` langchain4j via `runBlocking`). Injection
+`@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask` +
+`registerLlmBuildService()`. Mock-LLM fallback (`-Pollama.baseUrl` →
+`createOllamaChatModel` legacy) préserve 9 scénarios Cucumber
+`01_propose_deck_context`. `TranslatorManager` déprécié conservé (expulsion
+future EPIC SLD-CR4). Cross-borough : `codebase-plugin:0.0.5` republié
+mavenLocal (JAR S-176 n'incluait pas LlmBuildService). US-8.2a (catalog +
+build), US-8.2b (LlmProviderChatModelAdapter TDD 5 unit), US-8.2c
+(AssistantManager réduit), US-8.2d (RagTasks + TranslateDeckTask câblés).
+`./gradlew :slider:check` VERT (900 unit +5, 38 functional -2, 254 cucumber
+= 1192 total, 0 FAIL, 1 SKIP préexistant).
+
+Rapport complet : `slider-plugin/.agents/sessions/060-sld8-assistant-manager-wiring.adoc`.
+
+'''
 == Session 059 (2026-08-05) — Publication slider 0.0.15 + Coordination CAP-MODEL ✅
 
 Publication slider 0.0.15 (post-SLD-11 expulsion `slider.capsule`) + BOM 0.0.15 +
@@ -281,7 +303,7 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | PUB | Publications Maven Central 0.0.1→0.0.15 | ✅ | 9/9
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
-| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
+| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 EN COURS (S-060, US-8.0/8.1/8.2 ✅, US-8.3/8.4 à planifier) | 3/5 US
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | ✅ TERMINÉ (S-057, 5/5 US — 9.0/9.1/9.2/9.3/9.4) | 5 US ~10 pts
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | ✅ TERMINÉ (S-054, 7/7 US — 10.0→10.6) | 7 US ~18 pts
 | SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | ✅ TERMINÉ (S-058, 6/6 US — 11.0 cadrage S-056 + 11.1→11.6) | 6 US ~14 pts

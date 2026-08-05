@@ -2,6 +2,27 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 060 (2026-08-05) — SLD-8 US-8.2 AssistantManager câblage codebase ✅
+
+SLD-8 US-8.2 livrée en baby-step TDD/BDD 3 niveaux. `AssistantManager.kt`
+réécrit (652 → 300 lignes, -352) : suppression 3 factories gemini/mistral/
+huggingface + 4 streaming + 8 hello* tasks + catalogues. `resolveModel
+(provider, serviceProvider)` délègue à `LlmBuildService` (codebase N1)
+wrappé dans `LlmProviderChatModelAdapter` (nouveau, 48l, `LlmProvider`
+suspend → `ChatModel` langchain4j via `runBlocking`, concatène system+user).
+Injection `@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask`
++ `registerLlmBuildService()`. Mock-LLM fallback (`-Pollama.baseUrl` détecté
+→ `createOllamaChatModel` legacy) préserve 9 scénarios Cucumber
+`01_propose_deck_context`. `TranslatorManager` déprécié conservé (expulsion
+future EPIC SLD-CR4). Cross-borough : `codebase-plugin:0.0.5` republié
+mavenLocal (JAR S-176 n'incluait pas LlmBuildService). US-8.2a (catalog +
+build), US-8.2b (LlmProviderChatModelAdapter TDD 5 unit), US-8.2c
+(AssistantManager réduit), US-8.2d (RagTasks + TranslateDeckTask câblés).
+`./gradlew :slider:check` VERT (900 unit +5, 38 functional -2, 254 cucumber
+= 1192 total, 0 FAIL, 1 SKIP préexistant). | ✅ 9/10
+
+Rapport : `slider-plugin/.agents/sessions/060-sld8-assistant-manager-wiring.adoc`.
+
 == Session 059 (2026-08-05) — Publication slider 0.0.15 + Coordination CAP-MODEL ✅
 
 Publication slider 0.0.15 (post-SLD-11 expulsion `slider.capsule`) + BOM 0.0.15 +

@@ -5,8 +5,8 @@ _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-08-05
-_Session terminee_ : 059 — Publication slider 0.0.15 (post-SLD-11 expulsion) + BOM 0.0.15 + sync capsule. Bump 0.0.14 → 0.0.15 sur 3 fichiers (slider build, BOM build, BOM catalogue, capsule catalogue). Bundle nmcp slider `832cea2a` (AUTOMATIC, 3 artefacts signés) + BOM `02307b00` (AUTOMATIC). Statut publishing (validation Central en cours). `./gradlew :slider:check` VERT pré-publication (895 unit + 40 functional + 254 cucumber). Capsule 361 unit tests VERT avec slider 0.0.15 (mavenLocal). Zéro code production modifié côté slider. Coordination capsule 069 : EPIC CAP-MODEL TERMINÉ (unification modèle capsule.feed, côté capsule seul).
-_Prochaine session_ : 060 — Backlog slider : SLD-8 (consommer codebase, 5 US ~12 pts, CADRÉ S-046, dépendance cross-borough Queens — mis de côté par pilote). Vérifier propagation Central slider 0.0.15 + BOM 0.0.15 (repo1.maven.org HTTP 200).
+_Session terminee_ : 060 — SLD-8 US-8.2 AssistantManager câblage codebase LlmBuildService. `AssistantManager.kt` réécrit (652 → 300 lignes, -352) : suppression 3 factories gemini/mistral/huggingface + 4 streaming + 8 hello* tasks + catalogues. `resolveModel(provider, serviceProvider)` délègue à `LlmBuildService` (codebase N1) wrappé dans `LlmProviderChatModelAdapter` (nouveau, `LlmProvider` suspend → `ChatModel` langchain4j via `runBlocking`). Injection `@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask`. Mock-LLM fallback (`-Pollama.baseUrl` → `createOllamaChatModel` legacy) préserve 9 scénarios Cucumber `01_propose_deck_context`. `TranslatorManager` déprécié conservé. Cross-borough : `codebase-plugin:0.0.5` republié mavenLocal (JAR S-176 n'incluait pas LlmBuildService). `./gradlew :slider:check` VERT (900 unit +5, 38 functional -2, 254 cucumber = 1192 total, 0 FAIL).
+_Prochaine session_ : 061 — SLD-8.3 `DeckPipelineGraph` (koog orchestration, nodes propose-context/validate-context/generate-deck). Consulter `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`. Publication BOM 0.0.16 + codebase 0.0.5 Central (si permission).
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''
@@ -24,6 +24,8 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 |===
 | # | Date | Type | Sujet | Score
+
+| 060 | 2026-08-05 | feat+ddd+tdd+archi cross-borough | SLD-8 US-8.2 — AssistantManager câblage codebase LlmBuildService. `AssistantManager.kt` réécrit (652 → 300 lignes, -352) : suppression 3 factories gemini/mistral/huggingface + 4 streaming + 8 hello* tasks + catalogues. `resolveModel(provider, serviceProvider)` délègue à `LlmBuildService` (codebase N1) wrappé dans `LlmProviderChatModelAdapter` (nouveau, 48l, `LlmProvider` suspend → `ChatModel` langchain4j via `runBlocking`, concatène system+user). Injection `@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask` + `registerLlmBuildService()`. Mock-LLM fallback (`-Pollama.baseUrl` détecté → `createOllamaChatModel` legacy) préserve 9 scénarios Cucumber `01_propose_deck_context`. `TranslatorManager` déprécié conservé (expulsion future EPIC SLD-CR4). Cross-borough : `codebase-plugin:0.0.5` republié mavenLocal (JAR S-176 n'incluait pas LlmBuildService). US-8.2a (catalog + build), US-8.2b (LlmProviderChatModelAdapter TDD 5 unit), US-8.2c (AssistantManager réduit), US-8.2d (RagTasks + TranslateDeckTask câblés). `./gradlew :slider:check` VERT (900 unit +5, 38 functional -2, 254 cucumber = 1192 total, 0 FAIL, 1 SKIP préexistant). | ✅ 9/10
 
 | 059 | 2026-08-05 | publish+ops+cross-borough | Publication slider 0.0.15 (post-SLD-11 expulsion `slider.capsule`) + BOM 0.0.15 + sync capsule. Bump 0.0.14 → 0.0.15 sur 4 fichiers (slider build, BOM build, BOM catalogue, capsule catalogue). Bundle nmcp slider `832cea2a-47b5-4e74-b677-0effcc94bed6` (AUTOMATIC, 3 artefacts signés GPG : slider:0.0.15 + 2 plugin markers) + BOM `02307b00-db40-44e7-9037-c7d293f6a26f` (AUTOMATIC). `./gradlew :slider:check` VERT pré-publication (895 unit + 40 functional + 254 cucumber). `./gradlew :slider:publishToMavenLocal` (sync capsule). Capsule 361 unit tests VERT avec slider 0.0.15 (mavenLocal). Zéro code production modifié côté slider. Coordination capsule 069 : EPIC CAP-MODEL TERMINÉ (unification modèle capsule.feed, côté capsule seul — 7/7 US, +124 unit tests, `CapsuleScriptReader` remplace `CapsuleManager.parseScript`, `capsule.CapsuleModels` purgé). | ✅ 9/10
 
@@ -110,7 +112,7 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 | SLD-6 | Refactor DDD SliderManager decomposition — `SliderManager.kt` (968 lignes, 9 nested objects) est un god-object. Extraction de chaque responsabilité dans un domaine dédié (`slider.scaffold`, `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`, `slider.revealjs`, `slider.playwright`, `slider.capsule` consolidé) + consolidation `slider.repository` existant. Cible : `SliderManager` thin orchestrator < 100 lignes. Fix deprecation `properties[...]` (lignes 82, 744). Baby-step TDD/BDD 3 niveaux, English only. | ✅ TERMINÉ (S-042, 11/11 US) | P1
 | SLD-7 | Câblage Explicite translateDeck → Capsule — tâche composite `translateAndGenerateCapsule` (dependsOn translateDeck → generateCapsule). Contrat d'interface slider↔capsule pour pipeline multi-langue. | ✅ TERMINÉ (S-041, 3/3 US) | P1
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` doublon + resserrer `catch (_: Exception)` CapsulePlugin auto-apply slider. | ✅ TERMINÉ (S-044, 2/2 US) | P1
-| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider. Premier consommateur de la couche LLM codebase : `BuildService` LLM (Provider<ChatModel> via LlmProviderResolver/OllamaPool), koog/langchain4j en `api` (pas de koog direct via BOM), `AssistantManager` réduit à du câblage (4 factories supprimées), `DeckPipelineGraph` (propose-context/validate-context/generate-deck) sur services codebase. DI native Gradle (Decision 001). | 🟡 CADRÉ (S-046, refondu post-046, 5 US ~12 pts) — à planifier | P1
+| SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider. Premier consommateur de la couche LLM codebase : `BuildService` LLM (Provider<ChatModel> via LlmProviderResolver/OllamaPool), koog/langchain4j en `api` (pas de koog direct via BOM), `AssistantManager` réduit à du câblage (4 factories supprimées), `DeckPipelineGraph` (propose-context/validate-context/generate-deck) sur services codebase. DI native Gradle (Decision 001). | 🟡 EN COURS (S-060, US-8.0/8.1/8.2 ✅, US-8.3/8.4 à planifier) | P1
 | SLD-9 | i18n Completion via LLM — `AssistantManager` i18nisé (13 clés → 10 langues générées par LLM), 9 tests de traduction par langue (pattern plantuml), `TaskDescriptionsI18nTest` functional, `SliderMessagesTest` unitaire + Cucumber BDD. Périmètre restrictif : que de l'i18n, pas de refacto. | ✅ TERMINÉ (S-057, 5/5 US — 9.0/9.1/9.2/9.3/9.4) | P1
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` (SlideContent, TextBlock, SlideLayout, OverflowDetector, AsciidocContentParser, ContentSlideAssertion, ContentRenderData, ContentRenderAssertion) + adaptateur Playwright (ContentPlaywrightAdapter). Tests 3 niveaux (unit → functional → cucumber). Pattern de référence : `slider.rtl.RtlSlideAssertion` + `slider.capsule.AsciidocSpeakerNoteParser`. | ✅ TERMINÉ (S-054, 7/7 US — 10.0/10.1/10.2/10.3/10.4/10.5/10.6) | P1
 | SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Le domaine `slider.capsule` (4 fichiers prod + 8 fichiers test) est une fuite de responsabilite (preparation de script video dans slider). Expulsion vers capsule-side : capsule parse `.adoc` directement, slider s'arrete au HTML Reveal.js. 6 US ~14 pts. | ✅ TERMINÉ (S-058, 6/6 US — 11.0 cadrage S-056 + 11.1→11.6) | P1
@@ -456,7 +458,7 @@ _Non-périmètre_ :
 
 | SLD-10.6
 | Cucumber `24_slide_content_validation.feature` — scénarios BDD : texte overflow détecté (a priori + a posteriori), notes orateur rendues, font size lisible, contraste WCAG valide, slide sans note rejetée. Validation double : `ContentSlideAssertion` (estimation) + `ContentRenderAssertion` (mesure). *BDD end-to-end*.
-| ⏳ À FAIRE | 3 pts
+| ✅ TERMINÉ (S-054, 11 scénarios) | 3 pts
 |===
 
 _Total_ : 7 US, ~18 pts. _Pattern de référence_ : `slider.repository` (S-025/027)
@@ -577,7 +579,7 @@ _Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
 | SLD-11.0
 | *Cadrage EPIC* — vision, inventaire a expulser, boundary cible, non-regression.
   Mise a jour INDEX/BACKLOG/PROMPT_REPRISE + table AGENTS.adoc racine MIAMI.
-| ⏳ A FAIRE | 1 pt
+| ✅ TERMINÉ (S-056) | 1 pt
 
 | SLD-11.1
 | *Capsule-side : nouveau parseur `.adoc`* — domaine `capsule.feed` (nouveau) :
@@ -588,7 +590,7 @@ _Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
   (port + adaptation des 239l `AsciidocSpeakerNoteParserTest` + 166l
   `CapsuleScriptWriterTest` + 102l `CapsuleFeedDemoDeckTest` cote capsule).
   Baby-step TDD : RED (tests portes) -> GREEN (parseur porte) -> REFACTOR.
-| ⏳ A FAIRE | 3 pts
+| ✅ TERMINÉ (S-058) | 3 pts
 
 | SLD-11.2
 | *Capsule-side : tache `extractSpeakerNotes`* — `CapsuleTaskRegistrar` (nouveau,
@@ -596,13 +598,13 @@ _Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
   `slides/misc/*.adoc` → extrait notes → `CapsuleScript` modele capsule).
   Remplace `generateCapsule` slider-side. *Functional tests GradleTestKit*
   (port des tests fonctionnels slider + adaptation).
-| ⏳ A FAIRE | 3 pts
+| ✅ TERMINÉ (S-058) | 3 pts
 
 | SLD-11.3
 | *Capsule-side : Cucumber BDD* — `capsule_speaker_notes.feature` (nouveau,
   port des 13 scenarios `9_capsule_feed.feature` cote capsule) + steps portes
   dans `capsule.scenarios`. Tags `@capsule @feed`. *BDD end-to-end*.
-| ⏳ A FAIRE | 2 pts
+| ✅ TERMINÉ (S-058) | 2 pts
 
 | SLD-11.4
 | *Capsule-side : pipeline `translateAndExtract`* — tache composite
@@ -610,7 +612,7 @@ _Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
   `extractSpeakerNotes`). Remplace `translateAndGenerateCapsule` slider-side.
   Capsule devient autonome sur la chaine complete. *Functional + Cucumber*
   (port de `23_translate_and_generate_capsule.feature`).
-| ⏳ A FAIRE | 2 pts
+| ✅ TERMINÉ (S-058) | 2 pts
 
 | SLD-11.5
 | *Slider-side : expulsion `slider.capsule`* — suppression des 4 fichiers
@@ -621,7 +623,7 @@ _Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
   (reference `slider.capsule.AsciidocSpeakerNoteParser` → supprimee).
   *Verification* : `./gradlew :slider:check` VERT, zero regression, tests
   residuels passent (660 - ~55 tests expulses = ~605 tests attendus).
-| ⏳ A FAIRE | 2 pts
+| ✅ TERMINÉ (S-058) | 2 pts
 
 | SLD-11.6
 | *Capsule-side : integration `generateCapsuleVideo`* — `CapsuleBuildTask` et
@@ -631,7 +633,7 @@ _Priorite_ : P1 — dette architecturale, pas de nouvelle feature.
   arriere. *Verification non-regression* : `./gradlew :capsule:check` VERT,
   pipeline `translateDeck → extractSpeakerNotes → generateCapsuleVideo` produit
   la meme sortie video qu'avant. Cucumber `capsule.feature` enrichi.
-| ⏳ A FAIRE | 3 pts
+| ✅ TERMINÉ (S-058) | 3 pts
 |===
 
 _Total_ : 6 US, ~14 pts. _Pattern de reference_ : SLD-6 (expulsion SliderManager

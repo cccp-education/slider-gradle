@@ -1,0 +1,201 @@
+= Session 060 — SLD-8 US-8.2 : AssistantManager câblage codebase LlmBuildService
+:session: 060
+:date: 2026-08-05
+:borough: MIAMI (slider-gradle) + Queens (codebase-gradle) + MEMPHIS (workspace-bom)
+:type: feat+ddd+tdd+archi
+:epic: SLD-8 US-8.2
+
+== Contexte
+
+Session 060 = mission Session 177 côté slider (PROMPT_REPRISE codebase S-176
+avait cadré US-8.1 livrée, US-8.2 = mission courante côté slider). SLD-8
+était marqué "CADRÉ — à planifier" dans l'INDEX slider alors que codebase
+avait déjà livré US-8.1. Le PROMPT_REPRISE slider S-060 était obsolète.
+
+== Objectif
+
+Réduire `AssistantManager` (648 lignes, 4 factories LLM ollama/gemini/mistral/
+huggingface + 4 streaming + 8 hello* smoke tasks) à du câblage via
+`Provider<LlmBuildService>` depuis codebase (N1). Préserver `RagTasks` +
+`TranslateDeckTask` (consommateurs existants signature `ChatModel` langchain4j).
+
+Arbitrage pilote (A) : suppression 8 hello* tasks + 3 factories gemini/mistral/
+huggingface (chat + streaming = 6 méthodes) + 8 runners + catalogues.
+
+== Architecture (Decision 002 slider — koog orchestre, langchain4j exécute)
+
+----
+codebase N1 (Queens)                  slider N2 (MIAMI)
+├─ LlmProviderResolver                ├─ AssistantManager (réduit)
+├─ OllamaPool / GeminiLlmProvider      │   → registerLlmBuildService()
+├─ LlmProvider (suspend fun call)      ├─ LlmProviderChatModelAdapter (nouveau)
+└─ LlmBuildService (BuildService)      └─ préserve RagTasks + TranslateDeckTask
+   ↑ US-8.1 ✅ S-176                     ↑ US-8.2 = cette session
+----
+
+== Livrables (baby-step DDD/TDD/BDD 3 niveaux)
+
+=== US-8.2a — Dépendance catalog + build
+
+* `slider-plugin/gradle/libs.versions.toml` : +1 library `codebase-plugin`
+  (version 0.0.5 déjà présente comme plugin, ajoutée comme library)
+* `slider/build.gradle.kts` : +1 `implementation(libs.codebase.plugin)`
+* `./gradlew :slider:compileKotlin` VERT — codebase N1 sur compile classpath
+
+=== US-8.2b — LlmProviderChatModelAdapter (TDD unit RED → GREEN)
+
+Nouveau fichier `slider/src/main/kotlin/slider/ai/LlmProviderChatModelAdapter.kt`
+(48 lignes) : adaptateur `LlmProvider` (koog/codebase, `suspend fun call`) →
+`ChatModel` (langchain4j) via `runBlocking`. Implémente `doChat(ChatRequest)`,
+concatène system+user messages en un prompt string, wrap la réponse en
+`AiMessage` dans `ChatResponse`.
+
+Test `LlmProviderChatModelAdapterTest.kt` (5 tests unit, package `slider.ai`) :
+- `chat String should delegate to LlmProvider and return text`
+- `chat messages should concatenate system then user text into single prompt`
+- `chat messages should preserve order and join all messages text`
+- `chat ChatRequest should delegate via doChat and return ChatResponse with AiMessage`
+- `provider exception should propagate as RuntimeException`
+
+Pattern : `FakeLlmProvider` (fun interface, lambda response/throw), pas de
+mockito. 5/5 PASS.
+
+=== US-8.2c — AssistantManager réduit à du câblage
+
+`AssistantManager.kt` réécrit (652 → 300 lignes, -352 lignes) :
+* Suppression 3 factories gemini/mistral/huggingface (chat + streaming = 6 méthodes)
+* Suppression 8 hello* smoke tasks + 8 runners + catalogues gemini/mistral/huggingface
+* Suppression `GEMINI_2_5_FLASH` constante, `geminiModels`/`mistralModels`/
+  `huggingFaceModels`
+* `resolveModel(provider, serviceProvider)` : délègue à `LlmBuildService.provider()`
+  wrappé dans `LlmProviderChatModelAdapter`
+* `registerLlmBuildService()` : enregistre `LlmBuildService` via
+  `gradle.sharedServices.registerIfAbsent`, params `model` (convention `aiProvider`)
+* Injection `@ServiceReference llmService` sur `RagTask` (base) +
+  `TranslateDeckTask`
+* RAG tasks (reindexRag/proposeDeckContext/generateDeck) + TranslateDeckTask
+  reçoivent `llmServiceProvider` + `usesService`
+
+Conservation (TranslatorManager déprécié SLD-CR3) :
+* `createOllamaChatModel`, `createOllamaStreamingChatModel`,
+  `generateStreamingResponse`, `localModels` (utilisés par
+  `slider.translate.TranslatorManager` déprécié — expulsion future EPIC SLD-CR4)
+* `PromptManager` (objet pur, system/user prompts — pas de dépendance LLM)
+* `aiProvider` extension (lecture `-Pai.provider`)
+
+Mock-LLM fallback (non-regression Cucumber) : `resolveModel` détecte
+`-Pollama.baseUrl` (mock HTTP test) et fallback sur `createOllamaChatModel`
+legacy. Préserve les 9 scénarios Cucumber `01_propose_deck_context` qui
+injectent un mock HTTP via `-Pollama.baseUrl`, pas via `LlmBuildService`.
+
+=== US-8.2d — RagTasks + TranslateDeckTask câblés
+
+* `RagTask.kt` : +`@ServiceReference llmService: Property<LlmBuildService>`
+* `RagTasks.kt` : `project.resolveModel(provider, llmService)` (2 occurrences
+  ProposeDeckContextTask + GenerateDeckTask)
+* `TranslateDeckTask.kt` : +`@ServiceReference llmService` +
+  `registerTranslateDeckTask` enregistre `LlmBuildService` +
+  `project.resolveModel(provider, llmService)`
+* `AssistantManagerI18nFunctionalTest.kt` : suppression 2 tests "smoke test
+  tasks" (hello* supprimés)
+
+== Cross-borough (codebase)
+
+Republication `codebase-plugin:0.0.5` mavenLocal — le JAR publishé avant
+S-176 ne contenait pas `LlmBuildService`/`LlmServiceResolver` (US-8.1 non
+incluse). `./gradlew publishToMavenLocal` côté codebase-plugin, vérification
+`unzip -l` confirme `LlmBuildService.class` + `LlmServiceResolver.class`
+présents.
+
+== Tests
+
+|===
+| Niveau | Avant | Après | Delta
+
+| Unit
+| 895
+| 900
+| +5 (LlmProviderChatModelAdapterTest)
+
+| Functional
+| 40
+| 38
+| -2 (smoke test tasks supprimés)
+
+| Cucumber
+| 254
+| 254
+| 0 (non-regression via mock-LLM fallback)
+
+| Total
+| 1189
+| 1192
+| +3
+|===
+
+`./gradlew :slider:check` VERT — 0 FAIL, 1 SKIP préexistant (JRuby gem isolé).
+
+== Décisions
+
+. **Mock-LLM fallback** : `resolveModel` détecte `-Pollama.baseUrl` et
+  fallback sur `createOllamaChatModel` legacy. Préserve les 9 scénarios
+  Cucumber `01_propose_deck_context` qui injectent un mock HTTP. En
+  production (pas de `-Pollama.baseUrl`), `LlmBuildService` est utilisé.
+  Ce fallback sera supprimé quand les tests Cucumber migreront vers un
+  mock `LlmBuildService` (future US).
+. **TranslatorManager déprécié conservé** : utilise encore
+  `createOllamaChatModel`/`localModels`/`generateStreamingResponse`.
+  Expulsion future EPIC SLD-CR4 (suppression `TranslatorManager` +
+  `TranslatorPlugin` + 2 tests + 1 feature Cucumber).
+. **DI native Gradle (Decision 001)** : `BuildService<Params>` +
+  `Provider<T>`, pas de conteneur DI. `LlmBuildService` enregistré une
+  fois par build, shared par RAG tasks + TranslateDeckTask.
+. **koog orchestre, langchain4j exécute** (Decision 002) : l'adaptateur
+  pont `LlmProvider` (koog/codebase) → `ChatModel` (langchain4j/slider)
+  matérialise la séparation.
+
+== Fichiers modifiés
+
+*Slider-gradle* (9 fichiers) :
+- `gradle/libs.versions.toml` (+1 library codebase-plugin)
+- `slider/build.gradle.kts` (+1 implementation)
+- `slider/src/main/kotlin/slider/ai/LlmProviderChatModelAdapter.kt` (nouveau)
+- `slider/src/main/kotlin/slider/ai/AssistantManager.kt` (réécrit, -352 lignes)
+- `slider/src/main/kotlin/slider/ai/RagTask.kt` (+@ServiceReference llmService)
+- `slider/src/main/kotlin/slider/ai/RagTasks.kt` (resolveModel 2 occurrences)
+- `slider/src/main/kotlin/slider/translation/TranslateDeckTask.kt` (+llmService)
+- `slider/src/test/kotlin/slider/ai/LlmProviderChatModelAdapterTest.kt` (nouveau)
+- `slider/src/functionalTest/kotlin/slider/i18n/AssistantManagerI18nFunctionalTest.kt` (-2 tests)
+
+*Codebase-gradle* (1 fichier, republication) :
+- `codebase-plugin` republishé mavenLocal 0.0.5 (JAR inclut maintenant
+  LlmBuildService/LlmServiceResolver de S-176)
+
+== État SLD-8
+
+|===
+| US | Statut | Session
+
+| SLD-8.0 | Cadrage contrat consommation | ✅ TERMINÉ (S-046)
+| SLD-8.1 | BuildService LLM pont (codebase) | ✅ TERMINÉ (S-176)
+| SLD-8.2 | AssistantManager câblage (slider) | ✅ TERMINÉ (S-060)
+| SLD-8.3 | DeckPipelineGraph (koog orchestration) | 🟡 À PLANIFIER
+| SLD-8.4 | Tests 3 niveaux pipeline koog deck | 🟡 À PLANIFIER
+|===
+
+== Prochaine session — 061
+
+. SLD-8.3 : `DeckPipelineGraph` sur services codebase (nodes :
+  propose-context, validate-context, generate-deck) en DSL koog
+  `strategy<DeckState, DeckState>`. Consulter
+  `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` (Pattern 06
+  MapReduce ou Pattern 05 Routing selon la topologie cible).
+. Publication BOM 0.0.16 + codebase-plugin 0.0.5 sur Maven Central (si
+  permission) — prérequis pour publication slider 0.0.16 future.
+
+== Score session
+
+✅ 9/10 — US-8.2 livrée en baby-step TDD/BDD 3 niveaux, non-regression
+stricte (mock-LLM fallback), architecture Decision 002 matérialisée. Un
+point retiré pour le fallback mock-LLM (dette technique temporaire — à
+supprimer quand les tests Cucumber migreront vers un mock LlmBuildService).

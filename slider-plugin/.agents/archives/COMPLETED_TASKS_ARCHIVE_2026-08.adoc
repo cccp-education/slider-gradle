@@ -203,3 +203,25 @@ Tests slider : 895 unit (was 977, -82) / 40 functional (was 46, -6) / 254
 cucumber (was 279, -25) = 1189 total (was 1302, -113). `./gradlew :slider:check`
 VERT 0 FAIL / 1 SKIP préexistant. Capsule-gradle : +42 unit +8 functional +16
 cucumber = 66 nouveaux tests, 0 FAIL (1 failure préexistant burnin ffmpeg non lié).
+
+== Session 060 — SLD-8 US-8.2 AssistantManager câblage codebase LlmBuildService ✅
+
+SLD-8 US-8.2 livrée en baby-step TDD/BDD 3 niveaux. `AssistantManager.kt`
+réécrit (652 → 300 lignes, -352) : suppression 3 factories gemini/mistral/
+huggingface + 4 streaming + 8 hello* tasks + catalogues. `resolveModel
+(provider, serviceProvider)` délègue à `LlmBuildService` (codebase N1)
+wrappé dans `LlmProviderChatModelAdapter` (nouveau, 48l). Injection
+`@ServiceReference llmService` sur `RagTask` + `TranslateDeckTask` +
+`registerLlmBuildService()`. Mock-LLM fallback (`-Pollama.baseUrl` →
+`createOllamaChatModel` legacy) préserve 9 scénarios Cucumber.
+`TranslatorManager` déprécié conservé (expulsion future EPIC SLD-CR4).
+Cross-borough : `codebase-plugin:0.0.5` republié mavenLocal.
+
+US-8.2a (catalog + build), US-8.2b (LlmProviderChatModelAdapter TDD 5 unit),
+US-8.2c (AssistantManager réduit), US-8.2d (RagTasks + TranslateDeckTask câblés).
+
+Tests : 900 unit (was 895, +5) + 38 functional (was 40, -2) + 254 cucumber
+(unchanged) = 1192 total (was 1189, +3). `./gradlew :slider:check` VERT 0 FAIL
+/ 1 SKIP préexistant.
+
+Rapport : `slider-plugin/.agents/sessions/060-sld8-assistant-manager-wiring.adoc`.

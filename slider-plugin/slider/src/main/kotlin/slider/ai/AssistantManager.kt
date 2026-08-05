@@ -2,57 +2,36 @@
 
 package slider.ai
 
-import arrow.core.Either
-import arrow.core.Either.Companion.catch
-import arrow.core.Either.Left
-import arrow.core.Either.Right
-import slider.DeckContext
-import slider.SliderConfig.localConf
-import slider.i18n.SliderMessages
+import codebase.koog.llm.service.LlmBuildService
 import dev.langchain4j.model.chat.ChatModel
-import dev.langchain4j.model.chat.StreamingChatModel
-import dev.langchain4j.model.chat.response.ChatResponse
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler
-import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel
-import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel
-import dev.langchain4j.model.mistralai.MistralAiChatModel
-import dev.langchain4j.model.mistralai.MistralAiChatModelName.MISTRAL_SMALL_LATEST
-import dev.langchain4j.model.mistralai.MistralAiChatModelName.OPEN_MISTRAL_NEMO
-import dev.langchain4j.model.mistralai.MistralAiStreamingChatModel
-import dev.langchain4j.model.ollama.OllamaChatModel
-import dev.langchain4j.model.ollama.OllamaStreamingChatModel
-import dev.langchain4j.model.openai.OpenAiChatModel
-import dev.langchain4j.model.openai.OpenAiStreamingChatModel
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildServiceSpec
-import java.time.Duration.ofSeconds
-import kotlin.coroutines.resume
+import slider.DeckContext
+import slider.ai.AssistantManager.PROP_AI_PROVIDER
+import slider.ai.AssistantManager.PROVIDER_OLLAMA
+import slider.i18n.SliderMessages
 
 /**
  * Central AI orchestrator for the Slider Gradle plugin.
  *
- * Responsibilities:
- * - Provider selection via `-Pai.provider`
- * - Model factory methods (ChatModel + StreamingChatModel) for each provider
- * - Task registration: hello* smoke-test tasks + RAG pipeline tasks
+ * EPIC SLD-8 (Decision 002): slider consumes codebase (N1) as the unified
+ * LLM socle. The 4 provider factories (ollama/gemini/mistral/huggingface)
+ * and the 8 hello* smoke-test tasks have been removed — provider resolution
+ * now delegates to [LlmBuildService] via [LlmProviderChatModelAdapter].
+ *
+ * Responsibilities (post-SLD-8):
+ * - [LlmBuildService] registration (Gradle-managed DI, Decision 001)
+ * - [resolveModel] bridges codebase's [LlmProvider] to langchain4j [ChatModel]
+ * - RAG task registration: reindexRag + proposeDeckContext + generateDeck
  * - [PromptManager]: system and user prompts for both pipeline steps
  *
- * ## Provider selection
- * Pass `-Pai.provider=ollama|gemini|mistral|huggingface` on the command line.
- * Defaults to `ollama` when absent.
- *
- * ## Two-step RAG pipeline
- *   1. `proposeDeckContext` → [ProposeDeckContextTask]
- *   2. `generateDeck`        → [GenerateDeckTask]
- *
- * Both tasks share the same model instance resolved by [resolveModel].
+ * Legacy ollama factories ([createOllamaChatModel],
+ * [createOllamaStreamingChatModel], [generateStreamingResponse], [localModels])
+ * are kept for the deprecated [slider.translate.TranslatorManager] (SLD-CR3)
+ * and will be expelled in a future cleanup EPIC.
  */
 object AssistantManager {
-
-    const val GEMINI_2_5_FLASH = "gemini-2.5-flash"
 
     // =========================================================================
     // Provider selection
@@ -70,7 +49,7 @@ object AssistantManager {
             ?: PROVIDER_OLLAMA).lowercase().trim()
 
     // =========================================================================
-    // Model catalogs
+    // Local model catalog (legacy — used by deprecated TranslatorManager)
     // =========================================================================
 
     val localModels
@@ -81,20 +60,57 @@ object AssistantManager {
             "gemma3:1b-it-fp16"              to "Gemma3Instruct",
         )
 
-    val geminiModels
-        get() = setOf(GEMINI_2_5_FLASH to "GeminiFlash25")
+    // =========================================================================
+    // LlmBuildService registration + model resolution
+    // =========================================================================
 
-    val mistralModels
-        get() = setOf(
-            MISTRAL_SMALL_LATEST.toString() to "MistralSmall",
-            OPEN_MISTRAL_NEMO.toString()    to "MistralNemo",
-        )
+    /**
+     * Registers the [LlmBuildService] (Gradle-managed DI) and returns its
+     * [Provider]. The service exposes a codebase [codebase.koog.llm.LlmProvider]
+     * resolved by [codebase.koog.llm.service.LlmServiceResolver].
+     *
+     * Call once per build (typically from [createChatTasks]); inject the
+     * returned [Provider] into RAG tasks via `@ServiceReference`.
+     */
+    fun Project.registerLlmBuildService(): Provider<LlmBuildService> =
+        gradle.sharedServices.registerIfAbsent(
+            "sliderLlmService", LlmBuildService::class.java
+        ) { spec: BuildServiceSpec<LlmBuildService.Params> ->
+            spec.parameters.model.convention(project.aiProvider)
+            spec.maxParallelUsages.set(1)
+        }
 
-    val huggingFaceModels
-        get() = setOf(
-            "meta-llama/Llama-3.1-8B-Instruct:sambanova" to "Llama31Sambanova",
-            "Qwen/Qwen3.5-35B-A3B:novita"                to "Qwen35Novita",
-        )
+    /**
+     * Resolves the langchain4j [ChatModel] for the given [provider] by
+     * delegating to the codebase [LlmBuildService] and wrapping the returned
+     * [codebase.koog.llm.LlmProvider] in a [LlmProviderChatModelAdapter].
+     *
+     * This is the single resolution point used by [ProposeDeckContextTask]
+     * and [GenerateDeckTask] (via [RagTasks]) and [slider.translation.TranslateDeckTask].
+     *
+     * ## Mock-LLM fallback (test compat)
+     *
+     * When `-Pollama.baseUrl` is set (typically to a test mock HTTP server),
+     * resolution falls back to the legacy [createOllamaChatModel] which honors
+     * that property. This keeps the GradleTestKit-based Cucumber scenarios
+     * (feature `01_propose_deck_context.feature`) working without changes —
+     * they inject a mock via `-Pollama.baseUrl`, not via [LlmBuildService].
+     *
+     * In production (no `-Pollama.baseUrl`), the codebase [LlmBuildService]
+     * is used: `LlmProviderResolver` resolves the provider from the pool,
+     * wrapped in a [LlmProviderChatModelAdapter].
+     */
+    fun Project.resolveModel(
+        provider: String,
+        serviceProvider: Provider<LlmBuildService>,
+    ): ChatModel {
+        val mockOllamaUrl = findProperty("ollama.baseUrl") as? String
+        if (provider == PROVIDER_OLLAMA && mockOllamaUrl != null) {
+            return createOllamaChatModel(findProperty("ollama.modelName") as? String ?: "smollm:135m")
+        }
+        val llmProvider = serviceProvider.get().provider()
+        return LlmProviderChatModelAdapter(llmProvider)
+    }
 
     // =========================================================================
     // Task registration
@@ -117,26 +133,11 @@ object AssistantManager {
             spec.maxParallelUsages.set(1)
         }
 
-        localModels.forEach {
-            registerHelloChatTask(it.first, "helloOllama${it.second}")
-            registerHelloStreamingChatTask(it.first, "helloOllamaStream${it.second}")
-        }
-        geminiModels.forEach {
-            registerHelloGeminiChatTask(it.first, "helloGemini${it.second}")
-            registerHelloGeminiStreamingChatTask(it.first, "helloGeminiStream${it.second}")
-        }
-        mistralModels.forEach {
-            registerHelloMistralChatTask(it.first, "helloMistral${it.second}")
-            registerHelloMistralStreamingChatTask(it.first, "helloMistralStream${it.second}")
-        }
-        huggingFaceModels.forEach {
-            registerHelloHuggingFaceChatTask(it.first, "helloHuggingFace${it.second}")
-            registerHelloHuggingFaceStreamingChatTask(it.first, "helloHuggingFaceStream${it.second}")
-        }
+        val llmServiceProvider = registerLlmBuildService()
 
-        registerReindexRagTask(pgServiceProvider)
-        registerProposeDeckContextTask(pgServiceProvider)
-        registerGenerateDeckTask(pgServiceProvider)
+        registerReindexRagTask(pgServiceProvider, llmServiceProvider)
+        registerProposeDeckContextTask(pgServiceProvider, llmServiceProvider)
+        registerGenerateDeckTask(pgServiceProvider, llmServiceProvider)
     }
 
     // =========================================================================
@@ -144,7 +145,8 @@ object AssistantManager {
     // =========================================================================
 
     private fun Project.registerReindexRagTask(
-        pgServiceProvider: Provider<PgVectorService>
+        pgServiceProvider: Provider<PgVectorService>,
+        llmServiceProvider: Provider<LlmBuildService>,
     ) {
         tasks.register("reindexRag", ReindexRagTask::class.java) {
             val lang = SliderMessages.resolveLanguage(this@registerReindexRagTask)
@@ -152,11 +154,14 @@ object AssistantManager {
             it.description = SliderMessages.get("task.reindexRag.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
+            it.llmService.set(llmServiceProvider)
+            it.usesService(llmServiceProvider)
         }
     }
 
     private fun Project.registerProposeDeckContextTask(
-        pgServiceProvider: Provider<PgVectorService>
+        pgServiceProvider: Provider<PgVectorService>,
+        llmServiceProvider: Provider<LlmBuildService>,
     ) {
         tasks.register("proposeDeckContext", ProposeDeckContextTask::class.java) {
             val lang = SliderMessages.resolveLanguage(this@registerProposeDeckContextTask)
@@ -164,11 +169,14 @@ object AssistantManager {
             it.description = SliderMessages.get("task.proposeDeckContext.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
+            it.llmService.set(llmServiceProvider)
+            it.usesService(llmServiceProvider)
         }
     }
 
     private fun Project.registerGenerateDeckTask(
-        pgServiceProvider: Provider<PgVectorService>
+        pgServiceProvider: Provider<PgVectorService>,
+        llmServiceProvider: Provider<LlmBuildService>,
     ) {
         tasks.register("generateDeck", GenerateDeckTask::class.java) {
             val lang = SliderMessages.resolveLanguage(this@registerGenerateDeckTask)
@@ -176,275 +184,48 @@ object AssistantManager {
             it.description = SliderMessages.get("task.generateDeck.description", lang)
             it.pgVectorService.set(pgServiceProvider)
             it.usesService(pgServiceProvider)
+            it.llmService.set(llmServiceProvider)
+            it.usesService(llmServiceProvider)
         }
     }
 
     // =========================================================================
-    // Model resolution — single model per execution
+    // Legacy Ollama factories — kept for deprecated TranslatorManager (SLD-CR3)
     // =========================================================================
 
-    /**
-     * Resolves the [ChatModel] for the given [provider].
-     *
-     * Single resolution point used by both [ProposeDeckContextTask] and
-     * [GenerateDeckTask], enforcing the one-model-per-execution constraint.
-     */
-    fun Project.resolveModel(provider: String): ChatModel =
-        when (provider) {
-            PROVIDER_GEMINI      -> createGeminiChatModel()
-            PROVIDER_MISTRAL     -> createMistralChatModel()
-            PROVIDER_HUGGINGFACE -> createHuggingFaceChatModel()
-            else -> {
-                if (provider != PROVIDER_OLLAMA) println(
-                    "⚠️  Unknown ai.provider='$provider'. " +
-                            "Valid: $PROVIDER_OLLAMA, $PROVIDER_GEMINI, " +
-                            "$PROVIDER_MISTRAL, $PROVIDER_HUGGINGFACE. " +
-                            "Falling back to $PROVIDER_OLLAMA."
-                )
-                createOllamaChatModel(localModels.first().first)
-            }
-        }
+    fun Project.createOllamaChatModel(model: String = "smollm:135m"): dev.langchain4j.model.ollama.OllamaChatModel =
+        dev.langchain4j.model.ollama.OllamaChatModel.builder().apply {
+            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
+            modelName(findProperty("ollama.modelName") as? String ?: model)
+            temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
+            java.time.Duration.ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000)
+            logRequests(true)
+            logResponses(true)
+        }.build()
 
-    // =========================================================================
-    // Streaming coroutine bridge
-    // =========================================================================
+    fun Project.createOllamaStreamingChatModel(model: String = "smollm:135m"): dev.langchain4j.model.ollama.OllamaStreamingChatModel =
+        dev.langchain4j.model.ollama.OllamaStreamingChatModel.builder().apply {
+            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
+            modelName(findProperty("ollama.modelName") as? String ?: model)
+            temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
+            java.time.Duration.ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000)
+            logRequests(true)
+            logResponses(true)
+        }.build()
 
     suspend fun generateStreamingResponse(
-        model: StreamingChatModel,
+        model: dev.langchain4j.model.chat.StreamingChatModel,
         promptMessage: String
-    ): Either<Throwable, ChatResponse> = catch {
-        suspendCancellableCoroutine { continuation ->
-            model.chat(promptMessage, object : StreamingChatResponseHandler {
-                override fun onPartialResponse(partialResponse: String) = print(partialResponse)
-                override fun onCompleteResponse(response: ChatResponse) = continuation.resume(response)
-                override fun onError(error: Throwable) { continuation.cancel(error) }
-            })
+    ): arrow.core.Either<Throwable, dev.langchain4j.model.chat.response.ChatResponse> =
+        arrow.core.Either.Companion.catch {
+            kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+                model.chat(promptMessage, object : dev.langchain4j.model.chat.response.StreamingChatResponseHandler {
+                    override fun onPartialResponse(partialResponse: String) = print(partialResponse)
+                    override fun onCompleteResponse(response: dev.langchain4j.model.chat.response.ChatResponse) = continuation.resumeWith(Result.success(response))
+                    override fun onError(error: Throwable) { continuation.cancel(error) }
+                })
+            }
         }
-    }
-
-    // =========================================================================
-    // Ollama model factories
-    // =========================================================================
-
-    fun Project.createOllamaChatModel(model: String = "smollm:135m"): OllamaChatModel =
-        OllamaChatModel.builder().apply {
-            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
-            modelName(findProperty("ollama.modelName") as? String ?: model)
-            temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
-            timeout(ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000))
-            logRequests(true)
-            logResponses(true)
-        }.build()
-
-    fun Project.createOllamaStreamingChatModel(model: String = "smollm:135m"): OllamaStreamingChatModel =
-        OllamaStreamingChatModel.builder().apply {
-            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
-            modelName(findProperty("ollama.modelName") as? String ?: model)
-            temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
-            timeout(ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000))
-            logRequests(true)
-            logResponses(true)
-        }.build()
-
-    // =========================================================================
-    // Gemini model factories
-    // =========================================================================
-
-    fun Project.createGeminiChatModel(
-        model: String = GEMINI_2_5_FLASH
-    ): GoogleAiGeminiChatModel =
-        (localConf.ai?.gemini?.firstOrNull()
-            ?: error("No Gemini API key found in slides-context.yml under ai.gemini"))
-            .run(GoogleAiGeminiChatModel.builder()::apiKey)
-            .modelName(model)
-            .temperature(1.0)
-            .logRequestsAndResponses(true)
-            .build()
-
-    fun Project.createGeminiStreamingChatModel(
-        model: String = GEMINI_2_5_FLASH
-    ): GoogleAiGeminiStreamingChatModel =
-        (localConf.ai?.gemini?.firstOrNull()
-            ?: error("No Gemini API key found in slides-context.yml under ai.gemini"))
-            .run(GoogleAiGeminiStreamingChatModel.builder()::apiKey)
-            .modelName(model)
-            .temperature(1.0)
-            .logRequestsAndResponses(true)
-            .build()
-
-    // =========================================================================
-    // Mistral model factories
-    // =========================================================================
-
-    fun Project.createMistralChatModel(
-        model: String = MISTRAL_SMALL_LATEST.toString()
-    ): MistralAiChatModel =
-        (localConf.ai?.mistral?.firstOrNull()
-            ?: error("No Mistral API key found in slides-context.yml under ai.mistral"))
-            .run(MistralAiChatModel.builder()::apiKey)
-            .modelName(model)
-            .logRequests(true)
-            .logResponses(true)
-            .build()
-
-    fun Project.createMistralStreamingChatModel(
-        model: String = MISTRAL_SMALL_LATEST.toString()
-    ): MistralAiStreamingChatModel =
-        (localConf.ai?.mistral?.firstOrNull()
-            ?: error("No Mistral API key found in slides-context.yml under ai.mistral"))
-            .run(MistralAiStreamingChatModel.builder()::apiKey)
-            .modelName(model)
-            .logRequests(true)
-            .logResponses(true)
-            .build()
-
-    // =========================================================================
-    // HuggingFace model factories
-    // =========================================================================
-
-    fun Project.createHuggingFaceChatModel(
-        model: String = "meta-llama/Llama-3.1-8B-Instruct:sambanova"
-    ): OpenAiChatModel =
-        (localConf.ai?.huggingface?.firstOrNull()
-            ?: error("No HuggingFace token found in slides-context.yml under ai.huggingface"))
-            .run(OpenAiChatModel.builder()::apiKey)
-            .baseUrl("https://router.huggingface.co/v1")
-            .modelName(model)
-            .logRequests(true)
-            .logResponses(true)
-            .build()
-
-    fun Project.createHuggingFaceStreamingChatModel(
-        model: String = "meta-llama/Llama-3.1-8B-Instruct:sambanova"
-    ): OpenAiStreamingChatModel =
-        (localConf.ai?.huggingface?.firstOrNull()
-            ?: error("No HuggingFace token found in slides-context.yml under ai.huggingface"))
-            .run(OpenAiStreamingChatModel.builder()::apiKey)
-            .baseUrl("https://router.huggingface.co/v1")
-            .modelName(model)
-            .logRequests(true)
-            .logResponses(true)
-            .build()
-
-    // =========================================================================
-    // Hello task runners (smoke tests — send a bare "Hello" to each provider)
-    // =========================================================================
-
-    private fun Project.runOllamaChat(model: String) =
-        createOllamaChatModel(model).chat("Hello").let(::println)
-
-    private fun Project.runOllamaStreamChat(model: String) = runBlocking {
-        when (val r = generateStreamingResponse(createOllamaStreamingChatModel(model), "Hello")) {
-            is Right -> println(r.value.aiMessage().text())
-            is Left  -> println("Error: ${r.value}")
-        }
-    }
-
-    private fun Project.runGeminiChat(model: String) =
-        createGeminiChatModel(model).chat("Hello").let(::println)
-
-    private fun Project.runGeminiStreamChat(model: String) = runBlocking {
-        when (val r = generateStreamingResponse(createGeminiStreamingChatModel(model), "Hello")) {
-            is Right -> println(r.value.aiMessage().text())
-            is Left  -> println("Error: ${r.value}")
-        }
-    }
-
-    private fun Project.runMistralChat(model: String) =
-        createMistralChatModel(model).chat("Hello").let(::println)
-
-    private fun Project.runMistralStreamChat(model: String) = runBlocking {
-        when (val r = generateStreamingResponse(createMistralStreamingChatModel(model), "Hello")) {
-            is Right -> println(r.value.aiMessage().text())
-            is Left  -> println("Error: ${r.value}")
-        }
-    }
-
-    private fun Project.runHuggingFaceChat(model: String) =
-        createHuggingFaceChatModel(model).chat("Hello").let(::println)
-
-    private fun Project.runHuggingFaceStreamChat(model: String) = runBlocking {
-        when (val r = generateStreamingResponse(createHuggingFaceStreamingChatModel(model), "Hello")) {
-            is Right -> println(r.value.aiMessage().text())
-            is Left  -> println("Error: ${r.value}")
-        }
-    }
-
-    // =========================================================================
-    // Hello task factories
-    // =========================================================================
-
-    private fun Project.registerHelloChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloOllama.description", lang, model)
-            it.doFirst { project.runOllamaChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloStreamingChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloStreamingChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloOllamaStreaming.description", lang, model)
-            it.doFirst { runOllamaStreamChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloGeminiChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloGeminiChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloGemini.description", lang, model)
-            it.doFirst { project.runGeminiChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloGeminiStreamingChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloGeminiStreamingChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloGeminiStreaming.description", lang, model)
-            it.doFirst { runGeminiStreamChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloMistralChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloMistralChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloMistral.description", lang, model)
-            it.doFirst { project.runMistralChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloMistralStreamingChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloMistralStreamingChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloMistralStreaming.description", lang, model)
-            it.doFirst { runMistralStreamChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloHuggingFaceChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloHuggingFaceChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloHuggingFace.description", lang, model)
-            it.doFirst { project.runHuggingFaceChat(model) }
-        }
-    }
-
-    private fun Project.registerHelloHuggingFaceStreamingChatTask(model: String, taskName: String) {
-        tasks.register(taskName) {
-            val lang = SliderMessages.resolveLanguage(this@registerHelloHuggingFaceStreamingChatTask)
-            it.group = SliderMessages.get("task.group.slider-ai", lang)
-            it.description = SliderMessages.format("task.helloHuggingFaceStreaming.description", lang, model)
-            it.doFirst { runHuggingFaceStreamChat(model) }
-        }
-    }
 
     // =========================================================================
     // PromptManager
