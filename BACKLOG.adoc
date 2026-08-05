@@ -7,6 +7,40 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 052 (2026-08-05) — Cadrage exhaustif SLD-10.5 ✅ TERMINÉ
+
+Cadrage formel US SLD-10.5 (Assertions Playwright enrichies) de l'EPIC
+SLD-10. Zéro code modifié — session de vision et découpage. Audit Playwright
+cross-borough (6 boroughs : slider, bakery, capsule, container-provision,
+magic-stick, workspace-bom) confirmant l'absence de contrat Playwright
+partagé et le pattern snapshot DTO `SlideRenderData` unique à slider (gold
+standard du workspace).
+
+Décision architecturale clé : SLD-10.5 est l'**adaptateur Playwright** de
+SLD-10. Il introduit `ContentRenderData` (snapshot DTO pur, mirroring
+`SlideRenderData` RTL) contenant les mesures réelles extraites d'une `Page`
+Playwright (bounding boxes, font sizes calculées, contraste WCAG, présence
+notes DOM). Un nouvel object pur `ContentRenderAssertion` consomme ce
+snapshot et délivre `ContentAssertionResult` (sealed existant) en
+réutilisant les 4 codes de `ContentAssertionCode` (pas de nouveau code).
+
+Deux objects d'assertion coexistent : `ContentSlideAssertion` (S-051,
+estimation a priori sur `SlideContent`+`SlideLayout`) et
+`ContentRenderAssertion` (S-052, mesure a posteriori sur
+`ContentRenderData`). Les 4 codes sont partagés. Nouvelle constante
+`MIN_CONTRAST_RATIO = 4.5` (WCAG AA) — vit sur `ContentRenderAssertion` car
+le contraste réel n'est mesurable qu'après rendu.
+
+3 baby-steps TDD prévus : (1) `ContentRenderData` snapshot DTO + 8 unit,
+(2) `ContentRenderAssertion` object pur + 9 unit, (3)
+`ContentPlaywrightAdapter` + `ContentPlaywrightFunctionalTest` (LTR fixture,
+port 4337, réutilise `PlaywrightFixtureSupport`). 17 unit + 1 functional
+attendus. SLD-10.6 (Cucumber `24_slide_content_validation.feature`) à
+planifier ensuite.
+
+Rapport complet : `slider-plugin/.agents/sessions/052-sld-10.5-cadrage.adoc`.
+
+'''
 == Session 051 (2026-08-05) — SLD-10.4 ContentSlideAssertion ✅ TERMINÉ
 
 US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
@@ -106,10 +140,10 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
-| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-051, 5/7 US — 10.0/10.1/10.2/10.3/10.4 ✅) | 7 US ~18 pts
+| SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | 🟡 EN COURS (S-052 cadrage SLD-10.5, 5/7 US — 10.0/10.1/10.2/10.3/10.4 ✅, 10.5 cadré à implémenter S-053, 10.6 à planifier) | 7 US ~18 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2/10.3/10.4 ✅ (5/7 US), reste 10.5/10.6._
+_Tous les EPICs de feature sont terminés. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) en cours — SLD-10.0/10.1/10.2/10.3/10.4 ✅ (5/7 US), SLD-10.5 cadré session 052 (à implémenter S-053), SLD-10.6 à planifier._
 
 '''
 == 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 049 — Cadrage, à planifier)
@@ -143,7 +177,7 @@ Playwright adapter) + `slider.capsule.AsciidocSpeakerNoteParser` (parseur .adoc)
 | SLD-10.2 | `OverflowDetector` (domain service) — prédit si un `TextBlock` dépasse le viewport en fonction du `SlideLayout`. Unit tests purs | 3 | P0
 | SLD-10.3 | `AsciidocContentParser` (parseur .adoc → `SlideContent`) — étend `AsciidocSpeakerNoteParser` aux titres, paragraphes, listes, notes `[NOTE.speaker]`. Unit tests purs | 3 | P0
 | SLD-10.4 | `SlideContent` aggregate root + `ContentAssertionCode`/`Result`/`Failure` (codes P0/P1) + `ContentSlideAssertion` object (`assertAll`). Pattern `RtlSlideAssertion`. Unit tests purs | 3 | P1
-| SLD-10.5 | Assertions Playwright enrichies — `TextOverflow`, `NotesRendering`, `FontSize`, `Contrast` (pures, consomment snapshot enrichi). Functional tests GradleTestKit + Playwright fixtures | 3 | P1
+| SLD-10.5 | Assertions Playwright enrichies — `ContentRenderData` (snapshot DTO pur, mirroring `SlideRenderData` RTL) + `ContentRenderAssertion` (object pur, mesure a posteriori) + `ContentPlaywrightAdapter` (extraction Playwright → snapshot, port 4337) + `ContentPlaywrightFunctionalTest` (LTR fixture). Réutilise les 4 codes `ContentAssertionCode` existants. Nouvelle constante `MIN_CONTRAST_RATIO = 4.5` (WCAG AA). 3 baby-steps TDD : unit (8+9) → functional (1 Playwright). | 🟡 CADRÉ (S-052, à implémenter S-053) | 3 pts
 | SLD-10.6 | Cucumber `24_slide_content_validation.feature` — scénarios BDD : overflow, notes rendues, font size, contraste WCAG, slide sans note. BDD end-to-end | 3 | P1
 |===
 

@@ -1,0 +1,726 @@
+= Session 052 — Cadrage exhaustif SLD-10.5 Assertions Playwright enrichies
+:date: 2026-08-05
+:session: 052
+
+== Objectif
+
+Cadrage formel de l'US SLD-10.5 (Assertions Playwright enrichies) de l'EPIC
+SLD-10 Slide Content Model & Rendering Validation. Zéro code modifié —
+session de vision et découpage. Le pilote a explicitement demandé un cadrage
+exhaustif avant toute implémentation, après audit de l'existant Playwright
+cross-borough (6 boroughs audités : slider, bakery, capsule,
+container-provision, magic-stick, workspace-bom).
+
+== Méthode
+
+Baby-step DDD/TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber),
+RED → GREEN → REFACTOR. English only (code, Gherkin, commentaires). Pattern
+de référence : `slider.rtl` (S-021) — snapshot DTO + assertion pure +
+adaptateur Playwright.
+
+== Constat architectural préalable
+
+SLD-10.4 (S-051) a livré `ContentSlideAssertion.assertAll(content:
+SlideContent, layout: SlideLayout): ContentAssertionResult` — 4 codes
+(`P0_OVERFLOW`, `P0_MISSING_NOTES`, `P1_FONT_SIZE`, `P1_CONTRAST`), assertions
+pures sur estimation théorique (TextBlock synthétiques, font sizes du layout).
+SLD-10.5 ne doit PAS recoder ces 4 assertions pures — ce serait de la
+duplication. SLD-10.5 ajoute la couche *adaptateur Playwright* qui alimente
+les assertions avec des mesures réelles extraites du navigateur.
+
+== Vision SLD-10.5
+
+SLD-10.5 est l'**adaptateur Playwright** de l'EPIC SLD-10. Il introduit un
+snapshot enrichi `ContentRenderData` (DTO pur, mirroring `SlideRenderData`
+du RTL) contenant les mesures réelles extraites d'une `Page` Playwright
+(bounding boxes, font sizes calculées, contraste calculé, présence de notes
+dans le DOM). Un nouvel object pur `ContentRenderAssertion` consomme ce
+snapshot et délivre un `ContentAssertionResult` (sealed existant) en
+réutilisant les 4 codes de `ContentAssertionCode` (pas de nouveau code).
+
+Deux objects d'assertion coexistent, aux rôles complémentaires :
+
+[cols="3,4,4", options="header"]
+|===
+| Object | Consomme | Rôle
+
+| `ContentSlideAssertion` (S-051, existant)
+| `SlideContent` + `SlideLayout`
+| Validation a priori (estimation théorique, avant rendu — TextBlock synthétiques, font sizes du layout)
+
+| `ContentRenderAssertion` (S-052, nouveau)
+| `ContentRenderData`
+| Validation a posteriori (mesures réelles Playwright — bounding boxes calculées, computed styles, contraste réel)
+|===
+
+Les deux délivrent `ContentAssertionResult` (sealed `Passed`/`Failed`) et
+partagent les 4 codes de `ContentAssertionCode`. Le Cucumber SLD-10.6 testera
+les deux : validation a priori via `ContentSlideAssertion`, validation a
+posteriori via `ContentRenderAssertion`.
+
+== Périmètre
+
+=== Inclus
+
+* `ContentRenderData` (snapshot DTO pur, package `slider.content`)
+* `ContentRenderAssertion` (object pur, package `slider.content`)
+* `ContentPlaywrightAdapter` (extraction Playwright → `ContentRenderData`,
+  dans `src/test`, comme `RtlPlaywrightFunctionalTest`)
+* `ContentPlaywrightFunctionalTest` (functional test LTR sur fixture
+  pré-générée)
+* Unit tests purs pour `ContentRenderData` + `ContentRenderAssertion`
+* Réutilisation de `PlaywrightFixtureSupport` (S-034) tel quel
+
+=== Exclu
+
+* Nouveaux codes d'assertion (les 4 existants suffisent)
+* Nouvelles assertions pures sur `SlideContent`+`SlideLayout` (SLD-10.4 fait)
+* Cucumber BDD (couvert par SLD-10.6)
+* Track Node.js Playwright (TS `slider-visual.spec.ts`) — non concerné
+* Cross-borough shared Playwright contract (aucun n'existe dans la BOM)
+
+== Architecture (3-layer hexagonal, pattern RTL)
+
+----
+                         ┌─────────────────────────────────────┐
+                         │   PURE DOMAIN (slider.content)       │
+                         │   - ContentRenderData (snapshot DTO) │
+                         │   - ContentRenderAssertion (object)   │
+                         │     assertAll(data) -> Result         │
+                         │   - ContentAssertionCode (enum, S-051)│
+                         │   - ContentAssertionResult (sealed)  │
+                         │   NO Playwright, NO Gradle, NO I/O    │
+                         └──────────────┬──────────────────────┘
+                                        │
+              ┌─────────────────────────┼─────────────────────────┐
+              ▼                         ▼                         ▼
+   ┌──────────────────┐    ┌─────────────────────┐    ┌────────────────────┐
+   │ UNIT (JUnit5)    │    │ FUNCTIONAL (Playwright)│   │ BDD (Cucumber)    │
+   │ ContentRender    │    │ ContentPlaywright    │    │ (SLD-10.6, à      │
+   │ AssertionTest    │    │ FunctionalTest      │    │  planifier)        │
+   │                  │    │                     │    │                    │
+   │ builds fake      │    │ builds from real    │    │ builds from Given  │
+   │ ContentRenderData│    │ Page JS evaluation  │    │ step params        │
+   │ with hardcoded   │    │ → ContentRenderData │    │ → ContentRenderData│
+   │ doubles/booleans │    │                     │    │                    │
+   │                  │    │ uses Playwright-    │    │ calls assertAll   │
+   │ calls assertAll  │    │ FixtureSupport for  │    │ in Given step     │
+   │                  │    │ browser+HTTP server │    │                    │
+   │                  │    │ calls assertAll     │    │                    │
+   │                  │    │ + screenshot evidence│   │                    │
+   └──────────────────┘    └─────────────────────┘    └────────────────────┘
+----
+
+== Contrat ContentRenderData (snapshot DTO)
+
+`ContentRenderData` est l'équivalent de `SlideRenderData` (RTL) pour le
+contenu. Pure `data class`, `val` fields uniquement, zéro méthode (hors
+`companion object` factory). Documenté comme "built three ways" : unit tests
+(fakes), functional tests (Playwright `Page` queries), Cucumber steps (world
+state).
+
+[source,kotlin]
+----
+package slider.content
+
+/**
+ * Snapshot of a rendered slide page — the data Playwright-jvm extracts
+ * from the browser so that [ContentRenderAssertion] can validate it
+ * without any dependency on the Playwright API.
+ *
+ * Pure data carrier: tests build it from fake values (unit), functional
+ * tests build it from Playwright [com.microsoft.playwright.Page] queries,
+ * and Cucumber steps build it from world state.
+ *
+ * Mirrors [slider.rtl.SlideRenderData] — the boundary contract between
+ * the I/O adapter (Playwright) and the pure domain.
+ *
+ * @param slideTitle       text content of the slide title (h2/h1).
+ * @param realTextBlocks   bounding boxes of every text block on the slide,
+ *                         extracted via Playwright `boundingBox()`. Each
+ *                         [TextBlock] carries the real geometry (not
+ *                         synthétisé comme dans ContentSlideAssertion).
+ * @param computedTitleFontSize  title font size in CSS pixels (getComputedStyle).
+ * @param computedBodyFontSize   body font size in CSS pixels (getComputedStyle).
+ * @param computedContrastRatio  WCAG contrast ratio between title and body
+ *                               text colors (relative luminance formula).
+ * @param hasNotesInDom     true when the speaker note is rendered in the DOM
+ *                          (Reveal.js `aside.notes` ou `[NOTE.speaker]` rendu).
+ * @param viewportWidth     browser viewport width in CSS pixels.
+ * @param viewportHeight    browser viewport height in CSS pixels.
+ * @param slideRef          the slide title, used as `slideRef` in failures.
+ */
+data class ContentRenderData(
+    val slideTitle: String,
+    val realTextBlocks: List<TextBlock>,
+    val computedTitleFontSize: Double,
+    val computedBodyFontSize: Double,
+    val computedContrastRatio: Double,
+    val hasNotesInDom: Boolean,
+    val viewportWidth: Int,
+    val viewportHeight: Int,
+) {
+    companion object {
+        val EMPTY: ContentRenderData = ContentRenderData(
+            slideTitle = "",
+            realTextBlocks = emptyList(),
+            computedTitleFontSize = 0.0,
+            computedBodyFontSize = 0.0,
+            computedContrastRatio = 0.0,
+            hasNotesInDom = false,
+            viewportWidth = 0,
+            viewportHeight = 0,
+        )
+    }
+}
+----
+
+Invariants (`init { require(...) }`) :
+* `slideTitle` non-blank (sauf pour `EMPTY` qui bypass via factory)
+* `computedTitleFontSize > 0.0` et `computedBodyFontSize > 0.0`
+* `computedContrastRatio >= 0.0` (0 = pas mesurable, déclenche P1_CONTRAST)
+* `viewportWidth > 0` et `viewportHeight > 0`
+
+NOTE: `EMPTY` est une factory pour les tests Cucumber où le snapshot est
+construit progressivement. Les invariants ne s'appliquent qu'aux instances
+construites hors factory.
+
+== Contrat ContentRenderAssertion (object pur)
+
+`ContentRenderAssertion` est l'équivalent de `RtlSlideAssertion` pour le
+contenu. Object pur, stateless, zéro Playwright/Gradle/I/O. Réutilise les
+4 codes de `ContentAssertionCode` (S-051) et délivre
+`ContentAssertionResult` (sealed existant).
+
+[source,kotlin]
+----
+package slider.content
+
+/**
+ * Validates that a rendered Reveal.js slide deck is correctly rendered
+ * in terms of content geometry, font readability, contrast, and speaker
+ * notes presence.
+ *
+ * Pure domain logic — no Playwright, no Gradle, no I/O. It consumes a
+ * [ContentRenderData] snapshot (extracted from a real browser by the
+ * Playwright adapter) and returns a [ContentAssertionResult].
+ *
+ * Mirrors [slider.rtl.RtlSlideAssertion] — the pure-assertion half of
+ * the hexagonal pattern. The other half (Playwright adapter) lives in
+ * the test source set.
+ *
+ * Assertions (reuse [ContentAssertionCode] from S-051):
+ * - **P0_OVERFLOW**     — any real [TextBlock] overflows the viewport.
+ * - **P0_MISSING_NOTES** — the speaker note is not rendered in the DOM.
+ * - **P1_FONT_SIZE**    — the computed body font size is below [MIN_BODY_FONT_SIZE].
+ * - **P1_CONTRAST**     — the computed contrast ratio is below [MIN_CONTRAST_RATIO].
+ *
+ * Constants [MIN_BODY_FONT_SIZE] and [MIN_TITLE_BODY_RATIO] are reused
+ * from [ContentSlideAssertion]. [MIN_CONTRAST_RATIO] is new (WCAG AA = 4.5).
+ */
+object ContentRenderAssertion {
+
+    const val MIN_CONTRAST_RATIO: Double = 4.5
+
+    fun assertAll(data: ContentRenderData): ContentAssertionResult {
+        val failures = buildList {
+            addAll(overflowFailures(data))
+            if (!data.hasNotesInDom) {
+                add(failure(ContentAssertionCode.P0_MISSING_NOTES, "slide has no speaker note rendered in DOM", data.slideRef))
+            }
+            if (data.computedBodyFontSize < ContentSlideAssertion.MIN_BODY_FONT_SIZE) {
+                add(failure(ContentAssertionCode.P1_FONT_SIZE, "computed body font size ${data.computedBodyFontSize} < ${ContentSlideAssertion.MIN_BODY_FONT_SIZE}", data.slideRef))
+            }
+            if (data.computedContrastRatio < MIN_CONTRAST_RATIO) {
+                add(failure(ContentAssertionCode.P1_CONTRAST, "computed contrast ratio ${data.computedContrastRatio} < $MIN_CONTRAST_RATIO (WCAG AA)", data.slideRef))
+            }
+        }
+        return if (failures.isEmpty()) ContentAssertionResult.Passed
+               else ContentAssertionResult.Failed(failures)
+    }
+
+    private fun overflowFailures(data: ContentRenderData): List<ContentAssertionFailure> =
+        data.realTextBlocks.mapIndexedNotNull { index, block ->
+            val layout = SlideLayout(
+                viewportWidth = data.viewportWidth,
+                viewportHeight = data.viewportHeight,
+                marginX = 0.0,
+                marginY = 0.0,
+                titleFontSize = data.computedTitleFontSize,
+                bodyFontSize = data.computedBodyFontSize,
+            )
+            val result = OverflowDetector.detect(block, layout)
+            if (result is OverflowResult.Overflow) {
+                failure(ContentAssertionCode.P0_OVERFLOW, "text block $index — ${result.message}", data.slideRef)
+            } else null
+        }
+
+    private fun failure(code: ContentAssertionCode, detail: String, slideRef: String): ContentAssertionFailure =
+        ContentAssertionFailure(code, "${code.name} — $detail", slideRef)
+}
+----
+
+.Notes d'implémentation
+* `overflowFailures` réutilise `OverflowDetector.detect` (S-052) sur les
+  `TextBlock` réels (extraits via Playwright `boundingBox()`), pas les
+  TextBlock synthétiques de `ContentSlideAssertion`. Le `SlideLayout` est
+  reconstruit avec `marginX=0/marginY=0` car les bounding boxes réelles sont
+  déjà dans le repère viewport (pas dans un repère avec marges).
+* `MIN_BODY_FONT_SIZE` (14.0) est réutilisé depuis `ContentSlideAssertion`.
+* `MIN_CONTRAST_RATIO` (4.5) est nouveau — WCAG AA threshold pour texte
+  normal. La constante vit sur `ContentRenderAssertion` (pas sur
+  `ContentSlideAssertion`) car le contraste réel n'est mesurable qu'après
+  rendu (SLD-10.4 n'avait pas cette donnée).
+* Le ratio `titleFontSize/bodyFontSize` de SLD-10.4 (P1_CONTRAST) est remplacé
+  par le vrai ratio de contraste WCAG (luminance relative). C'est l'enrichissement
+  principal de SLD-10.5 : le P1_CONTRAST passe d'une heuristique (ratio de
+  tailles) à une mesure réelle (ratio de luminance).
+
+== Contrat ContentPlaywrightAdapter (extraction Playwright)
+
+L'adaptateur vit dans `src/test/kotlin/slider/` (comme
+`RtlPlaywrightFunctionalTest`). Il n'est PAS un object pur — il extrait un
+`ContentRenderData` depuis une `com.microsoft.playwright.Page` réelle. Il
+réutilise `PlaywrightFixtureSupport` (S-034) pour le lifecycle browser +
+HTTP server.
+
+[source,kotlin]
+----
+package slider
+
+import com.microsoft.playwright.Page
+import slider.content.ContentRenderData
+import slider.content.TextBlock
+
+/**
+ * Playwright adapter that extracts a [ContentRenderData] snapshot from a
+ * rendered Reveal.js slide. Mirrors the extraction pattern of
+ * [RtlPlaywrightFunctionalTest] (S-021).
+ *
+ * This is the I/O half of the hexagonal pattern — the pure
+ * [slider.content.ContentRenderAssertion] consumes the snapshot without
+ * any Playwright dependency.
+ */
+object ContentPlaywrightAdapter {
+
+    fun extract(page: Page, slideIndex: Int = 0): ContentRenderData {
+        // 1. Wait for Reveal.js runtime (.reveal .ready class)
+        page.waitForSelector(".reveal.ready, .reveal .slides section")
+
+        // 2. Select the slide (Reveal.js uses .slides > section:nth-of-type)
+        val slide = page.locator(".reveal .slides section").nth(slideIndex)
+
+        // 3. Extract title text (h2/h1 in the slide)
+        val slideTitle = slide.locator("h2, h1").first().textContent() ?: ""
+
+        // 4. Extract real text blocks (h2, h3, p, li) with bounding boxes
+        val realTextBlocks = extractTextBlocks(slide)
+
+        // 5. Computed font sizes (getComputedStyle)
+        val computedTitleFontSize = computedFontSize(page, "h2, h1")
+        val computedBodyFontSize = computedFontSize(page, "p, li")
+
+        // 6. Computed contrast ratio (WCAG relative luminance)
+        val computedContrastRatio = computedContrast(page)
+
+        // 7. Speaker note presence (Reveal.js aside.notes)
+        val hasNotesInDom = page.locator("aside.notes").count() > 0
+
+        // 8. Viewport
+        val viewport = page.viewportSize()!!
+
+        return ContentRenderData(
+            slideTitle = slideTitle.trim(),
+            realTextBlocks = realTextBlocks,
+            computedTitleFontSize = computedTitleFontSize,
+            computedBodyFontSize = computedBodyFontSize,
+            computedContrastRatio = computedContrastRatio,
+            hasNotesInDom = hasNotesInDom,
+            viewportWidth = viewport.width,
+            viewportHeight = viewport.height,
+        )
+    }
+
+    private fun extractTextBlocks(slide: com.microsoft.playwright.Locator): List<TextBlock> {
+        // Sélectionne h2, h3, p, li — chaque élément avec son boundingBox
+        val elements = slide.locator("h2, h3, p, li").all()
+        return elements.mapNotNull { el ->
+            val box = el.boundingBox() ?: return@mapNotNull null
+            val text = el.textContent() ?: return@mapNotNull null
+            if (text.isBlank()) return@mapNotNull null
+            TextBlock(text = text.trim(), x = box.x, y = box.y, width = box.width, height = box.height)
+        }
+    }
+
+    private fun computedFontSize(page: Page, selector: String): Double {
+        val px = page.evalOnSelector(selector, "el => getComputedStyle(el).fontSize") as String
+        return px.removeSuffix("px").toDouble()
+    }
+
+    private fun computedContrast(page: Page): Double {
+        // WCAG relative luminance : (L1 + 0.05) / (L2 + 0.05) où L1 > L2
+        // Extraction des couleurs title + body via getComputedStyle
+        val js = """
+            () => {
+                const title = document.querySelector('.reveal .slides section h2, .reveal .slides section h1');
+                const body = document.querySelector('.reveal .slides section p, .reveal .slides section li');
+                if (!title || !body) return 0.0;
+                const ts = getComputedStyle(title);
+                const bs = getComputedStyle(body);
+                return wcagContrast(ts.color, bs.backgroundColor);
+            }
+            function wcagContrast(c1, c2) {
+                const l1 = relativeLuminance(c1);
+                const l2 = relativeLuminance(c2);
+                const lighter = Math.max(l1, l2);
+                const darker = Math.min(l1, l2);
+                return (lighter + 0.05) / (darker + 0.05);
+            }
+            function relativeLuminance(rgb) {
+                const m = rgb.match(/\d+/g);
+                if (!m) return 0.0;
+                const [r, g, b] = m.map(Number).map(c => {
+                    c = c / 255;
+                    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+                });
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            }
+        """.trimIndent()
+        return (page.evaluate(js) as Number).toDouble()
+    }
+}
+----
+
+.Notes d'implémentation
+* L'adaptateur est un `object` (stateless) — la `Page` est passée en
+  paramètre, pas stockée.
+* `extract` prend un `slideIndex` (défaut 0) pour valider chaque slide
+  individuellement dans une boucle de test.
+* Le calcul du contraste WCAG se fait côté navigateur via `page.evaluate`
+  (JS injecté) — la formule de luminance relative est trop coûteuse à
+  réimplémenter en Kotlin et dépend des couleurs résolues par le CSS.
+* `computedContrast` retourne `0.0` si les éléments ne sont pas trouvés —
+  déclenche `P1_CONTRAST` (0 < 4.5).
+* Le port HTTP est **4337** (nouveau, pour éviter collision avec LTR 4335
+  et RTL 4336). Aucun collision avec la plage Ollama protégée (11434-11436)
+  ni la rotation (11437-11465).
+
+== Contrat ContentPlaywrightFunctionalTest
+
+Functional test LTR sur fixture pré-générée. Mirroring
+`RtlPlaywrightFunctionalTest` (S-021).
+
+[source,kotlin]
+----
+package slider
+
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import slider.content.ContentRenderAssertion
+import slider.content.ContentRenderData
+import java.nio.file.Path
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class ContentPlaywrightFunctionalTest {
+
+    companion object {
+        private val support = PlaywrightFixtureSupport()
+
+        @BeforeAll @JvmStatic fun launchBrowser() = support.launchBrowser()
+        @AfterAll  @JvmStatic fun closeBrowser()  = support.closeBrowser()
+    }
+
+    @Test
+    fun `pre-generated LTR deck renders content within viewport with readable fonts`() {
+        val fixtureDir = resolveFixtureDir("playwright.ltr.fixtures.dir")
+        val htmlFile = "capsule-feed-demo-en-deck.html"
+        assertThat(fixtureDir.resolve(htmlFile).toFile().exists())
+            .`as`("LTR fixture HTML must exist — run './gradlew generatePlaywrightFixtures' in the root project")
+            .isTrue()
+
+        support.withPage(fixtureDir, htmlFile, port = 4337) { page ->
+            val renderData = ContentPlaywrightAdapter.extract(page, slideIndex = 0)
+            val result = ContentRenderAssertion.assertAll(renderData)
+
+            assertThat(result.passed)
+                .`as`("Content render assertions should all pass. Failures: ${result.failures}")
+                .isTrue()
+        }
+    }
+
+    private fun resolveFixtureDir(property: String): Path {
+        val dir = System.getProperty(property)
+            ?: error("System property '$property' not set — run './gradlew :slider:test'")
+        return Path.of(dir).toAbsolutePath().normalize()
+    }
+}
+----
+
+== Plan de baby-step TDD/BDD (3 niveaux)
+
+L'US SLD-10.5 (3 pts) se découpe en 3 baby-steps, chacun avec ses 3 niveaux
+de tests. L'ordre respecte RED → GREEN → REFACTOR.
+
+=== Baby-step 1 — ContentRenderData (snapshot DTO pur)
+
+*Unit tests only (zéro Playwright).*
+
+. **RED** : écrire `ContentRenderDataTest.kt` (unit tests purs) — référence
+  des types inexistants → échec compilation attendu. Tests :
+  * `data class ContentRenderData accepts valid fields`
+  * `rejects blank slideTitle` (sauf EMPTY factory)
+  * `rejects non-positive computedTitleFontSize`
+  * `rejects non-positive computedBodyFontSize`
+  * `rejects negative computedContrastRatio`
+  * `rejects non-positive viewport dimensions`
+  * `EMPTY factory bypasses invariants`
+  * `realTextBlocks defaults to empty list`
+. **GREEN** : créer `ContentRenderData.kt` (data class + invariants + EMPTY
+  factory). Compilation réussit, tests passent.
+. **REFACTOR** : aligner le KDoc sur `SlideRenderData` (RTL).
+
+=== Baby-step 2 — ContentRenderAssertion (object pur)
+
+*Unit tests only (zéro Playwright).*
+
+. **RED** : écrire `ContentRenderAssertionTest.kt` (unit tests purs) —
+  référence `ContentRenderAssertion` inexistant → échec compilation. Tests :
+  * `full valid render data passes all assertions`
+  * `P0 overflow fails when a real text block overflows viewport`
+  * `P0 missing notes fails when hasNotesInDom is false`
+  * `P1 font size fails when computed body font is below 14.0`
+  * `P1 contrast fails when computed contrast ratio is below 4.5`
+  * `all failures are reported at once` (containsExactlyInAnyOrder des 4 codes)
+  * `each failure carries the slide title as slideRef`
+  * `failure messages contain the assertion code name`
+  * `MIN_CONTRAST_RATIO is 4.5 (WCAG AA)`
+. **GREEN** : créer `ContentRenderAssertion.kt` (object + `assertAll` +
+  `overflowFailures` + `failure` helper + `MIN_CONTRAST_RATIO` constante).
+  Réutiliser `ContentAssertionCode`, `ContentAssertionResult`,
+  `ContentAssertionFailure`, `OverflowDetector`, `OverflowResult`,
+  `SlideLayout`, `TextBlock`, `ContentSlideAssertion.MIN_BODY_FONT_SIZE`.
+  Compilation réussit, tests passent.
+. **REFACTOR** : aligner le code sur `RtlSlideAssertion` (object + `buildList`
+  + `failure()` helper). Vérifier que `overflowFailures` délègue bien à
+  `OverflowDetector.detect` (pas de refonte de la logique d'overflow).
+
+=== Baby-step 3 — ContentPlaywrightAdapter + Functional test
+
+*Functional tests (Playwright-jvm + GradleTestKit fixtures).*
+
+. **RED** : écrire `ContentPlaywrightFunctionalTest.kt` (functional test)
+  — référence `ContentPlaywrightAdapter` inexistant → échec compilation.
+  Test unique : `pre-generated LTR deck renders content within viewport with
+  readable fonts`. Assert : `result.passed` is true (avec message d'aide si
+  fixture absente).
+. **GREEN** : créer `ContentPlaywrightAdapter.kt` (object + `extract` +
+  helpers privés `extractTextBlocks`, `computedFontSize`, `computedContrast`).
+  Le test charge la fixture LTR pré-générée
+  (`capsule-feed-demo-en-deck.html`), extrait le snapshot, délègue à
+  `ContentRenderAssertion.assertAll`. Si la fixture n'existe pas, le test
+  échoue avec un message pointant vers `./gradlew generatePlaywrightFixtures`.
+. **REFACTOR** : factoriser le calcul WCAG si trop verbeux. Vérifier que le
+  port 4337 ne collisionne pas. Aligner le lifecycle sur
+  `RtlPlaywrightFunctionalTest` (`@TestInstance(PER_CLASS)` + companion
+  object + `@BeforeAll/@AfterAll`).
+
+== US (découpage interne de SLD-10.5)
+
+L'US SLD-10.5 (3 pts) est une US unique dans le BACKLOG, mais se déroule en
+3 baby-steps internes pour le TDD. Aucune sous-US formelle n'est créée — la
+traçabilité se fait dans le rapport de session.
+
+[cols="1,3,2,2", options="header"]
+|===
+| Baby-step | Description | Niveau test | Livrable
+
+| 1
+| `ContentRenderData` (snapshot DTO pur) + invariants + `EMPTY` factory. KDoc aligné sur `SlideRenderData`.
+| Unit (8 tests purs)
+| 1 fichier prod + 1 fichier test
+
+| 2
+| `ContentRenderAssertion` (object pur) + `assertAll(ContentRenderData): ContentAssertionResult`. Réutilise les 4 codes existants. Nouvelle constante `MIN_CONTRAST_RATIO = 4.5` (WCAG AA).
+| Unit (9 tests purs)
+| 1 fichier prod + 1 fichier test
+
+| 3
+| `ContentPlaywrightAdapter` (object, src/test) + `ContentPlaywrightFunctionalTest` (LTR fixture, port 4337). Réutilise `PlaywrightFixtureSupport`.
+| Functional (1 test Playwright)
+| 1 fichier test support + 1 fichier functional test
+|===
+
+_Total_ : 3 baby-steps, ~3 pts. 2 fichiers prod (`slider.content`), 4
+fichiers test (2 unit + 1 adapter + 1 functional). 17 unit tests + 1
+functional test attendus.
+
+== Dépendances
+
+* SLD-10.1 (`TextBlock`, `SlideLayout`) ✅
+* SLD-10.2 (`OverflowDetector`, `OverflowResult`) ✅
+* SLD-10.3 (`AsciidocContentParser` — non requis pour SLD-10.5, le snapshot
+  vient du DOM, pas du .adoc) ✅ (contexte)
+* SLD-10.4 (`ContentAssertionCode`, `ContentAssertionResult`,
+  `ContentAssertionFailure`, `ContentSlideAssertion.MIN_BODY_FONT_SIZE`) ✅
+* S-021 (`RtlSlideAssertion` + `SlideRenderData` — pattern de référence) ✅
+* S-034 (`PlaywrightFixtureSupport` — lifecycle browser + HTTP server) ✅
+* S-034 (`generatePlaywrightFixtures` root task — fixture LTR pré-générée) ✅
+* `libs.playwright` (testImplementation, version 1.52.0 BOM) ✅
+* System property `playwright.ltr.fixtures.dir` (déjà injectée par
+  `slider/build.gradle.kts:108-111`) ✅
+
+== Risques et mitigations
+
+[cols="3,4,3", options="header"]
+|===
+| Risque | Impact | Mitigation
+
+| Fuxture LTR absente (build non lancé)
+| Functional test échoue avec message d'aide
+| Message assert pointe vers `./gradlew generatePlaywrightFixtures`. Test skip si `assumeTrue(fixture.exists())` (option B, à décider en implémentation)
+
+| Contraste WCAG non mesurable (éléments cachés)
+| `computedContrastRatio = 0.0` déclenche P1_CONTRAST faux positif
+| L'JS injecté retourne `0.0` si éléments absents. `ContentRenderAssertion` traite `0.0 < 4.5` comme échec — c'est le comportement attendu (slide sans texte = échec contraste)
+
+| Font size `NaN` (élément sans computed style)
+| `computedBodyFontSize` invalide, invariant `> 0.0` violé
+| L'JS retourne `"0px"` si élément absent → `0.0` → invariant échoue. Adapter à durcir : fallback `MIN_BODY_FONT_SIZE` si `0.0` (signal d'élément absent)
+
+| Port 4337 déjà pris
+| HTTP server ne démarre pas, test timeout 15s
+| Polling 15s de `PlaywrightFixtureSupport.startHttpServer` lève `RuntimeException` claire. Aucun autre borough n'utilise 4337 (audit cross-borough confirmé)
+
+| Duplication avec SLD-10.4
+| Deux objects d'assertion pour les 4 mêmes codes
+| Accepté et documenté : `ContentSlideAssertion` = estimation a priori, `ContentRenderAssertion` = mesure a posteriori. Les codes sont partagés, pas dupliqués. Le Cucumber SLD-10.6 testera les deux
+
+| JRuby gem isolé (root cause S-023)
+| Functional test skip si GradleRunner invoqué
+| Non concerné : SLD-10.5 utilise fixture pré-générée (S-034), pas GradleRunner. Le test charge un HTML statique via HTTP server
+|===
+
+== Critères de done
+
+* `ContentRenderData.kt` créé dans `slider.content` (data class + invariants + EMPTY)
+* `ContentRenderAssertion.kt` créé dans `slider.content` (object + assertAll + MIN_CONTRAST_RATIO)
+* `ContentPlaywrightAdapter.kt` créé dans `src/test/kotlin/slider/` (object + extract)
+* `ContentPlaywrightFunctionalTest.kt` créé dans `src/test/kotlin/slider/` (LTR fixture, port 4337)
+* `ContentRenderDataTest.kt` créé (8 unit tests purs)
+* `ContentRenderAssertionTest.kt` créé (9 unit tests purs)
+* `./gradlew :slider:check` VERT (0 FAIL, 0 SKIP supplémentaire)
+* 567 unitaires → ~584 unitaires (+17 attendus) + 1 functional Playwright
+* Zéro régression sur les 567 unitaires existants
+* Zéro secret/token/api key dans le code
+* English only (code, commentaires, noms de tests)
+* Gouvernance mise à jour (INDEX, BACKLOG, PROMPT_REPRISE, SESSIONS_HISTORY, archive)
+
+== Décisions architecturales
+
+. **Deux objects d'assertion coexistent** : `ContentSlideAssertion` (S-051,
+  estimation a priori sur `SlideContent`+`SlideLayout`) et
+  `ContentRenderAssertion` (S-052, mesure a posteriori sur
+  `ContentRenderData`). Les 4 codes de `ContentAssertionCode` sont partagés.
+  Justification : le pattern RTL n'a qu'un seul `RtlSlideAssertion` car il
+  n'y a pas d'estimation a priori possible (le RTL est une propriété du
+  rendu, pas du contenu). Pour le content, l'estimation a priori (avant
+  rendu, sur le .adoc) et la mesure a posteriori (après rendu, sur le DOM)
+  sont toutes deux utiles — d'où les deux objects.
+
+. **`MIN_CONTRAST_RATIO = 4.5` vit sur `ContentRenderAssertion`** (pas sur
+  `ContentSlideAssertion`). Justification : le contraste WCAG n'est mesurable
+  qu'après rendu (couleurs résolues par le CSS). SLD-10.4 utilisait le ratio
+  `titleFontSize/bodyFontSize` comme heuristique de contraste — c'était un
+  proxy. SLD-10.5 le remplace par la vraie mesure WCAG.
+
+. **Port 4337** pour le functional test content. Justification : éviter
+  collision avec LTR 4335 (`SliderPlaywrightE2eTest`) et RTL 4336
+  (`RtlPlaywrightFunctionalTest`). Audit cross-borough confirmé : aucun
+  borough n'utilise 4337.
+
+. **Pas de Cucumber dans SLD-10.5**. Le BDD end-to-end (validation a priori
+  + a posteriori) est couvert par SLD-10.6 (US séparée, à planifier).
+
+. **Pas de gating `assumeTrue`**. Le functional test échoue explicitement si
+  la fixture est absente (message d'aide). Pattern aligné sur
+  `RtlPlaywrightFunctionalTest` (S-021), pas sur bakery `assumeTrue`.
+
+== Audit Playwright cross-borough (contexte de cadrage)
+
+6 boroughs audités pour harmonisation des conventions Playwright :
+
+[cols="2,1,2,2,1,2", options="header"]
+|===
+| Borough | Track | Rôle | Pattern | HTTP | Port
+
+| MIAMI (slider)
+| jvm + Node
+| test
+| Snapshot DTO `SlideRenderData` + assertions pures
+| `python3 http.server`
+| 4335/4336
+
+| Bushwick (bakery)
+| jvm
+| test (e2eTest)
+| Inline `page.locator()` + AssertJ
+| JDK HttpServer
+| 18763
+
+| Détroit (capsule)
+| jvm
+| production
+| `file://` + `recordVideo` + `PlaywrightCapture` iface
+| `file://`
+| aucun
+
+| KINSHASA (container-provision)
+| jvm
+| production
+| Subprocess + `connectOverCDP` (anti-détection)
+| CDP
+| 9222
+
+| magic-stick
+| jvm
+| test
+| Inline `page.evaluate` (axe-core a11y)
+| `file://`
+| aucun
+
+| MEMPHIS (bom)
+| —
+| version pin 1.52.0
+| —
+| —
+| —
+|===
+
+.Conclusion de l'audit
+* Aucun contrat Playwright cross-borough partagé (la BOM ne pin que la
+  version 1.52.0).
+* Le pattern snapshot DTO `SlideRenderData` est unique à slider — c'est le
+  gold standard du workspace. SLD-10.5 suit ce pattern (pas d'inspiration
+  cross-borough nécessaire).
+* `PlaywrightFixtureSupport` (S-034) est réutilisé tel quel — aucun besoin
+  de shared contract.
+* Port 4337 n'entre en collision avec aucun borough.
+
+== Prochaine session — 053
+
+*Objectif* : implémentation SLD-10.5 selon ce cadrage, baby-step TDD
+(RED → GREEN → REFACTOR), 3 niveaux tests (unit → functional). SLD-10.6
+(Cucumber `24_slide_content_validation.feature`) à planifier ensuite.
+
+== Livrables de la session 052
+
+* Cadrage exhaustif SLD-10.5 (ce document)
+* Mise à jour BACKLOG.adoc racine (section SLD-10.5 enrichie)
+* Mise à jour INDEX.adoc (session 052, roadmap SLD-10 statut)
+* Mise à jour PROMPT_REPRISE.adoc (contexte reprise session 053)
+* Mise à jour SESSIONS_HISTORY.adoc (entrée session 052)
+* Mise à jour COMPLETED_TASKS_ARCHIVE_2026-08.adoc (cadrage SLD-10.5)
+* Zéro code modifié, zéro test modifié, build inchangé

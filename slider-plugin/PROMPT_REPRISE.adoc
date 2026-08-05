@@ -1,34 +1,58 @@
-= PROMPT_REPRISE — slider-gradle — Session 052
-:session: 052
+= PROMPT_REPRISE — slider-gradle — Session 053
+:session: 053
 :date: 2026-08-05
 
-== Session 051 terminée
+== Session 052 terminée
 
-US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
-Domaine `slider.content` enrichi (3 nouveaux fichiers) :
-`ContentAssertionCode.kt` (enum P0_OVERFLOW/P0_MISSING_NOTES/P1_FONT_SIZE/
-P1_CONTRAST), `ContentAssertionResult.kt` (sealed Passed/Failed +
-ContentAssertionFailure), `ContentSlideAssertion.kt` (object `assertAll
-(content, layout): ContentAssertionResult`, délègue overflow à
-`OverflowDetector` via `TextBlock` synthétiques, constantes
-`MIN_BODY_FONT_SIZE=14.0` + `MIN_TITLE_BODY_RATIO=1.25`). Pattern de
-référence `slider.rtl.RtlSlideAssertion` (sealed result pour `when`
-exhaustif). 11 nouveaux tests unitaires. 567 unitaires (was 556), zéro
-régression. `./gradlew :slider:check` VERT.
+Cadrage exhaustif US SLD-10.5 (Assertions Playwright enrichies) terminé.
+Zéro code modifié — session de vision et découpage. Audit Playwright
+cross-borough (6 boroughs : slider, bakery, capsule, container-provision,
+magic-stick, workspace-bom) confirmant l'absence de contrat Playwright
+partagé et le pattern snapshot DTO `SlideRenderData` unique à slider (gold
+standard du workspace).
 
-== Prochaine session — 052
+Décision architecturale clé : SLD-10.5 est l'**adaptateur Playwright** de
+SLD-10. Nouveaux types cadrés :
+- `ContentRenderData` (snapshot DTO pur, mirroring `SlideRenderData` RTL) :
+  slideTitle, realTextBlocks (List<TextBlock>), computedTitleFontSize,
+  computedBodyFontSize, computedContrastRatio, hasNotesInDom,
+  viewportWidth/Height. Invariants `require`. Factory `EMPTY`.
+- `ContentRenderAssertion` (object pur, mesure a posteriori) : `assertAll
+  (ContentRenderData): ContentAssertionResult`. Réutilise les 4 codes
+  `ContentAssertionCode` existants (pas de nouveau code). Nouvelle constante
+  `MIN_CONTRAST_RATIO = 4.5` (WCAG AA). Délègue overflow à `OverflowDetector`
+  sur les `TextBlock` réels (extraits via Playwright `boundingBox()`).
+- `ContentPlaywrightAdapter` (object, src/test) : `extract(page, slideIndex):
+  ContentRenderData` via `page.evaluate`/`evalOnSelector`/`boundingBox`/
+  `getComputedStyle`. Calcul contraste WCAG côté navigateur (JS injecté).
+- `ContentPlaywrightFunctionalTest` (LTR fixture, port 4337, réutilise
+  `PlaywrightFixtureSupport` S-034).
 
-*Objectif* : US SLD-10.5 — Assertions Playwright enrichies.
+Deux objects d'assertion coexistent : `ContentSlideAssertion` (S-051,
+estimation a priori sur `SlideContent`+`SlideLayout`) et
+`ContentRenderAssertion` (S-052, mesure a posteriori sur
+`ContentRenderData`). Les 4 codes sont partagés.
+
+3 baby-steps TDD prévus : (1) `ContentRenderData` + 8 unit, (2)
+`ContentRenderAssertion` + 9 unit, (3) `ContentPlaywrightAdapter` +
+`ContentPlaywrightFunctionalTest` (1 functional Playwright). 17 unit + 1
+functional attendus. SLD-10.6 (Cucumber `24_slide_content_validation.feature`)
+à planifier ensuite.
+
+Rapport complet : `slider-plugin/.agents/sessions/052-sld-10.5-cadrage.adoc`.
+
+== Prochaine session — 053
+
+*Objectif* : implémentation SLD-10.5 selon cadrage S-052.
 
 Périmètre :
-- `TextOverflow`, `NotesRendering`, `FontSize`, `Contrast` (pures,
-  consomment snapshot enrichi)
-- Functional tests GradleTestKit + Playwright fixtures
-- Pattern de référence : `slider.rtl.RtlSlideAssertion` (assertions pures
-  + Playwright adapter)
-- Baby-step TDD : RED → GREEN → REFACTOR
-- Functional tests (GradleTestKit)
+- Baby-step 1 : `ContentRenderData` (snapshot DTO) + 8 unit tests purs
+- Baby-step 2 : `ContentRenderAssertion` (object pur) + 9 unit tests purs
+- Baby-step 3 : `ContentPlaywrightAdapter` + `ContentPlaywrightFunctionalTest`
+  (LTR fixture, port 4337)
+- Baby-step TDD : RED → GREEN → REFACTOR (unit → functional)
 - English only : code, commentaires, noms de tests
+- Pas de Cucumber dans SLD-10.5 (couvert par SLD-10.6)
 
 == Rappels
 
@@ -50,13 +74,22 @@ Périmètre :
 - `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
 - Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
   → `build/playwright-fixtures/{ltr,rtl}/`
+- System property `playwright.ltr.fixtures.dir` injectée par
+  `slider/build.gradle.kts:108-111` (déjà en place)
+- `PlaywrightFixtureSupport` (S-034) réutilisable tel quel — lifecycle
+  browser + `python3 -m http.server` + `withPage` block
+- Port 4337 pour SLD-10.5 (aucun collision cross-borough — audit confirmé)
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew :slider:check` est VERT (0 FAIL, 0 SKIP, 567 unitaires +11 S-051)
+- `./gradlew :slider:check` est VERT (0 FAIL, 0 SKIP, 567 unitaires S-051)
 - EPICs clos : SLD-0→7 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
 - EPIC cadré : SLD-8 slider consomme codebase (5 US ~12 pts, à planifier)
 - EPIC en pause : SLD-9 i18n Completion (SLD-9.1 ✅, reste 9.2/9.3/9.4)
 - EPIC en cours : SLD-10 Slide Content Model & Rendering Validation
-  (SLD-10.0/10.1/10.2/10.3/10.4 ✅, reste 10.5/10.6)
+  (SLD-10.0/10.1/10.2/10.3/10.4 ✅, SLD-10.5 cadré S-052 à implémenter S-053,
+  SLD-10.6 à planifier)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
   rejeté, 002 slider consomme codebase comme socle LLM unifié)
+- Cadrage SLD-10.5 : `slider-plugin/.agents/sessions/052-sld-10.5-cadrage.adoc`
+  (contrats ContentRenderData, ContentRenderAssertion, ContentPlaywrightAdapter,
+  ContentPlaywrightFunctionalTest, 3 baby-steps, risques, décisions)

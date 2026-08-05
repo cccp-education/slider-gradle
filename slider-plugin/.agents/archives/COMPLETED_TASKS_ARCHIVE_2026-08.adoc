@@ -1,6 +1,30 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 052 — Cadrage exhaustif SLD-10.5
+
+Cadrage formel US SLD-10.5 (Assertions Playwright enrichies) de l'EPIC
+SLD-10. Zéro code modifié — session de vision et découpage. Audit Playwright
+cross-borough (6 boroughs : slider, bakery, capsule, container-provision,
+magic-stick, workspace-bom) confirmant l'absence de contrat Playwright
+partagé et le pattern snapshot DTO `SlideRenderData` unique à slider (gold
+standard du workspace).
+
+Décision architecturale clé : SLD-10.5 est l'**adaptateur Playwright** de
+SLD-10. Nouveaux types cadrés : `ContentRenderData` (snapshot DTO pur,
+mirroring `SlideRenderData` RTL), `ContentRenderAssertion` (object pur,
+mesure a posteriori, réutilise les 4 codes `ContentAssertionCode` existants),
+`ContentPlaywrightAdapter` (extraction Playwright → snapshot, port 4337),
+`ContentPlaywrightFunctionalTest` (LTR fixture, réutilise
+`PlaywrightFixtureSupport` S-034). Nouvelle constante `MIN_CONTRAST_RATIO =
+4.5` (WCAG AA). Deux objects d'assertion coexistent :
+`ContentSlideAssertion` (S-051, estimation a priori) et
+`ContentRenderAssertion` (S-052, mesure a posteriori). 3 baby-steps TDD
+prévus : unit (8+9) → functional (1 Playwright). 17 unit + 1 functional
+attendus. SLD-10.6 (Cucumber `24_slide_content_validation.feature`) à
+planifier ensuite. Rapport :
+`slider-plugin/.agents/sessions/052-sld-10.5-cadrage.adoc`.
+
 == Session 051 — SLD-10.4 ContentSlideAssertion
 
 US SLD-10.4 livrée — `ContentSlideAssertion` + codes assertions P0/P1.
