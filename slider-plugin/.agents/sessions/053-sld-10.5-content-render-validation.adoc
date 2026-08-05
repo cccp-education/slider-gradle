@@ -1,0 +1,172 @@
+= Session 053 — SLD-10.5 Content Render Validation (Playwright adapter)
+:date: 2026-08-05
+:session: 053
+
+== Objectif
+
+Implémentation de l'US SLD-10.5 (Assertions Playwright enrichies) selon le
+cadrage exhaustif de la session 052. L'US introduit la couche *adaptateur
+Playwright* de l'EPIC SLD-10 : un snapshot enrichi `ContentRenderData` (DTO
+pur, mirroring `SlideRenderData` du RTL), un object pur
+`ContentRenderAssertion` (mesure a posteriori, réutilise les 4 codes
+`ContentAssertionCode` existants), et un adaptateur Playwright
+`ContentPlaywrightAdapter` qui extrait le snapshot depuis une `Page` réelle.
+
+== Méthode
+
+Baby-step DDD/TDD, 3 niveaux tests/US (unit → functional), RED → GREEN →
+REFACTOR. English only (code, commentaires, noms de tests). Pattern de
+référence : `slider.rtl` (S-021) — snapshot DTO + assertion pure +
+adaptateur Playwright.
+
+== Périmètre livré
+
+3 baby-steps TDD, chacun avec ses 3 niveaux de tests :
+
+. **Baby-step 1 — `ContentRenderData`** (snapshot DTO pur, package
+  `slider.content`) : data class avec 8 champs (slideTitle, realTextBlocks,
+  computedTitleFontSize, computedBodyFontSize, computedContrastRatio,
+  hasNotesInDom, viewportWidth, viewportHeight), invariants `init`
+  (slideTitle non-blank, font sizes > 0, contrast >= 0, viewport > 0),
+  factory `EMPTY` avec bypass des invariants via paramètre privé
+  `bypassInvariants` (pour tests Cucumber où le snapshot est construit
+  progressivement). KDoc aligné sur `SlideRenderData` (RTL). **8 tests
+  unitaires purs**.
+
+. **Baby-step 2 — `ContentRenderAssertion`** (object pur, package
+  `slider.content`) : `assertAll(data: ContentRenderData):
+  ContentAssertionResult` — réutilise les 4 codes de
+  `ContentAssertionCode` (S-051) et le sealed `ContentAssertionResult`.
+  `overflowFailures` délègue à `OverflowDetector.detect` (S-052) sur les
+  `TextBlock` réels (extraits via Playwright `boundingBox()`), pas les
+  TextBlock synthétiques de `ContentSlideAssertion`. Le `SlideLayout` est
+  reconstruit avec `marginX=0/marginY=0` car les bounding boxes réelles
+  sont déjà dans le repère viewport. Nouvelle constante
+  `MIN_CONTRAST_RATIO = 4.5` (WCAG AA) — vit sur
+  `ContentRenderAssertion` car le contraste réel n'est mesurable qu'après
+  rendu. `MIN_BODY_FONT_SIZE` (14.0) réutilisé depuis
+  `ContentSlideAssertion`. **9 tests unitaires purs**.
+
+. **Baby-step 3 — `ContentPlaywrightAdapter` + functional test** :
+  `ContentPlaywrightAdapter` (object, `src/test/kotlin/slider/`) extrait un
+  `ContentRenderData` depuis une `Page` Playwright réelle. Méthodes
+  privées : `extractTextBlocks` (h2/h3/p/li + boundingBox),
+  `computedFontSize` (getComputedStyle via `evalOnSelector`),
+  `computedContrast` (JS injecté côté navigateur — formule WCAG relative
+  luminance, retourne 0.0 si éléments absents). Port **4337** (nouveau,
+  aucun collision cross-borough — audit S-052 confirmé).
+  `ContentPlaywrightFunctionalTest` (LTR fixture
+  `capsule-feed-demo-en-deck.html`, port 4337, réutilise
+  `PlaywrightFixtureSupport` S-034). Lifecycle aligné sur
+  `RtlPlaywrightFunctionalTest` (`@TestInstance(PER_CLASS)` + companion +
+  `@BeforeAll/@AfterAll`). **1 test functional Playwright**.
+
+== Décisions architecturales
+
+. **Deux objects d'assertion coexistent** : `ContentSlideAssertion` (S-051,
+  estimation a priori sur `SlideContent`+`SlideLayout`) et
+  `ContentRenderAssertion` (S-053, mesure a posteriori sur
+  `ContentRenderData`). Les 4 codes de `ContentAssertionCode` sont
+  partagés. Justification : le pattern RTL n'a qu'un seul
+  `RtlSlideAssertion` car il n'y a pas d'estimation a priori possible (le
+  RTL est une propriété du rendu, pas du contenu). Pour le content,
+  l'estimation a priori (avant rendu, sur le .adoc) et la mesure a
+  posteriori (après rendu, sur le DOM) sont toutes deux utiles — d'où les
+  deux objects.
+
+. **`MIN_CONTRAST_RATIO = 4.5` vit sur `ContentRenderAssertion`** (pas sur
+  `ContentSlideAssertion`). Justification : le contraste WCAG n'est
+  mesurable qu'après rendu (couleurs résolues par le CSS). SLD-10.4
+  utilisait le ratio `titleFontSize/bodyFontSize` comme heuristique de
+  contraste — c'était un proxy. SLD-10.5 le remplace par la vraie mesure
+  WCAG.
+
+. **Port 4337** pour le functional test content. Justification : éviter
+  collision avec LTR 4335 (`SliderPlaywrightE2eTest`) et RTL 4336
+  (`RtlPlaywrightFunctionalTest`). Audit cross-borough confirmé : aucun
+  borough n'utilise 4337.
+
+. **`bypassInvariants` paramètre privé** sur `ContentRenderData`. La
+  factory `EMPTY` bypass les invariants `init` via un paramètre privé
+  `bypassInvariants: Boolean = false`. Justification : les tests Cucumber
+  construisent le snapshot progressivement (EMPTY puis copy), les
+  invariants ne s'appliquent qu'aux instances construites hors factory.
+
+. **Pas de Cucumber dans SLD-10.5**. Le BDD end-to-end (validation a
+  priori + a posteriori) est couvert par SLD-10.6 (US séparée, à planifier).
+
+. **Pas de gating `assumeTrue`**. Le functional test échoue explicitement
+  si la fixture est absente (message d'aide pointant vers
+  `./gradlew generatePlaywrightFixtures`). Pattern aligné sur
+  `RtlPlaywrightFunctionalTest` (S-021).
+
+== Fichiers créés
+
+Production (package `slider.content`) :
+. `slider/src/main/kotlin/slider/content/ContentRenderData.kt` (83 lignes)
+. `slider/src/main/kotlin/slider/content/ContentRenderAssertion.kt` (93
+  lignes)
+
+Test (unit) :
+. `slider/src/test/kotlin/slider/content/ContentRenderDataTest.kt` (8
+  tests)
+. `slider/src/test/kotlin/slider/content/ContentRenderAssertionTest.kt`
+  (9 tests)
+
+Test (functional) :
+. `slider/src/test/kotlin/slider/ContentPlaywrightAdapter.kt` (adaptateur
+  Playwright, 105 lignes)
+. `slider/src/test/kotlin/slider/ContentPlaywrightFunctionalTest.kt`
+  (1 test Playwright LTR, port 4337)
+
+== Résultats tests
+
+. `./gradlew :slider:check` VERT — BUILD SUCCESSFUL en 3m 6s
+. **585 unitaires** (was 567 S-051 → +18) : 8 ContentRenderDataTest + 9
+  ContentRenderAssertionTest + 1 ContentPlaywrightFunctionalTest (dans le
+  task `test`, pas `functionalTest`)
+. **238 Cucumber** (inchangé)
+. **26 Functional** (inchangé)
+. **0 FAIL, 1 SKIP** (préexistant — JRuby gem isolé, non lié)
+. Zéro régression sur les 567 unitaires existants
+
+== Critères de done (tous satisfaits)
+
+* `ContentRenderData.kt` créé dans `slider.content` (data class +
+  invariants + EMPTY) ✅
+* `ContentRenderAssertion.kt` créé dans `slider.content` (object +
+  assertAll + MIN_CONTRAST_RATIO) ✅
+* `ContentPlaywrightAdapter.kt` créé dans `src/test/kotlin/slider/`
+  (object + extract) ✅
+* `ContentPlaywrightFunctionalTest.kt` créé dans
+  `src/test/kotlin/slider/` (LTR fixture, port 4337) ✅
+* `ContentRenderDataTest.kt` créé (8 unit tests purs) ✅
+* `ContentRenderAssertionTest.kt` créé (9 unit tests purs) ✅
+* `./gradlew :slider:check` VERT (0 FAIL, 0 SKIP supplémentaire) ✅
+* 567 unitaires → 585 unitaires (+18 attendus) + 1 functional Playwright
+  ✅
+* Zéro régression sur les 567 unitaires existants ✅
+* Zéro secret/token/api key dans le code ✅
+* English only (code, commentaires, noms de tests) ✅
+* Gouvernance mise à jour (INDEX, BACKLOG, PROMPT_REPRISE,
+  SESSIONS_HISTORY, archive) ✅
+
+== Prochaine session — 054
+
+SLD-10.6 (Cucumber `24_slide_content_validation.feature`) à planifier puis
+implémenter. Le BDD end-to-end testera les deux objects d'assertion :
+validation a priori via `ContentSlideAssertion` (sur `SlideContent` +
+`SlideLayout` depuis le .adoc), validation a posteriori via
+`ContentRenderAssertion` (sur `ContentRenderData` depuis le DOM rendu).
+
+== Livrables de la session 053
+
+* 2 fichiers prod (`slider.content`) + 4 fichiers test (2 unit + 1
+  adapter + 1 functional)
+* Rapport de session (ce document)
+* Mise à jour BACKLOG.adoc racine (section SLD-10.5 ✅)
+* Mise à jour INDEX.adoc (session 053, roadmap SLD-10 statut)
+* Mise à jour PROMPT_REPRISE.adoc (contexte reprise session 054)
+* Mise à jour SESSIONS_HISTORY.adoc (entrée session 053)
+* Mise à jour COMPLETED_TASKS_ARCHIVE_2026-08.adoc (SLD-10.5 livré)
+* Zéro secret, build VERT, zéro régression

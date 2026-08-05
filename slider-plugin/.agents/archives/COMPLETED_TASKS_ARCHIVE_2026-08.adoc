@@ -1,6 +1,26 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 053 — SLD-10.5 Content Render Validation
+
+US SLD-10.5 (Assertions Playwright enrichies) livrée selon cadrage S-052.
+3 baby-steps TDD (RED → GREEN → REFACTOR), 3 niveaux tests (unit →
+functional). Domaine `slider.content` enrichi (2 nouveaux fichiers prod) :
+`ContentRenderData.kt` (snapshot DTO pur, mirroring `SlideRenderData` RTL,
+8 champs, invariants `init`, factory `EMPTY` avec bypass via paramètre
+privé `bypassInvariants`) + `ContentRenderAssertion.kt` (object pur,
+`assertAll(ContentRenderData): ContentAssertionResult`, réutilise les 4
+codes `ContentAssertionCode` existants, délègue overflow à
+`OverflowDetector.detect` sur les `TextBlock` réels, nouvelle constante
+`MIN_CONTRAST_RATIO = 4.5` WCAG AA). Adaptateur Playwright
+`ContentPlaywrightAdapter.kt` (src/test, object, extrait snapshot depuis
+`Page` réelle — `extractTextBlocks`/`computedFontSize`/`computedContrast`
+JS injecté WCAG luminance). Functional test LTR
+`ContentPlaywrightFunctionalTest.kt` (port 4337, fixture
+`capsule-feed-demo-en-deck.html`, réutilise `PlaywrightFixtureSupport`
+S-034). 17 unit + 1 functional = +18 tests. 585 unitaires (was 567), 0
+FAIL, 1 SKIP préexistant. `./gradlew :slider:check` VERT. Zéro régression.
+
 == Session 052 — Cadrage exhaustif SLD-10.5
 
 Cadrage formel US SLD-10.5 (Assertions Playwright enrichies) de l'EPIC

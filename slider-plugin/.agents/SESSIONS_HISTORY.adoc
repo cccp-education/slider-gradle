@@ -2,6 +2,36 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 053 (2026-08-05) — SLD-10.5 Content Render Validation ✅
+
+US SLD-10.5 (Assertions Playwright enrichies) livrée selon cadrage S-052.
+3 baby-steps TDD (RED → GREEN → REFACTOR), 3 niveaux tests (unit →
+functional). Domaine `slider.content` enrichi (2 nouveaux fichiers prod) :
+`ContentRenderData.kt` (snapshot DTO pur, mirroring `SlideRenderData` RTL,
+8 champs — slideTitle, realTextBlocks, computedTitleFontSize,
+computedBodyFontSize, computedContrastRatio, hasNotesInDom,
+viewportWidth/Height, invariants `init`, factory `EMPTY` avec bypass via
+paramètre privé `bypassInvariants`) + `ContentRenderAssertion.kt` (object
+pur, `assertAll(ContentRenderData): ContentAssertionResult`, réutilise les
+4 codes `ContentAssertionCode` existants — pas de nouveau code, délègue
+overflow à `OverflowDetector.detect` sur les `TextBlock` réels, nouvelle
+constante `MIN_CONTRAST_RATIO = 4.5` WCAG AA, `MIN_BODY_FONT_SIZE` réutilisé
+depuis `ContentSlideAssertion`). Adaptateur Playwright
+`ContentPlaywrightAdapter.kt` (src/test, object, extrait snapshot depuis
+`Page` réelle — `extractTextBlocks` h2/h3/p/li + boundingBox,
+`computedFontSize` getComputedStyle, `computedContrast` JS injecté WCAG
+relative luminance). Functional test LTR
+`ContentPlaywrightFunctionalTest.kt` (port 4337, fixture
+`capsule-feed-demo-en-deck.html`, réutilise `PlaywrightFixtureSupport`
+S-034, lifecycle `@TestInstance(PER_CLASS)` + companion +
+`@BeforeAll/@AfterAll`). Deux objects d'assertion coexistent :
+`ContentSlideAssertion` (S-051, estimation a priori sur
+`SlideContent`+`SlideLayout`) et `ContentRenderAssertion` (S-053, mesure a
+posteriori sur `ContentRenderData`). 17 unit + 1 functional = +18 tests. 585
+unitaires (was 567), 0 FAIL, 1 SKIP préexistant. `./gradlew :slider:check`
+VERT. Zéro régression. Rapport :
+`slider-plugin/.agents/sessions/053-sld-10.5-content-render-validation.adoc`.
+
 == Session 052 (2026-08-05) — Cadrage exhaustif SLD-10.5 ✅
 
 Cadrage formel US SLD-10.5 (Assertions Playwright enrichies) de l'EPIC
