@@ -2,6 +2,29 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 061 (2026-08-05) — Cadrage formel SLD-8.3 DeckPipelineGraph ✅
+
+Cadrage formel US-8.3 `DeckPipelineGraph` (koog orchestration). Zéro code modifié —
+session de vision et découpage baby-step. Patterns koog 1.0.0 consommés depuis
+`office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` (15 patterns, architecture
+"koog orchestre / langchain4j exécute"). Audit codebase : `KoogAugmentedContextGraph`
+(pattern hybride graphe koog + `execute()` séquentiel), `AugmentedState` (data class
+immutable), `LlmProvider` (fun interface suspend), `LlmBuildService` (BuildService Gradle).
+
+Domaine cible : `slider.pipeline` (nouveau, 16ème domaine), `DeckState` (data class
+immutable, 11 champs), `DeckContextValidator` (validation pure, sealed Valid/Invalid),
+`DeckPipelineGraph` (graphe koog `strategy<DeckState, DeckState>` — 3 nœuds
+propose-context/validate-context/generate-deck + edges conditionnels),
+`GenerateDeckPipelineTask` (tâche Gradle thin `generateDeckPipeline`).
+
+4 baby-steps TDD/BDD prévus (~9 pts) : 8.3a `DeckState`+`DeckContextValidator` (20-25
+unit) → 8.3b `DeckPipelineGraph` (15-20 unit mock LLM) → 8.3c `GenerateDeckPipelineTask`
+(5-8 functional) → 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios).
+Non-périmètre : pas de retry/boucle, pas de Checkpoints, pas de Self-Reflection,
+pas de modification des tâches existantes (rétrocompatibilité).
+
+Rapport : `slider-plugin/.agents/sessions/061-cadrage-sld-8.3.adoc`.
+
 == Session 060 (2026-08-05) — SLD-8 US-8.2 AssistantManager câblage codebase ✅
 
 SLD-8 US-8.2 livrée en baby-step TDD/BDD 3 niveaux. `AssistantManager.kt`

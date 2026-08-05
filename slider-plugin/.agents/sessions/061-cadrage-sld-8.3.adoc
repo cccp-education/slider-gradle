@@ -1,0 +1,177 @@
+= Session 061 — Cadrage formel SLD-8.3 DeckPipelineGraph (koog orchestration)
+:session: 061
+:date: 2026-08-05
+:epic: SLD-8 US-8.3
+:type: vision+cadrage
+:method: baby-step DDD/TDD/BDD (planning)
+:score: 9/10
+
+== Objectif
+
+Cadrer formellement l'US SLD-8.3 `DeckPipelineGraph` (orchestration koog du pipeline
+deck) en vue de l'implémentation en baby-steps TDD/BDD lors des sessions suivantes.
+Session de vision et découpage — zéro code modifié.
+
+== Contexte
+
+SLD-8 (slider consomme codebase N1) est en cours :
+- US-8.0 ✅ Cadrage contrat consommation (S-046)
+- US-8.1 ✅ BuildService LLM pont côté codebase (S-176)
+- US-8.2 ✅ AssistantManager câblage codebase LlmBuildService (S-060)
+- US-8.3 🟡 À IMPLÉMENTER (cadrage cette session)
+- US-8.4 🟡 À PLANIFIER (tests 3 niveaux — fusionné dans baby-steps 8.3a-d)
+
+L'US-8.3 introduit une orchestration koog du pipeline deck via un graphe
+`DeckPipelineGraph` qui chaîne les 3 nœuds : `propose-context` → `validate-context` →
+`generate-deck`. koog gère la topologie (nœuds, edges conditionnels, state), langchain4j
+exécute les appels LLM via `LlmProviderChatModelAdapter` (S-060).
+
+== Travail effectué
+
+=== 1. Consommation KOOG_AGENTIC_PATTERNS.adoc
+
+Lecture intégrale du document `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
+(1781 lignes, 15 patterns koog 1.0.0). Points clés extraits :
+
+- *Principe fondateur* : koog orchestre, langchain4j exécute
+- *DSL koog* : `strategy<TIn, TOut>`, `node<In, Out>`, `edge(from forwardTo to onCondition {})`, `nodeStart`/`nodeFinish`, `ToolSelectionStrategy.NONE`, `asMermaidDiagram()`
+- *State pattern* : data class Kotlin immutable, `copy()` par nœud
+- *Patterns pertinents* :
+  - Pattern 13 (Subgraphs) — composition de sous-graphes via `graph.invoke()`
+  - Pattern 08 (Guardrails) — validation pure (pas de LLM) avant appel LLM
+  - Pattern 05 (Routing) — edge conditionnel `onCondition { it.x }`
+
+=== 2. Audit codebase (références existantes)
+
+Audit des fichiers koog existants côté codebase-gradle pour identifier les patterns
+à réutiliser côté slider :
+
+- `codebase.koog.KoogAugmentedContextGraph` (141 lignes) — pattern hybride : graphe koog
+  `strategy<AugmentedState, AugmentedState>` pour la topologie + méthode `execute()`
+  séquentielle avec try/catch par nœud. **C'est le pattern de référence pour SLD-8.3.**
+- `codebase.koog.state.AugmentedState` (20 lignes) — data class immutable avec 8 champs
+  + `copy()`. Pattern pour `DeckState`.
+- `codebase.koog.llm.LlmProvider` (10 lignes) — `fun interface LlmProvider { suspend fun call(prompt: String): String }`.
+  Abstraction LLM de codebase, déjà wrappée côté slider par `LlmProviderChatModelAdapter`.
+- `codebase.koog.llm.service.LlmBuildService` (54 lignes) — BuildService Gradle exposant
+  `LlmProvider` via `LlmServiceResolver.resolveProvider()`. Déjà câblé côté slider
+  (S-060, `registerLlmBuildService()`).
+
+=== 3. Audit slider (état actuel du pipeline deck)
+
+Audit des tâches Gradle existantes qui seront orchestrées par le graphe :
+
+- `slider.ai.RagTasks.ProposeDeckContextTask` — tâche `proposeDeckContext` (step 1/2).
+  Lit `-Psubject`, résout la langue (cascade 5 couches I18nConfigResolver), récupère
+  le contexte RAG, appelle le LLM avec `PromptManager.contextSystemPrompt` +
+  `contextUserMessage`, parse le JSON en `DeckContext`, écrit `*-deck-context.yml`.
+- `slider.ai.RagTasks.GenerateDeckTask` — tâche `generateDeck` (step 2/2).
+  Lit `-Pdeck.context`, charge le `DeckContext`, récupère le contexte RAG AsciiDoc,
+  appelle le LLM avec `PromptManager.deckSystemPrompt` + `deckUserMessage`, écrit
+  `slides/misc/<outputFile>`.
+- `slider.ai.AssistantManager.PromptManager` — prompts system/user pour les 2 étapes.
+- `slider.ai.LlmProviderChatModelAdapter` (49 lignes, S-060) — adapteur
+  `LlmProvider` (suspend) → `ChatModel` (langchain4j) via `runBlocking`.
+
+**Constat** : les 2 tâches sont indépendantes, aucun chaînage, aucune validation du
+contexte proposé entre les 2. L'utilisateur doit manuellement enchaîner.
+
+=== 4. Cadrage formel US-8.3
+
+Rédaction du cadrage dans `slider-plugin/.agents/INDEX.adoc` (section EPIC SLD-8 US-8.3)
++ `BACKLOG.adoc` + `PROMPT_REPRISE.adoc`.
+
+*Domaine DDD cible* : `slider.pipeline` (nouveau, 16ème domaine)
+
+*Architecture cible* :
+```
+DeckState(subject, language, authorName, authorEmail, ragContext, deckContextJson,
+           contextValid=false, validationError=null, deckAdoc="", error=null)
+
+  [nodeStart] → [proposeContext] → [validateContext] → [generateDeck] → [nodeFinish]
+                     ↑ LLM call            ↑ pure check        ↑ LLM call
+```
+
+*Edges conditionnels* :
+- `validateContext → generateDeck onCondition { it.contextValid }`
+- `validateContext → nodeFinish onCondition { !it.contextValid }` (error = validationError)
+
+*4 baby-steps TDD/BDD prévus* (~9 pts) :
+
+[cols="1,3,2,2"]
+|===
+| Step | Description | Tests | Pts
+
+| 8.3a
+| `DeckState` + `DeckContextValidator` (value objects purs). `DeckState` data class
+  immutable (11 champs, invariants `init`). `DeckContextValidator` object pur
+  (`validate(deckContextJson): ValidationResult` — sealed Valid/Invalid). Zéro
+  dépendance koog/Gradle/LLM. Unit tests purs.
+| 20-25 unit | 2
+
+| 8.3b
+| `DeckPipelineGraph` (graphe koog). `strategy<DeckState, DeckState>` avec 3 nœuds
+  + edges conditionnels. Nœuds propose/generate appellent `ChatModel` (mocké en test).
+  Nœud validate délègue à `DeckContextValidator`. Pattern `KoogAugmentedContextGraph`.
+  Unit tests avec mock LLM.
+| 15-20 unit | 3
+
+| 8.3c
+| `GenerateDeckPipelineTask` (tâche Gradle thin). `generateDeckPipeline` task,
+  inputs `-Psubject`/`-Planguage`/`-Pai.provider`. Délègue à
+  `DeckPipelineGraph.execute()`. Outputs 2 fichiers. Functional tests GradleTestKit.
+| 5-8 functional | 2
+
+| 8.3d
+| Cucumber `26_deck_pipeline_koog.feature`. Scénarios BDD : pipeline complet,
+  contexte invalide, LLM échec propose, LLM échec generate. BDD end-to-end.
+| 8-12 cucumber | 2
+|===
+
+*Non-périmètre* :
+- Pas de retry/boucle sur validateContext (v1 — edge simple valid/invalid)
+- Pas de Checkpoints/Time Travel (Pattern 15)
+- Pas de Self-Reflection (Pattern 10)
+- Pas de modification des tâches existantes (rétrocompatibilité)
+- Pas de RAG pgvector dans le graphe (RAG reste dans les tâches existantes)
+
+== Gouvernance
+
+* Fichiers modifiés :
+  - `slider-plugin/.agents/INDEX.adoc` (session en cours 061, roadmap SLD-8, section
+    EPIC SLD-8 US-8.3 détaillée — ~90 lignes ajoutées)
+  - `BACKLOG.adoc` (session 061, table SLD-8 US affinée, section SLD-8.3 ajoutée)
+  - `slider-plugin/PROMPT_REPRISE.adoc` (mission session 062)
+  - `AGENTS.adoc` racine (table MIAMI session 061, historique mises à jour)
+  - Ce rapport `slider-plugin/.agents/sessions/061-cadrage-sld-8.3.adoc`
+
+* Zéro code de production modifié
+* Zéro test modifié
+* Build non relancé (zéro modification code — session de vision)
+
+== État SLD-8
+
+[cols="1,3,1,1"]
+|===
+| US | Description | Statut | Session
+
+| SLD-8.0 | Cadrage contrat consommation | ✅ TERMINÉ | S-046
+| SLD-8.1 | BuildService LLM pont (codebase) | ✅ TERMINÉ | S-176
+| SLD-8.2 | AssistantManager câblage (slider) | ✅ TERMINÉ | S-060
+| SLD-8.3 | DeckPipelineGraph (koog orchestration) | 🟡 CADRÉ | S-061
+| SLD-8.4 | Tests 3 niveaux pipeline koog deck | 🟡 À PLANIFIER | —
+|===
+
+== Prochaine session (062)
+
+. SLD-8.3 baby-step 8.3a : `DeckState` + `DeckContextValidator` (value objects purs,
+  domaine `slider.pipeline`). RED → GREEN → REFACTOR. 20-25 unit tests purs (zéro
+  Gradle, zéro LLM, zéro koog). Valider `./gradlew :slider:compileTestKotlin` VERT.
+. Publication BOM 0.0.16 + codebase-plugin 0.0.5 sur Maven Central (si permission) —
+  prérequis pour publication slider 0.0.16 future.
+
+== Score
+
+9/10 — Cadrage exhaustif, patterns koog consommés, audit codebase approfondi,
+baby-steps clairement définis avec estimations et contrats de test. Un point de
+marge pour les imprévus d'implémentation (accessibilité koog transitive, mocks LLM).

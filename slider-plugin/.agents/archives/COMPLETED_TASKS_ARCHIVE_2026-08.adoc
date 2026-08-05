@@ -1,6 +1,34 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 061 — Cadrage formel SLD-8.3 DeckPipelineGraph ✅
+
+Cadrage formel US-8.3 `DeckPipelineGraph` (koog orchestration). Zéro code modifié —
+session de vision et découpage baby-step. Patterns koog 1.0.0 consommés depuis
+`office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc` (15 patterns, "koog orchestre /
+langchain4j exécute"). Audit codebase : `KoogAugmentedContextGraph` (pattern hybride
+graphe koog + `execute()` séquentiel), `AugmentedState` (data class immutable),
+`LlmProvider` (fun interface suspend), `LlmBuildService` (BuildService Gradle).
+
+Domaine cible : `slider.pipeline` (nouveau, 16ème domaine), `DeckState` (data class
+immutable, 11 champs), `DeckContextValidator` (validation pure, sealed Valid/Invalid),
+`DeckPipelineGraph` (graphe koog — 3 nœuds propose-context/validate-context/generate-deck
++ edges conditionnels), `GenerateDeckPipelineTask` (tâche `generateDeckPipeline`).
+
+4 baby-steps TDD/BDD prévus (~9 pts) : 8.3a `DeckState`+`DeckContextValidator` (20-25
+unit) → 8.3b `DeckPipelineGraph` (15-20 unit mock LLM) → 8.3c `GenerateDeckPipelineTask`
+(5-8 functional) → 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios).
+
+Tâches terminées :
+. Consommation KOOG_AGENTIC_PATTERNS.adoc (1781 lignes, 15 patterns)
+. Audit codebase (KoogAugmentedContextGraph, AugmentedState, LlmProvider, LlmBuildService)
+. Audit slider (ProposeDeckContextTask, GenerateDeckTask, AssistantManager, LlmProviderChatModelAdapter)
+. Cadrage formel INDEX.adoc (section EPIC SLD-8 US-8.3, ~90 lignes)
+. Mise à jour BACKLOG.adoc (table SLD-8 US affinée)
+. Mise à jour PROMPT_REPRISE.adoc (mission session 062)
+. Mise à jour AGENTS.adoc racine (table MIAMI + historique)
+. Rapport de session 061-cadrage-sld-8.3.adoc
+
 == Session 057 — EPIC SLD-9 i18n Completion TERMINÉ (9.2/9.3/9.4)
 
 EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 5/5 US (9.0/9.1 S-047 +
