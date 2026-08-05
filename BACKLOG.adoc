@@ -458,10 +458,10 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | ✅ TERMINÉ (S-058, 6/6 US — 11.0 cadrage S-056 + 11.1→11.6) | 6 US ~14 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-11 (expulsion slider.capsule) TERMINÉ S-058 (6/6 US). EPIC CAP-MODEL (unification modèle capsule.feed) TERMINÉ capsule S-069 (7/7 US). Publication slider 0.0.15 + BOM 0.0.15 (S-059). EPIC SLD-8 (slider consomme codebase) cadré session 046 — mis de côté par pilote. EPIC SLD-9 (i18n Completion) TERMINÉ — SLD-9.0→9.4 ✅ (5/5 US). EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
+_Tous les EPICs de feature sont terminés. EPIC SLD-11 (expulsion slider.capsule) TERMINÉ S-058 (6/6 US). EPIC CAP-MODEL (unification modèle capsule.feed) TERMINÉ capsule S-069 (7/7 US). Publication slider 0.0.16 + BOM 0.0.17 (S-066). EPIC SLD-8 (slider consomme codebase) TERMINÉ S-065 (US-8.0/8.1/8.2/8.3 ✅, US-8.4 caduque). EPIC SLD-9 (i18n Completion) TERMINÉ — SLD-9.0→9.4 ✅ (5/5 US). EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
 
 '''
-== 🟡 EPIC SLD-11 — Expulsion slider.capsule : realignment boundary slider ↔ capsule (Session 056 — Cadrage)
+== ✅ EPIC SLD-11 — Expulsion slider.capsule : realignment boundary slider ↔ capsule (Session 058 — TERMINÉ)
 
 _Vision_ : Le domaine `slider.capsule` (4 fichiers production + 8 fichiers test,
 1251 lignes) est une *fuite de responsabilite* — il fait du travail de capsule
@@ -526,7 +526,7 @@ suppression source).
 
 '''
 
-== 🟡 EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 049 — Cadrage, à planifier)
+== ✅ EPIC SLD-10 — Slide Content Model & Rendering Validation (Session 054 — TERMINÉ)
 
 _Vision_ : slider génère des slides AsciiDoc → HTML via Reveal.js, mais n'a
 **aucun modèle de contenu de slide** qui permette d'évaluer le rendu. Les
@@ -568,7 +568,7 @@ assertions pures + adaptateur infrastructure. _Prérequis_ : SLD-2/3/6 terminés
 (✅), build vert 660 PASS (✅).
 
 '''
-== 🟡 EPIC SLD-8 — Consommation socle N1 codebase : unifier les appels LLM slider (Session 046 — Cadrage, refondu post-046)
+== ✅ EPIC SLD-8 — Consommation socle N1 codebase : unifier les appels LLM slider (Session 065 — TERMINÉ)
 
 _Vision_ : les appels LLM de slider sont éparpillés dans sa logique métier au lieu
 de reposer sur un socle unifié. `AssistantManager.kt` (648 lignes) fabrique des
@@ -592,8 +592,8 @@ langchain4j/koog en `implementation`). L'US-8.1 lève ce gap — contrat de serv
 | SLD-8.0 | Cadrage contrat de consommation — périmètre slider (`AssistantManager` 4 factories → câblage, `RagManager`, `OllamaLanguageModelAdapter`) + contrat service codebase consommable (N0 `llm-pool-contracts`/`codebase-contracts`) | 1 | P0 | ✅ TERMINÉ (S-046)
 | SLD-8.1 | **Côté codebase (N1, Queens)** — exposer un `BuildService` LLM consommable : `Provider<ChatModel>` via `LlmProviderResolver`/`OllamaPool` ; koog-agents/langchain4j en `api` → slider n'ajoute pas koog via BOM, il le consomme transitivement | 3 | P0 | ✅ TERMINÉ (S-176)
 | SLD-8.2 | slider consomme le service codebase via `@Inject` — `AssistantManager` réduit à du câblage, suppression factories 4 providers + dispatch `ai.provider` + pools | 2 | P0 | ✅ TERMINÉ (S-060)
-| SLD-8.3 | Orchestration koog du pipeline deck — `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) sur les services codebase, DSL koog transitif. 4 baby-steps : 8.3a `DeckState`+`DeckContextValidator` (20-25 unit) → 8.3b `DeckPipelineGraph` graphe koog (15-20 unit mock LLM) → 8.3c `GenerateDeckPipelineTask` (5-8 functional) → 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios). Domaine `slider.pipeline`. | 3 | P1 | 🟡 8.3a/b/c ✅ (S-062/063/064) — 8.3d à faire
-| SLD-8.4 | Tests 3 niveaux — unit (graphe koog, services mockés), functional, Cucumber pipeline koog deck (2 appels orchestrés). Fusionné dans baby-steps 8.3a-d (US-8.3 intègre les 3 niveaux par baby-step). | 3 | P1 | 🟡 À PLANIFIER
+| SLD-8.3 | Orchestration koog du pipeline deck — `DeckPipelineGraph` (nodes : propose-context, validate-context, generate-deck) sur les services codebase, DSL koog transitif. 4 baby-steps : 8.3a `DeckState`+`DeckContextValidator` (20-25 unit) → 8.3b `DeckPipelineGraph` graphe koog (15-20 unit mock LLM) → 8.3c `GenerateDeckPipelineTask` (5-8 functional) → 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios). Domaine `slider.pipeline`. | 3 | P1 | ✅ TERMINÉ (S-065, 4/4 baby-steps 8.3a-d, 71 tests 3 niveaux)
+| SLD-8.4 | Tests 3 niveaux — unit (graphe koog, services mockés), functional, Cucumber pipeline koog deck (2 appels orchestrés). Fusionné dans baby-steps 8.3a-d (US-8.3 intègre les 3 niveaux par baby-step). | 3 | P1 | ✅ CADUQUE (fusionné dans 8.3a-d)
 |===
 
 _Total_ : 5 US, ~12 pts. _Dépendances_ : US-8.1 = travail cross-borough codebase (Queens),
@@ -607,7 +607,7 @@ rejeté, DI native Gradle) + Decision 002 (consommer codebase comme socle IA uni
 
 '''
 
-== 🟡 EPIC SLD-9 — i18n Completion via LLM : AssistantManager + tests de traduction 10 langues (Session 047 — Cadrage, EN PAUSE)
+== ✅ EPIC SLD-9 — i18n Completion via LLM : AssistantManager + tests de traduction 10 langues (Session 057 — TERMINÉ)
 
 _Vision_ : SLD-3 (7/7 US) a posé le socle i18n — `SliderMessages`, 10 fichiers
 `Messages_*.properties` peuplés, 5 registrars i18nisés. Mais `AssistantManager.kt`
@@ -627,9 +627,9 @@ les traductions sont générées par LLM et validées par tests.
 | US | Description | Pts | Priorité
 | SLD-9.0 | Cadrage — inventaire exhaustif des strings non i18nisées + contrat de complétion | 1 | P0 | ✅ TERMINÉ (S-047)
 | SLD-9.1 | i18niser `AssistantManager` — 13 clés → `Messages_*.properties` 10 langues (générées par LLM), remplacer strings hardcodées par `SliderMessages.get()` | 3 | P0 | ✅ TERMINÉ (S-047, +47 tests)
-| SLD-9.2 | Tests de traduction par langue — 9 classes paramétrées (zh/hi/es/ar/bn/pt/ru/ur + en référence), pattern `MessagesFrTranslationTest`, vérification que chaque clé diffère de l'anglais | 2 | P1 | ⏳ À FAIRE
-| SLD-9.3 | `TaskDescriptionsI18nTest` — test fonctionnel GradleTestKit vérifiant que TOUTES les tâches enregistrées ont un groupe + description i18nisés pour chaque langue | 2 | P1 | ⏳ À FAIRE
-| SLD-9.4 | `SliderMessagesTest` unitaire (get/format/fallback/missing key) + Cucumber BDD message resolution (pattern plantuml `I18nSteps.kt`) | 2 | P1 | ⏳ À FAIRE
+| SLD-9.2 | Tests de traduction par langue — 9 classes paramétrées (zh/hi/es/ar/bn/pt/ru/ur + en référence), pattern `MessagesFrTranslationTest`, vérification que chaque clé diffère de l'anglais | 2 | P1 | ✅ TERMINÉ (S-057, +366 unit)
+| SLD-9.3 | `TaskDescriptionsI18nTest` — test fonctionnel GradleTestKit vérifiant que TOUTES les tâches enregistrées ont un groupe + description i18nisés pour chaque langue | 2 | P1 | ✅ TERMINÉ (S-057, +20 functional)
+| SLD-9.4 | `SliderMessagesTest` unitaire (get/format/fallback/missing key) + Cucumber BDD message resolution (pattern plantuml `I18nSteps.kt`) | 2 | P1 | ✅ TERMINÉ (S-057, +26 unit +31 cucumber)
 |===
 
 _Total_ : 5 US, ~10 pts. _Dépendances_ : SLD-3 (socle i18n) ✅. _Source_ : Session 047.
