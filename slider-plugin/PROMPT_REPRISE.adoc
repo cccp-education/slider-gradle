@@ -1,37 +1,43 @@
-= PROMPT_REPRISE — slider-gradle — Session 055
-:session: 055
+= PROMPT_REPRISE — slider-gradle — Session 058
+:session: 058
 :date: 2026-08-05
 
-== Session 054 terminée
+== Session 057 terminée
 
-US SLD-10.6 (Cucumber `24_slide_content_validation.feature`) livrée en
-baby-step TDD/BDD (RED → GREEN → REFACTOR). 2 fichiers test créés :
-feature `24_slide_content_validation.feature` (11 scénarios BDD end-to-end,
-tags `@content @validation`) + `ContentValidationSteps.kt` (141 lignes,
-package `slider.steps`, Java8 lambda style). 3 groupes de steps : a priori
-(`ContentSlideAssertion` sur `SlideContent`+`SlideLayout`), a posteriori
-(`ContentRenderAssertion` sur `ContentRenderData`), cross-validation. Zéro
-fichier de production modifié (pure BDD — logique métier déjà livrée
-S-051/053). 237 → 248 Cucumber (+11 scénarios : 5 a priori + 5 a posteriori
-+ 1 cross-validation). 585 unitaires (inchangé). 0 FAIL, 1 SKIP préexistant.
-`./gradlew :slider:check` VERT. Zéro régression.
+EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 5/5 US (9.0/9.1 + 9.2/9.3/9.4
+cette session). Périmètre restrictif respecté : i18n only, zéro refacto,
+zéro production modifié. Pattern plantuml-gradle appliqué fidèlement.
 
-**EPIC SLD-10 TERMINÉ** (7/7 US — 10.0/10.1/10.2/10.3/10.4/10.5/10.6 ✅).
-Domaine `slider.content` clos : 9 fichiers prod + 8 fichiers test. Pattern
-de référence `slider.rtl` (S-021) appliqué fidèlement (snapshot DTO +
-assertion pure + adaptateur infrastructure).
+SLD-9.2 — 9 classes traduction par langue (8 Messages{Zh,Hi,Es,Ar,Bn,Pt,Ru,Ur}
++ MessagesEnReference), pattern MessagesFrTranslationTest étendu
+(+`task.group.translator` PARTIAL +`task.translateDeck.noTargets`). 39 clés
+véritablement traduisibles (12 clés identiques cross-langue exclues : 10
+task.group.* techniques + 3 placeholders purs). +366 tests unitaires.
 
-Rapport complet : `slider-plugin/.agents/sessions/054-sld-10.6-content-validation-bdd.adoc`.
+SLD-9.3 — `TaskDescriptionsI18nFunctionalTest` (GradleRunner, 20 tests). 17
+tâches i18nisées vérifiées listées dans `gradle tasks --all` × 10 langues + 10
+tests spécifiques EN/FR (cleanBuild, asciidoctorRevealJs, serveSlides,
+visualTest, translateDeck). +20 functional.
 
-== Prochaine session — 055
+SLD-9.4 — SliderMessagesTest étendu (29→55, +26 unit) +
+`25_slider_messages_resolution.feature` (31 scénarios BDD) +
+`SliderMessagesResolutionSteps` (Java8 En). Bug DuplicateStepDefinitionException
+résolu (renommage `the resolved message should contain`). +31 cucumber.
 
-EPIC SLD-10 TERMINÉ. Reste du backlog slider :
+Tests : 977 unitaires / 46 functional / 279 cucumber = 1302 total (was 859,
++443). `./gradlew :slider:check --rerun-tasks` VERT 0 FAIL / 1 SKIP préexistant.
 
-* **SLD-8** (cadre S-046) — slider consomme codebase comme socle LLM unifié
-  (5 US ~12 pts, à planifier). `AssistantManager` réduit à du câblage,
-  `DeckPipelineGraph` sur services codebase, DI native Gradle.
-* **SLD-9** (en pause S-047) — i18n Completion via LLM (SLD-9.1 ✅, reste
-  9.2/9.3/9.4, 4 US ~7 pts).
+Rapport : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`.
+
+== Prochaine session — 058
+
+EPIC SLD-9 TERMINÉ. Reste backlog slider :
+* **SLD-11** (CADRÉ S-056) — Expulsion `slider.capsule` → capsule. 6 US
+  ~14 pts. Cross-borough (slider + capsule modifiés en coordination). Baby-step
+  DDD/TDD/BDD 3 niveaux, non-régression stricte (tests portés avant suppression
+  source). Recommandé (pur refactoring DDD, méthode de prédilection).
+* **SLD-8** (CADRÉ S-046) — Consomme codebase socle LLM. 5 US ~12 pts.
+  Dépendance cross-borough Queens (codebase N1). Risque dépendance externe.
 
 Choix pilote au démarrage.
 
@@ -39,8 +45,8 @@ Choix pilote au démarrage.
 
 - GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
   `education.cccp.slider.translator` (déprécié)
-- Version publiée Central : 0.0.13 (build.gradle.kts hardcodé 0.0.13)
-- BOM workspace-bom : Central 0.0.11
+- Version publiée Central : 0.0.14 (build.gradle.kts hardcodé 0.0.14)
+- BOM workspace-bom : Central 0.0.14
 - conventions-gradle : Central 0.0.2
 - i18n-contracts : Central 0.0.2
 - codebase-plugin : Central 0.0.5 (koog 1.0.0, R2DBC — socle N1)
@@ -51,21 +57,14 @@ Choix pilote au démarrage.
 - Domaines DDD (16) : `slider.repository`, `slider.capsule`, `slider.rtl`,
   `slider.i18n`, `slider.translate` (déprécié), `slider.translation`, `slider.scaffold`,
   `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
-  `slider.revealjs`, `slider.playwright`, `slider.content` (clos S-054) + `SliderConfig` + `SliderTasks`
+  `slider.revealjs`, `slider.playwright`, `slider.content` + `SliderConfig` + `SliderTasks`
 - `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
-- Playwright fixtures : `./gradlew generatePlaywrightFixtures` (racine)
-  → `build/playwright-fixtures/{ltr,rtl}/`
-- System property `playwright.ltr.fixtures.dir` injectée par
-  `slider/build.gradle.kts:108-111` (déjà en place)
-- `PlaywrightFixtureSupport` (S-034) réutilisable tel quel — lifecycle
-  browser + `python3 -m http.server` + `withPage` block
-- Ports Playwright : 4335 (LTR E2E), 4336 (RTL), 4337 (content SLD-10.5)
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew :slider:check` est VERT (0 FAIL, 1 SKIP, 585 unitaires, 248 cucumber)
-- EPICs clos : SLD-0→7 + SLD-10 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.13 + CR-GLOBALE-002
-- EPIC cadré : SLD-8 slider consomme codebase (5 US ~12 pts, à planifier)
-- EPIC en pause : SLD-9 i18n Completion (SLD-9.1 ✅, reste 9.2/9.3/9.4)
+- `./gradlew :slider:check` VERT (0 FAIL, 1 SKIP, 977 unitaires, 46 functional, 279 cucumber)
+- EPICs clos : SLD-0→7 + SLD-9 + SLD-10 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.14 + CR-GLOBALE-002
+- EPIC cadré : SLD-8 (slider consomme codebase, 5 US ~12 pts, à planifier)
+- EPIC cadré : SLD-11 (expulsion slider.capsule, 6 US ~14 pts, à planifier)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
-  rejeté, 002 slider consomme codebase comme socle LLM unifié)
-- Rapport SLD-10.6 : `slider-plugin/.agents/sessions/054-sld-10.6-content-validation-bdd.adoc`
+  rejeté, 002 slider consomme codebase)
+- Rapport SLD-9 : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`

@@ -1,0 +1,149 @@
+= Session 057 — EPIC SLD-9 i18n Completion TERMINÉ (9.2/9.3/9.4)
+:session: 057
+:date: 2026-08-05
+:epic: SLD-9
+:method: baby-step DDD/TDD/BDD 3 niveaux (unit → functional → cucumber)
+
+== Résumé
+
+EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 4/4 US livrées (9.0 cadrage +
+9.1 i18niser AssistantManager S-047 + 9.2/9.3/9.4 cette session). Périmètre
+restrictif respecté : que de l'i18n, zéro refacto, zéro koog, zéro codebase.
+Pattern de référence plantuml-gradle appliqué fidèlement
+(MessagesFrTranslationTest, TaskDescriptionsI18nTest, I18nSteps).
+
+== US livrées
+
+=== SLD-9.2 — Tests de traduction par langue (2 pts, unit)
+
+9 classes paramétrées par langue, pattern MessagesFrTranslationTest. Audit
+programmatically des 52 clés × 10 langues → 39 clés véritablement traduisibles
+(diffèrent dans toutes les langues), 12 clés identiques cross-langue (10
+`task.group.*` techniques + 3 placeholders purs `translated`/`failed`/`summary`
++ `task.group.translator` PARTIAL FR-only). Aucune traduction manquante — toutes
+les 39 clés traduisibles diffèrent dans les 9 langues non-EN (vérifié avant
+d'écrire les tests).
+
+Fichiers créés (8 nouveaux) :
+- `MessagesZhTranslationTest.kt` (39 clés)
+- `MessagesHiTranslationTest.kt` (39 clés)
+- `MessagesEsTranslationTest.kt` (39 clés)
+- `MessagesArTranslationTest.kt` (39 clés)
+- `MessagesBnTranslationTest.kt` (39 clés)
+- `MessagesPtTranslationTest.kt` (39 clés)
+- `MessagesRuTranslationTest.kt` (39 clés)
+- `MessagesUrTranslationTest.kt` (39 clés)
+- `MessagesEnReferenceTest.kt` (52 clés, non-blank référence)
+
+Fichier étendu (1) :
+- `MessagesFrTranslationTest.kt` (+2 clés : `task.translateDeck.noTargets` et
+  `task.group.translator` PARTIAL)
+
++366 tests unitaires (977 unitaires total, was 585).
+
+=== SLD-9.3 — TaskDescriptionsI18nFunctionalTest (3 pts, functional)
+
+`TaskDescriptionsI18nFunctionalTest.kt` (functionalTest, GradleRunner). 20 tests
+functional :
+- 1 paramétré `@ValueSource` 10 langues — vérifie que 17 tâches i18nisées
+  (cleanBuild, asciidoctorRevealJs, generateDashboard, asciidoctor, serveSlides,
+  installPlaywright, visualTest, deploySlides, generateCapsule,
+  translateAndGenerateCapsule, reportTests, reportFunctionalTests,
+  generateRevealUiMessages, translateDeck, reindexRag, proposeDeckContext,
+  generateDeck) sont listées dans `gradle tasks --all -Planguage=<code>`.
+- 10 tests spécifiques EN/FR sur 5 tâches (cleanBuild, asciidoctorRevealJs,
+  serveSlides, visualTest, translateDeck) — vérifient le contenu traduit dans
+  la sortie.
+
++20 tests functional (46 total, was 26).
+
+=== SLD-9.4 — SliderMessagesTest enrichi + Cucumber BDD (2 pts, unit + cucumber)
+
+SliderMessagesTest étendu (29 → 55 tests) :
+- `resolve task description in all supported languages` (10 langues paramétré)
+- `format task description with model name in all supported languages` (10 langues)
+- `format multi-arg message with all placeholders filled`
+- `format translateDeck translating message with subject and counts`
+- `forLanguage returns non-null bundle for all supported languages`
+- `group keys resolve to non-blank values in English`
+
+Cucumber BDD `25_slider_messages_resolution.feature` (31 scénarios) :
+- 4 scénarios résolution clé connue (en/fr/ar/zh)
+- 2 scénarios format paramétré modèle (en/fr)
+- 2 scénarios format multi-args `task.cleanBuild.cleaned` (en/fr)
+- 1 scénario clé manquante → MissingResourceException
+- 1 scénario fallback EN pour langue non supportée
+- 1 Scenario Outline 20 exemples (2 clés × 10 langues)
+
+`SliderMessagesResolutionSteps.kt` (Java8 En style). Bug
+`DuplicateStepDefinitionException` résolu : renommage `Then the message should
+contain` → `Then the resolved message should contain` pour éviter collision
+avec `AssistantManagerI18nSteps` existant. Args multi-values séparés par `|`
+au lieu de `,` (ambiguïté Cucumber multi-{string}).
+
++26 tests unitaires (+31 cucumber). 977 unitaires + 46 functional + 279
+cucumber = 1302 tests total (was 859). +443 tests, zéro régression.
+
+== Vérification non-régression
+
+[source,shell]
+----
+./gradlew :slider:check --rerun-tasks
+# BUILD SUCCESSFUL in 5m 17s
+# 977 unitaires / 0 FAIL / 0 SKIP
+# 46 functional / 0 FAIL
+# 279 cucumber / 0 FAIL / 1 SKIP préexistant (JRuby gem isolé)
+----
+
+== Fichiers modifiés (13)
+
+Modifiés (2) :
+- `slider/src/test/kotlin/slider/i18n/MessagesFrTranslationTest.kt` (+2 clés)
+- `slider/src/test/kotlin/slider/i18n/SliderMessagesTest.kt` (+48 lignes, +26 tests)
+
+Nouveaux (11) :
+- 8 `Messages{Zh,Hi,Es,Ar,Bn,Pt,Ru,Ur}TranslationTest.kt`
+- `MessagesEnReferenceTest.kt`
+- `TaskDescriptionsI18nFunctionalTest.kt` (functionalTest)
+- `25_slider_messages_resolution.feature` (cucumber)
+- `SliderMessagesResolutionSteps.kt` (cucumber steps)
+
+Zéro fichier de production modifié. Pure test coverage (SLD-9 périmètre
+restrictif : i18n only, pas de refacto).
+
+== Décisions architecture
+
+. *Clés techniques non traduites* : les 10 `task.group.*` (build, generate,
+  info, setup, verify, deploy, slider, translator, collect, slider-ai) sont
+  des identifiants stables de groupe Gradle — identiques cross-langue par
+  design. Exclus des tests `assertNotEquals`. Exception : `task.group.translator`
+  PARTIAL (FR=traducteur, autres=translator) — inclus uniquement dans
+  MessagesFrTranslationTest.
+. *Placeholders purs non traduits* : `task.translateDeck.translated/failed/summary`
+  sont des formats `{0} -> {1}`, `{0} — {1}`, `{0}` — identiques cross-langue
+  car purement structurels. Exclus des tests de traduction.
+. *Step deduplication Cucumber* : `SliderMessagesResolutionSteps` utilise
+  `the resolved message should contain` (préfixe) pour éviter collision avec
+  `AssistantManagerI18nSteps` (`the message should contain`).
+
+== Statut EPIC SLD-9
+
+[cols="2,3,2,2"]
+|===
+| US | Description | Pts | Statut
+| SLD-9.0 | Cadrage | 1 | ✅ TERMINÉ (S-047)
+| SLD-9.1 | i18niser AssistantManager (13 clés × 10 langues LLM) | 3 | ✅ TERMINÉ (S-047)
+| SLD-9.2 | Tests traduction 9 langues | 2 | ✅ TERMINÉ (S-057)
+| SLD-9.3 | TaskDescriptionsI18nTest functional | 2 | ✅ TERMINÉ (S-057)
+| SLD-9.4 | SliderMessagesTest + Cucumber BDD | 2 | ✅ TERMINÉ (S-057)
+|===
+
+**EPIC SLD-9 TERMINÉ** (5/5 US, ~10 pts). i18n completion livrée.
+
+== Prochain EPIC candidat
+
+Backlog restant slider :
+- *SLD-11* (CADRÉ S-056) — Expulsion `slider.capsule` → capsule. 6 US ~14 pts.
+  Cross-borough (2 repos). Baby-step DDD/TDD/BDD, non-régression stricte.
+- *SLD-8* (CADRÉ S-046) — Consomme codebase socle LLM. 5 US ~12 pts.
+  Dépendance cross-borough Queens (codebase).

@@ -7,6 +7,28 @@ _.date: 2026-08-05
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 057 (2026-08-05) — EPIC SLD-9 i18n Completion TERMINÉ (9.2/9.3/9.4) ✅
+
+EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 5/5 US (9.0/9.1 S-047 +
+9.2/9.3/9.4 cette session). Périmètre restrictif respecté : i18n only, zéro
+refacto, zéro production modifié. Pattern plantuml-gradle appliqué fidèlement.
+
+SLD-9.2 — 9 classes traduction par langue (8 Messages{Zh,Hi,Es,Ar,Bn,Pt,Ru,Ur}
+TranslationTest + MessagesEnReferenceTest), 39 clés véritablement traduisibles
+(12 clés identiques cross-langue exclues). +366 tests unitaires.
+
+SLD-9.3 — `TaskDescriptionsI18nFunctionalTest` (GradleRunner, 20 tests). 17
+tâches i18nisées × 10 langues + 10 tests spécifiques EN/FR. +20 functional.
+
+SLD-9.4 — SliderMessagesTest étendu (29→55) + `25_slider_messages_resolution.feature`
+(31 scénarios BDD) + `SliderMessagesResolutionSteps`. +26 unit +31 cucumber.
+
+Tests : 977 unit / 46 functional / 279 cucumber = 1302 total (was 859, +443).
+`./gradlew :slider:check --rerun-tasks` VERT 0 FAIL / 1 SKIP préexistant.
+
+Rapport complet : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`.
+
+'''
 == Session 056 (2026-08-05) — Cadrage EPIC SLD-11 ✅ TERMINÉ
 
 Cadrage formel EPIC SLD-11 — Expulsion `slider.capsule` : realignment boundary
@@ -219,12 +241,12 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | SLD-CR3 | Revue CR-GLOBALE-003 — Déprécier `translate/` + resserrer `catch (_: Exception)` CapsulePlugin | ✅ TERMINÉ (S-044) | 2/2
 | CR-GLOBALE-002 | Fix 3 bugs Option A — guard plan vide `translateDeck`, regex `buildOutputFile` uppercase, SSL propriétés système scopées | ✅ TERMINÉ (S-045) | 3/3
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
-| SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | 🟡 EN PAUSE (S-047) — SLD-9.1 ✅, reste 9.2/9.3/9.4 | 5 US ~10 pts
+| SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | ✅ TERMINÉ (S-057, 5/5 US — 9.0/9.1/9.2/9.3/9.4) | 5 US ~10 pts
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | ✅ TERMINÉ (S-054, 7/7 US — 10.0→10.6) | 7 US ~18 pts
 | SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | 🟡 CADRÉ (S-056) — à planifier | 6 US ~14 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-11 (expulsion slider.capsule) cadré session 056. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) en pause — SLD-9.1 ✅, reste 9.2/9.3/9.4. EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
+_Tous les EPICs de feature sont terminés. EPIC SLD-11 (expulsion slider.capsule) cadré session 056. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) TERMINÉ — SLD-9.0→9.4 ✅ (5/5 US). EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
 
 '''
 == 🟡 EPIC SLD-11 — Expulsion slider.capsule : realignment boundary slider ↔ capsule (Session 056 — Cadrage)

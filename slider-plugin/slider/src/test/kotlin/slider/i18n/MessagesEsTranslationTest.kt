@@ -4,7 +4,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.assertNotEquals
 
-class MessagesFrTranslationTest {
+class MessagesEsTranslationTest {
 
     @ParameterizedTest
     @ValueSource(strings = [
@@ -47,11 +47,10 @@ class MessagesFrTranslationTest {
         "task.helloMistralStreaming.description",
         "task.helloHuggingFace.description",
         "task.helloHuggingFaceStreaming.description",
-        "task.group.translator",
     ])
-    fun `french translation differs from english for key`(key: String) {
+    fun `spanish translation differs from english for key`(key: String) {
         val en = SliderMessages.get(key, "en")
-        val fr = SliderMessages.get(key, "fr")
-        assertNotEquals(en, fr, "Key '$key' has identical EN and FR translations")
+        val es = SliderMessages.get(key, "es")
+        assertNotEquals(en, es, "Key '$key' should be translated to Spanish, not a copy of English")
     }
 }

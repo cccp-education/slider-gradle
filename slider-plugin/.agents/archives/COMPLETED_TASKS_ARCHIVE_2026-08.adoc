@@ -1,6 +1,33 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 057 — EPIC SLD-9 i18n Completion TERMINÉ (9.2/9.3/9.4)
+
+EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 5/5 US (9.0/9.1 S-047 +
+9.2/9.3/9.4 cette session). Périmètre restrictif : i18n only, zéro refacto,
+zéro production modifié. Pattern plantuml-gradle appliqué fidèlement.
+
+SLD-9.2 (2 pts, unit) — 9 classes traduction par langue (8
+Messages{Zh,Hi,Es,Ar,Bn,Pt,Ru,Ur}TranslationTest + MessagesEnReferenceTest),
+pattern MessagesFrTranslationTest étendu. 39 clés véritablement traduisibles
+(12 clés identiques cross-langue exclues : 10 task.group.* techniques + 3
+placeholders purs). +366 tests unitaires.
+
+SLD-9.3 (3 pts, functional) — `TaskDescriptionsI18nFunctionalTest` (GradleRunner,
+20 tests). 17 tâches i18nisées × 10 langues + 10 tests spécifiques EN/FR.
++20 functional.
+
+SLD-9.4 (2 pts, unit + cucumber) — SliderMessagesTest étendu (29→55, +26 unit)
++ `25_slider_messages_resolution.feature` (31 scénarios BDD) +
+`SliderMessagesResolutionSteps`. Bug DuplicateStepDefinitionException résolu.
++31 cucumber.
+
+Tests : 977 unit / 46 functional / 279 cucumber = 1302 total (was 859, +443).
+`./gradlew :slider:check --rerun-tasks` VERT 0 FAIL / 1 SKIP préexistant.
+13 fichiers (2 modifiés + 11 nouveaux), zéro production modifié.
+
+Rapport : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`.
+
 == Session 056 — Cadrage EPIC SLD-11 : expulsion slider.capsule → capsule
 
 Cadrage formel EPIC SLD-11 — Expulsion `slider.capsule` : realignment

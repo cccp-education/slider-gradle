@@ -2,12 +2,22 @@ package slider.i18n
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
-class MessagesFrTranslationTest {
+class MessagesEnReferenceTest {
 
     @ParameterizedTest
     @ValueSource(strings = [
+        "task.group.build",
+        "task.group.generate",
+        "task.group.info",
+        "task.group.setup",
+        "task.group.verify",
+        "task.group.deploy",
+        "task.group.slider",
+        "task.group.translator",
+        "task.group.collect",
+        "task.group.slider-ai",
         "task.cleanBuild.description",
         "task.cleanBuild.cleaned",
         "task.asciidoctorRevealJs.description",
@@ -28,6 +38,9 @@ class MessagesFrTranslationTest {
         "task.translateDeck.translating",
         "task.translateDeck.provider",
         "task.translateDeck.targets",
+        "task.translateDeck.translated",
+        "task.translateDeck.failed",
+        "task.translateDeck.summary",
         "task.translateDeck.noTargets",
         "task.generateRevealUiMessages.description",
         "task.generateRevealUiMessages.written",
@@ -47,11 +60,9 @@ class MessagesFrTranslationTest {
         "task.helloMistralStreaming.description",
         "task.helloHuggingFace.description",
         "task.helloHuggingFaceStreaming.description",
-        "task.group.translator",
     ])
-    fun `french translation differs from english for key`(key: String) {
+    fun `english reference key is non blank`(key: String) {
         val en = SliderMessages.get(key, "en")
-        val fr = SliderMessages.get(key, "fr")
-        assertNotEquals(en, fr, "Key '$key' has identical EN and FR translations")
+        assertTrue(en.isNotBlank(), "Key '$key' should have a non-blank English reference value")
     }
 }
