@@ -2,6 +2,26 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 063 (2026-08-05) — SLD-8.3b DeckPipelineGraph ✅
+
+Baby-step 8.3b de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD strict (RED →
+GREEN → REFACTOR). Domaine `slider.pipeline` enrichi (3 fichiers prod purs).
+`DeckPromptBuilder.kt` (port — prompts propose/generate depuis `DeckState`),
+`DeckLlm.kt` (port — `propose`/`generate` synchrones mockable sans coroutine),
+`DeckPipelineGraph.kt` (graphe koog `strategy<DeckState, DeckState>` 3 nœuds
+proposeContext/validateContext/generateDeck + edges conditionnels
+`validateContext→generateDeck onCondition{it.contextValid}` /
+`validateContext→nodeFinish onCondition{!it.contextValid}`, méthode `execute`
+séquentielle try/catch par nœud pattern `codebase.koog.KoogAugmentedContextGraph`,
+`asMermaidDiagram()`). 17 unit tests purs (happy path DECK_GENERATED, context
+invalide→FAILED, LLM propose/generate throws→FAILED, appels prompt builder +
+LLM forwarding, transitions stage, asMermaidDiagram non-blank, préservation
+subject/language/ragContext). Dépendance `koog-agents:1.0.0` ajoutée directe
+slider (BOM 0.0.16 constraint, exclude `org.jetbrains:annotations` pour conflit
+testcontainers). `./gradlew :slider:check` VERT (949 unit +17, 38 functional,
+254 cucumber = 1241, 0 FAIL, 1 SKIP préexistant). Zéro régression. Rapport :
+`slider-plugin/.agents/sessions/063-sld-8.3b-deck-pipeline-graph.adoc`.
+
 == Session 062 (2026-08-05) — SLD-8.3a DeckState + DeckContextValidator ✅
 
 Baby-step 8.3a de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD strict (RED →

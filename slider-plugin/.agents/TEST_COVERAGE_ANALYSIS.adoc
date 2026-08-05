@@ -1,5 +1,28 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 063_ : SLD-8.3 baby-step 8.3b `DeckPipelineGraph` (graphe koog
+`strategy<DeckState, DeckState>` + execute séquentiel pattern
+`KoogAugmentedContextGraph`). Domaine `slider.pipeline` enrichi (3 fichiers
+prod purs : `DeckPromptBuilder` port, `DeckLlm` port, `DeckPipelineGraph`).
+17 unit tests purs (happy path + 4 failure modes + transitions stage + appels
+prompt builder + LLM forwarding + asMermaidDiagram). Dépendance `koog-agents:1.0.0`
+ajoutée directe slider (BOM 0.0.16 constraint, exclude `org.jetbrains:annotations`).
+`./gradlew :slider:check` VERT 0 FAIL / 1 SKIP préexistant. Totaux post-063 :
+949 unit + 38 functional + 254 cucumber = 1241 total (was 1224, +17).
+
+Tests ajoutés session 063 :
+. `DeckPipelineGraphTest.kt` (17 unit) — graphe koog pipeline deck :
+  happy path DECK_GENERATED, propose-context peuple deckContextJson,
+  validate-context échec (context invalide→FAILED, generate non appelé),
+  validate blank→FAILED error "blank", LLM propose/generate throws→FAILED,
+  appels prompt builder (propose avec subject, generate avec state validé),
+  generate non appelé quand context invalide (prompt builder + LLM),
+  prompts LLM forwarded (propose + generate), asMermaidDiagram non-blank,
+  préservation subject/language/ragContext, transitions stage
+  INITIALIZED→CONTEXT_VALIDATED, stage FAILED quand generate throws malgré
+  context valide. Deux fakes déterministes : `FakeDeckPromptBuilder` +
+  `FakeDeckLlm` (canned responses ou exceptions, compteurs d'appels).
+
 _Statut session 060_ : SLD-8 US-8.2 AssistantManager câblage codebase LlmBuildService.
 `AssistantManager.kt` réécrit (-352 lignes, suppression 3 factories + 8 hello* tasks).
 Nouvel adaptateur `LlmProviderChatModelAdapter` (5 unit tests TDD). Injection

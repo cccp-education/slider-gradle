@@ -1,6 +1,42 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
 :date: 2026-08-05
 
+== Session 063 — SLD-8.3 baby-step 8.3b DeckPipelineGraph ✅
+
+Baby-step 8.3b de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD strict (RED →
+GREEN → REFACTOR). Domaine `slider.pipeline` enrichi (3 fichiers prod purs).
+`DeckPromptBuilder.kt` (port — prompts propose/generate depuis `DeckState`),
+`DeckLlm.kt` (port — `propose`/`generate` synchrones mockable sans coroutine),
+`DeckPipelineGraph.kt` (graphe koog `strategy<DeckState, DeckState>` 3 nœuds
+proposeContext/validateContext/generateDeck + edges conditionnels
+`validateContext→generateDeck onCondition{it.contextValid}` /
+`validateContext→nodeFinish onCondition{!it.contextValid}`, méthode `execute`
+séquentielle try/catch par nœud pattern `codebase.koog.KoogAugmentedContextGraph`,
+`asMermaidDiagram()`). 17 unit tests purs. Dépendance `koog-agents:1.0.0`
+ajoutée directe slider (BOM 0.0.16 constraint, exclude `org.jetbrains:annotations`).
+`./gradlew :slider:check` VERT (949 unit +17, 38 functional, 254 cucumber
+= 1241, 0 FAIL, 1 SKIP préexistant). Zéro régression.
+
+Tâches terminées :
+. RED — `DeckPipelineGraphTest.kt` (17 tests, 2 fakes déterministes
+  `FakeDeckPromptBuilder` + `FakeDeckLlm`)
+. GREEN — `DeckPromptBuilder.kt` port (25l)
+. GREEN — `DeckLlm.kt` port (20l)
+. GREEN — `DeckPipelineGraph.kt` graphe koog + execute séquentiel (115l)
+. REFACTOR — Fix test `execute populates deckContextJson` (generateResponse
+  non-blank pour isoler)
+. Build — Ajout dépendance `koog-agents:1.0.0` directe slider (libs.versions.toml
+  + build.gradle.kts, exclude annotations)
+. Vérification `./gradlew :slider:check` VERT (949 unit +17, 38 functional,
+  254 cucumber = 1241, 0 FAIL, 1 SKIP préexistant)
+. Rapport de session 063-sld-8.3b-deck-pipeline-graph.adoc
+. Mise à jour INDEX.adoc (session 063, roadmap SLD-8 8.3b ✅)
+. Mise à jour BACKLOG.adoc (session 063, table SLD-8 US affinée)
+. Mise à jour PROMPT_REPRISE.adoc (mission session 064)
+. Mise à jour SESSIONS_HISTORY.adoc (entrée 063)
+. Mise à jour TEST_COVERAGE_ANALYSIS.adoc (session 063)
+. Mise à jour AGENTS.adoc racine (table MIAMI + historique)
+
 == Session 061 — Cadrage formel SLD-8.3 DeckPipelineGraph ✅
 
 Cadrage formel US-8.3 `DeckPipelineGraph` (koog orchestration). Zéro code modifié —

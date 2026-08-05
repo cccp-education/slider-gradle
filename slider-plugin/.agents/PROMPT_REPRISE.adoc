@@ -1,30 +1,43 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 056 — Cadrage EPIC SLD-11 (expulsion `slider.capsule` → capsule)
-_Prochaine session_ : 057 — SLD-11.1 (capsule-side : nouveau parseur `.adoc`)
+_Session terminee_ : 063 — SLD-8.3 baby-step 8.3b `DeckPipelineGraph` (graphe koog)
+_Prochaine session_ : 064 — SLD-8.3 baby-step 8.3c `GenerateDeckPipelineTask`
 
-== Mission session 056 (TERMINÉE)
+== Mission session 063 (TERMINÉE)
 
-. Audit cross-borough slider ↔ capsule : revelation fuite de responsabilite
-  `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251 lignes font du
-  travail de capsule dans slider)
-. Cadrage EPIC SLD-11 — Expulsion `slider.capsule` : realignment boundary
-  slider ↔ capsule. 6 US ~14 pts, methode baby-step DDD/TDD/BDD
-. Mise a jour INDEX.adoc + BACKLOG.adoc + PROMPT_REPRISE.adoc
+. SLD-8.3 baby-step 8.3b livré en TDD strict (RED → GREEN → REFACTOR)
+. Domaine `slider.pipeline` enrichi (3 fichiers prod purs : `DeckPromptBuilder`
+  port, `DeckLlm` port, `DeckPipelineGraph` graphe koog `strategy<DeckState,
+  DeckState>` + execute séquentiel pattern `KoogAugmentedContextGraph`)
+. 17 unit tests purs (happy path + 4 failure modes + transitions stage +
+  appels prompt builder + LLM forwarding + asMermaidDiagram)
+. Dépendance `koog-agents:1.0.0` ajoutée directe slider (BOM 0.0.16 constraint,
+  exclude `org.jetbrains:annotations` pour conflit testcontainers)
+. `./gradlew :slider:check` VERT (949 unit +17, 38 functional, 254 cucumber
+  = 1241, 0 FAIL, 1 SKIP préexistant). Zéro régression.
 
 == Contexte reprise
 
-- EPIC SLD-11 CADRÉ — 6 US ~14 pts (11.0 cadrage ✅, reste 11.1→11.6)
-- Boundary cible : slider s'arrete au HTML Reveal.js, capsule parse `.adoc`
-  directement, format `*-script.txt` supprime
-- US-11.1 (prochaine) : port `AsciidocSpeakerNoteParser` + `CapsuleScript` +
-  `CapsuleScriptWriter` cote capsule (domaine `capsule.feed`), tests unit
-  portes (239l + 166l + 102l). Baby-step TDD : RED (tests portes) → GREEN
-- Non-regression stricte : tests portes avant suppression source (US-11.5)
-- Cross-borough : 2 repos modifies en coordination (slider-gradle + capsule-gradle)
-- slider 0.0.14 publié Maven Central, BOM 0.0.14 publiée
-- `./gradlew :slider:check` VERT (660 PASS)
-- Backlog restant : SLD-11 (expulsion, 6 US ~14 pts), SLD-8 (codebase, CADRÉ),
-  SLD-9 (i18n Completion, en pause, reste 9.2/9.3/9.4)
-- Décisions architecture : Decision 001 (PicoContainer rejeté),
-  Decision 002 (consommer codebase N1)
+- EPIC SLD-8 (slider consomme codebase N1) EN COURS :
+  - US-8.0/8.1/8.2 ✅ terminés
+  - US-8.3 baby-steps : 8.3a ✅ (S-062), 8.3b ✅ (S-063), 8.3c/d à faire
+  - US-8.4 à planifier (fusionné dans baby-steps 8.3a-d)
+- Domaine `slider.pipeline` : 7 fichiers prod + 3 test (DeckStage, DeckState,
+  ValidationResult, DeckContextValidator, DeckPromptBuilder, DeckLlm,
+  DeckPipelineGraph)
+- 2 ports introduits 8.3b : `DeckPromptBuilder` (prompts propose/generate
+  depuis DeckState) + `DeckLlm` (propose/generate synchrones, mockable).
+  Adaptateurs concrets côté `slider.ai` à câbler en 8.3c :
+  - `DeckPromptBuilder` ← `AssistantManager.PromptManager` (slider.ai)
+  - `DeckLlm` ← wrapper sur `LlmProviderChatModelAdapter` (slider.ai)
+- Pattern référence : `codebase.koog.KoogAugmentedContextGraph` (graphe koog +
+  execute séquentiel avec try/catch par nœud)
+- Dépendance koog-agents 1.0.0 directe slider (BOM 0.0.16 constraint)
+- slider 0.0.15 publié Central, BOM 0.0.16 publiée Central (S-062)
+- `./gradlew :slider:check` VERT (949 unit + 38 functional + 254 cucumber
+  = 1241, 0 FAIL, 1 SKIP préexistant)
+- Backlog restant : SLD-8.3 (8.3c `GenerateDeckPipelineTask` 5-8 functional,
+  8.3d Cucumber `26_deck_pipeline_koog.feature` 8-12 scénarios), US-8.4 à planifier
+- Décisions architecture : Decision 001 (PicoContainer rejeté, DI native Gradle),
+  Decision 002 (slider consomme codebase N1 comme socle LLM unifié)
+- Rapport 063 : `slider-plugin/.agents/sessions/063-sld-8.3b-deck-pipeline-graph.adoc`

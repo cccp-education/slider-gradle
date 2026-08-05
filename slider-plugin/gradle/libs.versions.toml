@@ -29,6 +29,7 @@ logback = "1.5.32"
 codebase = "0.0.5"
 playwright = "1.52.0"
 i18n-contracts = "0.0.2"
+koog = "1.0.0"
 
 [libraries]
 asciidoctor-gradle-jvm-slides = { module = "org.asciidoctor:asciidoctor-gradle-jvm-slides", version.ref = "asciidoctor-gradle" }
@@ -78,6 +79,7 @@ logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
 i18n-contracts = { module = "education.cccp:i18n-contracts", version.ref = "i18n-contracts" }
 codebase-plugin = { module = "education.cccp:codebase-plugin", version.ref = "codebase" }
+koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

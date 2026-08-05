@@ -1,0 +1,240 @@
+= Session 063 — SLD-8.3b DeckPipelineGraph (baby-step 8.3b)
+:session: 063
+:date: 2026-08-05
+:epic: SLD-8 US-8.3 baby-step 8.3b
+:type: feat+ddd+tdd
+:method: baby-step DDD/TDD/BDD (RED → GREEN → REFACTOR)
+:score: 9/10
+
+== Objectif
+
+Livrer le baby-step 8.3b de l'US SLD-8.3 `DeckPipelineGraph` : le graphe koog
+`strategy<DeckState, DeckState>` orchestrant les 3 nœuds propose-context →
+validate-context → generate-deck + edges conditionnels. Domaine `slider.pipeline`
+enrichi (2ème baby-step). Mock LLM (zéro réseau, zéro clé API).
+
+== Contexte
+
+- SLD-8 (slider consomme codebase N1) en cours :
+  - US-8.0 ✅ Cadrage (S-046)
+  - US-8.1 ✅ BuildService LLM pont (S-176)
+  - US-8.2 ✅ AssistantManager câblage (S-060)
+  - US-8.3 🟡 À IMPLÉMENTER — baby-step 8.3b livré cette session
+    (8.3a ✅ S-062, 8.3b ✅ cette session, 8.3c/d à faire)
+  - US-8.4 🟡 À PLANIFIER (fusionné dans baby-steps 8.3a-d)
+
+- Cadrage 8.3 (S-061) : 4 baby-steps prévus (~9 pts) :
+  - 8.3a `DeckState` + `DeckContextValidator` ✅ (S-062, 35 unit)
+  - 8.3b `DeckPipelineGraph` (15-20 unit mock LLM) ← cette session
+  - 8.3c `GenerateDeckPipelineTask` (5-8 functional)
+  - 8.3d Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios)
+
+== Travail effectué
+
+=== 1. RED — Tests purs DeckPipelineGraph (17 unit)
+
+Création de `slider/src/test/kotlin/slider/pipeline/DeckPipelineGraphTest.kt`
+(17 tests, zéro Gradle, zéro LLM réel — fakes déterministes). Couvre :
+
+- Happy path complet (stage DECK_GENERATED, deckAdoc peuplé)
+- Propose-context peuple deckContextJson + stage progression
+- Validate-context échec (context invalide → stage FAILED, generate non appelé)
+- Validate-context blank → FAILED avec error contenant "blank"
+- LLM propose-context throws → FAILED (deckContextJson vide)
+- LLM generate-deck throws → FAILED (contextValid préservé)
+- Appels prompt builder (propose avec subject, generate avec state validé)
+- Generate non appelé quand context invalide (prompt builder + LLM)
+- Prompts LLM forwarded (propose + generate)
+- asMermaidDiagram non-blank
+- Préservation subject/language/ragContext à travers le pipeline
+- Transitions stage INITIALIZED → CONTEXT_VALIDATED (states capturés)
+- Stage FAILED quand generate throws malgré context valide
+
+Deux fakes déterministes dans le test :
+- `FakeDeckPromptBuilder` (implémente `DeckPromptBuilder`, enregistre les
+  states vus + retourne prompts dérivés du subject)
+- `FakeDeckLlm` (implémente `DeckLlm`, canned responses ou exceptions,
+  compteurs d'appels + prompts enregistrés)
+
+Total RED : 17 tests (cadrage prévoyait 15-20 — dans la fourchette).
+Compilation échoue : `DeckPromptBuilder`, `DeckLlm`, `DeckPipelineGraph`
+n'existent pas. RED confirmé.
+
+=== 2. GREEN — Code de production (3 fichiers, domaine slider.pipeline)
+
+Création de 3 fichiers prod purs dans le domaine `slider.pipeline` :
+
+- `DeckPromptBuilder.kt` (25l) — port (interface) construisant les prompts
+  LLM depuis le `DeckState` courant. 2 méthodes : `buildProposePrompt`
+  (propose-context) + `buildGeneratePrompt` (generate-deck). Port gardé
+  séparé du graphe pour tester avec stub déterministe sans dépendre de
+  `slider.ai.AssistantManager.PromptManager` ni Gradle.
+
+- `DeckLlm.kt` (20l) — port (interface) consommé par `DeckPipelineGraph`.
+  2 méthodes synchrones `propose(prompt): String` + `generate(prompt):
+  String`. Synchrone (pas suspend) pour garder le domaine pur et testable
+  avec plain fake — l'adaptateur `suspend → blocking` vit hors domaine
+  (`slider.ai` adapter sur codebase `LlmProvider`).
+
+- `DeckPipelineGraph.kt` (115l) — graphe koog `strategy<DeckState,
+  DeckState>` + méthode `execute` séquentielle. Pattern référence :
+  `codebase.koog.KoogAugmentedContextGraph` (pattern hybride graphe koog
+  pour topologie + execute() séquentiel avec try/catch par nœud).
+
+  *Graphe koog* (DSL `strategy`):
+  - 3 nœuds : `proposeContext`, `validateContext`, `generateDeck`
+  - Edges conditionnels :
+    - nodeStart → proposeContext (toujours)
+    - proposeContext → validateContext (toujours)
+    - validateContext → generateDeck onCondition { it.contextValid }
+    - validateContext → nodeFinish onCondition { !it.contextValid }
+    - generateDeck → nodeFinish (toujours)
+  - `asMermaidDiagram()` via `runBlocking`
+
+  *execute(initialState)* séquentiel (pattern KoogAugmentedContextGraph):
+  1. proposeContextNode — `promptBuilder.buildProposePrompt(state)` →
+     `llm.propose(prompt)` → state.copy(deckContextJson, CONTEXT_PROPOSED).
+     require(json non-blank). try/catch → FAILED + error.
+  2. validateContextNode — `DeckContextValidator.validate(json)` →
+     Valid: copy(contextValid=true, CONTEXT_VALIDATED) ;
+     Invalid: copy(validationError, error, FAILED).
+  3. generateDeckNode — `promptBuilder.buildGeneratePrompt(state)` →
+     `llm.generate(prompt)` → state.copy(deckAdoc, DECK_GENERATED).
+     require(deckAdoc non-blank). try/catch → FAILED + error.
+
+  Slf4j logger, ToolSelectionStrategy.NONE, name="deck-pipeline".
+
+=== 3. REFACTOR — Fix test + build vert
+
+Test `execute populates deckContextJson` corrigé : `generateResponse=""`
+déclenchait `require(deckAdoc.isNotBlank())` → FAILED au lieu de DECK_GENERATED.
+Assertion `stage == DECK_GENERATED` retirée (test focalisé sur deckContextJson,
+generateResponse mis à "== Deck" pour isoler).
+
+=== 4. Build — Ajout dépendance koog-agents directe
+
+Koog-agents n'est pas transitif via codebase (codebase l'expose en
+`implementation`, pas `api`). Ajout dépendance directe slider :
+
+- `gradle/libs.versions.toml` : version `koog = "1.0.0"` + library
+  `koog-agents = { module = "ai.koog:koog-agents", version.ref = "koog" }`
+- `slider/build.gradle.kts` : `implementation(libs.koog.agents) {
+  exclude(group = "org.jetbrains", module = "annotations") }` (exclude
+  pour conflit annotations 26.0.2-1 vs testcontainers 17.0.0, documenté
+  en tête du buildscript slider depuis S-022).
+
+BOM workspace-bom 0.0.16 fournit déjà la constraint koog 1.0.0.
+
+=== 5. Vérification `:slider:check`
+
+Lancement `./gradlew :slider:check` : BUILD SUCCESSFUL en 6m36s.
+
+Compteurs tests :
+- **949 unit** (was 932, +17) — 17 DeckPipelineGraphTest purs
+- **38 functional** (inchangé)
+- **254 cucumber** (inchangé, 1 SKIP préexistant JRuby gem)
+- **0 FAIL**
+
+Total : 1241 (was 1224, +17). Zéro régression.
+
+== Gouvernance
+
+* Fichiers créés (production) :
+  - `slider/src/main/kotlin/slider/pipeline/DeckPromptBuilder.kt` (25l)
+  - `slider/src/main/kotlin/slider/pipeline/DeckLlm.kt` (20l)
+  - `slider/src/main/kotlin/slider/pipeline/DeckPipelineGraph.kt` (115l)
+
+* Fichiers créés (test) :
+  - `slider/src/test/kotlin/slider/pipeline/DeckPipelineGraphTest.kt` (17 unit)
+
+* Fichiers modifiés (build) :
+  - `gradle/libs.versions.toml` (+ version koog + library koog-agents)
+  - `slider/build.gradle.kts` (+ implementation koog-agents avec exclude)
+
+* Domaine DDD `slider.pipeline` enrichi (was 4 fichiers prod + 2 test,
+  now 7 fichiers prod + 3 test).
+
+* Aucun commit/push pendant la session (interdiction formelle — clôture
+  autorisée par pilote en fin de session).
+
+== État SLD-8.3
+
+[cols="1,3,1,1]
+|===
+| Baby-step | Description | Statut | Session
+
+| 8.3a
+| `DeckState` + `DeckContextValidator` (value objects purs, domaine `slider.pipeline`). 35 unit tests purs.
+| ✅ TERMINÉ
+| S-062
+
+| 8.3b
+| `DeckPipelineGraph` (graphe koog `strategy<DeckState, DeckState>`, 3 nœuds propose/validate/generate + edges conditionnels). 2 ports (`DeckPromptBuilder`, `DeckLlm`). Mock LLM en test. 17 unit.
+| ✅ TERMINÉ
+| S-063
+
+| 8.3c
+| `GenerateDeckPipelineTask` (tâche Gradle thin `generateDeckPipeline`). 5-8 functional.
+| 🟡 À FAIRE
+| —
+
+| 8.3d
+| Cucumber `26_deck_pipeline_koog.feature` (8-12 scénarios BDD end-to-end).
+| 🟡 À FAIRE
+| —
+|===
+
+== Prochaine session (064)
+
+. SLD-8.3 baby-step 8.3c : `GenerateDeckPipelineTask` (tâche Gradle thin
+   `generateDeckPipeline`). Inputs `-Psubject`/`-Planguage`/`-Pai.provider`.
+   Délègue à `DeckPipelineGraph.execute()`. Outputs 2 fichiers (deck-context
+   yml + deck adoc). Functional tests GradleTestKit (5-8). Domaine
+   `slider.pipeline` enrichi. Adaptateur `DeckLlm` concret sur
+   `LlmProviderChatModelAdapter` (slider.ai). Adaptateur `DeckPromptBuilder`
+   concret sur `AssistantManager.PromptManager` (slider.ai).
+. Optionnel : publication slider 0.0.16 sur Maven Central (si les baby-steps
+  8.3c-d sont terminés et le pilote autorise).
+
+== Score
+
+9/10 — Baby-step 8.3b livré en TDD strict (RED → GREEN → REFACTOR), 17 tests
+purs couvrant happy path + 4 failure modes + transitions de stage + appels
+prompt builder + LLM forwarding + asMermaidDiagram. Domaine `slider.pipeline`
+enrichi proprement (3 fichiers prod purs, pattern référence
+`codebase.koog.KoogAugmentedContextGraph` respecté). Dépendance koog-agents
+ajoutée proprement (BOM 0.0.16 constraint, exclude annotations documenté).
+Un point de marge pour la dépendance koog-agents directe (aurait pu être
+exposée en `api` côté codebase US-8.1 future).
+
+== Rappels
+
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` + `education.cccp.slider.translator` (déprécié)
+- Version publiée Central : 0.0.15 (build.gradle.kts hardcodé 0.0.15)
+- BOM workspace-bom : Central 0.0.16 (publiée S-062)
+- codebase-plugin : Central 0.0.5
+- conventions-gradle : Central 0.0.2
+- i18n-contracts : Central 0.0.2
+- koog-agents : 1.0.0 (dépendance directe slider S-063, BOM 0.0.16 constraint)
+- 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
+- Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+- English only: code, Gherkin, comments — no French
+- Package Cucumber steps : `slider.steps`
+- Domaines DDD (16) : `slider.repository`, `slider.rtl`, `slider.i18n`,
+  `slider.translate` (déprécié), `slider.translation`, `slider.scaffold`,
+  `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
+  `slider.revealjs`, `slider.playwright`, `slider.content`, `slider.pipeline`,
+  `SliderConfig` + `SliderTasks` + `slider.ai` (LlmProviderChatModelAdapter,
+  AssistantManager)
+- `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
+- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
+- `./gradlew :slider:check` VERT (949 unit + 38 functional + 254 cucumber = 1241, 0 FAIL, 1 SKIP)
+- EPICs clos : SLD-0→7 + SLD-9 + SLD-10 + SLD-11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.15 + CR-GLOBALE-002
+- EPIC en cours : SLD-8 (US-8.0/8.1/8.2 ✅, US-8.3 8.3a/b ✅ 8.3c/d à faire, US-8.4 à planifier)
+- Build se lance depuis `slider-plugin/` (project `:slider`)
+- Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc`
+  (001 PicoContainer rejeté, 002 slider consomme codebase)
+- Patterns koog : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
+- Graphe cible SLD-8.3 : propose-context → validate-context → generate-deck (edges conditionnels)
+- Pattern référence codebase : `codebase.koog.KoogAugmentedContextGraph` (graphe + execute séquentiel)
+- Rapport 063 : `slider-plugin/.agents/sessions/063-sld-8.3b-deck-pipeline-graph.adoc`

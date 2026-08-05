@@ -55,6 +55,13 @@ dependencies {
     // N1 codebase — LLM socle (EPIC SLD-8 US-8.2): LlmBuildService + LlmProvider
     implementation(libs.codebase.plugin)
 
+    // koog-agents — orchestration DSL (EPIC SLD-8 US-8.3): DeckPipelineGraph.
+    // Not transitive via codebase (codebase exposes it as `implementation`),
+    // so slider depends on it directly via the BOM constraint.
+    implementation(libs.koog.agents) {
+        exclude(group = "org.jetbrains", module = "annotations")
+    }
+
     // Coroutines - IMPORTANT for the asynchronous tests
     testImplementation(libs.bundles.coroutines)
 
