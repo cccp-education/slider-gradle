@@ -1,0 +1,64 @@
+= Session 059 — Slider — Publication 0.0.15 + Coordination CAP-MODEL
+:date: 2026-08-05
+:session: 059
+:borough: MIAMI (slider-gradle)
+:epic: PUB 0.0.15
+
+== Objectif
+
+Publier slider 0.0.15 sur Maven Central (post-SLD-11 expulsion `slider.capsule`) +
+BOM 0.0.15 + sync capsule. Session pure ops/release — aucune feature slider.
+
+== Coordination cross-borough capsule
+
+Session capsule 069 (EPIC CAP-MODEL) exécutée en coordination : unification modèle
+`capsule.feed` ↔ `capsule.CapsuleScript` côté capsule. Slider inchangé (déjà clean
+post-SLD-11 S-058). 361 unit tests capsule VERT.
+
+== Publication slider 0.0.15
+
+. Bump `slider-plugin/slider/build.gradle.kts` : `version = "0.0.14"` → `"0.0.15"`.
+. `./gradlew :slider:check` VERT pré-publication (895 unit + 40 functional + 254 cucumber).
+. `./gradlew :slider:publishToMavenLocal` (sync capsule).
+. `./gradlew publishAggregationToCentralPortal --no-daemon` — bundle nmcp
+  `832cea2a-47b5-4e74-b677-0effcc94bed6` (AUTOMATIC), 3 artefacts signés GPG
+  (slider:0.0.15 + 2 plugin markers `education.cccp.slider` +
+  `education.cccp.slider.translator`).
+. Statut : publishing (validation Central en cours, propagation repo1.maven.org
+  5-15 min).
+
+== Publication BOM 0.0.15
+
+. Bump `workspace-bom/build.gradle.kts` : `version = "0.0.14"` → `"0.0.15"`.
+. Bump `workspace-bom/gradle/libs.versions.toml` : `slider-plugin = "0.0.14"` → `"0.0.15"`.
+. `./gradlew publishAggregationToCentralPortal --no-daemon` — bundle nmcp
+  `02307b00-db40-44e7-9037-c7d293f6a26f` (AUTOMATIC).
+. Statut : publishing.
+
+== Sync capsule
+
+. Bump `capsule-plugin/gradle/libs.versions.toml` : `slider = "0.0.14"` → `"0.0.15"`.
+. `./gradlew test` VERT (361 unit tests, slider 0.0.15 depuis mavenLocal).
+
+== Métriques
+
+[cols="2,2"]
+|===
+| Artefact | Bundle nmcp
+| slider 0.0.15 | `832cea2a-47b5-4e74-b677-0effcc94bed6`
+| workspace-bom 0.0.15 | `02307b00-db40-44e7-9037-c7d293f6a26f`
+|===
+
+Zéro code de production modifié côté slider (pure ops/release). Zéro secret.
+
+== Prochaines étapes
+
+. Vérifier propagation Central (repo1.maven.org HTTP 200 sur slider 0.0.15 + BOM 0.0.15).
+. Backlog slider : SLD-8 (slider consomme codebase, cadré S-046, mis de côté par pilote).
+
+== Fichiers modifiés
+
+. `slider-plugin/slider/build.gradle.kts` — version 0.0.14 → 0.0.15
+. `workspace-bom/build.gradle.kts` — version 0.0.14 → 0.0.15
+. `workspace-bom/gradle/libs.versions.toml` — slider-plugin 0.0.14 → 0.0.15
+. `capsule-plugin/gradle/libs.versions.toml` — slider 0.0.14 → 0.0.15
