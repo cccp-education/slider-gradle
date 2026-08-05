@@ -5,7 +5,6 @@ import slider.Slides.RevealJsSlides.TASK_ASCIIDOCTOR_REVEALJS
 import slider.Slides.RevealJsSlides.REVEAL_I18N_OUTPUT_DIR
 import slider.Slides.RevealJsSlides.TASK_GENERATE_REVEAL_UI_MESSAGES
 import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
-import slider.capsule.CapsuleTaskRegistrar
 import slider.i18n.SliderMessages
 import slider.translation.registerTranslateDeckTask
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
@@ -23,8 +22,6 @@ object SliderTasks {
             registerAsciidoctorTask()
             slider.playwright.PlaywrightTaskRegistrar.register(this)
             slider.repository.PublishTaskRegistrar.register(this)
-            slider.capsule.CapsuleTaskRegistrar.register(this)
-            slider.capsule.CapsuleTaskRegistrar.registerTranslateAndGenerateCapsule(this)
             registerReportTestsTask()
             registerReportFunctionalTestsTask()
             registerGenerateRevealUiMessagesTask()

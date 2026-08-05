@@ -29,6 +29,32 @@ Tests : 977 unit / 46 functional / 279 cucumber = 1302 total (was 859, +443).
 Rapport complet : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`.
 
 '''
+== Session 058 (2026-08-05) — EPIC SLD-11 Expulsion slider.capsule → capsule ✅ TERMINÉ
+
+EPIC SLD-11 (expulsion `slider.capsule` → capsule) TERMINÉ — 6/6 US (11.0 cadrage
+S-056 + 11.1→11.6). Cross-borough (slider + capsule modifiés en coordination),
+non-regression stricte (tests portés côté capsule avant suppression côté slider).
+Boundary realignment : slider produit HTML Reveal.js uniquement, capsule parse
+`.adoc` directement (format `*-script.txt` supprimé côté slider, recréé côté
+capsule via `extractSpeakerNotes`).
+
+SLD-11.1 : domaine `capsule.feed` côté capsule (3 fichiers prod) + 27 unit tests
+portés. SLD-11.2 : tâche `extractSpeakerNotes` côté capsule + 13 unit + 4 functional.
+SLD-11.3 : Cucumber `capsule_speaker_notes.feature` (13 scénarios). SLD-11.4 :
+pipeline `translateAndExtractSpeakerNotes` + 2 unit + 2 functional + 3 cucumber.
+SLD-11.5 : expulsion côté slider — 4 prod + 8 test + 3 features + 3 steps +
+2 functionalTest supprimés, câblage + KDoc + 11 `.properties` + 10 tests i18n
+nettoyés. SLD-11.6 : `generateCapsuleScript` dépend de `extractSpeakerNotes` +
+2 functional + 1 cucumber. `parseScript` conservé (rétrocompatibilité pipeline vidéo).
+
+Tests slider : 895 unit (was 977, -82) / 40 functional (was 46, -6) / 254 cucumber
+(was 279, -25) = 1189 total (was 1302, -113). `./gradlew :slider:check` VERT 0 FAIL
+/ 1 SKIP préexistant. Capsule-gradle : +42 unit +8 functional +16 cucumber = 66
+nouveaux tests, 0 FAIL (1 failure préexistant burnin ffmpeg non lié).
+
+Rapport complet : `slider-plugin/.agents/sessions/058-sld-11-expulsion-capsule.adoc`.
+
+'''
 == Session 056 (2026-08-05) — Cadrage EPIC SLD-11 ✅ TERMINÉ
 
 Cadrage formel EPIC SLD-11 — Expulsion `slider.capsule` : realignment boundary
@@ -243,10 +269,10 @@ VERT — 421 unit (+2 Playwright préexistants) + functional OK + Cucumber OK.
 | SLD-8 | Consommation socle N1 codebase — unifier les appels LLM slider (graphe koog pipeline deck) | 🟡 CADRÉ (S-046, refondu post-046) — à planifier | US à définir
 | SLD-9 | i18n Completion via LLM — AssistantManager + tests de traduction 10 langues | ✅ TERMINÉ (S-057, 5/5 US — 9.0/9.1/9.2/9.3/9.4) | 5 US ~10 pts
 | SLD-10 | Slide Content Model & Rendering Validation — domaine DDD `slider.content` + assertions Playwright | ✅ TERMINÉ (S-054, 7/7 US — 10.0→10.6) | 7 US ~18 pts
-| SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | 🟡 CADRÉ (S-056) — à planifier | 6 US ~14 pts
+| SLD-11 | Expulsion `slider.capsule` — realignment boundary slider ↔ capsule. Domaine `slider.capsule` (4 fichiers prod + 8 fichiers test, 1251l) = fuite de responsabilite (preparation script video dans slider). Expulsion vers capsule-side. | ✅ TERMINÉ (S-058, 6/6 US — 11.0 cadrage S-056 + 11.1→11.6) | 6 US ~14 pts
 |===
 
-_Tous les EPICs de feature sont terminés. EPIC SLD-11 (expulsion slider.capsule) cadré session 056. EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) TERMINÉ — SLD-9.0→9.4 ✅ (5/5 US). EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
+_Tous les EPICs de feature sont terminés. EPIC SLD-11 (expulsion slider.capsule) TERMINÉ S-058 (6/6 US). EPIC SLD-8 (slider consomme codebase) cadré session 046. EPIC SLD-9 (i18n Completion) TERMINÉ — SLD-9.0→9.4 ✅ (5/5 US). EPIC SLD-10 (Slide Content Model) TERMINÉ — SLD-10.0→10.6 ✅ (7/7 US)._
 
 '''
 == 🟡 EPIC SLD-11 — Expulsion slider.capsule : realignment boundary slider ↔ capsule (Session 056 — Cadrage)
@@ -282,27 +308,27 @@ _Boundary cible_ :
 
 | SLD-11.1
 | *Capsule-side : nouveau parseur `.adoc`* — domaine `capsule.feed` (nouveau) : `AsciidocSpeakerNoteParser` (port depuis `slider.capsule`), `CapsuleScript` modele unifie (modele capsule existant avec `type`/`manimScene`), `CapsuleScriptWriter`. Unit tests purs (port des 239l `AsciidocSpeakerNoteParserTest` + 166l `CapsuleScriptWriterTest` + 102l `CapsuleFeedDemoDeckTest`). Baby-step TDD : RED (tests portes) → GREEN (parseur porte) → REFACTOR
-| ⏳ A FAIRE | 3
+| ✅ TERMINÉ (S-058) | 3
 
 | SLD-11.2
 | *Capsule-side : tache `extractSpeakerNotes`* — `CapsuleTaskRegistrar` (nouveau, cote capsule) register `extractSpeakerNotes` task (group `capsule`, lit `slides/misc/*.adoc` → extrait notes → `CapsuleScript` modele capsule). Remplace `generateCapsule` slider-side. Functional tests GradleTestKit
-| ⏳ A FAIRE | 3
+| ✅ TERMINÉ (S-058) | 3
 
 | SLD-11.3
 | *Capsule-side : Cucumber BDD* — `capsule_speaker_notes.feature` (nouveau, port des 13 scenarios `9_capsule_feed.feature` cote capsule) + steps portes dans `capsule.scenarios`. Tags `@capsule @feed`. BDD end-to-end
-| ⏳ A FAIRE | 2
+| ✅ TERMINÉ (S-058) | 2
 
 | SLD-11.4
 | *Capsule-side : pipeline `translateAndExtract`* — tache composite `translateAndExtractSpeakerNotes` (dependsOn `translateDeck` → `extractSpeakerNotes`). Remplace `translateAndGenerateCapsule` slider-side. Functional + Cucumber (port de `23_translate_and_generate_capsule.feature`)
-| ⏳ A FAIRE | 2
+| ✅ TERMINÉ (S-058) | 2
 
 | SLD-11.5
 | *Slider-side : expulsion `slider.capsule`* — suppression des 4 fichiers production, 5 classes test unitaire (672l), 3 steps Cucumber (289l), 3 features Cucumber (290l). Suppression câblage `SliderTasks.kt:26-27`. Mise a jour KDoc `AsciidocContentParser.kt`. Verification : `./gradlew :slider:check` VERT, zero regression
-| ⏳ A FAIRE | 2
+| ✅ TERMINÉ (S-058) | 2
 
 | SLD-11.6
 | *Capsule-side : integration `generateCapsuleVideo`* — `CapsuleBuildTask`/`CapsuleVideoTask` consomment directement `extractSpeakerNotes` output. Suppression `CapsuleManager.parseScript` (devenu mort). Verification non-regression : `./gradlew :capsule:check` VERT, pipeline complet produit la meme sortie video. Cucumber `capsule.feature` enrichi
-| ⏳ A FAIRE | 3
+| ✅ TERMINÉ (S-058) | 3
 |===
 
 _Total_ : 6 US, ~14 pts. _Méthode_ : baby-step DDD/TDD/BDD, 3 niveaux tests/US

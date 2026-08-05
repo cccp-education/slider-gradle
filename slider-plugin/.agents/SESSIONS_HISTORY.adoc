@@ -2,6 +2,37 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 058 (2026-08-05) — EPIC SLD-11 Expulsion slider.capsule → capsule TERMINÉ (6/6 US) ✅
+
+EPIC SLD-11 (expulsion `slider.capsule` → capsule) TERMINÉ — 6/6 US (11.0
+cadrage S-056 + 11.1→11.6 cette session). Cross-borough (slider + capsule
+modifiés en coordination), non-regression stricte (tests portés côté capsule
+avant suppression côté slider). Boundary realignment : slider produit HTML
+Reveal.js uniquement, capsule parse `.adoc` directement (format `*-script.txt`
+supprimé côté slider, recréé côté capsule via `extractSpeakerNotes`).
+
+SLD-11.1 : domaine `capsule.feed` côté capsule (3 fichiers prod : AsciidocSpeakerNoteParser
+port fidèle + CapsuleFeedModels invariants stricts SlideSegment/CapsuleScript +
+CapsuleScriptWriter + CapsuleFeedTaskDomain). 27 unit tests portés (RED → GREEN).
+SLD-11.2 : tâche `extractSpeakerNotes` côté capsule (remplace slider `generateCapsule`),
+CapsuleFeedTaskRegistrar + ExtractSpeakerNotesTask, 13 unit + 4 functional.
+SLD-11.3 : Cucumber `capsule_speaker_notes.feature` (13 scénarios, port
+`9_capsule_feed.feature`) + CapsuleSpeakerNotesSteps (annotations classiques).
+SLD-11.4 : pipeline `translateAndExtractSpeakerNotes` (remplace
+`translateAndGenerateCapsule`), 2 unit + 2 functional + 3 cucumber.
+SLD-11.5 : expulsion côté slider — 4 prod + 8 test + 3 features + 3 steps +
+2 functionalTest supprimés, câblage `SliderTasks.kt` + KDoc + 11 `.properties`
++ 10 `MessagesXxTranslationTest` nettoyés. SLD-11.6 : `generateCapsuleScript`
+dépend de `extractSpeakerNotes`, 2 functional + 1 cucumber. `parseScript`
+conservé (rétrocompatibilité pipeline vidéo).
+
+Tests slider : 895 unit (was 977, -82) / 40 functional (was 46, -6) / 254
+cucumber (was 279, -25) = 1189 total (was 1302, -113). `./gradlew :slider:check`
+VERT 0 FAIL / 1 SKIP préexistant. Capsule-gradle : +42 unit +8 functional +16
+cucumber = 66 nouveaux tests, 0 FAIL (1 failure préexistant burnin ffmpeg non lié).
+
+Rapport : `slider-plugin/.agents/sessions/058-sld-11-expulsion-capsule.adoc`.
+
 == Session 057 (2026-08-05) — EPIC SLD-9 i18n Completion TERMINÉ (9.2/9.3/9.4) ✅
 
 EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 5/5 US (9.0/9.1 S-047 +

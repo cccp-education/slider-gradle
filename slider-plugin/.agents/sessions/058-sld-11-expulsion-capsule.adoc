@@ -1,0 +1,165 @@
+= Session 058 — EPIC SLD-11 : Expulsion slider.capsule → capsule (TERMINÉ 6/6 US)
+
+_Date_ : 2026-08-05
+_Type_ : refactor+ddd+tdd+bdd cross-borough
+_Score_ : 9/10
+
+== Objectif
+
+Réaliser l'EPIC SLD-11 (cadré S-056) — expulsion du domaine `slider.capsule`
+vers capsule-gradle. Realignment boundary : slider produit HTML Reveal.js
+uniquement, capsule parse `.adoc` directement. Cross-borough (2 repos
+modifiés en coordination), non-regression stricte (tests portés côté capsule
+avant suppression côté slider).
+
+== Livraisons
+
+=== SLD-11.1 — Domaine `capsule.feed` + unit tests portés (3 pts)
+
+Nouveau domaine DDD `capsule.feed` côté capsule-gradle (3 fichiers prod) :
+- `AsciidocSpeakerNoteParser.kt` — port fidèle depuis `slider.capsule`, produit
+  `capsule.feed.CapsuleScript`
+- `CapsuleFeedModels.kt` — `SlideSegment`/`CapsuleScript` (invariants stricts
+  `require(title.isNotBlank())`/`require(speakerNote.isNotBlank())`/`require(deckName.isNotBlank())`)
+  + `CapsuleScriptWriter` (sérialiseur plain-text contract `=== CAPSULE SCRIPT ===`)
+- `CapsuleFeedTaskDomain.kt` — value objects `CapsuleAdocDir`/`CapsuleScriptDir` +
+  `CapsuleFeedTaskNames`
+
+3 classes test unitaires portées (RED → GREEN) :
+- `AsciidocSpeakerNoteParserTest` (11 unit)
+- `CapsuleScriptWriterTest` (12 unit)
+- `CapsuleFeedDemoDeckTest` (4 unit — dogfooding 3 decks fr/en/ar copiés côté capsule)
+
+Build : ajout `assertj-core:3.27.7` en testImplementation. **27 unit tests PASS.**
+
+=== SLD-11.2 — Tâche `extractSpeakerNotes` + functional tests (3 pts)
+
+- `CapsuleFeedTaskRegistrar.kt` — thin Gradle adapter, enregistre la tâche
+  `extractSpeakerNotes` (group `capsule`), `outputs.upToDateWhen { false }`,
+  remplace le slider-side `generateCapsule`
+- `ExtractSpeakerNotesTask` — `DefaultTask` + `@DisableCachingByDefault`,
+  propriétés `@get:Internal` `adocDir`/`scriptDir` (validation Gradle)
+- Câblage `CapsuleManager.registerTasks()` → `registerExtractSpeakerNotesTask()`
+
+Tests :
+- `CapsuleFeedTaskDomainTest` (13 unit — value objects + noms de tâche)
+- `ExtractSpeakerNotesFunctionalTest` (4 functional GradleRunner — write/skip/multi-deck/missing-misc)
+
+**13 unit + 4 functional = 17 tests PASS.**
+
+=== SLD-11.3 — Cucumber BDD `capsule_speaker_notes.feature` (2 pts)
+
+- `capsule_speaker_notes.feature` (13 scénarios, port de `9_capsule_feed.feature`)
+  tags `@capsule @feed`
+- `CapsuleSpeakerNotesSteps.kt` (steps `io.cucumber.java.en.*`, convention capsule
+  annotations classiques, glue `capsule.scenarios`)
+- `resolveRepoRoot` adapté pour `capsule-gradle/slides/misc/`
+
+**13 cucumber scenarios PASS.**
+
+=== SLD-11.4 — Pipeline `translateAndExtractSpeakerNotes` (2 pts)
+
+- `CapsuleFeedTaskNames.TRANSLATE_AND_EXTRACT_SPEAKER_NOTES` +
+  `TRANSLATE_AND_EXTRACT_DESCRIPTION`
+- `CapsuleFeedTaskRegistrar.registerTranslateAndExtractSpeakerNotes()` — tâche
+  composite `dependsOn("extractSpeakerNotes")` + `dependsOn("translateDeck")`
+- Câblage `CapsuleManager.registerExtractSpeakerNotesTask()` ajoute les 2 registrations
+
+Tests :
+- `CapsuleFeedTaskDomainTest` +2 unit (noms composite)
+- `TranslateAndExtractSpeakerNotesFunctionalTest` (2 functional `tasks --all`)
+- `translate_and_extract_speaker_notes.feature` (3 cucumber) + `TranslateAndExtractSpeakerNotesSteps`
+
+**2 unit + 2 functional + 3 cucumber = 7 tests PASS.**
+
+=== SLD-11.5 — Expulsion slider-side (2 pts)
+
+Suppression côté slider-gradle (non-regression stricte, tests portés côté
+capsule en SLD-11.1→11.4) :
+- 4 fichiers prod `slider/capsule/*` supprimés (316 lignes)
+- 5 classes test unit `slider/capsule/*` supprimées (672 lignes)
+- 3 features Cucumber supprimées (`9_capsule_feed`, `22_capsule_task_decomposition`,
+  `23_translate_and_generate_capsule`)
+- 3 steps Cucumber supprimés (`CapsuleFeedSteps`, `CapsuleTaskDecompositionSteps`,
+  `TranslateAndGenerateCapsuleSteps`)
+- 2 functional tests supprimés (`GenerateCapsuleFunctionalTest`,
+  `TranslateAndGenerateCapsuleFunctionalTest`)
+- Câblage `SliderTasks.kt` : import + lignes 26-27 retirés (CapsuleTaskRegistrar)
+- KDoc `AsciidocContentParser.kt` mis à jour (référence `slider.capsule` retirée)
+- Clés i18n `task.generateCapsule.*` + `task.translateAndGenerateCapsule.*` retirées
+  des 11 fichiers `.properties` (Messages.properties + 10 langues)
+- 10 `MessagesXxTranslationTest` nettoyés (4 clés retirées chacun)
+- `TaskDescriptionsI18nFunctionalTest` nettoyé (2 tâches retirées)
+
+`./gradlew :slider:check` **VERT** : 895 unit (was 977, -82) + 40 functional
+(was 46, -6) + 254 cucumber (was 279, -25) = 1189 total (was 1302, -113). 0 FAIL.
+
+=== SLD-11.6 — Intégration `generateCapsuleScript` → `extractSpeakerNotes` (3 pts)
+
+- `CapsuleManager.registerGenerateCapsuleScriptTask()` — `generateCapsuleScript`
+  dépend maintenant de `extractSpeakerNotes` (au lieu d'attendre le slider-side
+  `generateCapsule` externe). Description mise à jour.
+- `CapsuleManager.parseScript` conservé (rétrocompatibilité pipeline vidéo —
+  `CapsuleScriptTask`/`CapsuleBuildTask`/`CapsuleVideoTask` le consomment).
+  Suppression complète = refactoring futur (unification modèle `capsule.feed`
+  ↔ `capsule.CapsuleScript`).
+
+Tests :
+- `GenerateCapsuleScriptIntegrationFunctionalTest` (2 functional — dépendance
+  `extractSpeakerNotes` + end-to-end avec deck `.adoc`)
+- `capsule.feature` +1 scenario `@feed` (`generateCapsuleScript depends on
+  extractSpeakerNotes`)
+
+`./gradlew :capsule:check` : 1 failure préexistant (burnin-e2e.srt — ffmpeg/piper
+environnement, non lié SLD-11). Tous les tests SLD-11 PASS.
+
+== Bilan tests cross-borough
+
+* Capsule-gradle (nouveaux) : 42 unit + 8 functional + 16 cucumber = 66 tests, 0 FAIL
+* Slider-gradle (supprimés) : -82 unit -6 functional -25 cucumber = -113 tests
+* Slider `./gradlew :slider:check` VERT (1189 total, 0 FAIL)
+* Capsule `./gradlew :capsule:check` : 1 failure préexistant (burnin ffmpeg), 0 failure SLD-11
+
+== Fichiers modifiés
+
+* Capsule-gradle (nouveaux) :
+  - `src/main/kotlin/capsule/feed/{AsciidocSpeakerNoteParser,CapsuleFeedModels,CapsuleFeedTaskDomain,CapsuleFeedTaskRegistrar}.kt`
+  - `src/test/kotlin/capsule/feed/{AsciidocSpeakerNoteParserTest,CapsuleScriptWriterTest,CapsuleFeedDemoDeckTest,CapsuleFeedTaskDomainTest}.kt`
+  - `src/functionalTest/kotlin/capsule/feed/{ExtractSpeakerNotesFunctionalTest,TranslateAndExtractSpeakerNotesFunctionalTest,GenerateCapsuleScriptIntegrationFunctionalTest}.kt`
+  - `src/test/features/{capsule_speaker_notes,translate_and_extract_speaker_notes}.feature`
+  - `src/test/kotlin/capsule/scenarios/{CapsuleSpeakerNotesSteps,TranslateAndExtractSpeakerNotesSteps}.kt`
+  - `slides/misc/capsule-feed-demo-{fr,en,ar}-deck.adoc` (copiés depuis slider)
+* Capsule-gradle (modifiés) :
+  - `build.gradle.kts` (+assertj-core), `CapsuleManager.kt` (câblage), `capsule.feature` (+1 scenario)
+* Slider-gradle (supprimés) : 4 prod + 8 test + 3 features + 3 steps + 2 functionalTest
+* Slider-gradle (modifiés) : `SliderTasks.kt`, `AsciidocContentParser.kt`, 11 `.properties`,
+  10 `MessagesXxTranslationTest`, `TaskDescriptionsI18nFunctionalTest`
+
+== Prochaine session
+
+EPIC SLD-11 TERMINÉ (6/6 US). Reste backlog slider :
+- **SLD-8** (CADRÉ S-046) — Consomme codebase socle LLM. 5 US ~12 pts.
+  Dépendance cross-borough Queens (codebase N1). Risque dépendance externe.
+- Refactoring futur : unification modèle `capsule.feed.CapsuleScript` ↔ `capsule.CapsuleScript`
+  + suppression `CapsuleManager.parseScript` (SLD-11.6 partiel).
+- Publication slider 0.0.15 (post-SLD-11 expulsion) + BOM 0.0.15.
+
+== Rappels
+
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` + `education.cccp.slider.translator` (déprécié)
+- Version publiée Central : 0.0.14 (build.gradle.kts hardcodé 0.0.14)
+- Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+- English only: code, Gherkin, comments
+- 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
+- Domaines DDD slider (15 désormais, was 16) : `slider.capsule` SUPPRIMÉ.
+  Reste : `slider.repository`, `slider.rtl`, `slider.i18n`, `slider.translate` (déprécié),
+  `slider.translation`, `slider.scaffold`, `slider.config`, `slider.prerequisite`,
+  `slider.extension`, `slider.wiring`, `slider.revealjs`, `slider.playwright`,
+  `slider.content` + `SliderConfig` + `SliderTasks`
+- `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
+- `./gradlew :slider:check` VERT (0 FAIL, 895 unit, 40 functional, 254 cucumber)
+- EPICs clos : SLD-0→7 + SLD-9 + SLD-10 + SLD-11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.14 + CR-GLOBALE-002
+- EPIC cadré : SLD-8 (slider consomme codebase, 5 US ~12 pts, à planifier)
+- Build se lance depuis `slider-plugin/` (project `:slider`)
+- Capsule-gradle : nouveau domaine `capsule.feed` (4 fichiers prod + 7 fichiers test +
+  2 features + 2 steps). Tâche `extractSpeakerNotes` remplace slider `generateCapsule`.

@@ -1,5 +1,31 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 058_ : EPIC SLD-11 (expulsion `slider.capsule` → capsule) TERMINÉ.
+Cross-borough (slider + capsule). Suppression côté slider : -82 unit -6 functional
+-25 cucumber = -113 tests. `./gradlew :slider:check` VERT 0 FAIL / 1 SKIP préexistant.
+Totaux post-058 : 895 unit + 40 functional + 254 cucumber = 1189 total (was 1302).
+
+Tests supprimés session 058 (expulsion `slider.capsule`) :
+. `AsciidocSpeakerNoteParserTest.kt` (11 unit) — porté vers `capsule.feed` SLD-11.1
+. `CapsuleScriptWriterTest.kt` (12 unit) — porté vers `capsule.feed` SLD-11.1
+. `CapsuleFeedDemoDeckTest.kt` (4 unit) — porté vers `capsule.feed` SLD-11.1
+. `CapsuleSmokeRealDeckTest.kt` (1 unit) — supprimé (round-trip deck réel)
+. `CapsuleTaskDomainTest.kt` (13 unit) — porté vers `capsule.feed` SLD-11.2
+. `GenerateCapsuleFunctionalTest.kt` (4 functional) — supprimé (tâche `generateCapsule` supprimée)
+. `TranslateAndGenerateCapsuleFunctionalTest.kt` (2 functional) — supprimé (tâche composite supprimée)
+. `9_capsule_feed.feature` (13 cucumber) — porté vers `capsule_speaker_notes.feature` SLD-11.3
+. `22_capsule_task_decomposition.feature` (13 cucumber) — supprimé (domaine `slider.capsule` supprimé)
+. `23_translate_and_generate_capsule.feature` (3 cucumber) — porté vers `translate_and_extract_speaker_notes.feature` SLD-11.4
+. `CapsuleFeedSteps.kt`, `CapsuleTaskDecompositionSteps.kt`, `TranslateAndGenerateCapsuleSteps.kt` (steps cucumber) — supprimés/portés
+
+Tests modifiés (nettoyage clés i18n `task.generateCapsule.*` + `task.translateAndGenerateCapsule.*`) :
+. 10 `MessagesXxTranslationTest.kt` (-4 clés chacun)
+. `TaskDescriptionsI18nFunctionalTest.kt` (-2 tâches)
+. 11 `Messages*.properties` (-4 clés)
+
+Nouveaux tests côté capsule-gradle (non comptés dans les totaux slider) :
++42 unit +8 functional +16 cucumber = 66 nouveaux tests, 0 FAIL (capsule-gradle).
+
 _Statut session 048_ : Vision SLD-10 Slide Content Model & Rendering Validation.
 Zéro code modifié — session de vision pure. Aucun test ajouté.
 

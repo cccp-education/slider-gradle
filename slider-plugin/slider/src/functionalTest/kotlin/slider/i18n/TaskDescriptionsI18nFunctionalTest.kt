@@ -53,8 +53,6 @@ class TaskDescriptionsI18nFunctionalTest {
             "installPlaywright",
             "visualTest",
             "deploySlides",
-            "generateCapsule",
-            "translateAndGenerateCapsule",
             "reportTests",
             "reportFunctionalTests",
             "generateRevealUiMessages",

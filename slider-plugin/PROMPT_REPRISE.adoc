@@ -1,50 +1,58 @@
-= PROMPT_REPRISE — slider-gradle — Session 058
-:session: 058
+= PROMPT_REPRISE — slider-gradle — Session 059
+:session: 059
 :date: 2026-08-05
 
-== Session 057 terminée
+== Session 058 terminée
 
-EPIC SLD-9 (i18n Completion via LLM) TERMINÉ — 5/5 US (9.0/9.1 + 9.2/9.3/9.4
-cette session). Périmètre restrictif respecté : i18n only, zéro refacto,
-zéro production modifié. Pattern plantuml-gradle appliqué fidèlement.
+EPIC SLD-11 (expulsion `slider.capsule` → capsule) TERMINÉ — 6/6 US
+(11.0 cadrage S-056 + 11.1→11.6 cette session). Cross-borough (slider + capsule
+modifiés en coordination). Non-regression stricte respectée (tests portés
+côté capsule avant suppression côté slider).
 
-SLD-9.2 — 9 classes traduction par langue (8 Messages{Zh,Hi,Es,Ar,Bn,Pt,Ru,Ur}
-+ MessagesEnReference), pattern MessagesFrTranslationTest étendu
-(+`task.group.translator` PARTIAL +`task.translateDeck.noTargets`). 39 clés
-véritablement traduisibles (12 clés identiques cross-langue exclues : 10
-task.group.* techniques + 3 placeholders purs). +366 tests unitaires.
+SLD-11.1 — Domaine `capsule.feed` côté capsule (3 fichiers prod) :
+`AsciidocSpeakerNoteParser` + `CapsuleFeedModels` (SlideSegment/CapsuleScript
+invariants stricts + CapsuleScriptWriter) + `CapsuleFeedTaskDomain`.
+27 unit tests portés (RED → GREEN).
 
-SLD-9.3 — `TaskDescriptionsI18nFunctionalTest` (GradleRunner, 20 tests). 17
-tâches i18nisées vérifiées listées dans `gradle tasks --all` × 10 langues + 10
-tests spécifiques EN/FR (cleanBuild, asciidoctorRevealJs, serveSlides,
-visualTest, translateDeck). +20 functional.
+SLD-11.2 — Tâche `extractSpeakerNotes` côté capsule (remplace slider
+`generateCapsule`). `CapsuleFeedTaskRegistrar` + `ExtractSpeakerNotesTask`.
+13 unit + 4 functional = 17 tests.
 
-SLD-9.4 — SliderMessagesTest étendu (29→55, +26 unit) +
-`25_slider_messages_resolution.feature` (31 scénarios BDD) +
-`SliderMessagesResolutionSteps` (Java8 En). Bug DuplicateStepDefinitionException
-résolu (renommage `the resolved message should contain`). +31 cucumber.
+SLD-11.3 — Cucumber `capsule_speaker_notes.feature` (13 scénarios, port
+`9_capsule_feed.feature`) + `CapsuleSpeakerNotesSteps`. 13 cucumber PASS.
 
-Tests : 977 unitaires / 46 functional / 279 cucumber = 1302 total (was 859,
-+443). `./gradlew :slider:check --rerun-tasks` VERT 0 FAIL / 1 SKIP préexistant.
+SLD-11.4 — Pipeline `translateAndExtractSpeakerNotes` (remplace
+`translateAndGenerateCapsule`). 2 unit + 2 functional + 3 cucumber = 7 tests.
 
-Rapport : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`.
+SLD-11.5 — Expulsion côté slider : 4 prod + 8 test + 3 features + 3 steps +
+2 functionalTest supprimés. Câblage `SliderTasks.kt` + KDoc + 11 `.properties`
++ 10 `MessagesXxTranslationTest` nettoyés. `./gradlew :slider:check` VERT
+895 unit + 40 functional + 254 cucumber = 1189 (was 1302, -113). 0 FAIL.
 
-== Prochaine session — 058
+SLD-11.6 — `generateCapsuleScript` dépend de `extractSpeakerNotes`. 2 functional
++ 1 cucumber. `parseScript` conservé (rétrocompatibilité pipeline vidéo).
+Unification modèle = refactoring futur.
 
-EPIC SLD-9 TERMINÉ. Reste backlog slider :
-* **SLD-11** (CADRÉ S-056) — Expulsion `slider.capsule` → capsule. 6 US
-  ~14 pts. Cross-borough (slider + capsule modifiés en coordination). Baby-step
-  DDD/TDD/BDD 3 niveaux, non-régression stricte (tests portés avant suppression
-  source). Recommandé (pur refactoring DDD, méthode de prédilection).
+Tests cross-borough : capsule +42 unit +8 functional +16 cucumber = 66 nouveaux
+0 FAIL. Slider -113 tests supprimés. Slider `check` VERT. Capsule `check` :
+1 failure préexistant (burnin ffmpeg), 0 failure SLD-11.
+
+Rapport : `slider-plugin/.agents/sessions/058-sld-11-expulsion-capsule.adoc`.
+
+== Prochaine session — 059
+
+EPIC SLD-11 TERMINÉ. Reste backlog slider :
 * **SLD-8** (CADRÉ S-046) — Consomme codebase socle LLM. 5 US ~12 pts.
   Dépendance cross-borough Queens (codebase N1). Risque dépendance externe.
+* Publication slider 0.0.15 (post-SLD-11 expulsion) + BOM 0.0.15 + sync capsule.
+* Refactoring futur : unification modèle `capsule.feed` ↔ `capsule.CapsuleScript`
+  + suppression `CapsuleManager.parseScript`.
 
 Choix pilote au démarrage.
 
 == Rappels
 
-- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
-  `education.cccp.slider.translator` (déprécié)
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` + `education.cccp.slider.translator` (déprécié)
 - Version publiée Central : 0.0.14 (build.gradle.kts hardcodé 0.0.14)
 - BOM workspace-bom : Central 0.0.14
 - conventions-gradle : Central 0.0.2
@@ -54,17 +62,16 @@ Choix pilote au démarrage.
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
 - English only: code, Gherkin, comments — no French
 - Package Cucumber steps : `slider.steps`
-- Domaines DDD (16) : `slider.repository`, `slider.capsule`, `slider.rtl`,
-  `slider.i18n`, `slider.translate` (déprécié), `slider.translation`, `slider.scaffold`,
-  `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
-  `slider.revealjs`, `slider.playwright`, `slider.content` + `SliderConfig` + `SliderTasks`
+- Domaines DDD (15, was 16) : `slider.capsule` SUPPRIMÉ. Reste : `slider.repository`,
+  `slider.rtl`, `slider.i18n`, `slider.translate` (déprécié), `slider.translation`,
+  `slider.scaffold`, `slider.config`, `slider.prerequisite`, `slider.extension`,
+  `slider.wiring`, `slider.revealjs`, `slider.playwright`, `slider.content` + `SliderConfig` + `SliderTasks`
 - `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew :slider:check` VERT (0 FAIL, 1 SKIP, 977 unitaires, 46 functional, 279 cucumber)
-- EPICs clos : SLD-0→7 + SLD-9 + SLD-10 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.14 + CR-GLOBALE-002
+- `./gradlew :slider:check` VERT (0 FAIL, 895 unit, 40 functional, 254 cucumber)
+- EPICs clos : SLD-0→7 + SLD-9 + SLD-10 + SLD-11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.14 + CR-GLOBALE-002
 - EPIC cadré : SLD-8 (slider consomme codebase, 5 US ~12 pts, à planifier)
-- EPIC cadré : SLD-11 (expulsion slider.capsule, 6 US ~14 pts, à planifier)
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
   rejeté, 002 slider consomme codebase)
-- Rapport SLD-9 : `slider-plugin/.agents/sessions/057-sld-9-completion.adoc`
+- Rapport SLD-11 : `slider-plugin/.agents/sessions/058-sld-11-expulsion-capsule.adoc`

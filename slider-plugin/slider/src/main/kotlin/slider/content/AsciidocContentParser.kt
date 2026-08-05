@@ -2,8 +2,7 @@ package slider.content
 
 /**
  * Parses an AsciiDoc deck source into a list of [SlideContent] — one per
- * level-2 heading (`==`). Reuses the line-by-line pattern of
- * [slider.capsule.AsciidocSpeakerNoteParser] and extends it to paragraphs,
+ * level-2 heading (`==`). Uses a line-by-line pattern extended to paragraphs,
  * subtitles (`===`), bullet lists (`* `), and `[NOTE.speaker]` blocks.
  *
  * Recognised elements within a slide:
