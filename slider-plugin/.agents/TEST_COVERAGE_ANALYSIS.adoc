@@ -1,5 +1,14 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 067_ : Aplatissement structure `slider-plugin/slider/` →
+`slider-plugin/` (fix contrat d'architecture, suppression sous-projet
+`include("slider")`). Zéro test supprimé ni modifié fonctionnellement.
+3 tests Playwright (`RtlPlaywrightFunctionalTest`, `SliderPlaywrightE2eTest`,
+`ContentPlaywrightFunctionalTest`) mis à jour message d'erreur uniquement
+(`./gradlew :slider:test` → `./gradlew test`). Totaux inchangés post-065 :
+959 unit + 45 functional + 265 cucumber = 1269 total, 0 FAIL, 1 SKIP
+préexistant. `./gradlew check` BUILD SUCCESSFUL 10m36s — zéro régression.
+
 _Statut session 065_ : SLD-8.3 baby-step 8.3d Cucumber `26_deck_pipeline_koog.feature`
 (12 scénarios BDD end-to-end, tags `@pipeline @koog`). *Pure BDD* — zéro fichier
 de production modifié (logique métier déjà livrée par 8.3a/b/c, pattern SLD-10.6).

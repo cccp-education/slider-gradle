@@ -2,7 +2,26 @@
 
 _Date creation_ : 2026-05-10
 
-== Session 066 (2026-08-06) — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule ✅ TERMINÉ
+== Session 067 (2026-08-07) — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅ TERMINÉ
+
+Fix structure repo — le dossier `slider-plugin/slider/` (sous-projet Gradle
+`include("slider")`) violait le contrat d'architecture « Plugin Indépendant +
+Racine Consommateur » (article 0124). slider-gradle était le SEUL borough avec
+cette indirection (`slider-plugin/slider/src/` au lieu de `slider-plugin/src/`).
+Héritage du tout premier commit (`d3aacdd "Once Upon A Time..."`).
+
+211 fichiers déplacés via `git mv` (rename detection, historique préservé) :
+`slider-plugin/slider/{build.gradle.kts, src, gradle.properties}` →
+`slider-plugin/` + fusion `.gitignore`. Suppression `include("slider")` de
+`slider-plugin/settings.gradle.kts` — build mono-projet autonome conforme au
+pattern (bakery/codex/planner/capsule/document). Chemins fixtures Playwright
+`../../build/` → `../build/`. 5 refs `:slider:` nettoyées (3 tests Playwright
+messages, PROMPT_REPRISE, SESSION_CHECKLIST). Path Gradle `:slider` → `:`.
+Zéro test supprimé/modifié fonctionnellement. `./gradlew check` BUILD
+SUCCESSFUL 10m36s (unit + functional + cucumber), zéro régression. Version
+0.0.16 inchangée. Commit + push (clôture pilote).
+
+## Session 066 (2026-08-06) — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule ✅ TERMINÉ
 
 Session pure ops/release (zéro code de production modifié, zéro test
 modifié). Publication slider 0.0.16 sur Maven Central via nmcp + BOM

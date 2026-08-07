@@ -1,6 +1,0 @@
-.gradle
-.idea
-.kotlin
-build
-doc.adoc
-src/test/resources/local.properties

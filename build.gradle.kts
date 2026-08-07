@@ -16,7 +16,7 @@ slider {
 
 // ── Playwright visual test fixtures ──────────────────────────────────────────
 // Pre-generates the two Reveal.js HTML decks consumed by the Playwright-jvm
-// tests in slider-plugin/slider. The root project uses the real Gradle home
+// tests in slider-plugin. The root project uses the real Gradle home
 // (JRuby gem present), avoiding the isolated-Jruby issue diagnosed in S-023.
 //
 // Fixtures:

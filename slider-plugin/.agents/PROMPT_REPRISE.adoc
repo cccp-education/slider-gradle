@@ -1,56 +1,52 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 066 — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule
-_Prochaine session_ : 067 — à arbitrer par le pilote (tous EPICs terminés)
+_Session terminee_ : 067 — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/`
+_Prochaine session_ : 068 — à arbitrer par le pilote (tous EPICs terminés)
 
-== Mission session 066 (TERMINÉE)
+== Mission session 067 (TERMINÉE)
 
-. Session pure ops/release (zéro code de production, zéro test modifié).
-. Publication slider 0.0.16 sur Maven Central via nmcp — bundle
-  `106d110f-27de-43c1-869e-9e9a70026f5d` (AUTOMATIC, 3 artefacts signés
-  GPG : slider:0.0.16 POM+JAR+sources+javadoc + 2 plugin markers
-  `education.cccp.slider` + `education.ccp.slider.translator`).
-. BOM 0.0.17 publiée (bundle `b432cc13-f08b-489c-8f67-c80d9d5d8b04`
-  AUTOMATIC, constraint slider 0.0.16 — BOM 0.0.16 publiée S-062 gardait
-  constraint 0.0.15).
-. Sync capsule-gradle (catalogue `capsule-plugin/gradle/libs.versions.toml`
-  slider 0.0.15→0.0.16, `./gradlew compileKotlin` VERT avec slider 0.0.16
-  mavenLocal).
-. Vérification repo1.maven.org : POM slider 0.0.16 + BOM 0.0.17 HTTP 200
-  (après ~6 min propagation VALIDATING → publishing).
-. `./gradlew :slider:check` VERT pré-publication (UP-TO-DATE 22s, 959
-  unit + 45 functional + 265 cucumber, 0 FAIL, 1 SKIP préexistant).
-. 4 fichiers build bumpés sur 3 repos (slider, BOM, capsule) — non
-  committés (Règle 1, accord pilote pour publish mais pas pour commit).
-. Secret-scan fin de session : zéro match dans le code de production.
+. Fix structure repo : le dossier `slider-plugin/slider/` (sous-projet
+  Gradle `include("slider")`) violait le contrat d'architecture
+  « Plugin Indépendant + Racine Consommateur » (article 0124) — slider
+  était le SEUL borough avec cette indirection
+  (`slider-plugin/slider/src/` au lieu de `slider-plugin/src/`).
+  Héritage du tout premier commit (`d3aacdd`).
+. Aplatissement complet via `git mv` (historique préservé, 211 fichiers
+  déplacés) : `slider-plugin/slider/{build.gradle.kts, src, gradle.properties}`
+  → `slider-plugin/` + fusion `.gitignore`.
+. `slider-plugin/settings.gradle.kts` : suppression `include("slider")`
+  — build mono-projet autonome conforme au pattern.
+. Chemins fixtures Playwright corrigés (`../../build/` → `../build/`).
+. 5 refs `:slider:` nettoyées (3 tests Playwright, PROMPT_REPRISE,
+  SESSION_CHECKLIST). Path Gradle : `:slider` → `:`.
+. `./gradlew check` BUILD SUCCESSFUL 10m36s (unit + functional +
+  cucumber), zéro régression.
+. Commit + push autorisés par le pilote (clôture session 067).
 
-== Contexte reprise session 067 — à arbitrer par le pilote
+== Contexte reprise session 068 — à arbitrer par le pilote
 
 - *Tous les EPICs de feature sont terminés* (SLD-0→11 + CR-GLOBALE-002 +
   CR3 + PUB 0.0.1→0.0.16). Aucun nouvel EPIC cadré.
-- *Arbitrage pilote session 066* : proposition 2 (cadrage nouvel EPIC)
-  écartée comme faux positif. Décision reportée à la session 067.
+- *Structure* : `slider-plugin/` est maintenant un build autonome avec
+  `src/` à sa racine. Commandes : `./gradlew check` (plus de `:slider:`
+  prefix).
 - *Backlog en attente de décision* :
-  - Commit/push des 3 repos modifiés (slider, BOM, capsule) — accord
-    pilote requis (Règle 1).
-  - Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues — backlog
-    cross-borough évoqué AGENTS.adoc racine, borough HTOWN DORMANT).
+  - Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues —
+    backlog cross-borough, borough HTOWN DORMANT).
   - Optionnel : nouveaux EPICs à cadrer (le pilote arbitre la prochaine
     direction — aucun EPIC n'est imposé).
-- *Baseline* : `main` propre, à jour `origin/main`. Dernier commit
-  `a7740ed feat(sld-8.3d)`. 4 fichiers build bumpés non committés dans 3
-  repos (working tree modifié). `./gradlew :slider:compileKotlin` VERT.
+- *Baseline* : session 067 committée + pushée (clôture pilote).
 - *Versions publiées Central* : slider 0.0.16, BOM 0.0.17.
 - *Règles* : Règle 1 — AUCUN commit sans permission. Règle 2 — AUCUN
   publish sans permission (publishSlides inclus).
-- *Rapport 066* :
-  `slider-plugin/.agents/sessions/066-pub-slider-0.0.16.adoc`.
+- *Rapport 067* :
+  `slider-plugin/.agents/sessions/067-aplatir-slider-plugin-structure.adoc`.
 
 == Rappels méthodologie (pilote)
 
 - *Baby-step DDD/TDD/BDD* : RED → GREEN → REFACTOR, 3 niveaux tests/US
   (unit → functional → cucumber), non-regression stricte
-  (`./gradlew :slider:check` VERT avant de clore une US).
+  (`./gradlew check` VERT avant de clore une US).
 - *English only* : code, Gherkin, commentaires. Gouvernance (.adoc) en
   français.
 - *Domaines DDD* (16) : `slider.pipeline` clos (10 fichiers prod + 4

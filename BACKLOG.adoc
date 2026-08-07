@@ -7,6 +7,29 @@ _.date: 2026-08-06
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 067 (2026-08-07) — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅ TERMINÉ
+
+Fix structure repo (aucun EPIC feature concerné — session architecture).
+Le dossier `slider-plugin/slider/` (sous-projet Gradle `include("slider")`)
+violait le contrat d'architecture « Plugin Indépendant + Racine
+Consommateur » (article 0124) : `{name}-plugin/` doit être un build
+autonome avec `src/` à sa racine et zéro `include()` / zéro sous-projet.
+slider-gradle était le SEUL borough avec cette indirection — héritage du
+premier commit `d3aacdd`.
+
+211 fichiers déplacés via `git mv` (rename detection, historique préservé) :
+`slider-plugin/slider/{build.gradle.kts, src, gradle.properties}` →
+`slider-plugin/` + fusion `.gitignore`. Suppression `include("slider")` —
+build mono-projet autonome conforme au pattern (bakery/codex/planner/
+capsule/document). Chemins fixtures Playwright `../../build/` → `../build/`.
+5 refs `:slider:` nettoyées. Path Gradle `:slider` → `:`. Zéro test
+supprimé/modifié fonctionnellement. `./gradlew check` BUILD SUCCESSFUL
+10m36s, zéro régression. Version 0.0.16 inchangée. Commit + push (clôture
+pilote).
+
+Rapport complet : `slider-plugin/.agents/sessions/067-aplatir-slider-plugin-structure.adoc`.
+
+'''
 == Session 066 (2026-08-06) — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule ✅ TERMINÉ
 
 Session pure ops/release (zéro code de production modifié, zéro test

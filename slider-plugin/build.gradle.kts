@@ -117,11 +117,11 @@ tasks.withType<Test>().configureEach {
     // RTL fixture: build/playwright-fixtures/rtl/ (requires -Planguage=ar)
     systemProperty(
         "playwright.ltr.fixtures.dir",
-        layout.projectDirectory.dir("../../build/playwright-fixtures/ltr").asFile.absolutePath
+        layout.projectDirectory.dir("../build/playwright-fixtures/ltr").asFile.absolutePath
     )
     systemProperty(
         "playwright.rtl.fixtures.dir",
-        layout.projectDirectory.dir("../../build/playwright-fixtures/rtl").asFile.absolutePath
+        layout.projectDirectory.dir("../build/playwright-fixtures/rtl").asFile.absolutePath
     )
 }
 

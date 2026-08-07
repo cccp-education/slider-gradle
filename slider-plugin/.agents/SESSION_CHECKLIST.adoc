@@ -6,7 +6,7 @@
 . [ ] Lire `AGENT.adoc` — regles absolues (6 regles)
 . [ ] Lire `.agents/INDEX.adoc` — roadmap, etat des EPICs, portefeuille
 . [ ] Verifier l'etat git (`git status`) — branche, fichiers modifies
-. [ ] Verifier que le build compile (`./gradlew :slider:compileKotlin`)
+. [ ] Verifier que le build compile (`./gradlew compileKotlin`)
 . [ ] Verifier que `./gradlew tasks` fonctionne
 
 == Pendant la session
@@ -76,5 +76,5 @@ git status
 grep -r "TOKEN\|SECRET\|PASSWORD\|API_KEY" slider-plugin/ --include="*.kts" --include="*.properties" --include="*.yml"
 
 # Verifier que le build compile
-./gradlew :slider:compileKotlin
+./gradlew compileKotlin
 ----

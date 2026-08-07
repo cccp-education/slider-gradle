@@ -1,5 +1,24 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
-:date: 2026-08-06
+:date: 2026-08-07
+
+== Session 067 — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅
+
+Fix structure repo — suppression du sous-projet Gradle `include("slider")`.
+slider-gradle était le SEUL borough avec l'indirection
+`slider-plugin/slider/src/` (contrat d'architecture « Plugin Indépendant +
+Racine Consommateur », article 0124 : `{name}-plugin/` = build autonome avec
+`src/` à sa racine, zéro `include()` / zéro sous-projet). Héritage du
+premier commit `d3aacdd`.
+
+Tâches terminées :
+. `git mv` 211 fichiers : `slider-plugin/slider/{build.gradle.kts, src, gradle.properties}` → `slider-plugin/` (historique préservé, rename detection)
+. Fusion `.gitignore` (+`doc.adoc`, `src/test/resources/local.properties`)
+. Suppression `include("slider")` de `slider-plugin/settings.gradle.kts` — build mono-projet autonome
+. Chemins fixtures Playwright `../../build/` → `../build/`
+. 5 refs `:slider:` nettoyées (3 tests Playwright + PROMPT_REPRISE + SESSION_CHECKLIST)
+. `./gradlew check` BUILD SUCCESSFUL 10m36s (unit + functional + cucumber), zéro régression
+. Path Gradle `:slider` → `:` — commandes `./gradlew check` sans prefix
+. Commit + push (clôture pilote)
 
 == Session 066 — Publication slider 0.0.16 + BOM 0.0.17 + sync capsule ✅
 

@@ -33,4 +33,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "slider-plugin"
-include("slider")

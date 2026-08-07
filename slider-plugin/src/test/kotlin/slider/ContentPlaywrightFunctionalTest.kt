@@ -69,7 +69,7 @@ class ContentPlaywrightFunctionalTest {
 
     private fun resolveFixtureDir(property: String): Path {
         val dir = System.getProperty(property)
-            ?: error("System property '$property' not set — run './gradlew :slider:test'")
+            ?: error("System property '$property' not set — run './gradlew test'")
         return Path.of(dir).toAbsolutePath().normalize()
     }
 }

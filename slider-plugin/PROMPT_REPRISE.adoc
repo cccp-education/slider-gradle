@@ -16,7 +16,7 @@ fakes `RecordingPromptBuilder` + `FakeDeckLlm` en mémoire). Domaine
 
 12 scénarios couvrent happy path (3), invalid context → FAILED (3), LLM
 failure modes (3), edge conditions (3 — no generate call, stage transitions,
-Mermaid diagram). `./gradlew :slider:check` VERT (959 unit, 45 functional,
+Mermaid diagram). `./gradlew check` VERT (959 unit, 45 functional,
 265 cucumber = 0 FAIL, 1 SKIP préexistant). Zéro régression.
 
 **US-8.3 clôturée** (4/4 baby-steps : 8.3a 35 unit, 8.3b 17 unit, 8.3c 7
@@ -55,7 +55,7 @@ Rapport : `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumb
   `SliderConfig` + `SliderTasks` + `slider.ai` (LlmProviderChatModelAdapter, AssistantManager)
 - `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew :slider:check` VERT (959 unit + 45 functional + 265 cucumber,
+- `./gradlew check` VERT (959 unit + 45 functional + 265 cucumber,
   0 FAIL, 1 SKIP)
 - EPICs clos : SLD-0→11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.15 + CR-GLOBALE-002
 - **EPIC SLD-8 TERMINÉ** (US-8.0/8.1/8.2/8.3 ✅, US-8.4 caduque)

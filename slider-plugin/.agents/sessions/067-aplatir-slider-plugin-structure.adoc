@@ -1,0 +1,123 @@
+= Session 067 — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/`
+:session: 067
+:date: 2026-08-07
+:epic: STRUCT — structure repo (aucun EPIC feature)
+:status: ✅ TERMINÉ
+:score: 9/10
+
+== Résumé
+
+Le dossier `slider-plugin/slider/` (sous-projet Gradle déclaré par
+`include("slider")` dans `slider-plugin/settings.gradle.kts`) était une
+déviation du contrat d'architecture « Plugin Indépendant + Racine
+Consommateur » (article 0124) : `{name}-plugin/` doit être un build
+autonome avec `src/` à sa racine et **zéro `include()` / zéro sous-projet**.
+
+slider-gradle était le **seul borough** avec cette indirection
+(`slider-plugin/slider/src/` au lieu de `slider-plugin/src/`). Tous les
+autres suivent le pattern (bakery-plugin/src, codex-plugin/src,
+planner-plugin/src, capsule-plugin/src, document-plugin/src).
+
+Héritage du tout premier commit (`d3aacdd "Once Upon A Time..."`) : le
+sous-projet a été copié depuis une source `include("module")` (le commit
+initial contient d'ailleurs `com/cheroliv/bakery`). L'indirection n'a
+jamais été aplatie depuis.
+
+Fix : aplatissement complet de `slider-plugin/slider/` vers
+`slider-plugin/`, via `git mv` (historique préservé — rename detection,
+211 fichiers déplacés).
+
+== Changements
+
+[cols="3,3,1"]
+|===
+| Fichier | Rôle | Delta
+
+| `slider-plugin/slider/build.gradle.kts` → `slider-plugin/build.gradle.kts`
+| build du plugin (root project désormais)
+| git mv
+
+| `slider-plugin/slider/src/` → `slider-plugin/src/`
+| sources main + test + functional + cucumber (209 fichiers)
+| git mv
+
+| `slider-plugin/slider/gradle.properties` → `slider-plugin/gradle.properties`
+| propriétés du build (node-gradle, langchain4j, kotlin...)
+| git mv
+
+| `slider-plugin/.gitignore`
+| fusion des 2 `.gitignore` (ajout `doc.adoc` + `src/test/resources/local.properties`)
+| merge
+
+| `slider-plugin/settings.gradle.kts`
+| suppression `include("slider")` — build mono-projet autonome
+| -1 ligne
+
+| `slider-plugin/build.gradle.kts`
+| chemins fixtures Playwright `../../build/` → `../build/` (projectDirectory = `slider-plugin/`)
+| 2 lignes
+
+| 3 tests Playwright (`src/test/kotlin/slider/{RtlPlaywrightFunctionalTest,SliderPlaywrightE2eTest,ContentPlaywrightFunctionalTest}.kt`)
+| message d'erreur `./gradlew :slider:test` → `./gradlew test`
+| 3 lignes
+
+| `build.gradle.kts` (racine consommateur)
+| commentaire `tests in slider-plugin/slider` → `tests in slider-plugin`
+| 1 ligne
+
+| `PROMPT_REPRISE.adoc` + `.agents/SESSION_CHECKLIST.adoc`
+| refs `:slider:check`/`:slider:compileKotlin` → root (4 occurrences)
+| 4 lignes
+|===
+
+== Impact
+
+* Le path Gradle du plugin passe de `:slider` à `:` — les commandes
+  `./gradlew :slider:check` deviennent `./gradlew check`.
+* `slider-plugin/` est désormais un build autonome conforme au pattern
+  (gradlew, settings, `src/`, build.gradle.kts) identique aux boroughs
+  bakery/codex/planner/capsule/document.
+* Version 0.0.16 inchangée — zéro changement de fonctionnalité.
+* `git mv` préserve l'historique (renames détectés) — zéro perte.
+
+== Tests
+
+* Aucun test supprimé ni modifié fonctionnellement (3 messages d'erreur
+  Playwright mis à jour uniquement).
+* `./gradlew check` BUILD SUCCESSFUL (10m36s, 13 actionable tasks :
+  unit + functional + cucumber) — zéro régression.
+
+== Vérifications fin de session
+
+* `git status` : 211 renames + 8 modified + 1 untracked.
+* Secret-scan : `grep -r "TOKEN\|SECRET\|PASSWORD\|API_KEY\|gho_\|ghp_"`
+  slider-plugin/ — zéro match dans le code de production.
+* Build VERT après restructuration.
+
+== Décisions
+
+* **Aplatissement via `git mv`** plutôt que déplacement manuel — préserve
+  l'historique git (rename detection) et le travail non committé du pilote
+  (session file 031 déplacé manuellement, conservé).
+* **Suppression pure du sous-projet `slider`** — module unique inutile,
+  l'indirection violait le contrat d'architecture publié (article 0124).
+* **Commit + push autorisé** — permission explicite du pilote (clôture).
+
+== Prochaine session
+
+* Tous les EPICs de feature sont terminés (SLD-0→11 + CR-GLOBALE-002 +
+  CR3 + PUB 0.0.1→0.0.16). Aucun nouvel EPIC cadré — arbitrage pilote.
+* Backlog en attente de décision :
+  - Rattrapage i18n plantuml (196 lignes × 9 langues — backlog
+    cross-borough, borough HTOWN DORMANT).
+  - Nouveaux EPICs à cadrer (le pilote arbitre la prochaine direction).
+
+== Rappels
+
+* GroupId : `education.cccp`, Plugin ID : `education.cccp.slider`
+* Version publiée Central : slider 0.0.16, BOM 0.0.17
+* Build : `./gradlew check` (plus de `:slider:` prefix — structure aplatie)
+* Domaines DDD (16) : `slider.pipeline` clos (10 fichiers prod + 4 test)
+* Baby-step TDD/BDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+* English only : code, Gherkin, commentaires
+* Package Cucumber steps : `slider.steps`

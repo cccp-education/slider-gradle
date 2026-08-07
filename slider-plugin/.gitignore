@@ -5,3 +5,5 @@ build
 .goose
 local.properties
 doc
+doc.adoc
+src/test/resources/local.properties
