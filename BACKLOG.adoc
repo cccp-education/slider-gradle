@@ -7,6 +7,16 @@ _.date: 2026-08-06
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 068 (2026-08-15) — Audit version + EPIC PUB bump 0.0.17 ✅ TERMINÉ
+
+Session de gouvernance pure (pattern S-057/S-063, bakery S-199) — zéro code
+modifié. Audit des deltas versions Maven Central vs code local : slider 0.0.16
+(Central 0.0.16 publié S-066) + commit post-publication `822c9e9`
+(LLM-ADAPTER-EXTRACT US-2 — codebase.koog.llm.adapter N1, langchain4j 1.16.3)
+→ delta. EPIC PUB bump 0.0.16 → 0.0.17 ajouté au BACKLOG (3 US
+PUB-0.0.17-1/2/3), à exécuter avant publication Maven Central. Zéro code
+modifié — gouvernance pure.
+
 == Session 067 (2026-08-07) — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅ TERMINÉ
 
 Fix structure repo (aucun EPIC feature concerné — session architecture).
@@ -833,6 +843,28 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 |===
 
 _Total_ : 11 US, ~20 pts (11/11 terminées — S-035→S-042). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
+
+'''
+== EPIC PUB — Publication Maven Central 0.0.17 🟡 À FAIRE (Session 068 — bump backlog)
+
+Audit version (gouvernance pure, zéro code modifié) — Session 068 (2026-08-15) :
+
+* `slider-plugin/build.gradle.kts:26` → `version = "0.0.16"` (code local)
+* Central 0.0.16 publié (bundle `106d110f`, S-066)
+* Commit post-publication non propagé : `822c9e9` (LLM-ADAPTER-EXTRACT US-2 —
+  suppression copie locale `LlmProviderChatModelAdapter`, consommation
+  `codebase.koog.llm.adapter` N1, langchain4j 1.14.1→1.16.3, codebase
+  0.0.5→0.0.7)
+* Décision : bump 0.0.16 → **0.0.17** + publication Maven Central au backlog
+  uniquement (pas d'exécution dans cette tâche — gouvernance pure, pattern
+  bakery S199)
+* BOM : workspace-bom 0.0.18 déjà publié (bundle `3d2702bf`, constraint
+  agent-contracts 0.0.3) — à vérifier la constraint slider à la publication
+
+US (~3) :
+. PUB-0.0.17-1 — Vérifier POM (`withType<MavenPublication>`) + signing GPG + release deps (pattern nmcp)
+. PUB-0.0.17-2 — Exécuter `./gradlew publishAggregationToCentralPortal --no-daemon` (méthode nmcp)
+. PUB-0.0.17-3 — Aligner les tags locaux sur l'origin (cleanup) + MàJ BOM workspace-bom si nécessaire
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.13 ✅ TERMINE (Session 045, 2026-08-04)

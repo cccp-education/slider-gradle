@@ -2,7 +2,37 @@
 
 _Date creation_ : 2026-05-10
 
-== Session 067 (2026-08-07) — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅ TERMINÉ
+== Session 068 (2026-08-15) — Audit version + EPIC PUB bump 0.0.17 (gouvernance pure) ✅ TERMINÉ
+
+Session pure gouvernance (zéro code de production modifié, zéro test
+modifié, pattern S-199 bakery / S-181 codebase). Audit de la version
+slider et du delta non publié depuis la dernière publication, puis ajout
+au backlog d'un EPIC PUB dédié pour publier slider 0.0.17.
+
+Audit :
+* Version locale `slider-plugin/build.gradle.kts:26` = 0.0.16.
+* Dernière publication Central : slider 0.0.16 (bundle `106d110f`,
+  session 066).
+* Commit post-publication `822c9e9` — LLM-ADAPTER-EXTRACT US-2 :
+  suppression de la copie locale `LlmProviderChatModelAdapter`,
+  consommation de l'adapter N1 `codebase.koog.llm.adapter`, langchain4j
+  1.14.1 → 1.16.3, codebase 0.0.5 → 0.0.7. Delta non publié → couvert
+  par la publication 0.0.17.
+* workspace-bom : 0.0.18 déjà publié (bundle `3d2702bf`, constraint
+  agent-contracts 0.0.3).
+
+Décision : bump 0.0.16 → 0.0.17 recadré EPIC PUB dédié (3 US
+PUB-0.0.17-1 bump + `./gradlew check` VERT, PUB-0.0.17-2 publication
+nmcp Central 3 artefacts signés GPG, PUB-0.0.17-3 bump BOM workspace-bom
+0.0.18 → 0.0.19 constraint slider 0.0.17 + publication + sync
+capsule-gradle). BACKLOG.adoc synchronisé (Section Session 068 + EPIC
+PUB 0.0.17 `🟡 À FAIRE`). Baseline `./gradlew check` VERT préservée
+(959 unit + 45 functional + 265 cucumber, 0 FAIL, 1 SKIP préexistant).
+Commit + push (clôture pilote).
+
+Rapport : `slider-plugin/.agents/sessions/068-version-bump-0.0.17.adoc`.
+
+## Session 067 (2026-08-07) — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅ TERMINÉ
 
 Fix structure repo — le dossier `slider-plugin/slider/` (sous-projet Gradle
 `include("slider")`) violait le contrat d'architecture « Plugin Indépendant +

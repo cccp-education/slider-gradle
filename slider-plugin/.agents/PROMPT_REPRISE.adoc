@@ -1,46 +1,47 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 067 — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/`
-_Prochaine session_ : 068 — à arbitrer par le pilote (tous EPICs terminés)
+_Session terminee_ : 068 — Audit version + EPIC PUB bump 0.0.17 (gouvernance pure)
+_Prochaine session_ : 069 — à arbitrer par le pilote (tous EPICs de feature terminés)
 
-== Mission session 067 (TERMINÉE)
+== Mission session 068 (TERMINÉE)
 
-. Fix structure repo : le dossier `slider-plugin/slider/` (sous-projet
-  Gradle `include("slider")`) violait le contrat d'architecture
-  « Plugin Indépendant + Racine Consommateur » (article 0124) — slider
-  était le SEUL borough avec cette indirection
-  (`slider-plugin/slider/src/` au lieu de `slider-plugin/src/`).
-  Héritage du tout premier commit (`d3aacdd`).
-. Aplatissement complet via `git mv` (historique préservé, 211 fichiers
-  déplacés) : `slider-plugin/slider/{build.gradle.kts, src, gradle.properties}`
-  → `slider-plugin/` + fusion `.gitignore`.
-. `slider-plugin/settings.gradle.kts` : suppression `include("slider")`
-  — build mono-projet autonome conforme au pattern.
-. Chemins fixtures Playwright corrigés (`../../build/` → `../build/`).
-. 5 refs `:slider:` nettoyées (3 tests Playwright, PROMPT_REPRISE,
-  SESSION_CHECKLIST). Path Gradle : `:slider` → `:`.
-. `./gradlew check` BUILD SUCCESSFUL 10m36s (unit + functional +
-  cucumber), zéro régression.
-. Commit + push autorisés par le pilote (clôture session 067).
+. Audit version slider : `slider-plugin/build.gradle.kts:26` = 0.0.16 ;
+  dernière publication Central 0.0.16 (bundle `106d110f`, S-066) ;
+  commit post-pub `822c9e9` (LLM-ADAPTER-EXTRACT US-2 — consommation
+  adapter N1 `codebase.koog.llm.adapter`, langchain4j 1.14.1→1.16.3,
+  codebase 0.0.5→0.0.7) non publié.
+. Décision : bump 0.0.16 → 0.0.17 recadré EPIC PUB dédié (3 US
+  PUB-0.0.17-1/2/3 — bump + publication nmcp + BOM 0.0.19 + sync capsule).
+. BACKLOG.adoc synchronisé (Section Session 068 + EPIC PUB 0.0.17
+  `🟡 À FAIRE`). Gouvernance pure — zéro code de production modifié.
+. Baseline `./gradlew check` VERT préservée (959 unit + 45 functional +
+  265 cucumber, 0 FAIL, 1 SKIP préexistant).
+. Commit + push autorisés par le pilote (clôture session 068).
 
-== Contexte reprise session 068 — à arbitrer par le pilote
+== Contexte reprise session 069 — à arbitrer par le pilote
 
+- *EPIC PUB 0.0.17 au backlog* (`🟡 À FAIRE`) : à exécuter à la prochaine
+  session de publication — bump 0.0.16→0.0.17 + `./gradlew check` VERT
+  + publication nmcp Central (3 artefacts signés GPG) + bump BOM
+  workspace-bom 0.0.18→0.0.19 (constraint slider 0.0.17) + publication
+  + sync capsule-gradle (catalogue slider). Accord pilote requis pour
+  publish et commit.
 - *Tous les EPICs de feature sont terminés* (SLD-0→11 + CR-GLOBALE-002 +
   CR3 + PUB 0.0.1→0.0.16). Aucun nouvel EPIC cadré.
-- *Structure* : `slider-plugin/` est maintenant un build autonome avec
-  `src/` à sa racine. Commandes : `./gradlew check` (plus de `:slider:`
-  prefix).
+- *Structure* : `slider-plugin/` est un build autonome avec `src/` à sa
+  racine. Commandes : `./gradlew check` (plus de `:slider:` prefix).
 - *Backlog en attente de décision* :
   - Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues —
     backlog cross-borough, borough HTOWN DORMANT).
   - Optionnel : nouveaux EPICs à cadrer (le pilote arbitre la prochaine
     direction — aucun EPIC n'est imposé).
-- *Baseline* : session 067 committée + pushée (clôture pilote).
-- *Versions publiées Central* : slider 0.0.16, BOM 0.0.17.
+- *Baseline* : session 068 committée + pushée (clôture pilote).
+- *Versions publiées Central* : slider 0.0.16, BOM 0.0.18. Version cible
+  backlog : slider 0.0.17.
 - *Règles* : Règle 1 — AUCUN commit sans permission. Règle 2 — AUCUN
   publish sans permission (publishSlides inclus).
-- *Rapport 067* :
-  `slider-plugin/.agents/sessions/067-aplatir-slider-plugin-structure.adoc`.
+- *Rapport 068* :
+  `slider-plugin/.agents/sessions/068-version-bump-0.0.17.adoc`.
 
 == Rappels méthodologie (pilote)
 

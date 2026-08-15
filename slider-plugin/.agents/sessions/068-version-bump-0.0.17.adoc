@@ -1,0 +1,114 @@
+= Session 068 — Audit version + EPIC PUB bump 0.0.17 (gouvernance pure)
+:session: 068
+:date: 2026-08-15
+:epic: PUB (slider 0.0.17 bump backlog)
+:status: ✅ TERMINÉ
+:score: 9/10
+
+== Résumé
+
+Session pure gouvernance (zéro code de production modifié, zéro test
+modifié). Audit de la version slider et du delta non publié depuis la
+dernière publication, puis ajout au backlog d'un EPIC PUB dédié pour
+publier slider 0.0.17 sur Maven Central.
+
+== Audit version
+
+* **Version locale** : `slider-plugin/build.gradle.kts:26` → `0.0.16`.
+* **Dernière publication Central** : slider 0.0.16 (bundle nmcp
+  `106d110f-27de-43c1-869e-9e9a70026f5d` AUTOMATIC, session 066).
+* **Commit post-publication** : `822c9e9` — LLM-ADAPTER-EXTRACT US-2
+  (consommation de l'adapter N1 `codebase.koog.llm.adapter`, suppression
+  de la copie locale `LlmProviderChatModelAdapter`, langchain4j
+  1.14.1→1.16.3, codebase 0.0.5→0.0.7). Ce delta n'est pas encore publié
+  → la publication 0.0.17 le couvrira.
+* **workspace-bom** : 0.0.18 déjà publié (bundle `3d2702bf`, constraint
+  agent-contracts 0.0.3). À vérifier à la publication : la BOM 0.0.19
+  (ou bump dédié) doit exposer la constraint slider 0.0.17.
+
+== Décisions
+
+* **Bump 0.0.16 → 0.0.17** (strictement montant, pattern S-066).
+* **EPIC PUB dédié au backlog** — 3 US :
+  * PUB-0.0.17-1 : bump version slider `slider-plugin/build.gradle.kts`
+    0.0.16 → 0.0.17 + `./gradlew check` VERT.
+  * PUB-0.0.17-2 : publication Maven Central via nmcp
+    (`publishAggregationToCentralPortal`, 3 artefacts signés GPG).
+  * PUB-0.0.17-3 : bump BOM (workspace-bom 0.0.18 → 0.0.19, constraint
+    slider 0.0.17) + publication + sync consommateurs (capsule-gradle
+    catalogue slider).
+* **Backlog uniquement** — aucun changement de version ni publication
+  dans cette session. Le bump est recadré EPIC PUB (pattern S-199 bakery
+  / S-181 codebase).
+
+== Tests
+
+* Aucun test modifié (gouvernance pure).
+* Baseline préservée : `./gradlew check` VERT (959 unit + 45 functional +
+  265 cucumber, 0 FAIL, 1 SKIP préexistant).
+
+== Fichiers Modifiés
+
+[cols="2,3,1"]
+|===
+| Fichier | Rôle | Delta
+
+| `BACKLOG.adoc`
+| Section Session 068 + EPIC PUB 0.0.17 (3 US)
+| 2 sections ajoutées
+
+| `slider-plugin/.agents/INDEX.adoc`
+| Header + table Sessions (entrée 068)
+| Mise à jour
+
+| `slider-plugin/.agents/SESSIONS_HISTORY.adoc`
+| Entrée 068
+| Mise à jour
+
+| `slider-plugin/.agents/PROMPT_REPRISE.adoc`
+| Pointage session 069
+| Réécriture
+
+| `slider-plugin/.agents/TEST_COVERAGE_ANALYSIS.adoc`
+| Mention S068 gouvernance pure
+| Mise à jour
+
+| `slider-plugin/.agents/archives/COMPLETED_TASKS_ARCHIVE_2026-08.adoc`
+| Entrée 068
+| Mise à jour
+
+| `slider-plugin/.agents/sessions/068-version-bump-0.0.17.adoc`
+| Rapport de session
+| Création
+|===
+
+*Total* : 6 fichiers gouvernance modifiés + 1 rapport créé. Zéro code de
+production modifié. Zéro test modifié.
+
+== Vérifications fin de session
+
+* `git status` : `BACKLOG.adoc` modifié (attendu), reste des fichiers
+  gouvernance à committer.
+* Secret-scan : zéro secret dans les fichiers modifiés (gouvernance).
+* Backlog synchronisé : EPIC PUB 0.0.17 marqué `🟡 À FAIRE` (à exécuter
+  à la prochaine session de publication), sections détaillées alignées
+  sur la table agrégée.
+
+== Prochaine session
+
+* Exécuter l'EPIC PUB 0.0.17 (bump + publication Central + BOM + sync
+  capsule) — accord pilote requis pour publish et commit.
+* Tous les EPICs de feature sont terminés (SLD-0→11 + CR-GLOBALE-002 +
+  CR3 + PUB 0.0.1→0.0.16).
+
+== Rappels
+
+* GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.ccp.slider.translator` (déprécié)
+* Version publiée Central : slider 0.0.16, BOM 0.0.18
+* Version cible backlog : slider 0.0.17
+* `./gradlew check` VERT (959 unit + 45 functional + 265 cucumber,
+  0 FAIL, 1 SKIP préexistant)
+* Baby-step TDD/BDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
+* English only : code, Gherkin, commentaires
+* Package Cucumber steps : `slider.steps`

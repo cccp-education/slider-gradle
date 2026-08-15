@@ -1,5 +1,11 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 068_ : Audit version + EPIC PUB bump 0.0.17 (gouvernance
+pure, pattern S-199 bakery / S-181 codebase). Zéro code de production
+modifié, zéro test modifié. Baseline préservée post-067 : 959 unit + 45
+functional + 265 cucumber = 1269 total, 0 FAIL, 1 SKIP préexistant.
+`./gradlew check` VERT (baseline S-065/S-067 inchangée).
+
 _Statut session 067_ : Aplatissement structure `slider-plugin/slider/` →
 `slider-plugin/` (fix contrat d'architecture, suppression sous-projet
 `include("slider")`). Zéro test supprimé ni modifié fonctionnellement.

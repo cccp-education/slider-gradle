@@ -1,5 +1,37 @@
 = COMPLETED_TASKS_ARCHIVE — Août 2026
-:date: 2026-08-07
+:date: 2026-08-15
+
+== Session 068 — Audit version + EPIC PUB bump 0.0.17 (gouvernance pure) ✅
+
+Session pure gouvernance (zéro code de production modifié, zéro test
+modifié, pattern S-199 bakery / S-181 codebase). Audit de la version
+slider et du delta non publié depuis la dernière publication, puis ajout
+au backlog d'un EPIC PUB dédié pour publier slider 0.0.17.
+
+Audit :
+* Version locale `slider-plugin/build.gradle.kts:26` = 0.0.16
+* Dernière publication Central : slider 0.0.16 (bundle `106d110f`, S-066)
+* Commit post-publication `822c9e9` — LLM-ADAPTER-EXTRACT US-2
+  (consommation adapter N1 `codebase.koog.llm.adapter`, langchain4j
+  1.14.1→1.16.3, codebase 0.0.5→0.0.7) — delta non publié
+* workspace-bom 0.0.18 déjà publié (bundle `3d2702bf`)
+
+Tâches terminées :
+. Ajout EPIC PUB 0.0.17 au BACKLOG.adoc (3 US PUB-0.0.17-1/2/3) +
+  Section Session 068 — bump 0.0.16→0.0.17 recadré
+. Mise à jour gouvernance : INDEX.adoc (header + table Sessions), SESSIONS_HISTORY.adoc,
+  PROMPT_REPRISE.adoc (pointage 069), TEST_COVERAGE_ANALYSIS.adoc,
+  archives COMPLETED_TASKS_ARCHIVE_2026-08.adoc
+. Rapport de session 068 créé
+. Baseline `./gradlew check` VERT préservée (959 unit + 45 functional +
+  265 cucumber, 0 FAIL, 1 SKIP préexistant)
+. Commit + push (clôture pilote)
+
+Aucun changement de version ni publication — le bump est au backlog
+uniquement (`🟡 À FAIRE`), à exécuter à la prochaine session de
+publication (accord pilote requis pour publish et commit).
+
+Rapport : `slider-plugin/.agents/sessions/068-version-bump-0.0.17.adoc`.
 
 == Session 067 — Aplatissement structure `slider-plugin/slider/` → `slider-plugin/` ✅
 
