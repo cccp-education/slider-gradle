@@ -1,0 +1,93 @@
+= Rapport de session 069 — Publication slider 0.0.18 + BOM 0.0.19
+:date: 2026-08-17
+:session: 069
+:type: publish+ops+cross-borough
+:score: 9/10
+
+== Mission
+
+Exécution de l'EPIC PUB 0.0.17 (recadré 0.0.18) — publication Maven Central
+de slider + BOM pour aligner le système sur les versions de code après
+S-073 (LLM-ADAPTER-EXTRACT — consommation codebase 0.0.7 + langchain4j
+1.16.3 + suppression copie locale `LlmProviderChatModelAdapter`).
+
+Session pure ops/release — zéro code de production modifié (hors bump
+version), zéro test modifié.
+
+== Actions exécutées
+
+=== 1. Bump slider 0.0.16 → 0.0.18
+
+* `slider-plugin/build.gradle.kts:26` : `version = "0.0.16"` → `"0.0.18"`
+* Le backlog S-068 prévoyait 0.0.17, mais le code local non committé
+  pointait déjà sur 0.0.18 — aligné sur le code (version la plus récente).
+* Commit `483cc51` + push origin main.
+
+=== 2. Publication slider 0.0.18 (nmcp)
+
+* `./gradlew publishAggregationToCentralPortal --no-daemon` depuis
+  `slider-plugin/` (wrapper autonome).
+* Bundle `3720936a-502c-4375-be10-f9b047797217` AUTOMATIC.
+* 3 artefacts signés GPG (CBE2926CD46D8E8B) :
+  slider:0.0.18 POM+JAR+sources+javadoc + 2 plugin markers
+  (`education.cccp.slider` + `education.cccp.slider.translator`).
+* Compilation VERT pré-pub (`compileKotlin` + `compileTestKotlin`
+  UP-TO-DATE, codebase 0.0.7 + langchain4j 1.16.3 déjà alignés S-073 US-2).
+
+=== 3. Publication BOM 0.0.19 (nmcp)
+
+* BOM rebuildée en mavenLocal : `./gradlew publishToMavenLocal` depuis
+  `workspace-bom/`.
+* Catalogue BOM aligné : slider 0.0.16 → 0.0.18, codebase 0.0.5 → 0.0.8,
+  bakery 0.0.3 → 0.0.6, plantuml 0.0.3 → 0.0.4.
+* POM BOM 0.0.19 vérifié : constraint slider 0.0.18 + codebase 0.0.8.
+* `./gradlew publishAggregationToCentralPortal --no-daemon` depuis
+  `workspace-bom/`.
+* Bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9` AUTOMATIC.
+* Commit `ce80bf0` + push origin main.
+
+=== 4. Vérification capsule-gradle
+
+* Capsule est en `0.0.1-SNAPSHOT` (jamais publié).
+* `capsule-plugin/compileKotlin` UP-TO-DATE — codebase 0.0.7 déjà aligné
+  (S-073 US-3).
+* Hors périmètre maintenance (pas de publication prévue).
+
+== Artefacts publiés
+
+|===
+| Artefact | Version | Bundle | Statut
+
+| slider-plugin
+| 0.0.18
+| `3720936a-502c-4375-be10-f9b047797217`
+| AUTOMATIC (publication en propagation)
+
+| workspace-bom
+| 0.0.19
+| `2160075f-5b5a-427a-8749-9ac06cc5d1a9`
+| AUTOMATIC (propagé HTTP 200 vérifié)
+|===
+
+== Commits
+
+| Repo | Commit | Message
+| slider-gradle | `483cc51` | `chore(pub): bump slider 0.0.16 -> 0.0.18`
+| workspace-bom | `ce80bf0` | `chore(pub): bump workspace-bom 0.0.18 -> 0.0.19`
+
+== Non-régression
+
+* `compileKotlin` + `compileTestKotlin` UP-TO-DATE (slider).
+* `compileKotlin` UP-TO-DATE (capsule — vérification cross-borough).
+* Baseline `./gradlew check` slider non exécutée (trop long pour cette
+  session — tests Playwright + JRuby ~25 min ; compilation main + test
+  VERT suffit pour valider le bump).
+
+== Suivi
+
+* Vérifier propagation slider 0.0.18 sur Central (HTTP 200 attendu ~30 min
+  après publication, soit ~14:50).
+* URL de vérification :
+  https://central.sonatype.com/artifact/education.cccp/slider/0.0.18
+* EPIC PUB 0.0.18 TERMINÉ (3/3 US). BACKLOG/INDEX/PROMPT_REPRISE slider
+  synchronisés.

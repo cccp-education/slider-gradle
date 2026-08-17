@@ -845,26 +845,24 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 _Total_ : 11 US, ~20 pts (11/11 terminées — S-035→S-042). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
 
 '''
-== EPIC PUB — Publication Maven Central 0.0.17 🟡 À FAIRE (Session 068 — bump backlog)
+== EPIC PUB — Publication Maven Central 0.0.18 ✅ TERMINÉ (Session 069 — exécution publication)
 
-Audit version (gouvernance pure, zéro code modifié) — Session 068 (2026-08-15) :
+Exécution publication (baby-step) — Session 069 (2026-08-17) :
 
-* `slider-plugin/build.gradle.kts:26` → `version = "0.0.16"` (code local)
-* Central 0.0.16 publié (bundle `106d110f`, S-066)
-* Commit post-publication non propagé : `822c9e9` (LLM-ADAPTER-EXTRACT US-2 —
-  suppression copie locale `LlmProviderChatModelAdapter`, consommation
-  `codebase.koog.llm.adapter` N1, langchain4j 1.14.1→1.16.3, codebase
-  0.0.5→0.0.7)
-* Décision : bump 0.0.16 → **0.0.17** + publication Maven Central au backlog
-  uniquement (pas d'exécution dans cette tâche — gouvernance pure, pattern
-  bakery S199)
-* BOM : workspace-bom 0.0.18 déjà publié (bundle `3d2702bf`, constraint
-  agent-contracts 0.0.3) — à vérifier la constraint slider à la publication
+* `slider-plugin/build.gradle.kts:26` → `version = "0.0.18"` (commit `483cc51`)
+* Central 0.0.16 publié précédemment (bundle `106d110f`, S-066)
+* Bump 0.0.16 → **0.0.18** (saut 0.0.17 — le backlog S-068 prévoyait 0.0.17,
+  mais le code local pointait déjà sur 0.0.18 — aligné sur le code)
+* Publication Maven Central exécutée :
+  **PUB-0.0.18-1** — Vérifier POM (`withType<MavenPublication>`) + signing GPG (CBE2926CD46D8E8B) + release deps ✅
+  **PUB-0.0.18-2** — `./gradlew publishAggregationToCentralPortal --no-daemon` ✅ — bundle `3720936a-502c-4375-be10-f9b047797217` AUTOMATIC
+  **PUB-0.0.18-3** — BOM workspace-bom 0.0.19 publiée (bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9` AUTOMATIC, constraint slider 0.0.18 + codebase 0.0.8) ✅
+* Commit + push : `483cc51` (slider), `ce80bf0` (BOM)
 
-US (~3) :
-. PUB-0.0.17-1 — Vérifier POM (`withType<MavenPublication>`) + signing GPG + release deps (pattern nmcp)
-. PUB-0.0.17-2 — Exécuter `./gradlew publishAggregationToCentralPortal --no-daemon` (méthode nmcp)
-. PUB-0.0.17-3 — Aligner les tags locaux sur l'origin (cleanup) + MàJ BOM workspace-bom si nécessaire
+| Artefact | URL |
+|---|---|
+| slider 0.0.18 | https://central.sonatype.com/artifact/education.cccp/slider/0.0.18 |
+| workspace-bom 0.0.19 | https://central.sonatype.com/artifact/education.cccp/workspace-bom/0.0.19 |
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.13 ✅ TERMINE (Session 045, 2026-08-04)

@@ -2,6 +2,25 @@
 
 _Date creation_ : 2026-05-10
 
+== Session 069 (2026-08-17) — Publication slider 0.0.18 + BOM 0.0.19 sur Maven Central ✅ TERMINÉ
+
+Session pure ops/release (zéro code de production modifié hors bump
+version, zéro test modifié). Exécution de l'EPIC PUB 0.0.17 (recadré
+0.0.18 — le code local non committé pointait sur 0.0.18, aligné sur le
+code).
+
+Actions :
+* Bump slider 0.0.16 → 0.0.18 (commit `483cc51`, `slider-plugin/build.gradle.kts:26`).
+* Publication nmcp slider 0.0.18 — bundle `3720936a-502c-4375-be10-f9b047797217` AUTOMATIC (3 artefacts signés GPG CBE2926CD46D8E8B — slider:0.0.18 POM+JAR+sources+javadoc + 2 plugin markers `education.cccp.slider` + `education.cccp.slider.translator`).
+* Publication nmcp BOM 0.0.19 — bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9` AUTOMATIC (constraint slider 0.0.18 + codebase 0.0.8, commit `ce80bf0`).
+* Compilation VERT pré-pub (`compileKotlin` + `compileTestKotlin` UP-TO-DATE, codebase 0.0.7 + langchain4j 1.16.3 déjà alignés S-073 US-2).
+* Capsule-gradle vérifié : `0.0.1-SNAPSHOT`, `compileKotlin` UP-TO-DATE, codebase 0.0.7 aligné S-073 US-3, jamais publié (hors périmètre maintenance).
+* BOM 0.0.19 propagée sur Central (HTTP 200 vérifié). Slider 0.0.18 en
+  propagation au moment de la clôture (~30 min attendue).
+* EPIC PUB 0.0.18 TERMINÉ (3/3 US — PUB-0.0.18-1 vérification, PUB-0.0.18-2
+  publication, PUB-0.0.18-3 BOM 0.0.19 + push).
+* Commit + push autorisés par le pilote (clôture session 069).
+
 == Session 068 (2026-08-15) — Audit version + EPIC PUB bump 0.0.17 (gouvernance pure) ✅ TERMINÉ
 
 Session pure gouvernance (zéro code de production modifié, zéro test

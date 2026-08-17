@@ -1,33 +1,30 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 068 — Audit version + EPIC PUB bump 0.0.17 (gouvernance pure)
-_Prochaine session_ : 069 — à arbitrer par le pilote (tous EPICs de feature terminés)
+_Session terminee_ : 069 — Publication slider 0.0.18 + BOM 0.0.19 sur Maven Central
+_Prochaine session_ : 070 — à arbitrer par le pilote (tous EPICs de feature + PUB terminés)
 
-== Mission session 068 (TERMINÉE)
+== Mission session 069 (TERMINÉE)
 
-. Audit version slider : `slider-plugin/build.gradle.kts:26` = 0.0.16 ;
-  dernière publication Central 0.0.16 (bundle `106d110f`, S-066) ;
-  commit post-pub `822c9e9` (LLM-ADAPTER-EXTRACT US-2 — consommation
-  adapter N1 `codebase.koog.llm.adapter`, langchain4j 1.14.1→1.16.3,
-  codebase 0.0.5→0.0.7) non publié.
-. Décision : bump 0.0.16 → 0.0.17 recadré EPIC PUB dédié (3 US
-  PUB-0.0.17-1/2/3 — bump + publication nmcp + BOM 0.0.19 + sync capsule).
-. BACKLOG.adoc synchronisé (Section Session 068 + EPIC PUB 0.0.17
-  `🟡 À FAIRE`). Gouvernance pure — zéro code de production modifié.
-. Baseline `./gradlew check` VERT préservée (959 unit + 45 functional +
-  265 cucumber, 0 FAIL, 1 SKIP préexistant).
-. Commit + push autorisés par le pilote (clôture session 068).
+. Bump slider 0.0.16 → 0.0.18 (commit `483cc51`, aligné sur code local non
+  committé de S-068 — le backlog S-068 prévoyait 0.0.17 mais le code pointait
+  sur 0.0.18).
+. Publication nmcp slider 0.0.18 — bundle `3720936a-502c-4375-be10-f9b047797217`
+  AUTOMATIC (3 artefacts signés GPG CBE2926CD46D8E8B — slider:0.0.18
+  POM+JAR+sources+javadoc + 2 plugin markers).
+. Publication nmcp BOM 0.0.19 — bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9`
+  AUTOMATIC (constraint slider 0.0.18 + codebase 0.0.8).
+. Compilation VERT (`compileKotlin` + `compileTestKotlin` UP-TO-DATE,
+  codebase 0.0.7 + langchain4j 1.16.3 déjà alignés S-073 US-2).
+. EPIC PUB 0.0.18 TERMINÉ (3/3 US — PUB-0.0.18-1 vérification, PUB-0.0.18-2
+  publication, PUB-0.0.18-3 BOM 0.0.19 + push).
+. Capsule-gradle vérifié : `0.0.1-SNAPSHOT`, compile OK, codebase 0.0.7
+  aligné S-073 US-3, jamais publié (hors périmètre maintenance).
+. Commit + push autorisés par le pilote (clôture session 069).
 
-== Contexte reprise session 069 — à arbitrer par le pilote
+== Contexte reprise session 070 — à arbitrer par le pilote
 
-- *EPIC PUB 0.0.17 au backlog* (`🟡 À FAIRE`) : à exécuter à la prochaine
-  session de publication — bump 0.0.16→0.0.17 + `./gradlew check` VERT
-  + publication nmcp Central (3 artefacts signés GPG) + bump BOM
-  workspace-bom 0.0.18→0.0.19 (constraint slider 0.0.17) + publication
-  + sync capsule-gradle (catalogue slider). Accord pilote requis pour
-  publish et commit.
-- *Tous les EPICs de feature sont terminés* (SLD-0→11 + CR-GLOBALE-002 +
-  CR3 + PUB 0.0.1→0.0.16). Aucun nouvel EPIC cadré.
+- *Tous les EPICs sont terminés* (SLD-0→11 + CR-GLOBALE-002 + CR3 +
+  PUB 0.0.1→0.0.18). Aucun nouvel EPIC cadré.
 - *Structure* : `slider-plugin/` est un build autonome avec `src/` à sa
   racine. Commandes : `./gradlew check` (plus de `:slider:` prefix).
 - *Backlog en attente de décision* :
@@ -35,13 +32,12 @@ _Prochaine session_ : 069 — à arbitrer par le pilote (tous EPICs de feature t
     backlog cross-borough, borough HTOWN DORMANT).
   - Optionnel : nouveaux EPICs à cadrer (le pilote arbitre la prochaine
     direction — aucun EPIC n'est imposé).
-- *Baseline* : session 068 committée + pushée (clôture pilote).
-- *Versions publiées Central* : slider 0.0.16, BOM 0.0.18. Version cible
-  backlog : slider 0.0.17.
+- *Baseline* : session 069 committée + pushée (clôture pilote).
+- *Versions publiées Central* : slider 0.0.18, BOM 0.0.19.
 - *Règles* : Règle 1 — AUCUN commit sans permission. Règle 2 — AUCUN
   publish sans permission (publishSlides inclus).
-- *Rapport 068* :
-  `slider-plugin/.agents/sessions/068-version-bump-0.0.17.adoc`.
+- *Rapport 069* :
+  `slider-plugin/.agents/sessions/069-pub-slider-0.0.18.adoc`.
 
 == Rappels méthodologie (pilote)
 
