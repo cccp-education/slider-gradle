@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.slider)
     alias(libs.plugins.readme)
+    // id("education.cccp.capsule")  // Temporarily removed to break circular dependency
 }
 
 repositories {
@@ -64,4 +65,3 @@ tasks.register("generatePlaywrightFixtures") {
     description = "Generate LTR + RTL Reveal.js HTML fixtures for Playwright visual tests."
     dependsOn("copyPlaywrightLtrFixture", "generateRtlFixture")
 }
-
