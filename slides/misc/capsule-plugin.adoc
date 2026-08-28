@@ -1,0 +1,44 @@
+= Utilisation du plugin Capsule-Gradle
+:author: cheroliv
+:revdate: 2026-08-25
+:icons: font
+:source-highlighter: rouge
+:toc:
+:toclevels: 3
+:numbered:
+
+== Introduction
+[NOTE.speaker]
+====
+Bonjour à tous, aujourd'hui nous allons voir comment utiliser le plugin Capsule-Gradle pour générer des vidéos pédagogiques à partir de decks Reveal.js.
+====
+
+== Qu'est-ce que Capsule-Gradle ?
+[NOTE.speaker]
+====
+Capsule-Gradle est un plugin Gradle qui automatise la création de capsules vidéo pédagogiques. Il prend en entrée un deck Reveal.js généré par le plugin Slider-Gradle et produit une vidéo WebM avec synchronisation audio et vidéo, sans post-production humaine.
+====
+
+== Le pipeline de génération
+[NOTE.speaker]
+====
+Le pipeline se déroule en plusieurs étapes : génération du deck HTML avec Slider-Gradle, extraction du script des notes speaker, synthèse vocale avec Piper, injection audio dans le deck, et enfin capture vidéo avec Playwright. Tout cela est orchestré par une tâche Gradle.
+====
+
+== Pourquoi utiliser Capsule-Gradle ?
+[NOTE.speaker]
+====
+Utiliser Capsule-Gradle vous permet de gagner du temps en éliminant la nécessité de montage vidéo manuel. De plus, étant basé sur des outils libres comme Piper et Playwright, il s'intègre parfaitement dans une chaîne de construction entièrement automatisée et reproductible.
+====
+
+== Démonstration pratique
+[NOTE.speaker]
+====
+Pour créer votre première capsule, vous avez besoin d'un fichier AsciiDoc avec des notes speaker. Ensuite, vous exécutez deux tâches Gradle : asciidoctorRevealJs pour générer le deck, et asciidocCapsule pour extraire le script. Enfin, la tâche generateCapsuleVideo produit la vidéo.
+====
+
+== Conclusion
+[NOTE.speaker]
+====
+En résumé, Capsule-Gradle simplifie considérablement la production de contenus vidéo pédagogiques. Il est idéal pour les formateurs et les créateurs de contenus qui souhaitent se concentrer sur le contenu plutôt que sur la technique. Merci de votre attention !
+====
