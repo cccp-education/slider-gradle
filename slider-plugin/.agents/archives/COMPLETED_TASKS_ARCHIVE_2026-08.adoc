@@ -459,3 +459,12 @@ Rapports :
 - `slider-plugin/.agents/sessions/063-sld-8.3b-deck-pipeline-graph.adoc`
 - `slider-plugin/.agents/sessions/064-sld-8.3c-generate-deck-pipeline-task.adoc`
 - `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumber.adoc`
+
+== Session 070 — 2026-09-07 — Synchronisation gouvernance post-S-069
+
+Gouvernance pure (zéro code) :
+* PROMPT_REPRISE réécrit S-066 → S-070 — versions Central réelles (0.0.18),
+  état git post-S-069 consigné (bump codebase 0.0.11, align conventions 0.0.4,
+  remove opencode.json).
+* BACKLOG racine resynchronisé (sections S-069/S-070, S-068 recadrée).
+* Hygiene signalée : 3 backups orphelins racine à purger (accord pilote requis).

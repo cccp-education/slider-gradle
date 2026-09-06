@@ -1,47 +1,60 @@
-= PROMPT_REPRISE — slider-gradle — Session 066
-:session: 066
-:date: 2026-08-06
+= PROMPT_REPRISE — slider-gradle — Session 070
+:session: 070
+:date: 2026-09-07
 
-== Session 065 terminée — SLD-8.3 baby-step 8.3d Cucumber ✅ US-8.3 clôturée
+== Sessions 066-069 terminées — EPIC PUB 0.0.18 clôturé, borough DORMANT
 
-Baby-step 8.3d de l'US SLD-8.3 `DeckPipelineGraph` livré en TDD/BDD strict
-(RED → GREEN → REFACTOR). *Pure BDD* — zéro fichier de production modifié
-(pattern SLD-10.6 / S-054 : la logique métier est déjà livrée par 8.3a/b/c,
-le baby-step 8.3d ajoute uniquement la couverture BDD end-to-end).
+* S-066 : Publication slider 0.0.16 + BOM 0.0.17 + sync capsule.
+* S-067 : Aplatissement structure `slider-plugin/slider/` → `slider-plugin/`
+  (fix contrat d'architecture, 211 fichiers déplacés `git mv`, build
+  mono-projet autonome, `./gradlew check` VERT).
+* S-068 : Audit version + EPIC PUB bump backlog (gouvernance pure).
+* S-069 : Publication slider **0.0.18** + BOM **0.0.19** sur Maven Central
+  (bundles `3720936a` / `2160075f`). EPIC PUB 0.0.18 TERMINÉ 3/3 US.
+  Session pure ops (zéro code production hors bump version).
 
-2 fichiers test créés : `26_deck_pipeline_koog.feature` (12 scénarios BDD
-end-to-end, tags `@pipeline @koog`) + `DeckPipelineKoogSteps.kt` (222 lignes,
-fakes `RecordingPromptBuilder` + `FakeDeckLlm` en mémoire). Domaine
-`slider.pipeline` inchangé (10 fichiers prod + 4 fichiers test de 8.3a/b/c).
+== Prochaine session — 070
 
-12 scénarios couvrent happy path (3), invalid context → FAILED (3), LLM
-failure modes (3), edge conditions (3 — no generate call, stage transitions,
-Mermaid diagram). `./gradlew check` VERT (959 unit, 45 functional,
-265 cucumber = 0 FAIL, 1 SKIP préexistant). Zéro régression.
+[IMPORTANT]
+Borough DORMANT — tous EPICs feature clos (SLD-0→11, SLD-CR3, CR-GLOBALE-002,
+CNV-6/7/8, PUB 0.0.1→0.0.18). Aucun travail planifié.
 
-**US-8.3 clôturée** (4/4 baby-steps : 8.3a 35 unit, 8.3b 17 unit, 8.3c 7
-functional + 11 i18n, 8.3d 12 cucumber = 71 tests 3 niveaux). **EPIC SLD-8
-terminé** (US-8.0/8.1/8.2/8.3 ✅ — US-8.4 caduque, fusionné dans 8.3a-d).
-Domaine `slider.pipeline` clos (10 fichiers prod + 4 fichiers test).
+=== ⚠️ État git post-S-069 à consigner (à faire en ouverture)
 
-Rapport : `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumber.adoc`.
+Commits post-S-069 non consignés dans un rapport de session :
 
-== Prochaine session — 066
+* `1237a2c` — bump codebase-plugin 0.0.7 → 0.0.11 (sync Central)
+* `f279468` — remove opencode.json + update Gradle & Kotlin
+* `6d1d8cb` — align conventions-plugin 0.0.4
 
-* EPIC SLD-8 terminé. Backlog slider : EPICs clos (SLD-0→11, SLD-CR3,
-  CR-GLOBALE-002, CNV-6/7/8, PUB 0.0.1→0.0.15).
-* Optionnel : publication slider 0.0.16 sur Maven Central (si autorisé —
-  BOM 0.0.16 déjà publiée S-062, codebase 0.0.5 déjà Central, build.gradle.kts
-  hardcodé 0.0.15).
-* Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues — backlog
-  cross-borough), ou nouveaux EPICs à cadrer.
+Action d'ouverture : `git log --oneline -10`, confirmer intentionnels,
+conserver consignation pour un futur rapport si absent.
+
+=== Option A — Maintenance
+
+* Dette technique ciblée, bumps de dépendances, code review.
+* Hygiene : 3 backups orphelins à la racine (`build.gradle.kts.backup`,
+  `.bak3`, `.backup4`) — purge à valider par le pilote.
+
+=== Option B — Cross-borough
+
+* MEM-CAT-ROLLOUT (MEMPHIS) : le catalogue workspace référence déjà
+  `slider-plugin` (fix EPIC MEMPHIS-BOM-FIX). Rien à faire côté slider.
+* Assister bakery/capsule si demandé.
+
+=== Option C — Nouvel EPIC
+
+* Cadrer si besoin identifié.
 
 == Rappels
-- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` + `education.cccp.slider.translator` (déprécié)
-- Version publiée Central : 0.0.15 (build.gradle.kts hardcodé 0.0.15)
-- BOM workspace-bom : Central 0.0.16 (publié S-062, bundle e12c25b5)
-- codebase-plugin : Central 0.0.5
-- conventions-gradle : Central 0.0.2
+
+- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
+  `education.cccp.slider.translator` (déprécié)
+- Version locale : 0.0.18 (Central : 0.0.18). Conventions 0.0.4.
+- BOM workspace-bom : Central 0.0.31 (MEM-CAT-ROLLOUT S-032, constraint
+  slider-plugin 0.0.18)
+- codebase-plugin : Central 0.0.10 (local 0.0.11)
+- conventions-gradle : Central 0.0.3 (local 0.0.4)
 - i18n-contracts : Central 0.0.2
 - 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
 - Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
@@ -52,15 +65,15 @@ Rapport : `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumb
   `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
   `slider.revealjs`, `slider.playwright`, `slider.content`,
   `slider.pipeline` (clos S-065 — 10 prod + 4 test),
-  `SliderConfig` + `SliderTasks` + `slider.ai` (LlmProviderChatModelAdapter, AssistantManager)
+  `SliderConfig` + `SliderTasks` + `slider.ai` (adapter N1 codebase, S-073
+  LLM-ADAPTER-EXTRACT : la copie locale `LlmProviderChatModelAdapter` est
+  supprimée, le borough consomme `codebase.koog.llm.adapter`).
 - `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
 - 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
 - `./gradlew check` VERT (959 unit + 45 functional + 265 cucumber,
-  0 FAIL, 1 SKIP)
-- EPICs clos : SLD-0→11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.15 + CR-GLOBALE-002
-- **EPIC SLD-8 TERMINÉ** (US-8.0/8.1/8.2/8.3 ✅, US-8.4 caduque)
+  0 FAIL, 1 SKIP) — baseline S-065/S-069 préservée
+- EPICs clos : SLD-0→11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.18 + CR-GLOBALE-002
 - Build se lance depuis `slider-plugin/` (project `:slider`)
 - Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc`
   (001 PicoContainer rejeté, 002 slider consomme codebase)
-- Rapport 065 : `slider-plugin/.agents/sessions/065-sld-8.3d-deck-pipeline-koog-cucumber.adoc`
 - Patterns koog : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`

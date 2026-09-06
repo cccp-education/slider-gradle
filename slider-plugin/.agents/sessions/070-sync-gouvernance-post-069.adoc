@@ -1,0 +1,68 @@
+= Session 070 — Synchronisation gouvernance post-S-069 (zéro code)
+:date: 2026-09-07
+:source: Session 070 (gouvernance pure)
+:type: governance
+:borough: MIAMI — slider-gradle (N2, slides Reveal.js)
+:status: TERMINÉE
+
+== Contexte hérité
+
+Session 069 (2026-08-17) — Publication slider 0.0.18 + BOM 0.0.19 Maven
+Central (bundles `3720936a` / `2160075f`). EPIC PUB 0.0.18 TERMINÉ 3/3 US.
+
+== Mission Session 070
+
+Synchroniser la gouvernance documentaire avec l'état réel du code (demande
+pilote, suite à code review écosystème foundry/public). Constats :
+
+1. PROMPT_REPRISE figé à S-066 (3 sessions de retard) : annonçait version
+   publiée 0.0.15 alors que 0.0.18 est sur Central — désinformation à
+   l'ouverture.
+2. BACKLOG racine : S-069 absente, date d'en-tête 2026-08-06.
+3. Commits post-S-069 non consignés dans un rapport de session.
+4. Hygiene : 3 backups orphelins à la racine borough.
+
+== Déroulement
+
+1. Lecture PROMPT_REPRISE/INDEX/BACKLOG + git log + vérification version
+   réelle (`slider-plugin/build.gradle.kts:26` = 0.0.18).
+2. PROMPT_REPRISE réécrit S-066 → S-070 : résumé sessions 066-069, état git
+   post-S-069 consigné (`1237a2c` bump codebase 0.0.11, `f279468` remove
+   opencode.json + update Gradle/Kotlin, `6d1d8cb` align conventions 0.0.4),
+   rappels mis à jour (versions Central réelles, domaine `slider.ai`
+   consomme adapter N1 depuis LLM-ADAPTER-EXTRACT S-073).
+3. BACKLOG racine : section Session 069 ajoutée + section Session 070 (sync
+   gouvernance), date d'en-tête 2026-09-07, S-068 recadrée (pub 0.0.17
+   remplacée par saut 0.0.18).
+4. Hygiene (signalée, NON exécutée) : backups orphelins
+   `build.gradle.kts.backup`/`.bak3`/`.backup4` à purger avec accord pilote.
+
+== Résultats
+
+- ✅ PROMPT_REPRISE rafraîchi — versions Central réelles affichées (0.0.18,
+  BOM 0.0.31, codebase 0.0.10/0.0.11, conventions 0.0.3/0.0.4).
+- ✅ BACKLOG racine resynchronisé (S-069/S-070 présentes).
+- ✅ INDEX confirmé à jour (S-069) — déjà consigné à l'époque.
+- ✅ Zéro code production modifié — gouvernance pure.
+- ✅ Baseline S-065/S-069 inchangée (959 unit + 45 functional + 265 cucumber,
+  0 FAIL, 1 SKIP préexistant).
+
+== Prochaine session — 071
+
+Borough DORMANT — tous EPICs feature clos. Aucun travail planifié.
+
+Options :
+. Maintenance : purge backups orphelins (à valider), bumps, code review.
+. Cross-borough : MEM-CAT-ROLLOUT ROLLOUT-6 ne concerne pas slider (le
+  catalogue référence déjà `slider-plugin`).
+. Cadrer un nouvel EPIC si besoin identifié.
+
+== Méthodologie
+
+Gouvernance pure — zéro code, zéro test modifié.
+
+== Références
+
+- `slider-plugin/.agents/INDEX.adoc` (S-069)
+- `slider-plugin/.agents/sessions/069-pub-slider-0.0.18.adoc`
+- `BACKLOG.adoc` (racine, resynchronisé)

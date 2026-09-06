@@ -1,13 +1,31 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-08-06
+_.date: 2026-09-07
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
-== Session 068 (2026-08-15) — Audit version + EPIC PUB bump 0.0.17 ✅ TERMINÉ
+== Session 069 (2026-08-17) — Publication slider 0.0.18 + BOM 0.0.19 ✅ TERMINÉ
+
+Publication Maven Central pure ops (zéro code production hors bump version).
+Bump 0.0.16 → **0.0.18** (commit `483cc51` — le backlog S-068 prévoyait
+0.0.17 mais le code pointait sur 0.0.18, saut assumé). Publication nmcp :
+slider 0.0.18 bundle `3720936a` AUTOMATIC, BOM 0.0.19 bundle `2160075f`
+AUTOMATIC (constraint slider 0.0.18 + codebase 0.0.8). EPIC PUB 0.0.18
+TERMINÉ (3/3 US).
+
+== Session 070 (2026-09-07) — Synchronisation gouvernance post-S-069 ✅ TERMINÉ
+
+Session de gouvernance pure (zéro code) : PROMPT_REPRISE rafraîchi S-066 →
+S-070, BACKLOG racine resynchronisé, INDEX confirmé à jour (S-069). État git
+post-S-069 consigné : bump codebase 0.0.11, align conventions 0.0.4, remove
+opencode.json (`1237a2c`/`f279468`/`6d1d8cb`). Hygiene identifiée (non
+exécutée) : 3 backups orphelins racine à purger (`build.gradle.kts.backup`,
+`.bak3`, `.backup4`).
+
+== Session 068 (2026-08-15) — Audit version + EPIC PUB bump 0.0.17 ✅ TERMINÉ (recadré S-069)
 
 Session de gouvernance pure (pattern S-057/S-063, bakery S-199) — zéro code
 modifié. Audit des deltas versions Maven Central vs code local : slider 0.0.16

@@ -2,6 +2,18 @@
 
 _Date creation_ : 2026-05-10
 
+
+== Session 070 (2026-09-07) — Synchronisation gouvernance post-S-069 (gouvernance pure) ✅ TERMINÉ
+
+* **EPICs** : Aucun (sync gouvernance — PROMPT_REPRISE S-066→S-070, BACKLOG racine, hygiene).
+* **Livrables** :
+** PROMPT_REPRISE réécrit S-066 → S-070 : versions Central réelles (0.0.18, BOM 0.0.31, codebase 0.0.10/0.0.11, conventions 0.0.3/0.0.4), résumé sessions 066-069, domaine `slider.ai` consomme adapter N1 (`codebase.koog.llm.adapter`, LLM-ADAPTER-EXTRACT S-073).
+** BACKLOG racine : sections Session 069 + Session 070 ajoutées, date en-tête 2026-09-07, S-068 recadrée (saut 0.0.18 assumé).
+** État git post-S-069 consigné : `1237a2c` bump codebase 0.0.11, `f279468` remove opencode.json + update Gradle/Kotlin, `6d1d8cb` align conventions 0.0.4.
+** Hygiene signalée (non exécutée) : 3 backups orphelins racine (`build.gradle.kts.backup`, `.bak3`, `.backup4`) — purge à valider pilote.
+** Rapport : `.agents/sessions/070-sync-gouvernance-post-069.adoc`.
+* Zéro code production, zéro bump BOM, zéro secret. Baseline préservée (959 unit + 45 FT + 265 cucumber).
+
 == Session 069 (2026-08-17) — Publication slider 0.0.18 + BOM 0.0.19 sur Maven Central ✅ TERMINÉ
 
 Session pure ops/release (zéro code de production modifié hors bump
