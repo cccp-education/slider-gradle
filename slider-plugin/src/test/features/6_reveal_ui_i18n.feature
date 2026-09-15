@@ -1,11 +1,11 @@
 @i18n @revealjs
-Feature: Reveal.js UI i18n messages generation for 10 languages
+Feature: Reveal.js UI i18n messages generation for LanguageCatalog languages
 
   Scenario: RevealUiMessageCatalog exposes one entry per LanguageCatalog language
     When the Reveal UI message catalog is queried
     Then it should contain one entry per LanguageCatalog language
 
-  Scenario: RevealUiMessageCatalog covers all 10 ISO codes
+  Scenario: RevealUiMessageCatalog covers all ISO codes
     When the Reveal UI message catalog is queried
     Then it should cover all LanguageCatalog supported codes
 

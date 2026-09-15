@@ -19,6 +19,13 @@ import java.util.stream.Stream
  * producing 27 `.adoc` files + 27 `deck-context.yml` files (54 total) in
  * `<repo-root>/slides/misc/`.
  *
+ * The dogfood corpus is a frozen artefact: it was produced when the shared
+ * [LanguageCatalog] exposed 10 languages. The catalog has since grown (22,
+ * talaria.school parity), but regenerating these committed files is an
+ * LLM-metered dogfooding task (Economy of Ink) — the corpus target set is
+ * therefore pinned to the committed codes, NOT to the live catalog. A future
+ * dogfooding session can regenerate the corpus and lift this pin.
+ *
  * This test verifies:
  * - Every translated `.adoc` file exists and is non-empty.
  * - Every translated `.adoc` preserves AsciiDoc structure (title `=`, section `==`,
@@ -30,12 +37,17 @@ class TranslatedDemoDeckTest {
 
     companion object {
         private val sourceCodes = listOf("fr", "en", "ar")
-        private val targetCodes = LanguageCatalog.supportedCodes().toList()
+
+        /**
+         * Target codes present in the committed dogfood corpus (S-030).
+         * Pinned — see the class KDoc. Not derived from [LanguageCatalog].
+         */
+        private val dogfoodTargetCodes = listOf("ar", "bn", "en", "es", "hi", "pt", "ru", "ur", "zh")
 
         @JvmStatic
         fun sourceTargetPairs(): Stream<Arguments> =
             sourceCodes.stream().flatMap { src ->
-                targetCodes.stream()
+                dogfoodTargetCodes.stream()
                     .filter { it != src }
                     .map { tgt -> Arguments.of(src, tgt) }
             }

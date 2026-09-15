@@ -50,10 +50,10 @@ class RevealRtlResolverTest {
     }
 
     @Test
-    fun `rtlLanguages should contain exactly Arabic and Urdu`() {
+    fun `rtlLanguages should contain exactly the catalog RTL languages`() {
         val rtl = RevealRtlResolver.rtlLanguages()
 
-        assertThat(rtl).containsExactlyInAnyOrder("ar", "ur")
+        assertThat(rtl).containsExactlyInAnyOrder("ar", "ur", "fa")
     }
 
     @Test

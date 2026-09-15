@@ -194,7 +194,7 @@ Let's dive in.
     }
 
     @Test
-    fun `should translate all 9 tasks when source is fr and targets are all 10 minus fr`() {
+    fun `should translate all tasks when source is fr and targets are all minus fr`() {
         val allTargets = (contracts.i18n.LanguageCatalog.supportedCodes() - "fr").toList()
         val responses = allTargets.associateWith { "= Translated $it" }
         val adapter = StubModelAdapter(responses)
@@ -207,7 +207,7 @@ Let's dive in.
 
         val outcome = translator.translate(plan)
 
-        assertThat(outcome.totalCount).isEqualTo(9)
+        assertThat(outcome.totalCount).isEqualTo(allTargets.size)
         assertThat(outcome.isAllTranslated()).isTrue()
     }
 

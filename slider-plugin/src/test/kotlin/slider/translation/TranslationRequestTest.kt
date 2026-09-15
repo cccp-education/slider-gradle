@@ -49,10 +49,10 @@ class TranslationRequestTest {
     }
 
     @Test
-    fun `default target languages should cover all 10 LanguageCatalog supported codes`() {
+    fun `default target languages should cover all LanguageCatalog supported codes`() {
         val req = TranslationRequest(sourceDeck = validDeck())
 
-        assertThat(req.targetLanguages).hasSize(10)
+        assertThat(req.targetLanguages).hasSize(LanguageCatalog.ALL.size)
         LanguageCatalog.supportedCodes().forEach { code ->
             assertThat(req.targetLanguages).contains(code)
         }
@@ -112,13 +112,13 @@ class TranslationRequestTest {
     }
 
     @Test
-    fun `should accept source language not in target list (translate to all 10`() {
+    fun `should accept source language not in target list (translate to all others`() {
         val req = TranslationRequest(
             sourceDeck = validDeck(languageCode = "fr"),
             targetLanguages = (allCodes - "fr"),
         )
 
-        assertThat(req.targetLanguages).hasSize(9)
+        assertThat(req.targetLanguages).hasSize(allCodes.size - 1)
         assertThat(req.targetLanguages).doesNotContain("fr")
     }
 

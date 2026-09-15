@@ -48,6 +48,11 @@ class TranslatorI18nSteps : En {
             assertThat(translationTasks).hasSize(n * m)
         }
 
+        Then("the number of tasks should be LanguageCatalog size times size minus 1") {
+            val n = LanguageCatalog.ALL.size
+            assertThat(translationTasks).hasSize(n * (n - 1))
+        }
+
         When("a translation prompt is generated from {string} to {string} for text {string}") { from: String, to: String, text: String ->
             prompt = TranslatorManager.PromptManager.run {
                 (from to to).getTranslatePromptMessage(text)

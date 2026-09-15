@@ -28,7 +28,7 @@ testcontainers-pg = "1.21.4"
 logback = "1.5.32"
 codebase = "0.0.14"
 playwright = "1.52.0"
-i18n-contracts = "0.0.2"
+i18n-contracts = "0.0.4"
 koog = "1.0.0"
 
 [libraries]

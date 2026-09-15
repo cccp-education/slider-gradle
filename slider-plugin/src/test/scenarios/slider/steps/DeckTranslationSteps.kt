@@ -126,7 +126,7 @@ Welcome.
             plan = DeckTranslationPlan.from(req)
         }
 
-        When("a translation plan is built from a request targeting all 10 languages") {
+        When("a translation plan is built from a request targeting all supported languages") {
             val req = TranslationRequest(sourceDeck = sourceDeck)
             plan = DeckTranslationPlan.from(req)
         }
@@ -156,10 +156,16 @@ Welcome.
             outcome = translator.translate(p)
         }
 
-        Then("the request should target all 10 LanguageCatalog supported codes") {
+        Then("the request should target all LanguageCatalog supported codes") {
             assertThat(request!!.targetLanguages).containsExactlyInAnyOrderElementsOf(
                 LanguageCatalog.supportedCodes().toList()
             )
+        }
+
+        Then("the plan should contain all non-source language tasks") {
+            val source = plan!!.sourceLanguage
+            val expected = LanguageCatalog.supportedCodes().filter { it != source }
+            assertThat(plan!!.tasks).hasSize(expected.size)
         }
 
         Then("the request should target exactly {int} languages") { count: Int ->

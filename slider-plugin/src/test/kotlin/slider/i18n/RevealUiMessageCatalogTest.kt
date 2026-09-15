@@ -14,7 +14,7 @@ class RevealUiMessageCatalogTest {
     }
 
     @Test
-    fun `catalog should cover all 10 ISO codes from LanguageCatalog`() {
+    fun `catalog should cover all ISO codes from LanguageCatalog`() {
         val catalog = RevealUiMessageCatalog.all()
 
         LanguageCatalog.supportedCodes().forEach { code ->
@@ -86,5 +86,13 @@ class RevealUiMessageCatalogTest {
             assertThat(messages.controls.fullscreen)
                 .withFailMessage("fullscreen blank for ${messages.languageCode}").isNotBlank()
         }
+    }
+
+    @Test
+    fun `catalog Persian messages should be rtl`() {
+        val fa = RevealUiMessageCatalog.findByCode("fa")!!
+
+        assertThat(fa.isRtl).isTrue()
+        assertThat(fa.nav.prev).isNotBlank()
     }
 }

@@ -30,7 +30,7 @@ class DeckTranslationPlanTest {
         )
         val plan = DeckTranslationPlan.from(request)
 
-        assertThat(plan.tasks).hasSize(9)
+        assertThat(plan.tasks).hasSize(allCodes.size - 1)
     }
 
     @Test
@@ -77,7 +77,7 @@ class DeckTranslationPlanTest {
         val plan = DeckTranslationPlan.from(request)
 
         assertThat(plan.tasks.map { it.to }).doesNotContain("fr")
-        assertThat(plan.tasks).hasSize(9)
+        assertThat(plan.tasks).hasSize(allCodes.size - 1)
     }
 
     @Test
@@ -94,7 +94,7 @@ class DeckTranslationPlanTest {
     }
 
     @Test
-    fun `plan should handle all 10 targets when source is outside catalog`() {
+    fun `plan should handle all targets when source is outside catalog`() {
         val deck = validDeck("fr")
         val request = TranslationRequest(
             sourceDeck = deck,
@@ -102,7 +102,7 @@ class DeckTranslationPlanTest {
         )
         val plan = DeckTranslationPlan.from(request)
 
-        assertThat(plan.tasks).hasSize(9)
+        assertThat(plan.tasks).hasSize(allCodes.size - 1)
         plan.tasks.forEach { task ->
             assertThat(task.from).isEqualTo("fr")
             assertThat(task.to).isNotEqualTo("fr")

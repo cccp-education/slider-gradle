@@ -1,5 +1,5 @@
 @translator @i18n
-Feature: TranslatorManager supports 10 languages via LanguageCatalog
+Feature: TranslatorManager supports all LanguageCatalog languages
 
   Scenario: Supported languages match LanguageCatalog ISO codes
     When the translator supported languages are queried
@@ -15,7 +15,7 @@ Feature: TranslatorManager supports 10 languages via LanguageCatalog
 
   Scenario: Translation tasks produce N times N minus 1 permutations
     When translation tasks are generated from supported languages
-    Then the number of tasks should be 10 times 9
+    Then the number of tasks should be LanguageCatalog size times size minus 1
 
   Scenario: Translation prompt mentions target language native name
     When a translation prompt is generated from "fr" to "ar" for text "Bonjour"

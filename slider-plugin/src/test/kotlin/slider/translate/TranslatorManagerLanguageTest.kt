@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class TranslatorManagerLanguageTest {
 
     @Test
-    fun `supportedLanguages should contain all 10 LanguageCatalog ISO codes`() {
+    fun `supportedLanguages should contain all LanguageCatalog ISO codes`() {
         val supported = TranslatorManager.supportedLanguages
 
         LanguageCatalog.supportedCodes().forEach { code ->
@@ -43,7 +43,7 @@ class TranslatorManagerLanguageTest {
     }
 
     @Test
-    fun `translationTasks should produce N times N minus 1 permutations for 10 languages`() {
+    fun `translationTasks should produce N times N minus 1 permutations`() {
         val tasks = TranslatorManager.run { supportedLanguages.translationTasks() }
         val n = LanguageCatalog.ALL.size
 

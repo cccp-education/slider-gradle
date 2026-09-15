@@ -1,14 +1,14 @@
 @translation @i18n
-Feature: Deck translation pipeline produces 10 localized variants from a source deck
+Feature: Deck translation pipeline produces localized variants from a source deck
 
   As a slider-gradle producer
-  I want to translate a deck into the 10 most spoken languages
+  I want to translate a deck into the supported languages
   So that my presentation reaches a global audience
 
-  Scenario: A valid translation request defaults to all 10 supported languages
+  Scenario: A valid translation request defaults to all supported languages
     Given a source deck in language "fr"
     When a translation request is created with default targets
-    Then the request should target all 10 LanguageCatalog supported codes
+    Then the request should target all LanguageCatalog supported codes
 
   Scenario: A translation request with explicit target languages
     Given a source deck in language "fr"
@@ -37,10 +37,10 @@ Feature: Deck translation pipeline produces 10 localized variants from a source 
     And the outcome should have 0 failed results
     And the outcome should be all translated
 
-  Scenario: A translation plan covers all 9 non-source languages
+  Scenario: A translation plan covers all non-source languages
     Given a source deck in language "fr"
-    When a translation plan is built from a request targeting all 10 languages
-    Then the plan should contain 9 tasks
+    When a translation plan is built from a request targeting all supported languages
+    Then the plan should contain all non-source language tasks
     And the plan source language should be "fr"
 
   Scenario: An invalid source language is rejected

@@ -11,7 +11,7 @@ import contracts.i18n.LanguageCatalog
  * flag derived from [LanguageCatalog].
  *
  * Used by [RevealUiMessageCatalog] to provide a message bundle for each
- * of the 10 supported languages, then written to `messages_{code}.js`
+ * supported language, then written to `messages_{code}.js`
  * by [RevealUiMessagesWriter] for the Reveal.js i18n plugin.
  */
 data class RevealUiMessages(
