@@ -72,4 +72,4 @@ grep -r "TOKEN\|SECRET\|PASSWORD\|API_KEY\|gho_\|ghp_" slider-plugin/ --include=
 * Reveal.js est gere via `asciidoctor-gradle-jvm` + gem `asciidoctor-revealjs`
 * Version reveal.js actuelle : 3.9.1 (tag dans `configureExtensions()`)
 * Gem version actuelle : 3.1.0
-* Aucun commit sans permission explicite
+* Commit/push/merge autorisés (décision pilote 2026-09-17). Ne JAMAIS commiter de secret.

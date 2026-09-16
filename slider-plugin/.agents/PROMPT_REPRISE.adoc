@@ -34,7 +34,7 @@ _Prochaine session_ : 070 — à arbitrer par le pilote (tous EPICs de feature +
     direction — aucun EPIC n'est imposé).
 - *Baseline* : session 069 committée + pushée (clôture pilote).
 - *Versions publiées Central* : slider 0.0.18, BOM 0.0.19.
-- *Règles* : Règle 1 — AUCUN commit sans permission. Règle 2 — AUCUN
+- *Règles* : Git autorisé (décision pilote 2026-09-17) — zéro secret. Règle 2 — AUCUN
   publish sans permission (publishSlides inclus).
 - *Rapport 069* :
   `slider-plugin/.agents/sessions/069-pub-slider-0.0.18.adoc`.
