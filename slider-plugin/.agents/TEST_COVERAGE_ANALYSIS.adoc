@@ -1,5 +1,18 @@
 = Test Coverage Analysis — Slider Gradle
 
+_Statut session 072_ : Correctif `asciidoctorRevealJs` (pin AsciidoctorJ,
+dette S-023/S-034). 3 niveaux de tests ajoutés (DDD/TDD/BDD strict) :
+. `AsciidoctorJPinTest` (3 unit) — défaut 3.0.1, blank rejeté, custom (RED 3
+  `Unresolved reference` → GREEN).
+. `AsciidoctorJPinFunctionalTest` (1 functional TestKit) — la configuration
+  du worker `__$$asciidoctorj_asciidoctorRevealJs$$__r` résout
+  `asciidoctorj:3.0.0 -> 3.0.1` (RED prouvé par stash du câblage → GREEN).
+. `18_extension_decomposition.feature` 9 → 12 scénarios (+3 AsciidoctorJPin).
+Totaux : **1102 unit + 46 functional + 273 cucumber** (baseline S-071
+1099/45/270 ; +3 unit +1 functional +3 cucumber), 0 FAIL, 1 SKIP. Les 3
+tests Playwright préexistants S-217 passent désormais (fixtures générables).
+`./gradlew check` VERT.
+
 _Statut session 068_ : Audit version + EPIC PUB bump 0.0.17 (gouvernance
 pure, pattern S-199 bakery / S-181 codebase). Zéro code de production
 modifié, zéro test modifié. Baseline préservée post-067 : 959 unit + 45
