@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== บทนำ
+
+[%step]
+* แสดงสายการทำงานจาก slider ไปยัง capsule
+* สร้างข้อความ capsule จากโน้ตของผู้บรรยาย
+* สคริปต์ข้อความธรรมดาที่ใช้โดย capsule-gradle
+
+[NOTE.speaker]
+--
+สวัสดีทุกท่านสู่การสาธิตสายการทำงาน capsule feed นี้
+เราจะเห็นว่า slider-gradle ดึงโน้ตของผู้บรรยายจากการนำเสนอ AsciiDoc อย่างไร
+เพื่อสร้างข้อความที่ใช้โดย capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== โหนด capsule-gradle
+
+[%step]
+* รูปแบบข้อความธรรมดาที่กำหนดไว้
+* หัว: `=== CAPSULE SCRIPT : name ===`
+* ส่วนหนึ่งต่อสไลด์: `--- SLIDE n : title ---`
+* เนื้อหา: โน้ตของผู้บรรยายตามต้นฉบับ
+
+[NOTE.speaker]
+--
+โหนดระหว่าง slider และ capsule ถูกทำให้เรียบง่ายโดยเจตนา:
+ไฟล์ข้อความที่มีหัวและส่วนหนึ่งต่อสไลด์
+แต่ละส่วนมีโน้ตของผู้บรรยายซึ่งกลายเป็นการบรรยายด้วยเสียง.
+--
+
+[.slide,data-transition="slide"]
+== การตรวจสอบการไป‑กลับ
+
+[%step]
+* ตัวแยกจะดึงส่วนต่างจาก AsciiDoc
+* ผู้เขียนจะวนซ้ำเป็นโหนดข้อความธรรมดา
+* capsule-gradle จะทำการวิเคราะห์รูปแบบเดียวกันอีกครั้ง
+* สูญเสียศูนย์: สิ่งที่ slider เขียนจะถูก capsule อ่าน
+
+[NOTE.speaker]
+--
+การตรวจสอบการไป‑กลับเสร็จสมบูรณ์: ตัวแยกดึงส่วนจากแหล่ง AsciiDoc
+ผู้เขียนวนซ้ำเป็นโหนดข้อความธรรมดาอีกครั้ง
+และ capsule-gradle ทำการวิเคราะห์รูปแบบเดียวกันอย่างแม่นยำโดยไม่มีการสูญเสียข้อมูล.
+--
+
+[.slide,data-transition="slide"]
+== สรุป
+
+[%step]
+* capsule feed = การดึงโน้ตของผู้บรรยาย
+* ไม่มี JSON หรือภาพหน้าจอในโหนด
+* ภาพหน้าจอถูกจับโดยตรงโดย capsule-gradle
+* slider สร้างข้อความและ capsule ใช้มัน
+
+[NOTE.speaker]
+--
+สรุป: capsule feed คือการดึงโน้ตของผู้บรรยายอย่างง่ายดาย
+ไม่มี JSON หรือภาพหน้าจอในโหนด — ภาพหน้าจอถูกจับโดยตรง
+โดย capsule-gradle ระหว่างการสร้างวิดีโอ. slider สร้างข้อความ
+และ capsule ใช้งานมัน. มีขอบเขตที่ชัดเจนระหว่างผู้ผลิตและผู้บริโภค.
+--

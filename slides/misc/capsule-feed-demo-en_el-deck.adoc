@@ -1,0 +1,72 @@
+= Capsule Feed Demo (Ελληνικά)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Εισαγωγή
+
+[%step]
+* Επίδειξη του pipeline από το slider προς το capsule
+* Δημιουργία σεναρίου Capsule από τις σημειώσεις ομιλητή
+* Συμφωνία απλού κειμένου (plain-text contract) που καταναλώνεται από το capsule-gradle
+
+[NOTE.speaker]
+--
+Καλώς ήρθατε σε αυτή την επίδειξη του pipeline του capsule feed.
+Θα δούμε πώς το slider-gradle εξάγει τις σημειώσεις ομιλητή από μια παρουσίαση AsciiDoc
+για να παράγει ένα σενάριο που καταναλώνεται από το capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Η συμφωνία του capsule-gradle
+
+[%step]
+* Μορφή απλού κειμένου με διαχωριστικά
+* Κεφαλίδα: `=== CAPSULE SCRIPT : name ===`
+* Ένα τμήμα ανά διαφάνεια: `--- SLIDE n : title ---`
+* Σώμα: η σημείωση ομιλητή όπως είναι
+
+[NOTE.speaker]
+--
+Η συμφωνία μεταξύ του slider και του capsule είναι σκόπιμα απλή:
+ένα αρχείο κειμένου με μια κεφαλίδα και ένα τμήμα ανά διαφάνεια.
+Κάθε τμήμα περιέχει τη σημείωση ομιλητή που γίνεται η αφήγηση TTS.
+--
+
+[.slide,data-transition="slide"]
+== Επαλήθευση κύκλου (Round-trip validation)
+
+[%step]
+* Ο parser εξάγει τμήματα από το AsciiDoc
+* Ο writer σειριοποιεί σε συμφωνία απλού κειμένου
+* Το Capsule-gradle ξανα-αναλύει την ίδια μορφή
+* Μηδενική απώλεια: ό,τι γράφει το slider, διαβάζει το capsule
+
+[NOTE.speaker]
+--
+Ο κύκλος είναι επαληθευμένος: ο parser εξάγει τμήματα από την πηγή AsciiDoc,
+ο writer τα σειριοποιεί ξανά στη συμφωνία απλού κειμένου,
+και το capsule-gradle αναλύει ξανά την ίδια ακριβώς μορφή χωρίς καμία απώλεια δεδομένων.
+--
+
+[.slide,data-transition="slide"]
+== Συμπέρασμα
+
+[%step]
+* Capsule feed = εξαγωγή σημειώσεων ομιλητή
+* Όχι JSON, όχι στιγμιότυπα οθόνης στη συμφωνία
+* Τα στιγμιότυπα οθόνης λαμβάνονται ζωντανά από το capsule-gradle
+* Το Slider παράγει το σενάριο, το capsule το καταναλώνει
+
+[NOTE.speaker]
+--
+Για να καταλήξουμε: το capsule feed είναι απλώς η εξαγωγή των σημειώσεων ομιλητή.
+Όχι JSON, όχι στιγμιότυπα οθόνης στη συμφωνία — τα στιγμιότυπα οθόνης λαμβάνονται ζωντανά
+από το capsule-gradle κατά τη διάρκεια της δημιουργίας του βίντεο. Το Slider παράγει το σενάριο,
+το capsule το καταναλώνει. Καθαρό όριο παραγωγού-καταναλωτή.
+--

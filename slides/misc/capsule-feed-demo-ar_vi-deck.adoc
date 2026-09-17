@@ -1,0 +1,73 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+:revealjs_direction: ltr
+
+[.slide,data-transition="zoom"]
+== Giới thiệu
+
+[%step]
+* Trình diễn luồng dữ liệu (pipeline) từ slider đến capsule
+* Tạo văn bản capsule từ ghi chú của diễn giả
+* Hợp đồng văn bản thuần túy được tiêu thụ bởi capsule-gradle
+
+[NOTE.speaker]
+--
+Chào mừng các bạn đến với buổi demo về luồng dữ liệu capsule feed.
+Chúng ta sẽ xem cách slider-gradle trích xuất ghi chú của diễn giả từ bài thuyết trình AsciiDoc
+để tạo ra văn bản mà capsule-gradle sẽ tiêu thụ.
+--
+
+[.slide,data-transition="slide"]
+== Hợp đồng capsule-gradle
+
+[%step]
+* Định dạng văn bản thuần túy cụ thể
+* Tiêu đề: `=== CAPSULE SCRIPT : name ===`
+* Một phân đoạn cho mỗi slide: `--- SLIDE n : title ---`
+* Nội dung: Ghi chú của diễn giả giữ nguyên
+
+[NOTE.speaker]
+--
+Hợp đồng giữa slider và capsule được thiết kế đơn giản một cách có ý đồ:
+Một tệp văn bản với tiêu đề và một phân đoạn cho mỗi slide.
+Mỗi phân đoạn chứa ghi chú của diễn giả, thứ sẽ trở thành lời dẫn âm thanh.
+--
+
+[.slide,data-transition="slide"]
+== Kiểm tra khứ hồi (Round-trip)
+
+[%step]
+* Trình phân tích trích xuất các phân đoạn từ AsciiDoc
+* Trình ghi tuần tự hóa thành hợp đồng văn bản thuần túy
+* capsule-gradle phân tích ngược lại định dạng đó
+* Không mất mát: Những gì slider viết là những gì capsule đọc
+
+[NOTE.speaker]
+--
+Đã kiểm chứng khứ hồi: Trình phân tích trích xuất các phân đoạn từ nguồn AsciiDoc,
+trình ghi tuần tự hóa chúng trở lại thành hợp đồng văn bản thuần túy,
+và capsule-gradle phân tích chính xác định dạng đó mà không làm mất bất kỳ dữ liệu nào.
+--
+
+[.slide,data-transition="slide"]
+== Kết luận
+
+[%step]
+* capsule feed = trích xuất ghi chú của diễn giả
+* Không JSON, không ảnh chụp màn hình trong hợp đồng
+* Ảnh chụp màn hình được thực hiện trực tiếp bởi capsule-gradle
+* slider tạo văn bản và capsule tiêu thụ nó
+
+[NOTE.speaker]
+--
+Để kết luận: capsule feed đơn giản là việc trích xuất ghi chú của diễn giả.
+Không có JSON hay ảnh chụp màn hình trong hợp đồng — ảnh chụp màn hình được thực hiện trực tiếp
+bởi capsule-gradle trong quá trình tạo video. slider tạo ra văn bản
+và capsule tiêu thụ nó. Một ranh giới rõ ràng giữa bên sản xuất và bên tiêu thụ.
+--

@@ -1,0 +1,72 @@
+= Demo Capsule Feed (Tiếng Việt)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Giới thiệu
+
+[%step]
+* Demo luồng pipeline từ Slider đến Capsule
+* Tạo kịch bản Capsule từ ghi chú của người thuyết trình (speaker notes)
+* Hợp đồng văn bản thuần (plain-text contract) được tiêu thụ bởi capsule-gradle
+
+[NOTE.speaker]
+--
+Chào mừng bạn đến với buổi demo luồng pipeline capsule feed.
+Chúng ta sẽ xem cách slider-gradle trích xuất các ghi chú của người thuyết trình từ một bộ slide AsciiDoc
+để tạo ra một kịch bản được tiêu thụ bởi capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Hợp đồng capsule-gradle
+
+[%step]
+* Định dạng phân tách bằng văn bản thuần
+* Tiêu đề: `=== CAPSULE SCRIPT : name ===`
+* Mỗi phân đoạn cho một slide: `--- SLIDE n : title ---`
+* Nội dung: ghi chú của người thuyết trình giữ nguyên
+
+[NOTE.speaker]
+--
+Hợp đồng giữa slider và capsule được thiết kế đơn giản một cách có chủ đích:
+một tệp văn bản với một tiêu đề và một phân đoạn cho mỗi slide.
+Mỗi phân đoạn chứa ghi chú của người thuyết trình, thứ sẽ trở thành lời thuyết minh TTS.
+--
+
+[.slide,data-transition="slide"]
+== Xác thực khứ hồi (Round-trip validation)
+
+[%step]
+* Bộ phân tích (Parser) trích xuất các phân đoạn từ AsciiDoc
+* Bộ ghi (Writer) tuần tự hóa thành hợp đồng văn bản thuần
+* Capsule-gradle phân tích lại cùng một định dạng đó
+* Không mất mát: những gì slider ghi, capsule đọc
+
+[NOTE.speaker]
+--
+Quá trình khứ hồi đã được xác thực: bộ phân tích trích xuất các phân đoạn từ nguồn AsciiDoc,
+bộ ghi tuần tự hóa chúng trở lại thành hợp đồng văn bản thuần,
+và capsule-gradle phân tích lại chính xác định dạng đó mà không làm mất dữ liệu.
+--
+
+[.slide,data-transition="slide"]
+== Kết luận
+
+[%step]
+* Capsule feed = trích xuất ghi chú của người thuyết trình
+* Không có JSON, không có ảnh chụp màn hình trong hợp đồng
+* Ảnh chụp màn hình được chụp trực tiếp bởi capsule-gradle
+* Slider tạo ra kịch bản, capsule tiêu thụ kịch bản đó
+
+[NOTE.speaker]
+--
+Để kết luận: capsule feed đơn giản là việc trích xuất các ghi chú của người thuyết trình.
+Không có JSON, không có ảnh chụp màn hình trong hợp đồng — ảnh chụp màn hình được chụp trực tiếp
+bởi capsule-gradle trong quá trình tạo video. Slider tạo ra kịch bản,
+capsule tiêu thụ nó. Ranh giới giữa bên sản xuất và bên tiêu thụ rất rõ ràng.
+--

@@ -1,0 +1,68 @@
+= دموی فید کپسول (فارسی)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+:revealjs_direction: rtl
+
+[.slide,data-transition="zoom"]
+== مقدمه
+
+[%step]
+* نمایش خط لوله (Pipeline) از Slider به Capsule
+* تولید اسکریپت کپسول از یادداشت‌های سخنران (Speaker Notes)
+* قرارداد متن ساده (Plain-text) مصرف شده توسط capsule-gradle
+
+[NOTE.speaker]
+--
+به این نمایش خط لوله فید کپسول خوش آمدید.
+خواهیم دید که چگونه slider-gradle یادداشت‌های سخنران را از یک عرصه AsciiDoc استخراج می‌کند تا اسکریپتی تولید کند که توسط capsule-gradle مصرف می‌شود.
+--
+
+[.slide,data-transition="slide"]
+== قرارداد capsule-gradle
+
+[%step]
+* فرمت متن ساده با جداکننده (Delimited)
+* سربرگ: `=== CAPSULE SCRIPT : name ===`
+* یک بخش برای هر اسلاید: `--- SLIDE n : title ---`
+* بدنه: یادداشت سخنران به همان صورت اصلی
+
+[NOTE.speaker]
+--
+قرارداد بین slider و capsule عمداً ساده طراحی شده است:
+یک فایل متنی با یک سربرگ و یک بخش برای هر اسلاید.
+هر بخش شامل یادداشت سخنران است که تبدیل به روایت TTS (تبدیل متن به گفتار) می‌شود.
+--
+
+[.slide,data-transition="slide"]
+== اعتبارسنجی رفت‌وبرگشت (Round-trip)
+
+[%step]
+* تجزیه‌کننده (Parser) بخش‌ها را از AsciiDoc استخراج می‌کند
+* نویسنده (Writer) آن‌ها را به قرارداد متن ساده تبدیل می‌کند
+* capsule-gradle همان فرمت را مجدداً تجزیه می‌کند
+* اتلاف صفر: آنچه slider می‌نویسد، capsule می‌خواند
+
+[NOTE.speaker]
+--
+فرآیند رفت‌وبرگشت اعتبارسنجی شده است: تجزیه‌کننده بخش‌ها را از منبع AsciiDoc استخراج می‌کند، نویسنده آن‌ها را دوباره به قرارداد متن ساده تبدیل می‌کند و capsule-gradle دقیقاً همان فرمت را بدون هیچ‌گونه از دست رفتن داده‌ای مجدداً تجزیه می‌کند.
+--
+
+[.slide,data-transition="slide"]
+== نتیجه‌گیری
+
+[%step]
+* فید کپسول = استخراج یادداشت‌های سخنران
+* بدون JSON، بدون اسکرین‌شات در قرارداد
+* اسکرین‌شات‌ها به صورت زنده توسط capsule-gradle گرفته می‌شوند
+* Slider اسکریپت را تولید می‌کند، capsule آن را مصرف می‌کند
+
+[NOTE.speaker]
+--
+در نهایت: فید کپسول صرفاً استخراج یادداشت‌های سخنران است.
+هیچ JSON یا اسکرین‌شاتی در قرارداد وجود ندارد — اسکرین‌شات‌ها به صورت زنده توسط capsule-gradle در هنگام تولید ویدیو گرفته می‌شوند. Slider اسکریپت را تولید می‌کند و capsule آن را مصرف می‌کند. یک مرز تمیز بین تولیدکننده و مصرف‌کننده.
+--

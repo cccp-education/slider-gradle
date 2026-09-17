@@ -1,0 +1,73 @@
+= Capsule Feed 데모 (한국어)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== 서론
+
+[%step]
+* slider -> capsule 파이프라인 시연
+* 발표자 노트로부터 capsule 스크립트 생성
+* capsule-gradle에서 사용하는 plain-text 계약(Contrat)
+
+[NOTE.speaker]
+--
+capsule feed 파이프라인 시연에 오신 것을 환영합니다.
+slider-gradle이 AsciiDoc 덱에서 발표자 노트를 어떻게 추출하여 
+capsule-gradle이 사용하는 스크립트를 생성하는지 살펴보겠습니다.
+--
+
+[.slide,data-transition="slide"]
+== capsule-gradle 계약
+
+[%step]
+* 구분자가 지정된 plain-text 형식
+* 헤더: `=== CAPSULE SCRIPT : 이름 ===`
+* 슬라이드당 하나의 세그먼트: `--- SLIDE n : 제목 ---`
+* 본문: 발표자 노트 그대로 유지
+
+[NOTE.speaker]
+--
+slider와 capsule 사이의 계약은 의도적으로 단순하게 설계되었습니다:
+헤더와 슬라이드별 세그먼트가 포함된 텍스트 파일입니다.
+각 세그먼트에는 TTS 내레이션이 될 발표자 노트가 포함됩니다.
+--
+
+[.slide,data-transition="slide"]
+== 라운드트립 검증 (Validation round-trip)
+
+[%step]
+* 파서(Parser)가 AsciiDoc에서 세그먼트 추출
+* 라이터(Writer)가 plain-text 계약으로 직렬화
+* capsule-gradle이 동일한 형식을 다시 파싱
+* 손실 제로: slider가 쓴 내용을 capsule이 읽음
+
+[NOTE.speaker]
+--
+라운드트립이 검증되었습니다: 파서가 AsciiDoc 소스에서 세그먼트를 추출하고, 
+라이터가 이를 plain-text 계약으로 직렬화하며, 
+capsule-gradle이 데이터 손실 없이 동일한 형식을 다시 파싱합니다.
+--
+
+[.slide,data-transition="slide"]
+== 결론
+
+[%step]
+* Capsule feed = 발표자 노트 추출
+* 계약 내용에 JSON이나 스크린샷 포함 안 됨
+* 스크린샷은 capsule-gradle에 의해 실시간으로 캡처됨
+* Slider는 스크립트를 생성하고, capsule은 이를 소비함
+
+[NOTE.speaker]
+--
+결론적으로, capsule feed는 단순히 발표자 노트를 추출하는 것입니다.
+계약 내용에 JSON이나 스크린샷은 포함되지 않습니다. 스크린샷은 
+비디오 생성 중에 capsule-gradle이 실시간으로 캡처합니다. 
+Slider가 스크립트를 생성하고 capsule이 이를 소비함으로써, 
+생성자와 소비자 간의 경계가 깔끔하게 분리됩니다.
+--

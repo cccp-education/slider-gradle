@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introduzione
+
+[%step]
+* Presentazione della pipeline dallo slider al capsule
+* Generazione del testo capsule dalle note dello speaker
+* Nodo di testo normale consumato da capsule-gradle
+
+[NOTE.speaker]
+--
+Benvenuti a questa demo della pipeline capsule feed.
+Vedremo come slider-gradle estrae le note dello speaker da una presentazione AsciiDoc
+per produrre un testo consumato da capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Nodo capsule-gradle
+
+[%step]
+* Formato di testo normale definito
+* Intestazione: `=== CAPSULE SCRIPT : name ===`
+* Un segmento per slide: `--- SLIDE n : title ---`
+* Corpo: la nota dello speaker così com'è
+
+[NOTE.speaker]
+--
+I nodi tra slider e capsule sono deliberatamente semplici:
+un file di testo con intestazione e un segmento per ogni slide.
+Ogni segmento contiene la nota dello speaker che diventa la narrazione audio.
+--
+
+[.slide,data-transition="slide"]
+== Verifica di andata e ritorno
+
+[%step]
+* L'analizzatore estrae i segmenti da AsciiDoc
+* Il writer serializza nei nodi di testo normale
+* capsule-gradle rianalizza lo stesso formato
+* Zero perdita: ciò che scrive lo slider lo legge capsule
+
+[NOTE.speaker]
+--
+È stata verificata la corsa di andata e ritorno: l'analizzatore estrae i segmenti dalla sorgente AsciiDoc,
+il writer li serializza nuovamente nei nodi di testo normale,
+e capsule-gradle rianalizza esattamente lo stesso formato senza alcuna perdita di dati.
+--
+
+[.slide,data-transition="slide"]
+== Conclusione
+
+[%step]
+* capsule feed = estrazione delle note dello speaker
+* Nessun JSON né screenshot nei nodi
+* Gli screenshot sono catturati direttamente da capsule-gradle
+* slider genera il testo e capsule lo consuma
+
+[NOTE.speaker]
+--
+Per concludere: capsule feed è semplicemente l'estrazione delle note dello speaker.
+Nessun JSON né screenshot nei nodi — gli screenshot vengono catturati direttamente
+da capsule-gradle durante la generazione del video. Lo slider genera il testo
+e capsule lo consuma. C'è una chiara separazione tra produttore e consumatore.
+--

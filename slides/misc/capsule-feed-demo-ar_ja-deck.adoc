@@ -1,0 +1,74 @@
+= Capsule Feed デモ
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+:revealjs_direction: ltr
+
+[.slide,data-transition="zoom"]
+== はじめに
+
+[%step]
+* sliderからcapsuleへのパイプラインの提示
+* スピーカーノートからのcapsuleテキスト生成
+* capsule-gradleが消費するプレーンテキスト・コントラクト
+
+[NOTE.speaker]
+--
+capsule feedパイプラインのデモンストレーションへようこそ。
+slider-gradleがAsciiDocプレゼンテーションからどのようにスピーカーノートを抽出し、
+capsule-gradleが消費するテキストを生成するかを見ていきましょう。
+--
+
+[.slide,data-transition="slide"]
+== capsule-gradle コントラクト
+
+[%step]
+* 特定のプレーンテキスト形式
+* ヘッダー: `=== CAPSULE SCRIPT : name ===`
+* スライドごとに1つのセクション: `--- SLIDE n : title ---`
+* ボディ: スピーカーノートをそのまま記載
+
+[NOTE.speaker]
+--
+sliderとcapsuleの間のコントラクトは、意図的にシンプルにしています。
+ヘッダーとスライドごとのセクションを持つテキストファイルです。
+各セクションには、音声ナレーションとなるスピーカーノートが含まれています。
+--
+
+[.slide,data-transition="slide"]
+== ラウンドトリップの検証
+
+[%step]
+* パーサーがAsciiDocからセクションを抽出
+* ライターがプレーンテキスト・コントラクトにシリアライズ
+* capsule-gradleが同じ形式を再解析
+* 損失ゼロ：sliderが書き込んだものをcapsuleが読み取る
+
+[NOTE.speaker]
+--
+ラウンドトリップが検証されました。パーサーがAsciiDocソースからセクションを抽出し、
+ライターがそれを再びプレーンテキスト・コントラクトにシリアライズします。
+そしてcapsule-gradleが全く同じ形式を再解析し、データの損失なく復元します。
+--
+
+[.slide,data-transition="slide"]
+== まとめ
+
+[%step]
+* capsule feed = スピーカーノートの抽出
+* コントラクトにJSONやスクリーンショットは含めない
+* スクリーンショットはcapsule-gradleによって直接キャプチャされる
+* sliderがテキストを生成し、capsuleがそれを消費する
+
+[NOTE.speaker]
+--
+まとめとして、capsule feedとは単にスピーカーノートを抽出することです。
+コントラクトにJSONやスクリーンショットは含まれません。スクリーンショットは、
+ビデオ生成中にcapsule-gradleによって直接キャプチャされます。
+sliderがテキストを生成し、capsuleがそれを消費するという、
+プロデューサーとコンシューマーの明確な境界線があります。
+--

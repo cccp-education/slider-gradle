@@ -1,8 +1,8 @@
 @translation @dogfood @i18n
-Feature: Deck translation dogfooding — 3 demo decks translated to 10 languages
+Feature: Deck translation dogfooding — 3 demo decks translated to 22 languages
 
   As a slider-gradle maintainer
-  I want the 3 demo decks (fr/en/ar) to be translated into all 10 supported languages
+  I want the 3 demo decks (fr/en/ar) to be translated into all 22 supported languages
   So that the translateDeck pipeline is validated end-to-end on real content
 
   Scenario: All 3 demo source decks have a deck-context.yml file
@@ -26,10 +26,10 @@ Feature: Deck translation dogfooding — 3 demo decks translated to 10 languages
     Given the demo deck context for "ar" exists
     Then the context output file should exist as adoc
 
-  Scenario Outline: Each source deck has 9 translated adoc files
+  Scenario Outline: Each source deck has 21 translated adoc files
     Given the source deck "<source>" has been translated
-    Then there should be 9 translated adoc files for source "<source>"
-    And there should be 9 translated context files for source "<source>"
+    Then there should be 21 translated adoc files for source "<source>"
+    And there should be 21 translated context files for source "<source>"
 
     Examples:
       | source |
@@ -50,10 +50,12 @@ Feature: Deck translation dogfooding — 3 demo decks translated to 10 languages
       | source | target |
       | fr     | en     |
       | fr     | ar     |
+      | fr     | de     |
       | en     | fr     |
       | en     | zh     |
       | ar     | en     |
       | ar     | ur     |
+      | ar     | fa     |
 
   Scenario Outline: Each translated context has the correct target language code
     Given the translated context from "<source>" to "<target>" exists
@@ -75,6 +77,7 @@ Feature: Deck translation dogfooding — 3 demo decks translated to 10 languages
       | source | target |
       | fr     | ar     |
       | fr     | ur     |
+      | fr     | fa     |
       | en     | ar     |
       | en     | ur     |
       | ar     | ur     |
@@ -91,5 +94,5 @@ Feature: Deck translation dogfooding — 3 demo decks translated to 10 languages
       | ar     | es     |
 
   Scenario: Total translated files count across all 3 sources
-    Then there should be 27 translated adoc files total
-    And there should be 27 translated context files total
+    Then there should be 63 translated adoc files total
+    And there should be 63 translated context files total

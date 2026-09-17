@@ -1,0 +1,73 @@
+= دمو Capsule Feed
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+:revealjs_direction: rtl
+
+[.slide,data-transition="zoom"]
+== مقدمه
+
+[%step]
+* نمایش خط لوله از slider به capsule
+* تولید متن capsule از یادداشت‌های سخنران
+* قرارداد متنی ساده که توسط capsule-gradle مصرف می‌شود
+
+[NOTE.speaker]
+--
+به این نمایش دمو از خط لوله capsule feed خوش آمدید.
+خواهیم دید که چگونه slider-gradle یادداشت‌های سخنران را از یک ارائه AsciiDoc استخراج می‌کند
+تا متنی تولید کند که توسط capsule-gradle مصرف شود.
+--
+
+[.slide,data-transition="slide"]
+== قرارداد capsule-gradle
+
+[%step]
+* قالب متنی ساده و مشخص
+* سربرگ: `=== CAPSULE SCRIPT : name ===`
+* یک بخش برای هر اسلاید: `--- SLIDE n : title ---`
+* بدنه: یادداشت سخنران به همان صورت
+
+[NOTE.speaker]
+--
+قرارداد بین slider و capsule عمداً ساده است:
+یک فایل متنی با یک سربرگ و یک بخش برای هر اسلاید.
+هر بخش شامل یادداشت سخنران است که تبدیل به روایت صوتی می‌شود.
+--
+
+[.slide,data-transition="slide"]
+== تایید رفت و برگشت (Round-trip)
+
+[%step]
+* تحلیل‌گر (Parser) بخش‌ها را از AsciiDoc استخراج می‌کند
+* نویسنده (Writer) به قرارداد متنی ساده تبدیل می‌کند
+* capsule-gradle همان قالب را دوباره تحلیل می‌کند
+* فقدان صفر: آنچه slider می‌نویسد، capsule می‌خواند
+
+[NOTE.speaker]
+--
+تایید رفت و برگشت: تحلیل‌گر بخش‌ها را از منبع AsciiDoc استخراج می‌کند،
+نویسنده آن‌ها را دوباره به قرارداد متنی ساده تبدیل می‌کند
+و capsule-gradle دقیقاً همان قالب را بدون هیچ‌گونه فقدان داده‌ای دوباره تحلیل می‌کند.
+--
+
+[.slide,data-transition="slide"]
+== جمع‌بندی
+
+[%step]
+* capsule feed = استخراج یادداشت‌های سخنران
+* بدون JSON یا اسکرین‌شات در قرارداد
+* اسکرین‌شات‌ها مستقیماً توسط capsule-gradle گرفته می‌شوند
+* slider متن را تولید می‌کند و capsule آن را مصرف می‌کند
+
+[NOTE.speaker]
+--
+در پایان: capsule feed صرفاً استخراج یادداشت‌های سخنران است.
+هیچ JSON یا اسکرین‌شاتی در قرارداد وجود ندارد — اسکرین‌شات‌ها مستقیماً
+توسط capsule-gradle در حین تولید ویدیو گرفته می‌شوند. slider متن را تولید
+و capsule آن را مصرف می‌کند. مرزی واضح بین تولیدکننده و مصرف‌کننده.
+--

@@ -1,0 +1,69 @@
+= Capsule Feed Demo (Indonesia)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Pendahuluan
+
+[%step]
+* Demonstrasi pipeline slider -> kapsul
+* Pembuatan skrip kapsul dari catatan pembicara
+* Kontrak teks biasa yang dikonsumsi oleh capsule-gradle
+
+[NOTE.speaker]
+--
+Selamat datang dalam demonstrasi pipeline capsule feed.  
+Kita akan melihat bagaimana slider-gradle mengekstrak catatan pembicara  
+dari sebuah deck AsciiDoc untuk menghasilkan skrip yang dikonsumsi oleh capsule-gradle.  
+--
+
+[.slide,data-transition="slide"]
+== Kontrak capsule-gradle
+
+[%step]
+* Format teks biasa yang dibatasi
+* Header: `=== CAPSULE SCRIPT : nama ===`
+* Satu segmen per slide: `--- SLIDE n : judul ---`
+* Badan: catatan pembicara apa adanya
+
+[NOTE.speaker]
+--
+Kontrak antara slider dan kapsul sengaja dibuat sederhana:  
+sebuah berkas teks dengan header dan satu segmen per slide.  
+Setiap segmen berisi catatan pembicara yang nantinya menjadi narasi TTS.  
+--
+
+[.slide,data-transition="slide"]
+== Validasi round‑trip
+
+[%step]
+* Parser mengekstrak segmen dari AsciiDoc
+* Writer menyerialkan ke format teks biasa
+* Capsule-gradle mem‑parse kembali format yang sama
+* Tanpa kehilangan: apa yang ditulis slider, dibaca kapsul
+
+[NOTE.speaker]
+--
+Round‑trip valid: parser mengekstrak segmen dari sumber AsciiDoc,  
+writer menyerialkannya ke kontrak teks biasa, dan capsule-gradle mem‑parse kembali format yang sama tanpa kehilangan data.  
+--
+
+[.slide,data-transition="slide"]
+== Kesimpulan
+
+[%step]
+* Capsule feed = ekstraksi catatan pembicara
+* Tanpa JSON, tanpa screenshot dalam kontrak
+* Screenshot diambil secara langsung oleh capsule-gradle
+* Slider menghasilkan skrip, kapsul mengkonsumsinya
+
+[NOTE.speaker]
+--
+Untuk menutup: capsule feed hanyalah ekstraksi catatan pembicara.  
+Tidak ada JSON, tidak ada screenshot dalam kontrak — screenshot diambil secara langsung oleh capsule-gradle saat pembuatan video. Slider menghasilkan skrip, kapsul mengkonsumsinya. Produk batas antara produsen‑konsumen yang bersih.  
+--

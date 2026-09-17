@@ -1,0 +1,73 @@
+= Demo Capsule Feed
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+:revealjs_direction: ltr
+
+[.slide,data-transition="zoom"]
+== Pendahuluan
+
+[%step]
+* Demonstrasi pipeline dari slider ke capsule
+* Pembuatan teks capsule dari catatan pembicara (speaker notes)
+* Kontrak teks biasa yang dikonsumsi oleh capsule-gradle
+
+[NOTE.speaker]
+--
+Selamat datang di demonstrasi pipeline capsule feed ini.
+Kita akan melihat bagaimana slider-gradle mengekstrak catatan pembicara dari presentasi AsciiDoc
+untuk menghasilkan teks yang dikonsumsi oleh capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Kontrak capsule-gradle
+
+[%step]
+* Format teks biasa yang spesifik
+* Header: `=== CAPSULE SCRIPT : name ===`
+* Satu bagian per slide: `--- SLIDE n : title ---`
+* Body: Catatan pembicara apa adanya
+
+[NOTE.speaker]
+--
+Kontrak antara slider dan capsule sengaja dibuat sederhana:
+sebuah file teks dengan header dan satu bagian per slide.
+Setiap bagian berisi catatan pembicara yang akan menjadi narasi suara.
+--
+
+[.slide,data-transition="slide"]
+== Verifikasi Bolak-Balik (Round-trip)
+
+[%step]
+* Parser mengekstrak bagian dari AsciiDoc
+* Writer menserialisasi ke kontrak teks biasa
+* capsule-gradle menganalisis ulang format yang sama
+* Nol kehilangan data: apa yang ditulis slider dibaca oleh capsule
+
+[NOTE.speaker]
+--
+Verifikasi bolak-balik telah dilakukan: parser mengekstrak bagian dari sumber AsciiDoc,
+writer menserialisasikannya kembali ke kontrak teks biasa,
+dan capsule-gradle menganalisis ulang format yang sama persis tanpa ada kehilangan data.
+--
+
+[.slide,data-transition="slide"]
+== Kesimpulan
+
+[%step]
+* capsule feed = ekstraksi catatan pembicara
+* Tidak ada JSON maupun screenshot dalam kontrak
+* Screenshot diambil langsung oleh capsule-gradle
+* slider menghasilkan teks dan capsule mengonsumsinya
+
+[NOTE.speaker]
+--
+Sebagai penutup: capsule feed hanyalah ekstraksi catatan pembicara.
+Tidak ada JSON maupun screenshot dalam kontrak — screenshot diambil langsung
+oleh capsule-gradle saat pembuatan video. slider menghasilkan teks
+dan capsule mengonsumsinya. Batasan yang jelas antara produsen dan konsumen.
+--

@@ -3,6 +3,21 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 071 (2026-09-17) — BKY-LANG-22-8 (dogfooding 22 langues) + publication 0.0.19 ✅ TERMINÉ
+
+* **EPIC** : BKY-LANG-22 (transverse, piloté bakery S-226) — US-8 + US-10 (slider).
+* **US-8 — dogfooding corpus 22 langues** : 3 sources fr/en/ar × 12 nouvelles
+  langues = **36 paires** via `translateDeck` réel (`gemma4:31b-cloud` ; `gpt-oss:120b-cloud`
+  à sa limite mensuelle). Corpus **63 adoc + 63 context = 126 fichiers**.
+* **Pin levé** : `TranslatedDemoDeckTest.dogfoodTargetCodes` dérivé de
+  `LanguageCatalog.supportedCodes()` (RED 8 assertions → GREEN 261/0).
+* **Drift préexistant corrigé** : `7_rtl_layout.feature` (`fa`, S-217) catalog-driven.
+* **Feature 14** : 9→21 adoc/source, totaux 27→63, RTL `fa`.
+* **US-10 — publication** : slider 0.0.19 bundle `03289d70-443d-4ee2-9f02-1a06b850522c`.
+* Gates : 261 UT + cucumber 270/0 + FT 45/0 + `test` 1099 (3 FAIL Playwright préexistants).
+* Rapport : `.agents/sessions/071-bky-lang-22-8-dogfooding.adoc`.
+
+
 == Session 070 (2026-09-07) — Synchronisation gouvernance post-S-069 (gouvernance pure) ✅ TERMINÉ
 
 * **EPICs** : Aucun (sync gouvernance — PROMPT_REPRISE S-066→S-070, BACKLOG racine, hygiene).

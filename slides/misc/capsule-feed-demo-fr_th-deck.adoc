@@ -1,0 +1,72 @@
+= Capsule Feed Demo (ไทย)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== บทนำ
+
+[%step]
+* การสาธิต pipeline slider -> capsule
+* การสร้างสคริปต์ capsule จากบันทึกผู้บรรยาย (speaker notes)
+* ข้อตกลงรูปแบบ plain-text ที่ใช้งานโดย capsule-gradle
+
+[NOTE.speaker]
+--
+ยินดีต้อนรับสู่การสาธิต pipeline capsule feed
+เราจะมาดูกันว่า slider-gradle ดึงข้อมูลบันทึกผู้บรรยาย
+จาก AsciiDoc deck เพื่อสร้างสคริปต์ที่ถูกนำไปใช้โดย capsule-gradle ได้อย่างไร
+--
+
+[.slide,data-transition="slide"]
+== ข้อตกลง capsule-gradle
+
+[%step]
+* รูปแบบ plain-text แบบกำหนดขอบเขต
+* ส่วนหัว: `=== CAPSULE SCRIPT : ชื่อ ===`
+* หนึ่งส่วนต่อหนึ่งสไลด์: `--- SLIDE n : หัวข้อ ---`
+* เนื้อหา: บันทึกผู้บรรยายตามต้นฉบับ
+
+[NOTE.speaker]
+--
+ข้อตกลงระหว่าง slider และ capsule ถูกออกแบบให้เรียบง่าย:
+เป็นไฟล์ข้อความที่มีส่วนหัวและหนึ่งส่วนต่อหนึ่งสไลด์
+แต่ละส่วนประกอบด้วยบันทึกผู้บรรยาย ซึ่งจะกลายเป็นคำบรรยาย TTS ต่อไป
+--
+
+[.slide,data-transition="slide"]
+== การตรวจสอบ Round-trip
+
+[%step]
+* Parser ดึงส่วนต่างๆ จาก AsciiDoc
+* Writer แปลงข้อมูลเป็นรูปแบบ plain-text
+* Capsule-gradle ทำการ parse รูปแบบเดิมซ้ำ
+* ไม่มีการสูญเสียข้อมูล: สิ่งที่ slider เขียนคือสิ่งที่ capsule อ่าน
+
+[NOTE.speaker]
+--
+การทดสอบ round-trip ได้รับการยืนยันแล้ว: parser ดึงส่วนต่างๆ จากแหล่งข้อมูล
+AsciiDoc, writer แปลงข้อมูลเป็นรูปแบบ plain-text,
+และ capsule-gradle ทำการ parse รูปแบบเดิมซ้ำโดยไม่มีการสูญเสียข้อมูลใดๆ
+--
+
+[.slide,data-transition="slide"]
+== บทสรุป
+
+[%step]
+* Capsule feed = การดึงข้อมูลบันทึกผู้บรรยาย
+* ไม่มี JSON, ไม่มี screenshot ในข้อตกลง
+* Screenshot จะถูกจับภาพแบบเรียลไทม์โดย capsule-gradle
+* Slider ผลิตสคริปต์ และ capsule นำไปใช้งาน
+
+[NOTE.speaker]
+--
+สรุปคือ: capsule feed เป็นเพียงการดึงข้อมูลบันทึกผู้บรรยายเท่านั้น
+ไม่มี JSON และไม่มี screenshot ในข้อตกลง — screenshot จะถูกจับภาพ
+แบบเรียลไทม์โดย capsule-gradle ระหว่างการสร้างวิดีโอ Slider ทำหน้าที่ผลิต
+สคริปต์ และ capsule ทำหน้าที่นำไปใช้ เป็นการแบ่งขอบเขตผู้ผลิต-ผู้บริโภคที่ชัดเจน
+--

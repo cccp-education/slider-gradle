@@ -1,53 +1,42 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 069 — Publication slider 0.0.18 + BOM 0.0.19 sur Maven Central
-_Prochaine session_ : 070 — à arbitrer par le pilote (tous EPICs de feature + PUB terminés)
+_Session terminee_ : 071 — BKY-LANG-22-8 (dogfooding 22 langues) + publication 0.0.19
+_Prochaine session_ : 072 — à arbitrer par le pilote (tous EPICs terminés, borough en maintenance)
 
-== Mission session 069 (TERMINÉE)
+== Mission session 071 (TERMINÉE) — EPIC transverse BKY-LANG-22 (piloté bakery S-226)
 
-. Bump slider 0.0.16 → 0.0.18 (commit `483cc51`, aligné sur code local non
-  committé de S-068 — le backlog S-068 prévoyait 0.0.17 mais le code pointait
-  sur 0.0.18).
-. Publication nmcp slider 0.0.18 — bundle `3720936a-502c-4375-be10-f9b047797217`
-  AUTOMATIC (3 artefacts signés GPG CBE2926CD46D8E8B — slider:0.0.18
-  POM+JAR+sources+javadoc + 2 plugin markers).
-. Publication nmcp BOM 0.0.19 — bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9`
-  AUTOMATIC (constraint slider 0.0.18 + codebase 0.0.8).
-. Compilation VERT (`compileKotlin` + `compileTestKotlin` UP-TO-DATE,
-  codebase 0.0.7 + langchain4j 1.16.3 déjà alignés S-073 US-2).
-. EPIC PUB 0.0.18 TERMINÉ (3/3 US — PUB-0.0.18-1 vérification, PUB-0.0.18-2
-  publication, PUB-0.0.18-3 BOM 0.0.19 + push).
-. Capsule-gradle vérifié : `0.0.1-SNAPSHOT`, compile OK, codebase 0.0.7
-  aligné S-073 US-3, jamais publié (hors périmètre maintenance).
-. Commit + push autorisés par le pilote (clôture session 069).
+. *BKY-LANG-22-8 — dogfooding slider corpus 22 langues* : 3 sources fr/en/ar ×
+   12 nouvelles langues = **36 paires** via `translateDeck` réel (`gemma4:31b-cloud`,
+   `gpt-oss:120b-cloud` à sa limite mensuelle, ports 11439-11444 via
+   `OLLAMA_POOL_PORTS`). Corpus `slides/misc/` : **63 adoc + 63 context = 126
+   fichiers** (21 cibles/source).
+. *Pin levé* : `TranslatedDemoDeckTest.dogfoodTargetCodes` dérivé de
+   `LanguageCatalog.supportedCodes()` (RED 8 assertions → GREEN 261/0).
+. *Drift préexistant corrigé* : `7_rtl_layout.feature` (`fa` ajouté S-217 sans
+   maj de l'assertion) → catalog-driven.
+. *Feature 14 étendue* : 9→21 adoc/source, totaux 27→63, RTL `fa`.
+. *BKY-LANG-22-10 — publication slider 0.0.19* : bundle
+   `03289d70-443d-4ee2-9f02-1a06b850522c` AUTOMATIC, propagation repo1 HTTP 200.
+. Gates : 261 UT, cucumber 270/0, FT 45/0, `test` global 1099 (3 FAIL Playwright
+   préexistants, fixtures HTML non générées).
 
-== Contexte reprise session 070 — à arbitrer par le pilote
+== Contexte reprise session 072 — à arbitrer par le pilote
 
-- *Tous les EPICs sont terminés* (SLD-0→11 + CR-GLOBALE-002 + CR3 +
-  PUB 0.0.1→0.0.18). Aucun nouvel EPIC cadré.
-- *Structure* : `slider-plugin/` est un build autonome avec `src/` à sa
-  racine. Commandes : `./gradlew check` (plus de `:slider:` prefix).
-- *Backlog en attente de décision* :
-  - Optionnel : rattrapage i18n plantuml (196 lignes × 9 langues —
-    backlog cross-borough, borough HTOWN DORMANT).
-  - Optionnel : nouveaux EPICs à cadrer (le pilote arbitre la prochaine
-    direction — aucun EPIC n'est imposé).
-- *Baseline* : session 069 committée + pushée (clôture pilote).
-- *Versions publiées Central* : slider 0.0.18, BOM 0.0.19.
-- *Règles* : Git autorisé (décision pilote 2026-09-17) — zéro secret. Règle 2 — AUCUN
-  publish sans permission (publishSlides inclus).
-- *Rapport 069* :
-  `slider-plugin/.agents/sessions/069-pub-slider-0.0.18.adoc`.
+- *Tous les EPICs sont terminés* (SLD-0→11 + CR + PUB). Aucun nouvel EPIC cadré.
+- *Structure* : `slider-plugin/` est un build autonome (`./gradlew check`).
+- *Versions publiées Central* : slider 0.0.19, BOM 0.0.48, i18n-contracts 0.0.4.
+- *Rapport 071* : `.agents/sessions/071-bky-lang-22-8-dogfooding.adoc`.
+- *Dette* : rendu `asciidoctorRevealJs` Gradle cassé (gems JRuby
+  `jar-dependencies 0.5.4 vs 0.4.1`, préexistant S-023/S-034) — bloque le
+  dogfooding HTML automatisé. EPIC candidat.
 
 == Rappels méthodologie (pilote)
 
 - *Baby-step DDD/TDD/BDD* : RED → GREEN → REFACTOR, 3 niveaux tests/US
-  (unit → functional → cucumber), non-regression stricte
-  (`./gradlew check` VERT avant de clore une US).
-- *English only* : code, Gherkin, commentaires. Gouvernance (.adoc) en
-  français.
-- *Domaines DDD* (16) : `slider.pipeline` clos (10 fichiers prod + 4
-  test). `slider.capsule` expulsé (S-058, cross-borough capsule).
-- *Décisions architecture* : Decision 001 (PicoContainer rejeté, DI
-  native Gradle), Decision 002 (slider consomme codebase N1 comme socle
-  LLM unifié).
+  (unit → functional → cucumber), non-régression stricte (`./gradlew check`).
+- *English only* : code, Gherkin, commentaires. Gouvernance (.adoc) en français.
+- *Modèle LLM* : `gpt-oss:120b-cloud` épuisé (limite mensuelle) → utiliser
+  `gemma4:31b-cloud` + `OLLAMA_POOL_PORTS=11439,11440,11441,11442`.
+- *Git autorisé* (décision pilote 2026-09-17) — zéro secret. Aucun publish sans
+  permission (publishSlides inclus).
+- *Domaines DDD* (16) : `slider.pipeline` clos. `slider.capsule` expulsé (S-058).

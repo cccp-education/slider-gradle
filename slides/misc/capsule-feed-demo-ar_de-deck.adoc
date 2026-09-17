@@ -1,0 +1,73 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Einleitung
+
+[%step]
+* Demo der Pipeline von Slider zu Capsule
+* Erzeugen von Capsule-Text aus den Sprecher-Notizen
+* Ein einfacher Textknoten, konsumiert von capsule-gradle
+
+[NOTE.speaker]
+--
+Willkommen zu dieser Demonstration der Capsule-Feed-Pipeline. Wir werden sehen,
+wie slider-gradle die Sprecher-Notizen aus einer AsciiDoc-Präsentation extrahiert,
+um einen Text zu erzeugen, der von capsule-gradle konsumiert wird.
+--
+
+[.slide,data-transition="slide"]
+== Knoten capsule-gradle
+
+[%step]
+* Definiertes einfaches Textformat
+* Header: `=== CAPSULE SCRIPT : name ===`
+* Ein Abschnitt pro Folie: `--- SLIDE n : title ---`
+* Body: Die Sprecher-Notiz unverändert
+
+[NOTE.speaker]
+--
+Die Schnittstelle zwischen slider und capsule ist absichtlich einfach gehalten:
+Eine Textdatei mit Header und einem Abschnitt pro Folie. Jeder Abschnitt enthält die
+Sprecher-Notiz, die zum Voice‑Over wird.
+--
+
+[.slide,data-transition="slide"]
+== Verifikation von Hin‑ und Rückweg
+
+[%step]
+* Der Parser extrahiert die Abschnitte aus AsciiDoc
+* Der Writer serialisiert sie zurück in den einfachen Textknoten
+* capsule-gradle analysiert das gleiche Format erneut
+* Kein Datenverlust: Was slider schreibt, liest capsule
+
+[NOTE.speaker]
+--
+Die Rundreise wurde verifiziert: Der Parser extrahiert die Abschnitte aus der
+AsciiDoc‑Quelle, der Writer serialisiert sie erneut in den einfachen Textknoten,
+und capsule-gradle analysiert exakt dasselbe Format ohne Datenverlust.
+--
+
+[.slide,data-transition="slide"]
+== Fazit
+
+[%step]
+* capsule feed = Extraktion der Sprecher-Notizen
+* Kein JSON und keine Screenshots im Knoten
+* Screenshots werden direkt von capsule-gradle aufgenommen
+* slider erzeugt den Text und capsule konsumiert ihn
+
+[NOTE.speaker]
+--
+Zum Abschluss: capsule feed ist einfach die Extraktion der Sprecher-Notizen.
+Kein JSON und keine Screenshots im Knoten – Screenshots werden direkt von
+capsule-gradle während der Videoerstellung aufgenommen. slider erzeugt den Text
+und capsule konsumiert ihn. Es gibt eine klare Trennung zwischen Erzeuger und
+Verbraucher.
+--

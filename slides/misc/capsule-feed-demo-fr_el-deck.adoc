@@ -1,0 +1,72 @@
+= Demo Capsule Feed (Γαλλικά)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Εισαγωγή
+
+[%step]
+* Επίδειξη της διαδικασίας slider -> capsule
+* Δημιουργία script capsule από τις σημειώσεις του ομιλητή
+* Συμβόλαιο plain-text που καταναλώνεται από το capsule-gradle
+
+[NOTE.speaker]
+--
+Καλώς ήρθατε σε αυτή την επίδειξη του pipeline capsule feed.
+Θα δούμε πώς το slider-gradle εξάγει τις σημειώσεις του ομιλητή
+από ένα deck AsciiDoc για να παράγει ένα script που καταναλώνεται από το capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Η σύμβαση capsule-gradle
+
+[%step]
+* Μορφή plain-text οριοθετημένη
+* Κεφαλίδα: `=== CAPSULE SCRIPT : όνομα ===`
+* Ένα τμήμα ανά slide: `--- SLIDE n : τίτλος ---`
+* Σώμα: σημείωση ομιλητή όπως είναι
+
+[NOTE.speaker]
+--
+Η σύμβαση μεταξύ slider και capsule είναι εσκεμμένα απλή:
+ένα αρχείο κειμένου με μια κεφαλίδα και ένα τμήμα ανά slide.
+Κάθε τμήμα περιέχει τη σημείωση του ομιλητή που θα γίνει η αφήγηση TTS.
+--
+
+[.slide,data-transition="slide"]
+== Επικύρωση round-trip
+
+[%step]
+* Ο parser εξάγει τα τμήματα από το AsciiDoc
+* Ο writer σειριοποιεί στο συμβόλαιο plain-text
+* Το capsule-gradle επανα-αναλύει την ίδια μορφή
+* Καμία απώλεια: αυτό που γράφει το slider, το capsule το διαβάζει
+
+[NOTE.speaker]
+--
+Το round-trip είναι έγκυρο: ο parser εξάγει τα τμήματα από την πηγή
+AsciiDoc, ο writer τα σειριοποιεί στο συμβόλαιο plain-text,
+και το capsule-gradle επανα-αναλύει την ίδια μορφή χωρίς καμία απώλεια δεδομένων.
+--
+
+[.slide,data-transition="slide"]
+== Συμπέρασμα
+
+[%step]
+* Capsule feed = εξαγωγή σημειώσεων ομιλητή
+* Χωρίς JSON, χωρίς screenshots στο συμβόλαιο
+* Τα screenshots λαμβάνονται ζωντανά από το capsule-gradle
+* Το slider παράγει το script, το capsule το καταναλώνει
+
+[NOTE.speaker]
+--
+Για να συμπεράνουμε: το capsule feed είναι απλώς η εξαγωγή των σημειώσεων του ομιλητή.
+Χωρίς JSON, χωρίς screenshots στο συμβόλαιο — τα screenshots λαμβάνονται
+ζωντανά από το capsule-gradle κατά τη δημιουργία του βίντεο. Το slider παράγει το
+script, το capsule το καταναλώνει. Καθαρό όριο παραγωγός-καταναλωτής.
+--

@@ -1,0 +1,64 @@
+= Kapsül Besleme Demosu (İngilizce)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Giriş
+
+[%step]
+* Slider'dan kapsül boru hattı gösterimi
+* Konuşmacı notlarından kapsül betik oluşturma
+* Kapsül-gradle tarafından tüketilen düz metin sözleşmesi
+
+[NOTE.speaker]
+--
+Bu kapsül besleme boru hattı gösterimine hoş geldiniz.
+Slider-gradle'ın bir AsciiDoc desteden konuşmacı notlarını nasıl çıkardığını ve kapsül-gradle tarafından tüketilen bir betik ürettiğini göreceğiz.
+--
+
+[.slide,data-transition="slide"]
+== Kapsül-gradle sözleşmesi
+
+[%step]
+* Düz metin sınırlı format
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: konuşmacı notu olduğu gibi
+
+[NOTE.speaker]
+--
+Slider ile kapsül arasındaki sözleşme kasıtlı olarak basittir: bir başlık ve her slayt için bir bölüm içeren bir metin dosyası. Her bölüm, TTS anlatımına dönüşen konuşmacı notunu içerir.
+--
+
+[.slide,data-transition="slide"]
+== Gidiş-dönüş doğrulaması
+
+[%step]
+* Ayrıştırıcı AsciiDoc'tan bölümleri çıkarır
+* Yazıcı bölümleri düz metin sözleşmesine seri hâle getirir
+* Kapsül-gradle aynı formatı yeniden ayrıştırır
+* Sıfır kayıp: slider'ın yazdığı, kapsülün okuduğu
+
+[NOTE.speaker]
+--
+Gidiş-dönüş doğrulanmıştır: ayrıştırıcı AsciiDoc kaynağından bölümleri çıkarır, yazıcı bunları düz metin sözleşmesine geri seri hâle getirir ve kapsül-gradle aynı formatı sıfır veri kaybıyla yeniden ayrıştırır.
+--
+
+[.slide,data-transition="slide"]
+== Sonuç
+
+[%step]
+* Kapsül beslemesi = konuşmacı notlarının çıkarılması
+* Sözleşmede JSON yok, ekran görüntüsü yok
+* Ekran görüntüleri kapsül-gradle tarafından canlı olarak alınır
+* Slider betiği üretir, kapsül onu tüketir
+
+[NOTE.speaker]
+--
+Sonuç olarak: kapsül beslemesi yalnızca konuşmacı notlarının çıkarılmasıdır. Sözleşmede JSON yok, ekran görüntüsü yok — ekran görüntüleri video oluşturma sırasında kapsül-gradle tarafından canlı olarak alınır. Slider betiği üretir, kapsül onu tüketir. Temiz bir üretici‑tüketici sınırı.
+--

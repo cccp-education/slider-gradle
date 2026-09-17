@@ -1,0 +1,64 @@
+= Capsule Feed Demo (Deutsch)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Einführung
+
+[%step]
+* Demonstration der Slider‑zu‑Capsule-Pipeline
+* Erzeugung des Capsule‑Skripts aus den RednerNotizen
+* Plain‑Text‑Vertrag, der von capsule-gradle verwendet wird
+
+[NOTE.speaker]
+--
+Willkommen zu dieser Demonstration der Capsule‑Feed‑Pipeline.
+Wir werden sehen, wie slider-gradle RednerNotizen aus einem AsciiDoc‑Deck extrahiert, um ein Skript zu erzeugen, das von capsule-gradle verwendet wird.
+--
+
+[.slide,data-transition="slide"]
+== Der capsule-gradle Vertrag
+
+[%step]
+* Klartext‑format mit Trennzeichen
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: RednerNotiz unverändert
+
+[NOTE.speaker]
+--
+Der Vertrag zwischen Slider und Capsule ist bewusst einfach gehalten: eine Textdatei mit einem Header und einem Segment pro Folie. Jedes Segment enthält die RednerNotiz, die zur TTS‑Erzählung wird.
+--
+
+[.slide,data-transition="slide"]
+== Round‑Trip‑Validierung
+
+[%step]
+* Parser extrahiert Segmente aus AsciiDoc
+* Writer serialisiert in den Plain‑Text‑Vertrag
+* capsule-gradle analysiert das gleiche Format erneut
+* Kein Datenverlust: Was Slider schreibt, liest Capsule
+
+[NOTE.speaker]
+--
+Der Round‑Trip wird validiert: Der Parser extrahiert Segmente aus der AsciiDoc‑Quelle, der Writer serialisiert sie zurück in den Plain‑Text‑Vertrag, und capsule-gradle analysiert exakt dasselbe Format erneut ohne Datenverlust.
+--
+
+[.slide,data-transition="slide"]
+== Fazit
+
+[%step]
+* Capsule‑Feed = Extraktion der RednerNotizen
+* Kein JSON, keine Screenshots im Vertrag
+* Screenshots werden live von capsule-gradle aufgenommen
+* Slider erzeugt das Skript, Capsule verwendet es
+
+[NOTE.speaker]
+--
+Zusammenfassend: Der Capsule‑Feed ist einfach die Extraktion der RednerNotizen. Kein JSON, keine Screenshots im Vertrag – Screenshots werden während der Videoerstellung live von capsule-gradle aufgenommen. Slider erzeugt das Skript, Capsule verwendet es. Saubere Produzent‑Konsument‑Grenze.
+--

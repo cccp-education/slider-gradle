@@ -1,0 +1,67 @@
+= Demo Capsule Feed (Pháp)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Giới thiệu
+
+[%step]
+* Demo quy trình slider → capsule
+* Tạo script capsule từ ghi chú diễn giả
+* Hợp đồng plain-text được capsule-gradle tiêu thụ
+
+[NOTE.speaker]
+--
+Chào mừng đến với buổi demo quy trình capsule feed này.
+Chúng ta sẽ xem cách slider-gradle trích xuất ghi chú diễn giả từ một bộ tài liệu AsciiDoc để tạo ra một script được capsule-gradle tiêu thụ.
+--
+
+[.slide,data-transition="slide"]
+== Hợp đồng capsule-gradle
+
+[%step]
+* Định dạng plain-text được phân cách
+* Tiêu đề: `=== CAPSULE SCRIPT : nom ===`
+* Một đoạn cho mỗi slide: `--- SLIDE n : titre ---`
+* Nội dung: ghi chú diễn giả như nguyên văn
+
+[NOTE.speaker]
+--
+Hợp đồng giữa slider và capsule được tạo ra cố ý đơn giản: một tệp văn bản với một tiêu đề và một đoạn cho mỗi slide.
+Mỗi đoạn chứa ghi chú diễn giả sẽ trở thành lời thoại TTS.
+--
+
+[.slide,data-transition="slide"]
+== Xác thực vòng qua
+
+[%step]
+* Bộ phân tích trích xuất các đoạn từ AsciiDoc
+* Bộ ghi serialize thành hợp đồng plain-text
+* Capsule-gradle phân tích lại cùng định dạng
+* Không mất mát: những gì slider viết, capsule đọc
+
+[NOTE.speaker]
+--
+Vòng qua là hợp lệ: parser trích xuất các đoạn từ nguồn AsciiDoc, writer serialize chúng thành hợp đồng plain-text, và capsule-gradle phân tích lại cùng định dạng mà không mất dữ liệu nào.
+--
+
+[.slide,data-transition="slide"]
+== Kết luận
+
+[%step]
+* Capsule feed = trích xuất ghi chú diễn giả
+* Không có JSON, không có screenshot trong hợp đồng
+* Screenshot được lấy trực tiếp bởi capsule-gradle
+* Slider tạo script, capsule tiêu thụ nó
+
+[NOTE.speaker]
+--
+Để kết luận: capsule feed chỉ đơn giản là việc trích xuất ghi chú diễn giả.
+Không có JSON, không có screenshot trong hợp đồng — screenshot được lấy trực tiếp bởi capsule-gradle trong quá trình tạo video.
+Slider tạo script, capsule tiêu thụ nó. Ranh giới giữa người sản xuất và người tiêu dùng được duy trì sạch sẽ.
+--

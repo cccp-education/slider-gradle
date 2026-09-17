@@ -1,5 +1,6 @@
 package slider.steps
 
+import contracts.i18n.LanguageCatalog
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
 import slider.i18n.RevealRtlResolver
@@ -33,8 +34,9 @@ class RtlLayoutSteps : En {
             rtlLanguages = RevealRtlResolver.rtlLanguages()
         }
 
-        Then("they should be exactly {string} and {string}") { first: String, second: String ->
-            assertThat(rtlLanguages).containsExactlyInAnyOrder(first, second)
+        Then("they should be exactly the catalog RTL languages") {
+            val expected = LanguageCatalog.ALL.filter { it.rtl }.map { it.code }.toSet()
+            assertThat(rtlLanguages).containsExactlyInAnyOrderElementsOf(expected)
         }
     }
 }

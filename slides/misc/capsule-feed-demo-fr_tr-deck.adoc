@@ -1,0 +1,72 @@
+= Capsule Feed Demo (Türkçe)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Giriş
+
+[%step]
+* Slider -> Capsule boru hattı (pipeline) gösterimi
+* Konuşmacı notlarından capsule betiği oluşturma
+* Capsule-gradle tarafından tüketilen düz metin (plain-text) sözleşmesi
+
+[NOTE.speaker]
+--
+Capsule feed boru hattı gösterimine hoş geldiniz.
+Bu sunumda, slider-gradle'ın bir AsciiDoc destesindeki konuşmacı notlarını nasıl çıkardığını
+ve capsule-gradle tarafından tüketilen bir betik oluşturduğunu göreceğiz.
+--
+
+[.slide,data-transition="slide"]
+== Capsule-gradle Sözleşmesi
+
+[%step]
+* Sınırlandırılmış düz metin formatı
+* Başlık: `=== CAPSULE SCRIPT : isim ===`
+* Slayt başına bir segment: `--- SLIDE n : başlık ---`
+* Gövde: Konuşmacı notu olduğu gibi
+
+[NOTE.speaker]
+--
+Slider ve capsule arasındaki sözleşme bilinçli olarak basit tutulmuştur:
+Bir başlık ve her slayt için bir segment içeren bir metin dosyası.
+Her segment, TTS anlatımına dönüşecek olan konuşmacı notunu içerir.
+--
+
+[.slide,data-transition="slide"]
+== Gidiş-Dönüş (Round-trip) Doğrulaması
+
+[%step]
+* Ayrıştırıcı (parser), segmentleri AsciiDoc'tan çıkarır
+* Yazıcı (writer), düz metin sözleşmesine serileştirir
+* Capsule-gradle aynı formatı yeniden ayrıştırır
+* Sıfır kayıp: Slider'ın yazdığını capsule okur
+
+[NOTE.speaker]
+--
+Gidiş-dönüş doğrulaması geçerlidir: Ayrıştırıcı segmentleri AsciiDoc kaynağından çıkarır,
+yazıcı bunları düz metin sözleşmesine serileştirir ve capsule-gradle
+hiçbir veri kaybı olmadan aynı formatı yeniden ayrıştırır.
+--
+
+[.slide,data-transition="slide"]
+== Sonuç
+
+[%step]
+* Capsule feed = konuşmacı notlarının çıkarılması
+* Sözleşmede JSON veya ekran görüntüsü yok
+* Ekran görüntüleri capsule-gradle tarafından canlı olarak alınır
+* Slider betiği üretir, capsule tüketir
+
+[NOTE.speaker]
+--
+Özetle: Capsule feed, basitçe konuşmacı notlarının çıkarılması işlemidir.
+Sözleşmede JSON veya ekran görüntüsü bulunmaz — ekran görüntüleri, video üretimi sırasında
+capsule-gradle tarafından canlı olarak alınır. Slider betiği üretir, capsule ise bunu tüketir.
+Temiz bir üretici-tüketici sınırı.
+--

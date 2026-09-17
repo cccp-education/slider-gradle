@@ -4,9 +4,9 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
-_Derniere mise a jour_ : 2026-08-17
-_Session terminee_ : 069 — Publication slider 0.0.18 + BOM 0.0.19 sur Maven Central. Bump 0.0.16 → 0.0.18 (commit `483cc51`, aligné sur code local non committé de S-068). Publication nmcp : slider 0.0.18 bundle `3720936a-502c-4375-be10-f9b047797217` AUTOMATIC, BOM 0.0.19 bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9` AUTOMATIC (constraint slider 0.0.18 + codebase 0.0.8). Compilation VERT (`compileKotlin` + `compileTestKotlin` UP-TO-DATE, codebase 0.0.7 + langchain4j 1.16.3 déjà alignés S-073 US-2). EPIC PUB 0.0.18 TERMINÉ (3/3 US). Capsule-gradle vérifié : `0.0.1-SNAPSHOT`, compile OK, codebase 0.0.7 aligné S-073 US-3, jamais publié (hors périmètre).
-_Session en cours_ : 069 — Publication slider 0.0.18 + BOM 0.0.19 sur Maven Central. Bump 0.0.16 → 0.0.18 (commit `483cc51`, aligné sur code local non committé de S-068). Publication nmcp : slider 0.0.18 bundle `3720936a-502c-4375-be10-f9b047797217` AUTOMATIC, BOM 0.0.19 bundle `2160075f-5b5a-427a-8749-9ac06cc5d1a9` AUTOMATIC (constraint slider 0.0.18 + codebase 0.0.8). Compilation VERT (`compileKotlin` + `compileTestKotlin` UP-TO-DATE, codebase 0.0.7 + langchain4j 1.16.3 déjà alignés S-073 US-2). EPIC PUB 0.0.18 TERMINÉ (3/3 US). Capsule-gradle vérifié : `0.0.1-SNAPSHOT`, compile OK, codebase 0.0.7 aligné S-073 US-3, jamais publié (hors périmètre).
+_Derniere mise a jour_ : 2026-09-17
+_Session terminee_ : 071 — **BKY-LANG-22-8** : dogfooding slider corpus 22 langues (EPIC transverse piloté bakery S-226) + **BKY-LANG-22-10** publication 0.0.19. 3 sources fr/en/ar × 12 nouvelles langues = **36 paires** générées via `translateDeck` réel (`gemma4:31b-cloud` — `gpt-oss:120b-cloud` à sa limite mensuelle, ports 11439-11444). Corpus 63 adoc + 63 context (21 cibles/source). Pin `TranslatedDemoDeckTest` **levé** (dérivé de `LanguageCatalog.supportedCodes()`, RED 8 assertions → GREEN 261/0). Drift préexistant `7_rtl_layout.feature` (`fa`, S-217) corrigé catalog-driven. Feature 14 : 9→21 adoc/source, totaux 27→63. Publication slider 0.0.19 bundle `03289d70-443d-4ee2-9f02-1a06b850522c`. Gates : 261 UT, cucumber 270/0, FT 45/0, `test` global 1099 (3 FAIL Playwright préexistants).
+_Session en cours_ : 071 — BKY-LANG-22-8 dogfooding 22 langues + publication 0.0.19.
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''

@@ -1,0 +1,72 @@
+= Capsule Feed Demo (Nederlands)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Introductie
+
+[%step]
+* Demonstratie van de slider -> capsule pipeline
+* Genereren van een capsule-script vanuit sprekersnotities
+* Plain-text contract geconsumeerd door capsule-gradle
+
+[NOTE.speaker]
+--
+Welkom bij deze demonstratie van de capsule feed pipeline.
+We gaan zien hoe slider-gradle de sprekersnotities extraheert
+uit een AsciiDoc-deck om een script te produceren dat wordt geconsumeerd door capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Het capsule-gradle contract
+
+[%step]
+* Afgebakend plain-text formaat
+* Header: `=== CAPSULE SCRIPT : naam ===`
+* Eén segment per slide: `--- SLIDE n : titel ---`
+* Body: sprekersnotitie zoals deze is
+
+[NOTE.speaker]
+--
+Het contract tussen slider en capsule is bewust eenvoudig:
+een tekstbestand met een header en een segment per slide.
+Elk segment bevat de sprekersnotitie die de TTS-narratie wordt.
+--
+
+[.slide,data-transition="slide"]
+== Round-trip validatie
+
+[%step]
+* De parser extraheert segmenten uit de AsciiDoc
+* De writer serialiseert naar het plain-text contract
+* Capsule-gradle parseert hetzelfde formaat opnieuw
+* Nul verlies: wat slider schrijft, leest capsule
+
+[NOTE.speaker]
+--
+De round-trip is gevalideerd: de parser extraheert de segmenten uit de
+AsciiDoc-bron, de writer serialiseert deze naar het plain-text contract,
+en capsule-gradle parseert hetzelfde formaat opnieuw zonder enig gegevensverlies.
+--
+
+[.slide,data-transition="slide"]
+== Conclusie
+
+[%step]
+* Capsule feed = extractie van sprekersnotities
+* Geen JSON, geen screenshots in het contract
+* Screenshots worden live gemaakt door capsule-gradle
+* Slider produceert het script, capsule consumeert het
+
+[NOTE.speaker]
+--
+Om af te sluiten: de capsule feed is simpelweg de extractie van de sprekersnotities.
+Geen JSON, geen screenshots in het contract — de screenshots worden
+live gemaakt door capsule-gradle tijdens de videogeneratie. Slider produceert het
+script, capsule consumeert het. Een schone producent-consument boundary.
+--

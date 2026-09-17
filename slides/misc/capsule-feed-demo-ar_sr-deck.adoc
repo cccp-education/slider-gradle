@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Uvod
+
+[%step]
+* Prikaz pipeline-a od slider-a do capsule
+* Generisanje capsule teksta iz napomena govornika
+* Običan tekstualni čvor koji konzumira capsule-gradle
+
+[NOTE.speaker]
+--
+Dobrodošli na ovu demonstraciju capsule feed pipeline-a.
+Videćemo kako slider-gradle izdvaja napomene govornika iz AsciiDoc prezentacije
+da proizvede tekst koji konzumira capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Čvor capsule-gradle
+
+[%step]
+* Određeni obični tekstualni format
+* Zaglavlje: `=== CAPSULE SCRIPT : name ===`
+* Jedan odeljak po slajdu: `--- SLIDE n : title ---`
+* Telo: napomena govornika takva kakva je
+
+[NOTE.speaker]
+--
+Veza između slider-a i capsule je namerno jednostavna:
+Tekstualni fajl sa zaglavljem i jednim odeljkom po slajdu.
+Svaki odeljak sadrži napomenu govornika koja postaje narativ.
+--
+
+[.slide,data-transition="slide"]
+== Provera povratka i napred
+
+[%step]
+* Analizator izvlači odeljke iz AsciiDoc-a
+* Pisac sekvenciše u običan tekstualni čvor
+* capsule-gradle ponovo analizira isti format
+* Nula gubitka: ono što piše slider, čita capsule
+
+[NOTE.speaker]
+--
+Provera povratka i napred: analizator izdvaja odeljke iz AsciiDoc izvora
+pisac ih ponovo sekvencira u običan tekstualni čvor
+i capsule-gradle ponovo analizira isti format tačno, bez ikakvog gubitka podataka.
+--
+
+[.slide,data-transition="slide"]
+== Zaključak
+
+[%step]
+* capsule feed = izdvajanje napomena govornika
+* Nema JSON-a niti snimaka ekrana u čvoru
+* Snimci ekrana se uzimaju direktno od strane capsule-gradle
+* slider generiše tekst, a capsule ga konzumira
+
+[NOTE.speaker]
+--
+Za zaključak: capsule feed je jednostavno izdvajanje napomena govornika.
+Nema JSON-a niti snimaka ekrana u čvoru — snimci ekrana se uzimaju direktno
+od strane capsule-gradle tokom generisanja videa. slider generiše tekst
+i capsule ga konzumira. Jasna granica između proizvođača i potrošača.
+--

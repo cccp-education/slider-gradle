@@ -1,0 +1,63 @@
+= カプセルフィード デモ（フランス語）
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== はじめに
+
+[%step]
+* スライダー -> カプセル パイプラインのデモ
+* スピーカーのノートからカプセルスクリプトを生成
+* カプセル-gradle が消費するプレーンテキスト契約
+
+[NOTE.speaker]
+--
+カプセルフィード パイプラインのデモへようこそ。スライダー-gradle が AsciiDoc デッキからスピーカーのノートを抽出し、カプセル-gradle が消費するスクリプトを生成する様子をご覧いただきます。
+--
+
+[.slide,data-transition="slide"]
+== カプセル-gradle の契約
+
+[%step]
+* 区切られたプレーンテキスト形式
+* ヘッダー: `=== CAPSULE SCRIPT : nom ===`
+* スライドごとにセグメント: `--- SLIDE n : titre ---`
+* 本文: そのままのスピーカーノート
+
+[NOTE.speaker]
+--
+スライダーとカプセル間の契約は意図的にシンプルです：ヘッダーとスライドごとのセグメントを持つテキストファイルです。各セグメントは TTS ナレーションになるスピーカーノートを含みます。
+--
+
+[.slide,data-transition="slide"]
+== 往復検証
+
+[%step]
+* パーサーが AsciiDoc からセグメントを抽出
+* ライターがプレーンテキスト契約へシリアライズ
+* カプセル-gradle が同じ形式を再パース
+* ロスゼロ：スライダーが書き、カプセルが読むもの
+
+[NOTE.speaker]
+--
+ラウンドトリップは有効です：パーサーがソース AsciiDoc からセグメントを抽出し、ライターがそれらをプレーンテキスト契約へシリアライズし、カプセル-gradle が同じ形式を再パースしてデータの損失がありません。
+--
+
+[.slide,data-transition="slide"]
+== 結論
+
+[%step]
+* カプセルフィード = スピーカーノートの抽出
+* 契約に JSON もスクリーンショットもなし
+* スクリーンショットはカプセル-gradle がライブで取得
+* スライダーがスクリプトを生成し、カプセルが消費
+
+[NOTE.speaker]
+--
+結論として、カプセルフィードは単にスピーカーノートを抽出するものです。契約に JSON やスクリーンショットは含まれません — スクリーンショットはビデオ生成中にカプセル-gradle がライブで取得します。スライダーがスクリプトを生成し、カプセルがそれを消費します。生産者と消費者の境界がクリーンです。
+--

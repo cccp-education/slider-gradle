@@ -1,0 +1,72 @@
+= Demonstracija Capsule Feed (Engleski)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Uvod
+
+[%step]
+* Demonstracija pipeline-a između slidera i kapsule
+* Generisanje skripte kapsule iz beležaka govornika
+* Ugovor u čistom tekstu koji konzumira capsule-gradle
+
+[NOTE.speaker]
+--
+Dobrodošli na demonstraciju pipeline-a capsule feed.
+Videćemo kako slider-gradle izdvaja beleške govornika iz AsciiDoc prezentacije
+da proizvede skriptu koju konzumira capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== Ugovor capsule-gradle
+
+[%step]
+* Format čistog teksta sa delimiterima
+* Header: `=== CAPSULE SCRIPT : name ===`
+* One segment per slide: `--- SLIDE n : title ---`
+* Body: speaker note as-is
+
+[NOTE.speaker]
+--
+Ugovor između slidera i kapsule je namerno jednostavan:
+tekstualni fajl sa zaglavljem i jednim segmentom po slajdu.
+Svaki segment sadrži belešku govornika koja postaje TTS naracija.
+--
+
+[.slide,data-transition="slide"]
+== Validacija u oba pravca
+
+[%step]
+* Parser izdvaja segmente iz AsciiDoc-a
+* Writer serijalizuje u ugovor čistog teksta
+* Capsule-gradle ponovo parsira isti format
+* Nula gubitaka: ono što slider piše, kapsula čita
+
+[NOTE.speaker]
+--
+Validacija u oba pravca je potvrđena: parser izdvaja segmente iz AsciiDoc
+izvora, writer ih serijalizuje nazad u ugovor čistog teksta,
+a capsule-gradle ponovo parsira identičan format bez ikakvog gubitka podataka.
+--
+
+[.slide,data-transition="slide"]
+== Zaključak
+
+[%step]
+* Capsule feed = izdvajanje beležaka govornika
+* Nema JSON-a, nema screenshot-ova u ugovoru
+* Screenshot-ove uzima u realnom vremenu capsule-gradle
+* Slider proizvodi skriptu, kapsula je konzumira
+
+[NOTE.speaker]
+--
+Da zaključimo: capsule feed je jednostavno izdvajanje beležaka govornika.
+Nema JSON-a, nema screenshot-ova u ugovoru — screenshot-ove uzima u realnom
+vremenu capsule-gradle tokom generisanja videa. Slider proizvodi skriptu,
+kapsula je konzumira. Čista granica proizvođač‑potrošač.
+--

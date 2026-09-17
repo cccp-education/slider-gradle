@@ -1,0 +1,86 @@
+= Session 071 — BKY-LANG-22-8 : dogfooding slider corpus 22 langues
+:session: 071
+:date: 2026-09-17
+:type: dogfooding LLM réel + levée de pin + publication Central
+:borough: MIAMI (slider-gradle)
+:epic: BKY-LANG-22 (transverse, piloté bakery S-226)
+:score: 9/10
+
+== Contexte
+
+US **BKY-LANG-22-8** de l'EPIC transverse BKY-LANG-22 : régénérer le corpus
+dogfooding slider des 3 decks démo (fr/en/ar) vers les 12 nouvelles langues
+(parité talaria.school 22 langues, `LanguageCatalog` N0 étendu S-217).
+La session portait aussi **BKY-LANG-22-10** (publication Central slider).
+
+== BKY-LANG-22-8 — Dogfooding LLM 22 langues
+
+=== Environnement
+
+`gpt-oss:120b-cloud` (défaut pool codebase) à sa limite mensuelle (ports
+11437/11438) → bascule `gemma4:31b-cloud` (ports 11439-11444,
+`OLLAMA_POOL_PORTS=11439,11440,11441,11442`).
+
+Plugin republié mavenLocal d'abord (le jar local 0.0.18 était périmé :
+i18n-contracts 0.0.2/10 langues vs source 0.0.4/22).
+
+=== Génération (LLM metered, Économie d'Encre)
+
+3 sources × 12 nouvelles langues = **36 paires** via `translateDeck` réel
+(consumer racine) : 19 s (fr→de, validation) + 1m08s (fr, 11 restantes) +
+1m08s (en, 12) + 1m11s (ar, 12).
+
+Corpus final dans `slides/misc/` : **63 `-deck.adoc` + 63 `-deck-context.yml`
+= 126 fichiers** (21 cibles/source). RTL `fa`/`ar`/`ur` porte
+`:revealjs_direction: rtl` ; les cibles LTR depuis source RTL non.
+
+=== Levée du pin `TranslatedDemoDeckTest`
+
+Le test épinglait 9 cibles en dur (corpus gelé S-030). RED naturel prouvé
+(8 assertions de comptage FAILED sur le corpus 22 langues). Levée :
+
+- `dogfoodTargetCodes = LanguageCatalog.supportedCodes().sorted()` (plus de pin).
+- Comptages dérivés (`count { it != source }`, somme pour le total).
+- RTL dérivé (`LanguageCatalog.ALL.filter { it.rtl }` + assertion ar/ur/fa).
+
+**261 tests, 0 FAIL.**
+
+=== Drift préexistant corrigé (`7_rtl_layout.feature`)
+
+S-217 a ajouté `fa` au catalogue sans mettre à jour « RTL languages are exactly
+Arabic and Urdu » → 1 FAIL cucumber à HEAD (stash-confirmé préexistant).
+Corrigé catalog-driven (scénario `fa` + step dérivé de `LanguageCatalog.ALL`).
+
+=== BDD feature 14 étendue
+
+`14_deck_translation_dogfood.feature` : 9 → 21 adoc/source, totaux 27 → 63,
+exemples RTL/structure étendus (`fa`, `fr→de`).
+
+== BKY-LANG-22-10 — publication slider 0.0.19
+
+- Version littérale 0.0.18 → **0.0.19** (+ toml consumer racine).
+- Central : bundle `03289d70-443d-4ee2-9f02-1a06b850522c` (AUTOMATIC).
+- Propagation repo1 HTTP 200 vérifiée.
+
+== Gates
+
+|===
+| Gate | Résultat
+
+| `TranslatedDemoDeckTest` | 261/0
+| `cucumberTest` | 270/0 (1 skipped)
+| `functionalTest` | 45/0
+| `test` (global) | 1099, 3 FAIL Playwright **préexistants** (fixtures HTML non générées)
+| Central | slider-plugin 0.0.19 propagé
+|===
+
+== Dette / notes
+
+- Le test `test` global conserve 3 FAIL Playwright préexistants (fixtures
+  `generatePlaywrightFixtures` non exécutées) — documentés S-217, hors périmètre.
+- Rendu `asciidoctorRevealJs` Gradle cassé (gems JRuby, préexistant S-023/S-034).
+
+== Prochaine session
+
+Rien d'actif (borough en maintenance). Le dogfooding capsule 22 langues
+(BKY-LANG-22-9) a été mené côté capsule S-226.

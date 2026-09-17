@@ -1,0 +1,72 @@
+= Capsule Feed Demo
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== Giriş
+
+[%step]
+* slider'dan capsule'a pipeline gösterimi
+* konuşmacı notlarından capsule metni oluşturma
+* capsule-gradle'ın tükettiği normal metin düğümü
+
+[NOTE.speaker]
+--
+capsule feed pipeline'ine hoş geldiniz.
+slider-gradle'ın AsciiDoc sunumundan konuşmacı notlarını nasıl çıkardığını ve
+capsule-gradle'ın tükettiği bir metin ürettiğini göreceğiz.
+--
+
+[.slide,data-transition="slide"]
+== capsule-gradle Düğümü
+
+[%step]
+* Belirlenmiş normal metin formatı
+* Başlık: `=== CAPSULE SCRIPT : name ===`
+* Her slayt için bir bölüm: `--- SLIDE n : title ---`
+* Gövde: konuşmacı notu olduğu gibi
+
+[NOTE.speaker]
+--
+slider ve capsule arasındaki düğüm kasıtlı olarak basit tutulmuştur:
+Başlık ve her slayt için bir bölüm içeren bir metin dosyası.
+Her bölüm, ses anlatımına dönüşen konuşmacı notunu içerir.
+--
+
+[.slide,data-transition="slide"]
+== Gidiş-Dönüş Doğrulaması
+
+[%step]
+* Ayrıştırıcı AsciiDoc'tan bölümleri çıkarır
+* Oluşturucu normal metin düğümüne sıralar
+* capsule-gradle aynı formatı yeniden ayrıştırır
+* Sıfır kayıp: slider ne yazar ise capsule okur
+
+[NOTE.speaker]
+--
+Gidiş-dönüş doğrulandı: Ayrıştırıcı AsciiDoc kaynağından bölümleri çıkarır,
+Oluşturucu bunları normal metin düğümüne yeniden sıralar
+ve capsule-gradle aynı formatı tam olarak, veri kaybı olmadan yeniden ayrıştırır.
+--
+
+[.slide,data-transition="slide"]
+== Sonuç
+
+[%step]
+* capsule feed = konuşmacı notlarının çıkarılması
+* Düğümde JSON ya da ekran görüntüsü yok
+* Ekran görüntüleri doğrudan capsule-gradle tarafından alınır
+* slider metni üretir ve capsule onu tüketir
+
+[NOTE.speaker]
+--
+Sonuç olarak: capsule feed, konuşmacı notlarını çıkarmaktır.
+Düğümde JSON ya da ekran görüntüsü yok — ekran görüntüleri doğrudan
+capsule-gradle tarafından video üretimi sırasında alınır. slider metni üretir,
+capsule ise onu tüketir. Üretici ve tüketici arasında net bir sınır.
+--

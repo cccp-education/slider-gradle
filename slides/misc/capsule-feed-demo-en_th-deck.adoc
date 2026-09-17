@@ -1,0 +1,72 @@
+= สาธิต Capsule Feed (ภาษาอังกฤษ)
+cheroliv <cheroliv@mail.com>
+:revealjs_theme: sky
+:revealjs_transition: slide
+:revealjs_slideNumber: c/t
+:revealjs_width: 1408
+:revealjs_height: 792
+:source-highlighter: rouge
+
+[.slide,data-transition="zoom"]
+== บทนำ
+
+[%step]
+* การสาธิต pipeline จาก Slider ไปยัง Capsule
+* การสร้างสคริปต์ Capsule จากโน้ตพูด
+* สัญญาแบบข้อความธรรมดาที่ใช้โดย capsule-gradle
+
+[NOTE.speaker]
+--
+ยินดีต้อนรับสู่การสาธิต pipeline ของ capsule feed นี้
+เราจะเห็นว่า slider-gradle ดึงโน้ตพูดจากชุดสไลด์ AsciiDoc อย่างไร
+เพื่อสร้างสคริปต์ที่ถูกใช้โดย capsule-gradle.
+--
+
+[.slide,data-transition="slide"]
+== สัญญา capsule‑gradle
+
+[%step]
+* รูปแบบข้อความธรรมดาที่คั่นด้วยตัวแบ่ง
+* หัวเรื่อง: `=== CAPSULE SCRIPT : name ===`
+* หนึ่งส่วนต่อสไลด์: `--- SLIDE n : title ---`
+* เนื้อหา: โน้ตพูดตามที่เป็น
+
+[NOTE.speaker]
+--
+สัญญาระหว่าง slider และ capsule ถูกออกแบบให้เรียบง่ายโดยเจตนา:
+ไฟล์ข้อความที่มีหัวเรื่องและหนึ่งส่วนต่อสไลด์
+แต่ละส่วนบรรจุโน้ตพูดที่กลายเป็นการบรรยาย TTS.
+--
+
+[.slide,data-transition="slide"]
+== การตรวจสอบรอบการทำงาน
+
+[%step]
+* ตัวประมวลผลดึงส่วนต่างจาก AsciiDoc
+* ตัวเขียนทำการแปลงเป็นสัญญาข้อความธรรมดา
+* capsule-gradle ทำการแปลงรูปแบบเดิมอีกครั้ง
+* ไม่มีการสูญเสีย: สิ่งที่ slider เขียน, capsule อ่าน
+
+[NOTE.speaker]
+--
+การตรวจสอบรอบการทำงานได้รับการยืนยัน: ตัวประมวลผลดึงส่วนต่างจากแหล่ง AsciiDoc,
+ตัวเขียนทำการแปลงกลับเป็นสัญญาข้อความธรรมดา,
+และ capsule-gradle ทำการแปลงรูปแบบเดียวกันอีกครั้งโดยไม่มีการสูญเสียข้อมูล.
+--
+
+[.slide,data-transition="slide"]
+== สรุป
+
+[%step]
+* Capsule feed = การสกัดโน้ตพูด
+* ไม่มี JSON, ไม่มีภาพหน้าจอในสัญญา
+* ภาพหน้าจอถูกจับแบบเรียลไทม์โดย capsule-gradle
+* Slider สร้างสคริปต์, capsule ใช้สคริปต์นั้น
+
+[NOTE.speaker]
+--
+เพื่อสรุป: capsule feed คือการสกัดโน้ตพูดอย่างง่ายดาย
+ไม่มี JSON, ไม่มีภาพหน้าจอในสัญญา — ภาพหน้าจอถูกจับแบบเรียลไทม์
+โดย capsule-gradle ระหว่างการสร้างวิดีโอ Slider สร้างสคริปต์,
+capsule ใช้สคริปต์นั้น. การแยก producer‑consumer อย่างชัดเจน.
+--
