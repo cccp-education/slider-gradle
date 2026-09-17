@@ -1,5 +1,6 @@
 package slider.extension
 
+import org.asciidoctor.gradle.jvm.AsciidoctorJExtension
 import org.asciidoctor.gradle.jvm.slides.RevealJSExtension
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
@@ -31,6 +32,7 @@ object SliderExtensionRegistrar {
     fun configure(project: Project, pin: RevealJsPin = RevealJsPin()) {
         registerSliderExtension(project)
         pinRevealJsTemplate(project, pin)
+        pinAsciidoctorJ(project)
     }
 
     /**
@@ -51,6 +53,22 @@ object SliderExtensionRegistrar {
                 gh.setRepository(pin.repository)
                 gh.setTag(pin.tag)
             }
+        }
+    }
+
+    /**
+     * Pins the AsciidoctorJ version on the AsciidoctorJ [AsciidoctorJExtension].
+     *
+     * Without this pin, the `asciidoctorRevealJs` OUT_OF_PROCESS worker
+     * resolves the asciidoctor-gradle-plugin default AsciidoctorJ version
+     * alongside the one carried by the plugin classpath. Both bring a JRuby
+     * runtime with a different `jar-dependencies` gem, which makes
+     * `asciidoctorGemsPrepare` abort and leaves the gem jar empty (see
+     * [AsciidoctorJPin]). Pinning one version keeps a single JRuby runtime.
+     */
+    fun pinAsciidoctorJ(project: Project, pin: AsciidoctorJPin = AsciidoctorJPin()) {
+        project.extensions.getByType(AsciidoctorJExtension::class.java).apply {
+            setVersion(pin.version)
         }
     }
 }

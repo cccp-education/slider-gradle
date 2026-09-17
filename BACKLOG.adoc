@@ -1,12 +1,45 @@
 := Backlog — MIAMI (slider-gradle)
 :description: Resume du backlog — source de verite : slider-plugin/.agents/INDEX.adoc
-_.date: 2026-09-07
+_.date: 2026-09-17
 :toc: left
 :sectnums:
 
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== Session 072 (2026-09-17) — `asciidoctorRevealJs` réparé (dette S-023/S-034) + bump 0.0.20 ✅ TERMINÉ
+
+Dette locale actionnable (zéro coût LLM), reprise à la demande pilote. Le
+symptôme « gems JRuby » recouvre **deux** causes :
+
+. **Double JRuby sur le worker OUT_OF_PROCESS** : la tâche résout le défaut
+  asciidoctor-gradle `asciidoctorj:3.0.0` → `jruby-complete:9.4.8.0`
+  (`jar-dependencies` **0.4.1**) ; le classpath plugin (workspace-bom /
+  codebase-plugin) contraint `asciidoctorj:3.0.1` → `jruby-stdlib:9.4.14.0`
+  (**0.5.4**). JRuby active 0.4.1 puis échoue sur 0.5.4 → `Gem::LoadError` ;
+  `asciidoctorGemsPrepare` avorte, jar de gems vide (261 o) →
+  `LoadError: no such file to load -- asciidoctor`.
+. **JRuby isolé GradleRunner** (3 tests Playwright, distinct, S-034).
+
+Correctif baby-step DDD/TDD/BDD strict : US-1 `slider.extension.AsciidoctorJPin`
+value object pur (défaut 3.0.1) ; US-2 `SliderExtensionRegistrar.pinAsciidoctorJ`
+(pose `AsciidoctorJExtension.setVersion`) ; US-3 `AsciidoctorJPinFunctionalTest`
+(TestKit, RED prouvé par stash) ; US-4 feature 18 : 9 → 12 scénarios.
+
+Preuve dogfooding from-scratch : `Successfully installed
+asciidoctor-revealjs-5.2.0` + **80 decks HTML** (jar 261 o → 10,9 Mo).
+Bonus : `generatePlaywrightFixtures` débloqué → 3 tests Playwright
+préexistants S-217 passent. **Bump 0.0.19 → 0.0.20** (0.0.19 Central
+immuable S-226). Gates : `test` 1102/0, FT 46/0, cucumber 273/0 (1 skip).
+
+== Session 071 (2026-09-17) — BKY-LANG-22-8 dogfooding 22 langues + publication 0.0.19 ✅ TERMINÉ
+
+US transverse (pilotée bakery S-226) : 3 sources fr/en/ar × 12 nouvelles
+langues = 36 paires via `translateDeck` réel (`gemma4:31b-cloud`). Corpus
+63 adoc + 63 context. Pin `TranslatedDemoDeckTest` levé (catalog-driven),
+drift `7_rtl_layout.feature` (`fa`) corrigé. Publication slider 0.0.19
+(bundle `03289d70`).
+
 == Session 069 (2026-08-17) — Publication slider 0.0.18 + BOM 0.0.19 ✅ TERMINÉ
 
 Publication Maven Central pure ops (zéro code production hors bump version).
@@ -861,6 +894,20 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 |===
 
 _Total_ : 11 US, ~20 pts (11/11 terminées — S-035→S-042). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
+
+'''
+== EPIC PUB — Publication Maven Central 0.0.20 🟡 À FAIRE (accord pilote requis)
+
+Contexte : le correctif `asciidoctorRevealJs` (S-072) est dans le code local
+0.0.20, non publié Central. 0.0.19 Central (S-226) est immuable et ne porte
+pas le correctif. Ordre DAG attendu : publier slider 0.0.20 → bump
+WORKSPACE-BOM/catalog MEMPHIS (constraint slider-plugin 0.0.20) → propager
+aux consommateurs.
+
+| US | Description | Statut
+| PUB-0.0.20-1 | Vérifier POM (`withType<MavenPublication>`) + signing GPG + release deps | 🟡 À FAIRE
+| PUB-0.0.20-2 | `./gradlew publishAggregationToCentralPortal --no-daemon` | 🟡 À FAIRE
+| PUB-0.0.20-3 | Bump WORKSPACE-BOM/catalog MEMPHIS (constraint slider 0.0.20) + propagation repo1 | 🟡 À FAIRE
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.18 ✅ TERMINÉ (Session 069 — exécution publication)

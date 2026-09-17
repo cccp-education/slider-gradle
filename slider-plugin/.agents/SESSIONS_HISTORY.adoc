@@ -3,6 +3,40 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 072 (2026-09-17) — `asciidoctorRevealJs` réparé (dette S-023/S-034) + bump 0.0.20 ✅ TERMINÉ
+
+* **EPIC** : aucun (dette locale actionnable, zéro coût LLM — PROMPT_REPRISE 071).
+* **Diagnostic** : le symptôme « gems JRuby » recouvre **deux** causes.
+** (1) **Double JRuby sur le worker OUT_OF_PROCESS** : la tâche résout le défaut
+   asciidoctor-gradle `asciidoctorj:3.0.0` → `jruby-complete:9.4.8.0`
+   (`jar-dependencies` **0.4.1**) ; le classpath plugin (workspace-bom /
+   codebase-plugin) contraint `asciidoctorj:3.0.1` → `jruby-stdlib:9.4.14.0`
+   (**0.5.4**). JRuby active 0.4.1 puis échoue sur 0.5.4 → `Gem::LoadError` ;
+   `asciidoctorGemsPrepare` avorte, jar de gems **vide** (261 o) →
+   `LoadError: no such file to load -- asciidoctor`.
+** (2) JRuby isolé GradleRunner (3 tests Playwright, distinct, S-034).
+* **Correctif (baby-step DDD/TDD/BDD strict)** :
+** US-1 `slider.extension.AsciidoctorJPin` value object pur (défaut 3.0.1,
+   invariant non-blank) — RED 3 `Unresolved` → GREEN 3/3.
+** US-2 `SliderExtensionRegistrar.pinAsciidoctorJ` (pose
+   `AsciidoctorJExtension.setVersion`) appelé depuis `configure()`.
+** US-3 `AsciidoctorJPinFunctionalTest` (TestKit, configuration
+   `__$$asciidoctorj_asciidoctorRevealJs$$__r`) — **RED prouvé par stash du
+   câblage** → GREEN ; second test « single JRuby » retiré (non discriminant).
+** US-4 `18_extension_decomposition.feature` : 9 → 12 scénarios (3 AsciidoctorJPin).
+* **Preuve dogfooding from-scratch** : nettoyage complet puis `asciidoctorRevealJs`
+  → `Successfully installed asciidoctor-revealjs-5.2.0` + BUILD SUCCESSFUL +
+  **80 decks HTML** (RTL ar/fa/ur), jar de gems 261 o → **10,9 Mo**.
+  Contre-preuve : `git stash` du câblage → `Gem::LoadError` réapparaît.
+* **Bonus** : `generatePlaywrightFixtures` débloqué → les **3 tests Playwright
+  préexistants depuis S-217 passent** (LTR content, RTL Arabic, LTR E2E).
+* **Bump** : 0.0.19 (déjà Central S-226, immuable) → **0.0.20** (`slider-plugin/build.gradle.kts`
+  + catalogue racine `gradle/libs.versions.toml`). Publication Central à venir (Règle 2).
+* **Gates** post-bump `--rerun-tasks` : `test` **1102/0**, `functionalTest` **46/0**,
+  `cucumberTest` **273/0** (1 skip), `check` VERT.
+* Rapport : `.agents/sessions/072-asciidoctorj-pin-revealjs-repare.adoc`.
+
+
 == Session 071 (2026-09-17) — BKY-LANG-22-8 (dogfooding 22 langues) + publication 0.0.19 ✅ TERMINÉ
 
 * **EPIC** : BKY-LANG-22 (transverse, piloté bakery S-226) — US-8 + US-10 (slider).

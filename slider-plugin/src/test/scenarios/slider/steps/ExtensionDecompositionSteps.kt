@@ -2,11 +2,13 @@ package slider.steps
 
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
+import slider.extension.AsciidoctorJPin
 import slider.extension.RevealJsPin
 
 class ExtensionDecompositionSteps : En {
 
     private var pin: RevealJsPin? = null
+    private var asciidoctorJPin: AsciidoctorJPin? = null
     private var constructionError: Throwable? = null
 
     init {
@@ -60,6 +62,29 @@ class ExtensionDecompositionSteps : En {
         }
 
         Then("the pin construction should fail with a validation error") {
+            assertThat(constructionError).isNotNull()
+            assertThat(constructionError).isInstanceOf(IllegalArgumentException::class.java)
+        }
+
+        When("the default AsciidoctorJ pin is built") {
+            asciidoctorJPin = AsciidoctorJPin()
+            constructionError = null
+        }
+
+        When("an AsciidoctorJ pin is built with a blank version") {
+            try { AsciidoctorJPin(version = "   ") } catch (e: Throwable) { constructionError = e }
+        }
+
+        When("an AsciidoctorJ pin is built with version {string}") { version: String ->
+            asciidoctorJPin = AsciidoctorJPin(version = version)
+            constructionError = null
+        }
+
+        Then("the AsciidoctorJ pin version should be {string}") { expected: String ->
+            assertThat(asciidoctorJPin?.version).isEqualTo(expected)
+        }
+
+        Then("the AsciidoctorJ pin construction should fail with a validation error") {
             assertThat(constructionError).isNotNull()
             assertThat(constructionError).isInstanceOf(IllegalArgumentException::class.java)
         }

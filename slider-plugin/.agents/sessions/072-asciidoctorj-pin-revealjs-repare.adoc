@@ -1,0 +1,138 @@
+= Session 072 — AsciidoctorJ pin : `asciidoctorRevealJs` réparé (dette S-023/S-034)
+:session: 072
+:date: 2026-09-17
+:type: DDD + TDD + BDD + functional + dogfooding réel + bump
+:borough: MIAMI (slider-gradle)
+:epic: dette locale actionnable (zéro coût LLM) — PROMPT_REPRISE 071
+:score: 9/10
+
+== Contexte
+
+Reprise slider à la demande pilote. Le PROMPT_REPRISE 071 listait une
+*unique dette locale actionnable sans coût externe* : le rendu
+`asciidoctorRevealJs` Gradle cassé par un conflit de gems JRuby
+(`jar-dependencies 0.5.4 vs 0.4.1`, préexistant S-023/S-034). Cette dette
+bloquait tout dogfooding HTML automatisé et forçait un contournement Ruby
+système (`gem install asciidoctor asciidoctor-revealjs`) au dogfooding
+capsule S-226.
+
+== Diagnostic — la cause racine (dépassant le symptôme « gems »)
+
+L'analyse initiale S-023/S-034 attribuait l'échec à un *JRuby isolé du
+GradleRunner* (tests Playwright). La reproduction réelle sur le build racine
+révèle **deux causes distinctes** :
+
+. **Conflit JRuby double sur le worker `OUT_OF_PROCESS`** (cause de l'échec
+   `asciidoctorRevealJs`) : la tâche résout le défaut asciidoctor-gradle
+   `asciidoctorj:3.0.0` → `jruby-complete:9.4.8.0` (gem `jar-dependencies`
+   **0.4.1**), tandis que le classpath du plugin (via `workspace-bom` /
+   `codebase-plugin`) contraint `asciidoctorj:3.0.1` →
+   `jruby-stdlib:9.4.14.0` (`jar-dependencies` **0.5.4**). Les deux JRuby
+   atterrissent sur le même classpath ; JRuby active 0.4.1 puis échoue à
+   activer 0.5.4 → `Gem::LoadError: can't activate jar-dependencies-0.5.4,
+   already activated jar-dependencies-0.4.1`. `asciidoctorGemsPrepare` avorte,
+   le jar de gems reste **vide** (261 octets, META-INF seul), et la tâche
+   échoue en `LoadError: no such file to load -- asciidoctor`.
+. **JRuby isolé du GradleRunner** (cause des 3 tests Playwright) : distincte,
+   déjà traitée par l'architecture fixtures S-034. Les fixtures n'étaient
+   simplement *jamais générées* parce que la cause 1 cassait
+   `asciidoctorRevealJs` → `generatePlaywrightFixtures`.
+
+== Correctif (baby-step DDD/TDD/BDD strict)
+
+=== US-1 (DDD) — `AsciidoctorJPin` value object pur
+
+`slider.extension.AsciidoctorJPin` (data class, invariant non-blank, défaut
+`3.0.1`), miroir du `RevealJsPin` existant. RED `AsciidoctorJPinTest` (3
+`Unresolved reference`) → GREEN 3/3.
+
+=== US-2 (TDD) — câblage `pinAsciidoctorJ`
+
+`SliderExtensionRegistrar.pinAsciidoctorJ(project, pin)` pose
+`AsciidoctorJExtension.setVersion("3.0.1")`. Appelé depuis `configure()`.
+Compile VERT.
+
+=== US-3 (functional) — garde TestKit
+
+`AsciidoctorJPinFunctionalTest` : résout la configuration du worker
+`__$$asciidoctorj_asciidoctorRevealJs$$__r` et exige
+`org.asciidoctor:asciidoctorj:3.0.0 -> 3.0.1`. **RED prouvé par stash du
+câblage** (1 FAILED) → GREEN après restauration. Un second test
+« single JRuby » a été retiré : non discriminant en TestKit (passait aussi
+sans le pin) — zéro faux positif.
+
+=== US-4 (BDD) — feature 18 étendue
+
+`18_extension_decomposition.feature` : 9 → 12 scénarios (`@extension
+@decomposition`), 3 pour `AsciidoctorJPin` (défaut 3.0.1, blank rejeté,
+custom). `ExtensionDecompositionSteps` étendu (4 steps préfixés
+« AsciidoctorJ »). Cucumber global 273/0 (+3).
+
+== Preuve — dogfooding réel from-scratch
+
+Nettoyage complet (`build/.asciidoctorGems*`, `build/docs/asciidocRevealJs`,
+`build/playwright-fixtures`) puis `./gradlew asciidoctorRevealJs` :
+`Successfully installed asciidoctor-revealjs-5.2.0` + BUILD SUCCESSFUL,
+**80 decks HTML** générés (RTL `ar`/`fa`/`ur` confirmé). Le jar de gems passe
+de **261 octets → 10,9 Mo**.
+
+**Bonus** : `generatePlaywrightFixtures` fonctionne désormais → les 3 tests
+Playwright (échecs préexistants depuis S-217) **passent** (LTR content,
+RTL Arabic, LTR E2E).
+
+Contre-preuve : après `git stash` du câblage + republication, le
+`Gem::LoadError` réapparaît — chaîne causale verrouillée.
+
+== Bump 0.0.19 → 0.0.20
+
+0.0.19 était **déjà publié Central** (S-226) sans le correctif : garder le
+même numéro aurait produit un drift code local ≠ Central. Bump version
+`slider-plugin/build.gradle.kts` + catalogue racine `gradle/libs.versions.toml`.
+Publication Central reportée à l'accord pilote (Règle 2 slider).
+
+== Gates (post-bump, `--rerun-tasks`)
+
+|===
+| Niveau | Résultat
+
+| `test` (unit) | 1102 / 0 FAIL
+| `functionalTest` | 46 / 0 FAIL (dont 1 nouveau AsciidoctorJ)
+| `cucumberTest` | 273 / 0 FAIL / 1 skip (feature 18 : 12 scénarios)
+| `check` | BUILD SUCCESSFUL
+|===
+
+== Décisions
+
+. *Fix dans le plugin, pas dans le build consommateur* — le pin est une
+   propriété du plugin distribué ; le contournement `build.gradle.kts racine`
+   (testé en premier) n'aurait corrigé qu'un consommateur.
+. *Pin aligné sur le classpath du plugin (3.0.1)* — la version est celle que
+   le plugin porte déjà ; le plugin unifie le runtime au lieu d'imposer la
+   sienne au consommateur.
+. *Test décisif unique* — le test « single JRuby » passait sans le pin
+   (non discriminant) → retiré pour ne pas laisser un faux positif vert.
+. *Bump, pas réutilisation* — 0.0.19 Central est immuable ; le correctif
+   mérite 0.0.20.
+
+== Fichiers modifiés (5) / créés (3)
+
+[cols="2,4"]
+|===
+| Fichier | Nature
+
+| `src/main/kotlin/slider/extension/AsciidoctorJPin.kt` | créé (value object)
+| `src/main/kotlin/slider/extension/SliderExtensionRegistrar.kt` | modifié (+18)
+| `src/test/kotlin/slider/extension/AsciidoctorJPinTest.kt` | créé (3 UT)
+| `src/functionalTest/kotlin/slider/AsciidoctorJPinFunctionalTest.kt` | créé (1 FT)
+| `src/test/features/18_extension_decomposition.feature` | modifié (+3 scénarios)
+| `src/test/scenarios/slider/steps/ExtensionDecompositionSteps.kt` | modifié (+4 steps)
+| `slider-plugin/build.gradle.kts` | modifié (0.0.19 → 0.0.20)
+| `../gradle/libs.versions.toml` | modifié (0.0.19 → 0.0.20)
+|===
+
+== Dette résiduelle découverte
+
+- `slider-plugin/gradle/libs.versions.toml` porte `slider = "0.0.14"` (résidu
+  stale, seul `.pluginId` est lu — version inerte). Nettoyage candidat.
+- Le build racine `slider-gradle` pin le catalogue via `gradle/libs.versions.toml`
+  (0.0.20) — cohérent.

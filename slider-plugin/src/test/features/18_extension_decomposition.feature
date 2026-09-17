@@ -45,3 +45,17 @@ Feature: Extension domain decomposition (SLD-6.4)
     And the pin organisation should be "custom-org"
     And the pin repository should be "custom-repo"
     And the pin tag should be "6.0.0"
+
+  # AsciidoctorJPin ----------------------------------------------------------------------------
+
+  Scenario: The default AsciidoctorJ pin targets version 3.0.1
+    When the default AsciidoctorJ pin is built
+    Then the AsciidoctorJ pin version should be "3.0.1"
+
+  Scenario: A blank AsciidoctorJ version is rejected
+    When an AsciidoctorJ pin is built with a blank version
+    Then the AsciidoctorJ pin construction should fail with a validation error
+
+  Scenario: A custom AsciidoctorJ pin preserves the supplied version
+    When an AsciidoctorJ pin is built with version "9.9.9"
+    Then the AsciidoctorJ pin version should be "9.9.9"

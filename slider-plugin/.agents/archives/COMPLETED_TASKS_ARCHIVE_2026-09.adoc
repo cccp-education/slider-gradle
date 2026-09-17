@@ -1,0 +1,38 @@
+= Archive — Tâches terminées (septembre 2026) — slider-gradle
+
+_Archive mensuelle_ : sessions et US clôturées en septembre 2026.
+Fichiers actifs (INDEX, SESSIONS_HISTORY) conservent les 10 dernières sessions.
+
+== Session 072 (2026-09-17) — `asciidoctorRevealJs` réparé (dette S-023/S-034) ✅ TERMINÉ
+
+* **Diagnostic** : double JRuby sur le worker OUT_OF_PROCESS — défaut
+  asciidoctor-gradle `asciidoctorj:3.0.0` (`jruby-complete:9.4.8.0`,
+  `jar-dependencies 0.4.1`) vs classpath plugin `asciidoctorj:3.0.1`
+  (`jruby-stdlib:9.4.14.0`, `0.5.4`) → `Gem::LoadError`, jar de gems vide.
+* **Correctif** : `AsciidoctorJPin` value object + `pinAsciidoctorJ`
+  (US-1→4 DDD/TDD/BDD strict, RED prouvé par stash).
+* **Preuve** : dogfooding from-scratch → `Successfully installed
+  asciidoctor-revealjs-5.2.0` + 80 decks HTML (jar 261 o → 10,9 Mo).
+* **Bonus** : 3 tests Playwright préexistants S-217 passent.
+* **Bump** : 0.0.19 → 0.0.20.
+* Gates : `test` 1102/0, FT 46/0, cucumber 273/0 (1 skip).
+* Rapport : `.agents/sessions/072-asciidoctorj-pin-revealjs-repare.adoc`.
+
+== Session 071 (2026-09-17) — BKY-LANG-22-8 dogfooding 22 langues + publication 0.0.19 ✅ TERMINÉ
+
+* 3 sources fr/en/ar × 12 nouvelles langues = 36 paires via `translateDeck`
+  réel (`gemma4:31b-cloud`). Corpus 63 adoc + 63 context.
+* Pin `TranslatedDemoDeckTest` levé (catalog-driven). `7_rtl_layout.feature`
+  corrigé (`fa`).
+* Publication slider 0.0.19 (bundle `03289d70`).
+* Rapport : `.agents/sessions/071-bky-lang-22-8-dogfooding.adoc`.
+
+== Session 070 (2026-09-07) — Synchronisation gouvernance post-S-069 ✅ TERMINÉ
+
+* Gouvernance pure (zéro code) : PROMPT_REPRISE S-066→S-070, BACKLOG racine, hygiene.
+* Rapport : `.agents/sessions/070-sync-gouvernance-post-069.adoc`.
+
+== Session 069 (2026-08-17) — Publication slider 0.0.18 + BOM 0.0.19 ✅ TERMINÉ
+
+* Publication nmcp : slider 0.0.18 (bundle `3720936a`) + BOM 0.0.19 (bundle `2160075f`).
+* Rapport : `.agents/sessions/069-pub-slider-0.0.18.adoc`.
