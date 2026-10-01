@@ -53,3 +53,4 @@ Gates : `test` 1102/0, `functionalTest` 46/0, `cucumberTest` 273/0 (1 skip),
   `gemma4:31b-cloud` + `OLLAMA_POOL_PORTS=11439,11440,11441,11442`.
 - *Git autorisé* (décision pilote 2026-09-17) — zéro secret. Aucun publish
   Central sans permission explicite de l'utilisateur.
+
