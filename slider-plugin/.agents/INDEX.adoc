@@ -6,8 +6,9 @@ _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
 _Derniere mise a jour_ : 2026-09-17
 _Session terminee_ : 072 — **`asciidoctorRevealJs` réparé** (dette S-023/S-034) : cause racine **double JRuby** sur le worker OUT_OF_PROCESS (défaut asciidoctor-gradle `asciidoctorj:3.0.0`/`jruby-complete:9.4.8.0`/`jar-dependencies 0.4.1` vs classpath plugin `asciidoctorj:3.0.1`/`jruby-stdlib:9.4.14.0`/`0.5.4`) → `Gem::LoadError` + jar de gems vide. Correctif : `slider.extension.AsciidoctorJPin` value object + `pinAsciidoctorJ` (US-1→4 DDD/TDD/BDD strict). Preuve : dogfooding from-scratch `Successfully installed asciidoctor-revealjs-5.2.0` + **80 decks HTML** (jar 261 o → 10,9 Mo) ; bonus **3 tests Playwright préexistants S-217 passent** (`generatePlaywrightFixtures` débloqué). Bump **0.0.19 → 0.0.20** (0.0.19 Central immuable S-226). Gates : `test` 1102/0, FT 46/0, cucumber 273/0 (1 skip).
-_Session en cours_ : 072 — `asciidoctorRevealJs` réparé + bump 0.0.20.
-_Prochaine session_ : 073 — à arbitrer par le pilote (EPIC PUB 0.0.20 candidat).
+_Session en cours_ : — (S-073 terminée).
+_Session terminee_ : 073 — **racine réalignée sur la version publiée** (`slider 0.0.20 → 0.0.19`, fix cross-borough `runAllTests` MEMPHIS : la racine épinglait une version non publiée ; Central = 0.0.18/0.0.19). Plugin inchangé (0.0.20 en dev). `./gradlew help` VERT.
+_Prochaine session_ : 074 — à arbitrer par le pilote (EPIC PUB 0.0.20 candidat).
 _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 
 '''

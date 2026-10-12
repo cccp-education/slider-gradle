@@ -1,7 +1,17 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 072 — `asciidoctorRevealJs` reparé (dette S-023/S-034) + bump 0.0.20
-_Prochaine session_ : 073 — a arbitrer par le pilote
+_Session terminee_ : 073 — racine réalignée sur la version publiée (`slider 0.0.20 → 0.0.19`, fix cross-borough runAllTests MEMPHIS)
+_Prochaine session_ : 074 — a arbitrer par le pilote (EPIC PUB 0.0.20 candidat)
+
+== Mission session 073 (TERMINÉE) — réalignement racine consommatrice
+
+*Symptôme* : le job `runAllTests` de MEMPHIS échoue sur la racine slider —
+`Plugin education.cccp.slider:0.0.20 was not found`.
+*Cause* : la racine épinglait `slider = "0.0.20"` (version **non publiée** ; Central =
+0.0.18/0.0.19). Une racine consommatrice (pattern 0124) doit référencer une version
+publiée.
+*Correctif* : `gradle/libs.versions.toml` → `slider = "0.0.19"` (aligné MEMPHIS
+`workspace-catalog`). Vérif : `./gradlew help` exit 0. Plugin inchangé (0.0.20 en dev).
 
 == Mission session 072 (TERMINÉE) — dette locale actionnable (zéro coût LLM)
 
