@@ -7,6 +7,25 @@ _.date: 2026-09-17
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== 🟡 EPIC SLD-PUB — Alignement dev ↔ publication slider
+
+_Constat (S-073)_ : le plugin est en **dev 0.0.20** (S-072) mais **non publié** sur
+Central (seuls 0.0.18 et 0.0.19 le sont). La **racine consommatrice** avait épinglé
+0.0.20 → `Plugin education.cccp.slider:0.0.20 was not found` (job cross-borough
+`runAllTests` MEMPHIS). Une racine (pattern 0124) doit référencer une version **publiée**.
+
+[cols="1,4,2", options="header"]
+|===
+| US | Description | Statut
+
+| US-1 | Racine réalignée sur la version publiée (`gradle/libs.versions.toml` `slider 0.0.20 → 0.0.19`) | ✅ S-073
+
+| US-2 | **Trancher dev 0.0.20** : soit **publier `slider-plugin 0.0.20`** (Maven Central, DAG MEMPHIS-first) et repinner la racine sur 0.0.20 ; soit **figer la dev sur 0.0.19** (aligner `slider-plugin/gradle/libs.versions.toml`, aujourd'hui incohérent) | 🟡 À FAIRE (accord pilote)
+
+| US-3 | Vérifier/aligner la version interne du plugin (`slider-plugin/gradle/libs.versions.toml` = `0.0.14` — stale) | 🟡 À FAIRE
+|===
+
+'''
 == Session 072 (2026-09-17) — `asciidoctorRevealJs` réparé (dette S-023/S-034) + bump 0.0.20 ✅ TERMINÉ
 
 Dette locale actionnable (zéro coût LLM), reprise à la demande pilote. Le
