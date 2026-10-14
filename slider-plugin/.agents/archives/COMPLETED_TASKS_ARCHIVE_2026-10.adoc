@@ -1,4 +1,17 @@
 
+== S-075 — CI sharding parallèle (`full-tests.yml`) ✅
+
+* Le repo n'avait aucun workflow de test. `full-tests.yml` = **11 jobs parallèles**
+  (unit + 7 shards BDD exhaustifs/disjoints des 25 features + 3 shards functionalTest).
+  `test.yml` = gate PR rapide.
+* Garde anti-« test fantôme » S-269 : `slider.ci.SliderCucumberShardCoverageTest`
+  (4 tests — partition exhaustive/disjointe, runner = tâche Gradle ET CI).
+* Correctifs CI : fallback nmcp `?: ""` ; auto-skip (assumeTrue) des 3 tests Playwright ;
+  `git.log()` ref explicite du test JGit ; pré-pull `pgvector/pgvector:pg17` (shard core).
+* **CI VERTE** run `38604523046` — 11/11 jobs, wall-clock 194 s (~3,2 min), max
+  `BDD · core` 191 s. Commits `f7cb6a3`→`6202fbd`.
+* Rapport `.agents/sessions/075-ci-sharding-parallel-matrix.adoc`.
+
 == S-074 — KOOG-PIPELINE-DEDUP BS-2 : adoption du squelette N1 ✅
 
 * Décision pilote d'exécution. `DeckPipelineDefinition` (`PipelineDefinition<DeckState>`)

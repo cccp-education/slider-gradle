@@ -7,6 +7,29 @@ _.date: 2026-09-17
 _Source de verite_ : link:slider-plugin/.agents/INDEX.adoc[INDEX.adoc] — ce fichier est un resume.
 
 '''
+== ✅ CI-SHARDING — Tests slider en matrice parallèle GitHub Actions (S-075, 2026-10-14)
+
+_Constat_ : le repo n'avait **aucun workflow de test** (`.github/workflows/` ne contenait
+que des workflows pré-existants partiellement commentés, rouges à 0 s — hors périmètre).
+
+[cols="1,4,2", options="header"]
+|===
+| US | Description | Statut
+
+| US-1 | `full-tests.yml` = **11 jobs parallèles** : `unit` + **7 shards BDD** exhaustifs/disjoints des 25 features (1 JVM/shard) + **3 shards functionalTest** (`--tests`) | ✅ S-075
+
+| US-2 | Garde anti-« test fantôme » S-269 (`slider.ci.SliderCucumberShardCoverageTest`, 4 tests) : partition exhaustive/disjointe + runner = tâche Gradle **et** invoquée par la CI | ✅ S-075
+
+| US-3 | Câblage `cucumberConventions.additionalTasks` (`CucumberTaskSpec`) + `org.gradle.caching=true` | ✅ S-075
+
+| US-4 | CI verte : run `38604523046` **11/11 jobs**, wall-clock **194 s** (~3,2 min, max `BDD · core` 191 s) | ✅ S-075
+
+| US-5 | Correctifs CI : fallback nmcp `?: ""` ; auto-skip Playwright ; `git.log()` ref explicite ; pré-pull pgvector (shard core) | ✅ S-075
+|===
+
+_Détail_ : link:slider-plugin/.agents/sessions/075-ci-sharding-parallel-matrix.adoc[rapport S-075].
+
+'''
 == 🟡 EPIC SLD-PUB — Alignement dev ↔ publication slider
 
 _Constat (S-073)_ : le plugin est en **dev 0.0.20** (S-072) mais **non publié** sur

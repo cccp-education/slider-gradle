@@ -1,0 +1,171 @@
+= Session 075 — CI sharding : `full-tests.yml` en matrice parallèle (7 shards BDD + 3 functional + unit)
+:session: 075
+:date: 2026-10-14
+:type: ci-infra
+:borough: MIAMI / slider-gradle
+:statut: ✅ TERMINÉ — CI VERTE (run `38604523046`), 11/11 jobs
+:toc:
+
+== Contexte / mission
+
+Le repo slider n'avait **aucun workflow de test** (`.github/workflows/` ne contenait
+que `generate_deck.yml`, `readme_plantuml.yml`, `readme_truth.yml`, `website.yml`,
+pré-existants, certains rouges à 0 s — hors périmètre). Mission : éclater les tests en
+**shards parallèles** dans GitHub Actions, exactement comme `capsule-gradle`
+(S-198). Chaque shard tourne sur **sa propre machine** (1 JVM/shard), la couverture
+d'origine (`cucumberTest` agrégé = 25 features, `functionalTest` = 9 classes,
+`test` unit) est **intégralement préservée**.
+
+== Design du sharding
+
+=== Unit (1 job)
+`./gradlew test`. Exclut (par construction du `test` task) les runners de shard
+(`slider.steps.**`) ; les **3 tests visuels Playwright** sont désormais
+**auto-skippés** (voir plus bas). 1106 tests, 0 FAIL, 3 skipped.
+
+=== BDD — 7 shards exhaustifs et disjoints (25/25 features)
+
+[cols="1,3,1", options="header"]
+|===
+| Shard (tâche Gradle) | Features | # 
+
+| `cucumberTestShardCore` (`CucumberShardCoreRunner`)
+| 1_minimal_configuration, 2_propose_deck_context, 3_revealjs_transition, 4_auto_animate
+| 4
+
+| `cucumberTestShardI18n` (`CucumberShardI18nRunner`)
+| 5_translator_i18n, 6_reveal_ui_i18n, 7_rtl_layout, 8_i18n_fallback, 9_assistant_manager_i18n, 25_slider_messages_resolution
+| 6
+
+| `cucumberTestShardTranslation` (`CucumberShardTranslationRunner`)
+| 13_deck_translation, 14_deck_translation_dogfood
+| 2
+
+| `cucumberTestShardRepository` (`CucumberShardRepositoryRunner`)
+| 11_deployment_request, 12_git_push_adapter, 20_publish_task_decomposition
+| 3
+
+| `cucumberTestShardDecomposition` (`CucumberShardDecompositionRunner`)
+| 15_scaffold, 16_config, 17_prerequisite, 18_extension, 19_wiring, 20_revealjs, 21_playwright (décomposition)
+| 7
+
+| `cucumberTestShardContent` (`CucumberShardContentRunner`)
+| 10_rtl_visual_validation, 24_slide_content_validation
+| 2
+
+| `cucumberTestShardPipeline` (`CucumberShardPipelineRunner`)
+| 26_deck_pipeline_koog
+| 1
+|===
+
+Chaque runner porte `@SelectClasspathResource("features/<file>")` (répétable),
+`@ConfigurationParameter(FEATURES_PROPERTY_NAME, ...)` (leçon S-198 : le moteur
+Cucumber exige `cucumber.features`), `GLUE_PROPERTY_NAME = "slider.steps"`, et le
+filtre agrégé **`not @wip and not @integration`** — le sharding exécute **exactement**
+ce que `cucumberTest` exécutait.
+
+*Aucun shard n'a besoin de ffmpeg ni de Chromium* : toutes les features slider sont
+**pure-domaine** (contrairement à capsule). Les features 10/21/24 manipulent des DTO
+snapshot (RTL / contenu / commandes Playwright) — elles n'ouvrent **jamais** un
+navigateur.
+
+=== functionalTest — 3 shards exhaustifs et disjoints (9 classes)
+
+[cols="1,4", options="header"]
+|===
+| Shard | Classes (`--tests`)
+
+| Functional · core
+| `slider.AsciidoctorJPinFunctionalTest`, `slider.RevealUiMessagesFunctionalTest`, `slider.SlideDeploymentFunctionalTest`
+
+| Functional · wiring+i18n
+| `slider.GradleWiringFunctionalTest`, `slider.i18n.TaskDescriptionsI18nFunctionalTest`, `slider.i18n.AssistantManagerI18nFunctionalTest`
+
+| Functional · translate+pipeline
+| `slider.TranslateDeckFunctionalTest`, `slider.TranslatorFunctionalTest`, `slider.GenerateDeckPipelineFunctionalTest`
+|===
+
+== Garde d'exhaustivité (§ anti « test fantôme » S-269)
+
+`slider-plugin/src/test/kotlin/slider/ci/SliderCucumberShardCoverageTest.kt`
+(4 tests, exécutés dans le job `unit`) — lecture pure des sources, sans modèle Gradle :
+
+. les shards forment une **partition exhaustive et disjointe** des 25 features, et
+  **chaque** shard préserve le filtre agrégé (`not @wip` + `not @integration`) ;
+. chaque runner de shard est une **tâche Gradle** (`CucumberTaskSpec`) **et** est
+  **invoquée par `full-tests.yml`** (égalité ensembliste des noms de tâches) ;
+. les shards `functionalTest` forment une partition exhaustive/disjointe des 9 classes ;
+. le job unitaire exécute bien `./gradlew test`.
+
+Un runner non enregistré ou une feature orpheline fait échouer la gate — plus de test
+silencieusement non exécuté.
+
+== Câblage build
+
+`slider-plugin/build.gradle.kts` : `import build.CucumberTaskSpec` +
+`cucumberConventions { additionalTasks = listOf(7 × CucumberTaskSpec(...)) }`
+(mécanisme ABIDJAN `education.cccp.build.cucumber:0.0.7`). `additionalTasksInCheck`
+reste `false` (défaut) : `check` garde l'agrégat `cucumberTest`, les shards sont CI-only.
+
+`slider-plugin/gradle.properties` : `org.gradle.caching=true` (mirror capsule itér. 6).
+
+== Correctifs nécessaires à la CI verte
+
+. *`settings.gradle.kts` — fallback nmcp* : `centralPortal.username/password`
+  `?: error(...)` → **`?: \"\"`**. Un runner CI n'a pas de
+  `~/.gradle/gradle.properties` ; l'`error` cassait **toute** la configuration
+  (`test`, `compileKotlin`…) — pattern codebase S-269 / dashboard S-217.
+. *3 tests Playwright visuels (unit) — auto-skip* : les fixtures HTML Reveal.js sont
+  produites par la **racine consommatrice** (`generatePlaywrightFixtures`), qui épingle
+  le plugin **publié** (`slider = 0.0.19`, **sans** le fix AsciidoctorJ S-072). En CI
+  elles sont absentes → `PlaywrightFixtureSupport.requireFixture(...)` (assumeTrue)
+  **skippe** proprement au lieu d'échouer (3 skipped). `closeBrowser()` rendu
+  null-safe. Doctrine = `assumeTrue(isOllamaReady(port))`.
+. *`SlideDeploymentPipelineIntegrationTest`* : `git.log()` (suivi HEAD) levait
+  `NoHeadException` en CI — le HEAD du bare remote reste sur le défaut JGit (`master`)
+  car `init.defaultBranch=main` n'existe que dans la config git locale. **Fix
+  déterministe** : logger la ref **explicite** `refs/heads/main`.
+. *Image pgvector du shard core* : la feature 2 (`proposeDeckContext`, RAG) démarre un
+   conteneur pgvector via docker-java ; le `pullImageCmd` du plugin est peu fiable en
+   CI (`No such image: pgvector/pgvector:pg17`). **Pré-pull** `docker pull
+   pgvector/pgvector:pg17` dans le job `core` (flag matrice `pgvector`), mirror codebase
+   (`docker pull ollama/ollama`).
+
+== Preuve CI (unique preuve de validité)
+
+* Run **`38604523046`** (commit `6202fbd`) — **`success`**, **11/11 jobs verts**.
+* Wall-clock total : **194 s (~3,2 min)**. Job le plus long : **`BDD · core` 191 s**
+  (~3,2 min, borné par le démarrage pgvector). Autres : Unit 102 s, Functional · core
+  54 s, BDD · i18n 91 s, BDD · decomposition 104 s, BDD · repository 137 s…
+* Comparaison : run froid `38603408247` (2 échecs) total 307 s ; run vert à chaud 194 s.
+  Un job monolithique `check` local = ~10 min 36 s (S-067). Gain ≈ ×3,3 en wall-clock.
+* Artefacts : 11 rapports (`reports-unit`, `reports-cucumberTestShard*`,
+  `reports-functionalshard-*`).
+
+== Fichiers
+
+* Créés : 7 `src/test/scenarios/slider/steps/CucumberShard*Runner.kt` ;
+  `src/test/kotlin/slider/ci/SliderCucumberShardCoverageTest.kt` ;
+  `.github/workflows/full-tests.yml` ; `.github/workflows/test.yml` (gate PR rapide).
+* Modifiés : `build.gradle.kts`, `settings.gradle.kts`, `gradle.properties` ;
+  `PlaywrightFixtureSupport.kt` + 3 tests Playwright ;
+  `SlideDeploymentPipelineIntegrationTest.kt`.
+
+== Commits
+
+* `f7cb6a3` `build(s075): register BDD shard tasks + nmcp credential fallback for CI`
+* `bf1d421` `test(s075): add BDD shard runners + coverage guard`
+* `620dabc` `test(s075): environment-gate the 3 Playwright visual tests for CI`
+* `2d64244` `ci(s075): add parallel Full Tests matrix + fast PR gate`
+* `7cc2c67` `test(s075): make JGit deploy integration test deterministic on CI`
+* `6202fbd` `ci(s075): pre-pull pgvector image for the core BDD shard`
+
+== Reste / dette
+
+* EPIC **SLD-PUB** (publier 0.0.20) toujours en attente d'accord pilote — inchangé.
+* `test.yml` ne se déclenche qu'en `pull_request` (gate rapide) ; `full-tests.yml` en
+  `push` (main/master) + `workflow_dispatch`.
+* Les 3 tests Playwright restent **non exécutés en CI** (auto-skip) : pour les activer,
+  il faudrait un job qui publie le plugin courant en mavenLocal puis génère les fixtures
+  depuis la racine — non retenu (coût/robustesse, et la racine épingle une version
+  publiée). Couverture locale intacte (fixtures présentes).

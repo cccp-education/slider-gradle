@@ -3,6 +3,25 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 075 (2026-10-14) — CI sharding parallèle (`full-tests.yml`) ✅ TERMINÉ
+
+* **Type** : ci-infra (le repo n'avait **aucun workflow de test**).
+* **Livrable** : `.github/workflows/full-tests.yml` = **11 jobs parallèles** —
+  `unit` + **7 shards BDD** exhaustifs/disjoints des **25 features**
+  (`cucumberTestShard{Core,I18n,Translation,Repository,Decomposition,Content,Pipeline}`,
+  1 JVM/shard, mécanisme `CucumberTaskSpec` ABIDJAN 0.0.7) + **3 shards functionalTest**
+  (`--tests`, partition des 9 classes) ; `.github/workflows/test.yml` = gate PR rapide.
+* **Garde** : `slider.ci.SliderCucumberShardCoverageTest` (4 tests, anti-« test fantôme »
+  S-269) — partition exhaustive/disjointe, filtres agrégés préservés, runner = tâche
+  Gradle ET invoquée par la CI.
+* **Correctifs CI** : fallback nmcp `?: ""` (`settings.gradle.kts`) ; 3 tests Playwright
+  auto-skippés (assumeTrue) + `closeBrowser` null-safe ; `git.log()` ref explicite du
+  test JGit ; pré-pull `pgvector/pgvector:pg17` (shard core).
+* **Preuve CI** : run `38604523046` **11/11 jobs verts**, wall-clock **194 s (~3,2 min)**,
+  max `BDD · core` 191 s. Aucun shard ne requiert ffmpeg/Chromium (features pure-domaine).
+* **Commits** : `f7cb6a3`, `bf1d421`, `620dabc`, `2d64244`, `7cc2c67`, `6202fbd`.
+  **Rapport** : `.agents/sessions/075-ci-sharding-parallel-matrix.adoc`.
+
 == Session 074 (2026-10-14) — KOOG-PIPELINE-DEDUP BS-2 : adoption du squelette N1 ✅ TERMINÉ
 
 * **EPIC** : KOOG-PIPELINE-DEDUP (BS-2, décision pilote d'exécution).

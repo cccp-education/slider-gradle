@@ -1,73 +1,56 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 074 — **KOOG-PIPELINE-DEDUP BS-2** (adoption du squelette N1 `codebase.koog.pipeline`, EPIC clos)
-_Prochaine session_ : 075 — a arbitrer par le pilote (EPIC PUB 0.0.20 candidat)
+_Session terminee_ : 075 — **CI sharding** : `full-tests.yml` en matrice parallèle (11 jobs : unit + 7 shards BDD + 3 functional), CI **VERTE** run `38604523046`.
+_Prochaine session_ : 076 — a arbitrer par le pilote (EPIC PUB 0.0.20 candidat).
+
+== Mission session 075 (TERMINÉE) — CI sharding parallèle
+
+*Le repo n'avait aucun workflow de test.* Création de `full-tests.yml` : **unit** (`./gradlew test`)
++ **7 shards BDD** (`cucumberTestShard{Core,I18n,Translation,Repository,Decomposition,Content,Pipeline}`,
+partition **exhaustive et disjointe** des 25 features, 1 JVM/shard) + **3 shards functionalTest**
+(`--tests`, partition des 9 classes). Garde anti-« test fantôme » (S-269)
+`slider.ci.SliderCucumberShardCoverageTest` (4 tests). `test.yml` = gate PR rapide.
+*Aucun shard n'a besoin de ffmpeg/Chromium* (features pure-domaine).
+*Preuve CI* : run `38604523046`, **11/11 jobs verts**, wall-clock **194 s (~3,2 min)**,
+job le plus long `BDD · core` 191 s. Commits `f7cb6a3`→`6202fbd`.
+Rapport `.agents/sessions/075-ci-sharding-parallel-matrix.adoc`.
+
+Correctifs CI associés : fallback nmcp `?: ""` (sinon config CI cassée), auto-skip
+(assumeTrue) des 3 tests Playwright, `git.log()` ref explicite du test JGit,
+pré-pull `pgvector/pgvector:pg17` du shard core.
 
 == Mission session 074 (TERMINÉE) — adoption du squelette N1 (BS-2)
 
-*Décision pilote d'exécution.* `DeckPipelineDefinition` (`PipelineDefinition<DeckState>`)
-+ `DeckPipelineGraph` façade sur `pipelineGraph(...)` (API publique préservée) ;
-`codebase 0.0.14 → 0.0.18` ; `koog 1.0.0 → 1.3.0`. Compiles ×3 VERTS. Commit `a20c4b1`.
-Rapport `.agents/sessions/074-koog-pipeline-dedup-bs2-adoption.adoc`.
+`DeckPipelineDefinition` (`PipelineDefinition<DeckState>`) + `DeckPipelineGraph` façade
+sur `pipelineGraph(...)` (API publique préservée) ; `codebase 0.0.14 → 0.0.18` ;
+`koog 1.0.0 → 1.3.0`. Compiles ×3 VERTS. Commit `a20c4b1`.
 
-== Mission session 073 (TERMINÉE) — réalignement racine consommatrice
+== Mission session 072 (TERMINÉE) — `asciidoctorRevealJs` réparé
 
-*Symptôme* : le job `runAllTests` de MEMPHIS échoue sur la racine slider —
-`Plugin education.cccp.slider:0.0.20 was not found`.
-*Cause* : la racine épinglait `slider = "0.0.20"` (version **non publiée** ; Central =
-0.0.18/0.0.19). Une racine consommatrice (pattern 0124) doit référencer une version
-publiée.
-*Correctif* : `gradle/libs.versions.toml` → `slider = "0.0.19"` (aligné MEMPHIS
-`workspace-catalog`). Vérif : `./gradlew help` exit 0. Plugin inchangé (0.0.20 en dev).
+Cause racine **double JRuby** sur le worker OUT_OF_PROCESS → `Gem::LoadError`, jar de
+gems vide. Correctif `slider.extension.AsciidoctorJPin` + `pinAsciidoctorJ`
+(baby-step DDD/TDD/BDD). Preuve dogfooding from-scratch (80 decks HTML) ; bonus
+`generatePlaywrightFixtures` débloqué. Bump **0.0.19 → 0.0.20**.
 
-== Mission session 072 (TERMINÉE) — dette locale actionnable (zéro coût LLM)
+== Contexte reprise session 076
 
-*`asciidoctorRevealJs` cassé* : reproduction réelle → cause racine **double
-JRuby** sur le worker OUT_OF_PROCESS. La tâche résout le défaut
-asciidoctor-gradle `asciidoctorj:3.0.0` (`jruby-complete:9.4.8.0`,
-`jar-dependencies 0.4.1`) ; le classpath plugin (via workspace-bom /
-codebase-plugin) contraint `asciidoctorj:3.0.1` (`jruby-stdlib:9.4.14.0`,
-`jar-dependencies 0.5.4`). Gemini JRuby activait 0.4.1 puis échouait sur
-0.5.4 → `Gem::LoadError`, jar de gems vide → `LoadError: no such file to
-load -- asciidoctor`.
-
-Correctif (baby-step DDD/TDD/BDD strict) :
-. *US-1* `slider.extension.AsciidoctorJPin` value object pur (défaut 3.0.1,
-   3 UT RED→GREEN).
-. *US-2* `SliderExtensionRegistrar.pinAsciidoctorJ` (pose
-   `AsciidoctorJExtension.setVersion`).
-. *US-3* `AsciidoctorJPinFunctionalTest` (TestKit, RED prouvé par stash).
-. *US-4* feature 18 : 9 → 12 scénarios (3 AsciidoctorJPin).
-
-*Preuve dogfooding from-scratch* : `Successfully installed
-asciidoctor-revealjs-5.2.0` + **80 decks HTML** ; jar de gems 261 o → 10,9 Mo.
-*Bonus* : `generatePlaywrightFixtures` débloqué → les 3 tests Playwright
-(échecs préexistants S-217) **passent**.
-
-*Bump* : 0.0.19 (déjà Central S-226, immuable) → **0.0.20**.
-
-Gates : `test` 1102/0, `functionalTest` 46/0, `cucumberTest` 273/0 (1 skip),
-`check` VERT.
-
-== Contexte reprise session 073
-
-- *Tous les EPICs slider terminés* (SLD-0→11 + CR + PUB).
-- *Versions* : slider local **0.0.20** (non publié Central — accord pilote
-  requis Règle 2) ; Central 0.0.19 ; BOM 0.0.48 ; i18n-contracts 0.0.4.
-- *Publication 0.0.20* : EPIC PUB candidat (ordre DAG : publier slider 0.0.20
-  puis bump MEMPHIS/catalog + consommateurs). `publishToMavenLocal` OK.
-- *Rapport 072* : `.agents/sessions/072-asciidoctorj-pin-revealjs-repare.adoc`.
+- *Tous les EPICs feature slider terminés* (SLD-0→11 + CR + PUB 0.0.1→0.0.18).
+- *Versions* : slider local **0.0.20** (non publié Central — accord pilote requis
+  Règle 2) ; Central 0.0.19 ; codebase 0.0.18 ; koog 1.3.0.
+- *EPIC PUB 0.0.20* : candidat (DAG MEMPHIS-first : publier slider 0.0.20, bump
+  workspace-bom/catalog, consommateurs). `publishToMavenLocal` OK.
+- *CI* : `full-tests.yml` (push main) + `test.yml` (PR). 11 jobs. Les 3 tests
+  Playwright visuels sont **auto-skippés** en CI (fixtures de la racine non générées).
 - *Dette* : `slider-plugin/gradle/libs.versions.toml` `slider = "0.0.14"` (résidu
   stale, version inerte — seul `.pluginId` est lu). Nettoyage candidat.
-- *Dogfooding HTML désormais automatisable* : plus besoin du Ruby système.
 
 == Rappels méthodologie (pilote)
 
-- *Baby-step DDD/TDD/BDD* : RED → GREEN → REFACTOR, 3 niveaux tests/US
-  (unit → functional → cucumber), non-régression stricte (`./gradlew check`).
+- *Local = Build, Tests = CI* : en local uniquement `compileKotlin`/`compileTestKotlin`/
+  `compileFunctionalTestKotlin`/`tasks`/`validatePlugins`. Jamais `test`/`check`.
+- *Baby-step DDD/TDD/BDD* : RED → GREEN → REFACTOR, 3 niveaux tests/US.
 - *English only* : code, Gherkin, commentaires. Gouvernance (.adoc) en français.
-- *Modèle LLM* : `gpt-oss:120b-cloud` épuisé (limite mensuelle) → utiliser
-  `gemma4:31b-cloud` + `OLLAMA_POOL_PORTS=11439,11440,11441,11442`.
-- *Git autorisé* (décision pilote 2026-09-17) — zéro secret. Aucun publish
-  Central sans permission explicite de l'utilisateur.
-
+- *Git autorisé* (décision pilote 2026-09-17) — zéro secret. **Aucun publish Central
+  sans permission explicite du pilote.**
+- Workflow de référence (capsule) : `.github/workflows/full-tests.yml` +
+  `capsule.ci.CapsuleCucumberShardCoverageTest` (S-198).
