@@ -40,7 +40,10 @@ class SliderPlaywrightE2eTest {
 
         @BeforeAll
         @JvmStatic
-        fun launchBrowser() = support.launchBrowser()
+        fun launchBrowser() {
+            support.requireFixture("playwright.ltr.fixtures.dir", "capsule-feed-demo-en-deck.html")
+            support.launchBrowser()
+        }
 
         @AfterAll
         @JvmStatic

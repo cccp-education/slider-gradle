@@ -4,6 +4,7 @@ import com.microsoft.playwright.Browser
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Playwright
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.file.Path
@@ -38,6 +39,21 @@ class PlaywrightFixtureSupport {
     private lateinit var playwright: Playwright
     private lateinit var browser: Browser
 
+    /**
+     * Environment gate (CI). The Reveal.js HTML fixtures are produced by the ROOT
+     * consumer project's `generatePlaywrightFixtures` task (published-plugin pin in
+     * its version catalog), and Chromium is required. On a CI runner neither is
+     * available, so the visual tests cleanly SKIP instead of failing — same doctrine
+     * as the workspace's `assumeTrue(isOllamaReady(port))` integration tests.
+     */
+    fun requireFixture(property: String, fileName: String) {
+        val dir = System.getProperty(property)?.let { Path.of(it) }
+        assumeTrue(dir != null && dir.resolve(fileName).toFile().exists()) {
+            "Playwright fixture '$fileName' absent (system property '$property') — " +
+                "run './gradlew generatePlaywrightFixtures' in the root project to enable the visual tests"
+        }
+    }
+
     fun launchBrowser() {
         playwright = Playwright.create()
         browser = playwright.chromium().launch(
@@ -48,8 +64,10 @@ class PlaywrightFixtureSupport {
     }
 
     fun closeBrowser() {
-        browser.close()
-        playwright.close()
+        // Null-safe: when `requireFixture` aborts `@BeforeAll`, the browser was never
+        // launched (and JUnit may still invoke `@AfterAll`).
+        if (this::browser.isInitialized) browser.close()
+        if (this::playwright.isInitialized) playwright.close()
     }
 
     /**

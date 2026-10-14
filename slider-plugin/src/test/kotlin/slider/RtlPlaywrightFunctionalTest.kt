@@ -41,7 +41,10 @@ class RtlPlaywrightFunctionalTest {
 
         @BeforeAll
         @JvmStatic
-        fun launchBrowser() = support.launchBrowser()
+        fun launchBrowser() {
+            support.requireFixture("playwright.rtl.fixtures.dir", "capsule-feed-demo-ar-deck.html")
+            support.launchBrowser()
+        }
 
         @AfterAll
         @JvmStatic
