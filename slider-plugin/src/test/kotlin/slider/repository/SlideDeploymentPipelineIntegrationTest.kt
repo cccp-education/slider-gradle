@@ -91,7 +91,11 @@ class SlideDeploymentPipelineIntegrationTest {
 
         val remoteRepo = FileRepositoryBuilder().setGitDir(bareRemote).build()
         val git = Git.wrap(remoteRepo)
-        val commits = git.log().call().toList()
+        // Log the pushed branch ref EXPLICITLY. The bare remote's HEAD is left at
+        // JGit's default (`refs/heads/master`), whereas the local `init.defaultBranch`
+        // config (`main`) is absent on a CI runner — `git.log()` (HEAD follow) would
+        // then throw NoHeadException. Naming the ref is deterministic everywhere.
+        val commits = git.log().add(remoteRepo.resolve("refs/heads/main")).call().toList()
         assertThat(commits).hasSize(1)
         assertThat(commits[0].fullMessage).isEqualTo("custom message from integration test")
         git.close()
