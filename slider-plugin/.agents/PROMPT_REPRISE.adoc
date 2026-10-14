@@ -1,7 +1,23 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 075 — **CI sharding** : `full-tests.yml` en matrice parallèle (11 jobs : unit + 7 shards BDD + 3 functional), CI **VERTE** run `38604523046`.
-_Prochaine session_ : 076 — a arbitrer par le pilote (EPIC PUB 0.0.20 candidat).
+_Session terminee_ : 076 — **Publication slider 0.0.20** (Maven Central, bundle `36c53dc9`, propagation repo1 HTTP 200) + consommateur racine `0.0.20` + MEMPHIS BOM/catalog `0.0.93`. EPIC **SLD-PUB TERMINÉ**.
+_Prochaine session_ : 077 — à arbitrer par le pilote.
+
+== Mission session 076 (TERMINÉE) — Publication slider 0.0.20
+
+Release DAG N0→N1→N2 (accord pilote) : `slider-plugin 0.0.20` publié Central
+(bundle `36c53dc9-8459-4299-bca1-ee30f625877a`, AUTOMATIC, propagation repo1
+HTTP 200) ; consommateur racine `gradle/libs.versions.toml` `slider 0.0.19 → 0.0.20`
+(`./gradlew help` VERT) ; `capsule-plugin 0.0.11` (dès que publié) + MEMPHIS
+BOM/catalog `0.0.93` (`capsule-plugin 0.0.11`, `slider-plugin 0.0.20`).
+Contenu 0.0.20 : `asciidoctorRevealJs` réparé (S-072) + KOOG-PIPELINE-DEDUP BS-2
+(S-074) + CI sharding (S-075). Rapport `.agents/sessions/076-pub-slider-0.0.20.adoc`.
+
+=== Contexte reprise session 077
+
+- *Tous les EPICs feature + PUB clos* (SLD-0→11, CR, PUB 0.0.1→0.0.20).
+- *Versions* : slider local **0.0.20 = Central** ; codebase 0.0.18 ; koog 1.3.0.
+- *Backlog* : vide (aucun item actionnable) — prochaine session à arbitrer.
 
 == Mission session 075 (TERMINÉE) — CI sharding parallèle
 
@@ -32,17 +48,13 @@ gems vide. Correctif `slider.extension.AsciidoctorJPin` + `pinAsciidoctorJ`
 (baby-step DDD/TDD/BDD). Preuve dogfooding from-scratch (80 decks HTML) ; bonus
 `generatePlaywrightFixtures` débloqué. Bump **0.0.19 → 0.0.20**.
 
-== Contexte reprise session 076
+== Contexte historique (avant S-076)
 
-- *Tous les EPICs feature slider terminés* (SLD-0→11 + CR + PUB 0.0.1→0.0.18).
-- *Versions* : slider local **0.0.20** (non publié Central — accord pilote requis
-  Règle 2) ; Central 0.0.19 ; codebase 0.0.18 ; koog 1.3.0.
-- *EPIC PUB 0.0.20* : candidat (DAG MEMPHIS-first : publier slider 0.0.20, bump
-  workspace-bom/catalog, consommateurs). `publishToMavenLocal` OK.
+- *Tous les EPICs feature slider terminés* (SLD-0→11 + CR + PUB 0.0.1→0.0.20 ✅ S-076).
 - *CI* : `full-tests.yml` (push main) + `test.yml` (PR). 11 jobs. Les 3 tests
   Playwright visuels sont **auto-skippés** en CI (fixtures de la racine non générées).
-- *Dette* : `slider-plugin/gradle/libs.versions.toml` `slider = "0.0.14"` (résidu
-  stale, version inerte — seul `.pluginId` est lu). Nettoyage candidat.
+- *Marker* : `slider-plugin/gradle/libs.versions.toml` `slider = "0.0.14"` =
+  marker d'auto-application (version inerte — seul `.pluginId` est lu) — conservé.
 
 == Rappels méthodologie (pilote)
 

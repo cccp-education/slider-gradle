@@ -1,4 +1,15 @@
 
+== S-076 — Publication `slider-plugin 0.0.20` + BOM 0.0.93 ✅
+
+* EPIC **SLD-PUB TERMINÉ** (3/3 US). `slider-plugin 0.0.20` Central — bundle
+  `36c53dc9-8459-4299-bca1-ee30f625877a` (AUTOMATIC), propagation repo1 HTTP 200.
+* Consommateur racine `slider 0.0.19 → 0.0.20` (commit `3aa5648`).
+* Cross-borough : `capsule-plugin 0.0.11` + MEMPHIS BOM/catalog `0.0.93`
+  (bundle `fa361f70`, `capsule-plugin 0.0.11` + `slider-plugin 0.0.20`).
+* Contenu 0.0.20 : `asciidoctorRevealJs` réparé (S-072) + KOOG-PIPELINE-DEDUP
+  BS-2 (S-074) + CI sharding (S-075).
+* Rapport `.agents/sessions/076-pub-slider-0.0.20.adoc`.
+
 == S-075 — CI sharding parallèle (`full-tests.yml`) ✅
 
 * Le repo n'avait aucun workflow de test. `full-tests.yml` = **11 jobs parallèles**

@@ -1,0 +1,72 @@
+= Rapport de session 076 — Publication `slider-plugin 0.0.20` (Maven Central) + BOM 0.0.93
+:date: 2026-10-14
+:session: 076
+:type: publish+cross-borough
+:borough: MIAMI (slider-gradle)
+:statut: TERMINÉ (release DAG N0→N1→N2, accord pilote)
+
+== Mission
+
+Clore l'EPIC **SLD-PUB** — publier `slider-plugin 0.0.20` sur Maven Central
+(accord pilote) puis propager la chaîne DAG : consommateur racine,
+`capsule-plugin 0.0.11` (N2, `compileOnly`), MEMPHIS BOM/catalog `0.0.93`.
+
+Contenu de `0.0.20` (depuis `0.0.19`) : `asciidoctorRevealJs` réparé (S-072,
+`AsciidoctorJPin`) + KOOG-PIPELINE-DEDUP BS-2 adoption `codebase.koog.pipeline`
+(S-074) + CI sharding parallèle (S-075, infra only).
+
+Session pure ops/release : `build.gradle.kts` `version = "0.0.20"` était déjà
+positionné (S-072), zéro code de production modifié hors bump déjà committé.
+
+== Actions exécutées
+
+=== 1. Publication slider 0.0.20 (nmcp)
+
+* `./gradlew assemble publishToMavenLocal --no-daemon` (depuis `slider-plugin/`,
+  wrapper autonome) — BUILD SUCCESSFUL ; POM local `0.0.20` vérifié.
+* 3 artefacts signés GPG (CBE2926CD46D8E8B) : `slider-plugin:0.0.20`
+  POM+JAR+sources+javadoc + 2 plugin markers (`education.cccp.slider` +
+  `education.cccp.slider.translator`).
+* `./gradlew publishAggregationToCentralPortal --no-daemon` → bundle
+  **`36c53dc9-8459-4299-bca1-ee30f625877a`** (AUTOMATIC).
+* **Propagation repo1** : `slider-plugin/0.0.20/slider-plugin-0.0.20.pom`
+  → HTTP **200** (vérifié en session).
+
+=== 2. Consommateur racine
+
+* `foundry/public/slider-gradle/gradle/libs.versions.toml` : `slider 0.0.19 → 0.0.20`.
+* `./gradlew help` VERT. Commit `3aa5648`.
+
+=== 3. MEMPHIS 0.0.93 (N0)
+
+* `workspace-bom/gradle/libs.versions.toml` : `workspace-bom 0.0.92 → 0.0.93`,
+  `slider-plugin 0.0.19 → 0.0.20`, `capsule-plugin 0.0.10 → 0.0.11`.
+* Garde `PlatformCatalogAlignmentTest` ré-alignée (`workspace-bom 0.0.92 → 0.0.93`).
+* `publishToMavenLocal` VERT (BOM + catalog 0.0.93 signés ; POM BOM contraint
+  `slider-plugin 0.0.20` + `capsule-plugin 0.0.11`). Bundle Central
+  **`fa361f70-ed77-4325-9e7d-d562db429efa`** (AUTOMATIC).
+
+== Artefacts
+
+|===
+| Artefact | Version | Bundle
+
+| slider-plugin
+| 0.0.20
+| `36c53dc9-8459-4299-bca1-ee30f625877a`
+
+| workspace-bom / workspace-catalog
+| 0.0.93
+| `fa361f70-ed77-4325-9e7d-d562db429efa`
+|===
+
+== Non-régression
+
+* Local = Build : `assemble` + `publishToMavenLocal` VERTS (slider).
+* Tests délégués CI. Zéro secret, zéro Python.
+
+== Suivi
+
+* `slider-plugin/gradle/libs.versions.toml` `slider = "0.0.14"` reste le **marker
+  d'auto-application** (dogfooding, version inerte — seul `.pluginId` est lu) :
+  volontairement **non** modifié (US-3 SLD-PUB requalifiée).

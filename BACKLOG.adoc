@@ -30,7 +30,7 @@ que des workflows pré-existants partiellement commentés, rouges à 0 s — hor
 _Détail_ : link:slider-plugin/.agents/sessions/075-ci-sharding-parallel-matrix.adoc[rapport S-075].
 
 '''
-== 🟡 EPIC SLD-PUB — Alignement dev ↔ publication slider
+== ✅ EPIC SLD-PUB — Alignement dev ↔ publication slider (TERMINÉ S-076)
 
 _Constat (S-073)_ : le plugin est en **dev 0.0.20** (S-072) mais **non publié** sur
 Central (seuls 0.0.18 et 0.0.19 le sont). La **racine consommatrice** avait épinglé
@@ -43,9 +43,9 @@ Central (seuls 0.0.18 et 0.0.19 le sont). La **racine consommatrice** avait épi
 
 | US-1 | Racine réalignée sur la version publiée (`gradle/libs.versions.toml` `slider 0.0.20 → 0.0.19`) | ✅ S-073
 
-| US-2 | **Trancher dev 0.0.20** : soit **publier `slider-plugin 0.0.20`** (Maven Central, DAG MEMPHIS-first) et repinner la racine sur 0.0.20 ; soit **figer la dev sur 0.0.19** (aligner `slider-plugin/gradle/libs.versions.toml`, aujourd'hui incohérent) | 🟡 À FAIRE (accord pilote)
+| US-2 | **Trancher dev 0.0.20** : publié `slider-plugin 0.0.20` (Maven Central, bundle `36c53dc9`, DAG MEMPHIS-first) + racine repinnée sur 0.0.20 | ✅ S-076
 
-| US-3 | Vérifier/aligner la version interne du plugin (`slider-plugin/gradle/libs.versions.toml` = `0.0.14` — stale) | 🟡 À FAIRE
+| US-3 | Version interne `slider-plugin/gradle/libs.versions.toml` = `0.0.14` = **marker d'auto-application** (version inerte — seul `.pluginId` lu), requalifiée « attendue », non un stale | ✅ S-076
 |===
 
 '''
@@ -938,18 +938,18 @@ _Domaines DDD extraits_ : `slider.scaffold`, `slider.config`, `slider.prerequisi
 _Total_ : 11 US, ~20 pts (11/11 terminées — S-035→S-042). _Méthode_ : baby-step TDD/BDD, 3 niveaux tests/US (unit → functional → cucumber), English only code/Gherkin. _Prérequis_ : SLD-0→5 + CNV-6/7/8 terminés, build vert 654 PASS.
 
 '''
-== EPIC PUB — Publication Maven Central 0.0.20 🟡 À FAIRE (accord pilote requis)
+== EPIC PUB — Publication Maven Central 0.0.20 ✅ TERMINÉ (Session 076 — exécution publication)
 
 Contexte : le correctif `asciidoctorRevealJs` (S-072) est dans le code local
 0.0.20, non publié Central. 0.0.19 Central (S-226) est immuable et ne porte
-pas le correctif. Ordre DAG attendu : publier slider 0.0.20 → bump
+pas le correctif. Ordre DAG : publier slider 0.0.20 → bump
 WORKSPACE-BOM/catalog MEMPHIS (constraint slider-plugin 0.0.20) → propager
-aux consommateurs.
+aux consommateurs. **Exécuté S-076.**
 
 | US | Description | Statut
-| PUB-0.0.20-1 | Vérifier POM (`withType<MavenPublication>`) + signing GPG + release deps | 🟡 À FAIRE
-| PUB-0.0.20-2 | `./gradlew publishAggregationToCentralPortal --no-daemon` | 🟡 À FAIRE
-| PUB-0.0.20-3 | Bump WORKSPACE-BOM/catalog MEMPHIS (constraint slider 0.0.20) + propagation repo1 | 🟡 À FAIRE
+| PUB-0.0.20-1 | Vérifier POM (`withType<MavenPublication>`) + signing GPG + release deps | ✅ S-076
+| PUB-0.0.20-2 | `./gradlew publishAggregationToCentralPortal --no-daemon` (bundle `36c53dc9`) | ✅ S-076
+| PUB-0.0.20-3 | Bump WORKSPACE-BOM/catalog MEMPHIS (constraint slider 0.0.20) + propagation repo1 (HTTP 200) | ✅ S-076
 
 '''
 == EPIC PUB — Publication Maven Central 0.0.18 ✅ TERMINÉ (Session 069 — exécution publication)

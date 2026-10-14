@@ -3,6 +3,20 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 076 (2026-10-14) — Publication `slider-plugin 0.0.20` + BOM 0.0.93 ✅ TERMINÉ
+
+* **Type** : publish/ops (release DAG N0→N1→N2, accord pilote). EPIC **SLD-PUB TERMINÉ**.
+* **Livrable** : `slider-plugin 0.0.20` publié Maven Central — bundle
+  **`36c53dc9-8459-4299-bca1-ee30f625877a`** (AUTOMATIC) ; propagation repo1
+  `slider-plugin/0.0.20` **HTTP 200**. 3 artefacts signés GPG + 2 plugin markers.
+* **Consommateur racine** : `gradle/libs.versions.toml` `slider 0.0.19 → 0.0.20`
+  (`./gradlew help` VERT, commit `3aa5648`).
+* **Cross-borough** : `capsule-plugin 0.0.11` (N2) + MEMPHIS BOM/catalog `0.0.93`
+  (`capsule-plugin 0.0.11`, `slider-plugin 0.0.20`, bundle `fa361f70`).
+* **Contenu 0.0.20** : `asciidoctorRevealJs` réparé (S-072) + KOOG-PIPELINE-DEDUP
+  BS-2 (S-074) + CI sharding (S-075).
+* **Rapport** : `.agents/sessions/076-pub-slider-0.0.20.adoc`.
+
 == Session 075 (2026-10-14) — CI sharding parallèle (`full-tests.yml`) ✅ TERMINÉ
 
 * **Type** : ci-infra (le repo n'avait **aucun workflow de test**).
