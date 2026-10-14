@@ -3,6 +3,19 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 074 (2026-10-14) — KOOG-PIPELINE-DEDUP BS-2 : adoption du squelette N1 ✅ TERMINÉ
+
+* **EPIC** : KOOG-PIPELINE-DEDUP (BS-2, décision pilote d'exécution).
+* **Livrable** : nouveau `slider/pipeline/DeckPipelineDefinition.kt` (port
+  `codebase.koog.pipeline.PipelineDefinition<DeckState>`) ; `DeckPipelineGraph` devient
+  une façade sur `pipelineGraph(DeckPipelineDefinition(...))` — API publique préservée
+  (`graph`/`execute`/`asMermaidDiagram`), **142 → 27 l. (−116)**.
+* **Bumps** : `codebase 0.0.14 → 0.0.18` (+ marker plugin) ; `koog 1.0.0 → 1.3.0`
+  (aligné sur le koog de compilation de codebase 0.0.18).
+* **Gates** : compiles ×3 VERTS contre `codebase-plugin 0.0.18` résolu depuis Central
+  (propagation repo1 vérifiée avant compilation). Pas de workflow de test dans ce repo.
+* **Commit** : `a20c4b1`. **Rapport** : `.agents/sessions/074-koog-pipeline-dedup-bs2-adoption.adoc`.
+
 == Session 073 (2026-10-12) — Racine réalignée sur la version publiée (`0.0.20 → 0.0.19`) ✅ TERMINÉ
 
 * **Type** : fix cross-borough (job `runAllTests` MEMPHIS).

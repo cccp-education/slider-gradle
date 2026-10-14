@@ -1,0 +1,62 @@
+= Session 074 — KOOG-PIPELINE-DEDUP BS-2 : adoption du squelette N1 (slider)
+:session: 074
+:date: 2026-10-14
+:borough: MIAMI — slider-gradle (N2)
+:statut: ✅ TERMINÉ — adoption du squelette N1 `codebase.koog.pipeline` (BS-2)
+
+== Mission
+
+Décision pilote d'exécution : **BS-2 de KOOG-PIPELINE-DEDUP** — adopter le squelette
+N1 `codebase.koog.pipeline` (BS-1 S-276, publié `codebase-plugin 0.0.18` S-277/295)
+dans `slider.pipeline.DeckPipelineGraph`, en préservant l'API publique et tous les
+tests existants. Bump/pin autorisés par le pilote.
+
+== Ordre DAG
+
+Consommateur N2 — résout `codebase-plugin` depuis **Maven Central** (slider n'a pas
+de `mavenLocal` dans `dependencyResolutionManagement`). L'adoption est conditionnée
+à la propagation Central de `codebase-plugin 0.0.18` (vérifiée : repo1 HTTP 200
+avant compilation locale).
+
+== Livrable
+
+* Nouveau `slider/pipeline/DeckPipelineDefinition.kt` : implémente le port N1
+  `codebase.koog.pipeline.PipelineDefinition<DeckState>` —
+  `propose`/`validate`/`generate` (délégation `DeckContextValidator`) +
+  `isValid`/`isFailed` + `onProposeFailure`/`onGenerateFailure`
+  (libellés `ProposeContextFailed:` / `GenerateDeckFailed:` conservés).
+* `slider/pipeline/DeckPipelineGraph.kt` : façade mince sur
+  `pipelineGraph(DeckPipelineDefinition(...))` ; **API publique préservée**
+  (`graph`, `execute`, `asMermaidDiagram`). 142 → 27 lignes (−116).
+* `gradle/libs.versions.toml` :
+  * `codebase 0.0.14 → 0.0.18` (lib + marker plugin `education.cccp.codebase`).
+  * `koog 1.0.0 → 1.3.0` (aligné sur le koog de compilation de codebase 0.0.18).
+
+== Iso-comportement
+
+* Mêmes transitions (`CONTEXT_PROPOSED → CONTEXT_VALIDATED → DECK_GENERATED|FAILED`),
+  mêmes edges conditionnels, mêmes libellés d'erreur.
+* Déviation mineure documentée : les nœuds de `asMermaidDiagram()` sont nommés
+  génériquement (`proposeNode`/`validateNode`/`generateNode`), les tests n'assertent
+  que la non-vacuité. Un seul fichier `src/main` utilisait koog (`DeckPipelineGraph.kt`) —
+  le bump koog `1.0.0 → 1.3.0` n'affecte aucun autre code.
+
+== Gates (Local = Build, Tests = CI)
+
+* `compileKotlin` / `compileTestKotlin` / `compileFunctionalTestKotlin` VERT contre
+  `codebase-plugin 0.0.18` résolu depuis Central.
+* UT `DeckPipelineGraphTest` (16) et BDD `26_deck_pipeline_koog.feature` inchangés.
+* **CI** : le repo ne porte pas de workflow de test (seuls `generate_deck.yml` /
+  `website.yml`, pré-existants rouges à 0 s, hors périmètre) — la preuve de validité
+  est la compilation locale ×3 ; le delta est identique au jumeau capsule, couvert
+  par la CI `Test`/`Full Tests` de capsule.
+
+== Commit
+
+* `a20c4b1` — `refactor(slider): adopt N1 codebase.koog.pipeline skeleton (KOOG-PIPELINE-DEDUP BS-2)`
+
+== Traçabilité
+
+* Cadrage : `capsule-gradle/capsule-plugin/.agents/CADRAGE_EPIC_KOOG_PIPELINE_DEDUP.adoc`.
+* BS-1 : `codebase-gradle/.../sessions/276-koog-pipeline-dedup-bs1.adoc`.
+* Jumeau capsule : `.agents/sessions/200-koog-pipeline-dedup-bs2-adoption.adoc` (capsule).
