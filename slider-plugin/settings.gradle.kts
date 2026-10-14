@@ -20,8 +20,13 @@ val globalProps = java.util.Properties().also {
 
 nmcpSettings {
     centralPortal {
-        username = globalProps.getProperty("ossrhUsername") ?: error("ossrhUsername not found")
-        password = globalProps.getProperty("ossrhPassword") ?: error("ossrhPassword not found")
+        // Empty fallback (not `error`): a CI runner has no credentials in
+        // ~/.gradle/gradle.properties — failing here would break EVERY task at
+        // configuration time, including `test`/`compileKotlin`. Credentials are
+        // only required by the actual publish tasks. Pattern shared with codebase
+        // (S-269) and dashboard (S-217).
+        username = globalProps.getProperty("ossrhUsername") ?: ""
+        password = globalProps.getProperty("ossrhPassword") ?: ""
         publishingType = "AUTOMATIC"
     }
 }

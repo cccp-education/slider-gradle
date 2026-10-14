@@ -1,3 +1,5 @@
+import build.CucumberTaskSpec
+
 // ── buildscript resolutionStrategy ────────────────────────────────────────────────
 // Gradle 9.5.1 pinne annotations:13.0 (Kotlin embedded) en strictly.
 // koog-agents 0.8.0 → koog-utils/koog-http-client-core/koog-prompt-llm →
@@ -92,6 +94,49 @@ dependencies {
 cucumberConventions {
     featuresDir = "src/test/features"
     scenariosDir = "src/test/scenarios"
+    // ── CI shards (parallel `full-tests.yml`) ──────────────────────────────────
+    // Exhaustive, disjoint feature shards of the aggregate `CucumberTestRunner`,
+    // so the BDD suite runs across several CI machines in parallel. Exhaustiveness
+    // and disjointness are guarded by slider.ci.SliderCucumberShardCoverageTest.
+    // Each shard keeps the one-JVM/aggregate efficiency; no shard needs ffmpeg or
+    // Chromium — every slider feature is pure-domain.
+    additionalTasks = listOf(
+        CucumberTaskSpec(
+            name = "cucumberTestShardCore",
+            runnerClass = "slider.steps.CucumberShardCoreRunner",
+            timeoutMinutes = 30,
+        ),
+        CucumberTaskSpec(
+            name = "cucumberTestShardI18n",
+            runnerClass = "slider.steps.CucumberShardI18nRunner",
+            timeoutMinutes = 30,
+        ),
+        CucumberTaskSpec(
+            name = "cucumberTestShardTranslation",
+            runnerClass = "slider.steps.CucumberShardTranslationRunner",
+            timeoutMinutes = 30,
+        ),
+        CucumberTaskSpec(
+            name = "cucumberTestShardRepository",
+            runnerClass = "slider.steps.CucumberShardRepositoryRunner",
+            timeoutMinutes = 30,
+        ),
+        CucumberTaskSpec(
+            name = "cucumberTestShardDecomposition",
+            runnerClass = "slider.steps.CucumberShardDecompositionRunner",
+            timeoutMinutes = 30,
+        ),
+        CucumberTaskSpec(
+            name = "cucumberTestShardContent",
+            runnerClass = "slider.steps.CucumberShardContentRunner",
+            timeoutMinutes = 30,
+        ),
+        CucumberTaskSpec(
+            name = "cucumberTestShardPipeline",
+            runnerClass = "slider.steps.CucumberShardPipelineRunner",
+            timeoutMinutes = 30,
+        ),
+    )
 }
 
 // Exclude Cucumber step definitions from the unit `test` task.
