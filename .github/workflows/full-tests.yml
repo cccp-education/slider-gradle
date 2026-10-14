@@ -72,20 +72,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # The `core` shard runs `proposeDeckContext` (RAG-assisted), which starts a
+          # pgvector container via docker-java. The image must be pre-pulled: the
+          # plugin's own `pullImageCmd` is unreliable on CI (anonymous Docker Hub pull).
           - name: "BDD · core"
             task: cucumberTestShardCore
+            pgvector: true
           - name: "BDD · i18n"
             task: cucumberTestShardI18n
+            pgvector: false
           - name: "BDD · translation"
             task: cucumberTestShardTranslation
+            pgvector: false
           - name: "BDD · repository"
             task: cucumberTestShardRepository
+            pgvector: false
           - name: "BDD · decomposition"
             task: cucumberTestShardDecomposition
+            pgvector: false
           - name: "BDD · content"
             task: cucumberTestShardContent
+            pgvector: false
           - name: "BDD · pipeline"
             task: cucumberTestShardPipeline
+            pgvector: false
     steps:
       - uses: actions/checkout@v4
 
@@ -97,6 +107,10 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Pre-pull pgvector image
+        if: ${{ matrix.pgvector }}
+        run: docker pull pgvector/pgvector:pg17
 
       - name: Run BDD shard
         run: ./gradlew ${{ matrix.task }}
