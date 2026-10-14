@@ -26,10 +26,11 @@ langchain4j-beta = "1.16.3-beta26"
 docker-java = "3.7.0"
 testcontainers-pg = "1.21.4"
 logback = "1.5.32"
-codebase = "0.0.14"
+codebase = "0.0.18"
 playwright = "1.52.0"
 i18n-contracts = "0.0.4"
-koog = "1.0.0"
+# Aligned on the codebase 0.0.18 compile-time koog (N1 skeleton PipelineGraph).
+koog = "1.3.0"
 
 [libraries]
 asciidoctor-gradle-jvm-slides = { module = "org.asciidoctor:asciidoctor-gradle-jvm-slides", version.ref = "asciidoctor-gradle" }
