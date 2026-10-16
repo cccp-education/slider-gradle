@@ -1,0 +1,32 @@
+= Session 077 — Cache CI de l'image pgvector (shard BDD `core`)
+:toc:
+
+== Contexte
+
+Maintenance CI (cache cross-borough, cf. `workspace-bom/.agents/CADRAGE_CI_CACHE.adoc`).
+Le shard BDD `BDD · core` (`pgvector: true`) de `full-tests.yml` faisait
+`docker pull pgvector/pgvector:pg17` à **chaque** run.
+
+== Correctif
+
+Remplacement du `docker pull` nu par un cache `docker save`/`load` (pattern identique
+à `setup-ollama` de capsule/plantuml) :
+
+. `actions/cache@v4` sur `${{ runner.temp }}/pgvector-pg17.tar`, clé
+   `pgvector-pg17-${{ runner.os }}` ;
+. **cache hit** → `docker load -i …` ;
+. **cache miss** → `docker pull` puis `docker save -o …`.
+
+Le tout gardé par `matrix.pgvector` (seul le shard `core` l'exécute).
+
+== Portée
+
+`.github/workflows/full-tests.yml` (job `bdd-shard`) uniquement ; aucun code plugin.
+Le run cross-borough de `workspace-bom` ne consomme que les tâches Gradle (pas ce
+workflow).
+
+== Rappel (contrainte)
+
+Le cache GitHub Actions est **scopé par dépôt** ; un cache « global » exigerait un
+runner self-hosted à disque persistant (images pré-`pull`) ou une image conteneur
+pré-bakée.

@@ -3,6 +3,16 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 077 (2026-10-15) — Cache CI de l'image pgvector (shard BDD `core`) ✅ TERMINÉ
+
+* **Type** : ci (maintenance, cache cross-borough). Le shard `BDD · core` (`pgvector: true`)
+  faisait `docker pull pgvector/pgvector:pg17` à chaque run.
+* **Correctif** : `actions/cache@v4` sur un `docker save` tar (clé `pgvector-pg17-${{ runner.os }}`),
+  `docker load` sur hit / `docker pull`+`docker save` sur miss (pattern `setup-ollama`).
+* **Portée** : `.github/workflows/full-tests.yml` uniquement ; zéro code plugin.
+* Cadrage transverse : `workspace-bom/.agents/CADRAGE_CI_CACHE.adoc`. Rapport
+  `.agents/sessions/077-ci-cache-pgvector.adoc`.
+
 == Session 076 (2026-10-14) — Publication `slider-plugin 0.0.20` + BOM 0.0.93 ✅ TERMINÉ
 
 * **Type** : publish/ops (release DAG N0→N1→N2, accord pilote). EPIC **SLD-PUB TERMINÉ**.
