@@ -108,9 +108,25 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Pre-pull pgvector image
+      # Cache the pgvector image as a `docker save` tar (mirrors the ollama
+      # pattern) so the image is not re-pulled on every run.
+      - name: Restore pgvector image cache
         if: ${{ matrix.pgvector }}
-        run: docker pull pgvector/pgvector:pg17
+        id: pgvector-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/pgvector-pg17.tar
+          key: pgvector-pg17-${{ runner.os }}
+
+      - name: Load pgvector image
+        if: ${{ matrix.pgvector && steps.pgvector-cache.outputs.cache-hit == 'true' }}
+        run: docker load -i "${{ runner.temp }}/pgvector-pg17.tar"
+
+      - name: Pull and cache pgvector image
+        if: ${{ matrix.pgvector && steps.pgvector-cache.outputs.cache-hit != 'true' }}
+        run: |
+          docker pull pgvector/pgvector:pg17
+          docker save pgvector/pgvector:pg17 -o "${{ runner.temp }}/pgvector-pg17.tar"
 
       - name: Run BDD shard
         run: ./gradlew ${{ matrix.task }}
