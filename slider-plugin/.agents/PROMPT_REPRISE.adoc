@@ -1,7 +1,8 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 077 — **Cache CI de l'image pgvector (shard BDD `core`)** ✅ — `docker save/load` + `actions/cache` (pattern ollama) ; workflow-only. Cf. `workspace-bom/.agents/CADRAGE_CI_CACHE.adoc`. Rapport `.agents/sessions/077-ci-cache-pgvector.adoc`.
-_Prochaine session_ : 078 — à arbitrer par le pilote.
+_Session terminee_ : 078 — **CI : désactivation des workflows morts** (`generate_deck.yml`, `website.yml` → `.disabled`, 0 s failures) ✅ — `git mv` ; rapport `.agents/sessions/078-ci-disable-dead-workflows.adoc`.
+_Prochaine session_ : 079 — à arbitrer par le pilote.
+_Session terminee (précédente)_ : 077 — **Cache CI de l'image pgvector (shard BDD `core`)** ✅ — `docker save/load` + `actions/cache` (pattern ollama) ; workflow-only. Rapport `.agents/sessions/077-ci-cache-pgvector.adoc`.
 _Session terminee (précédente)_ : 076 — **Publication slider 0.0.20** (Maven Central, bundle `36c53dc9`, propagation repo1 HTTP 200) + consommateur racine `0.0.20` + MEMPHIS BOM/catalog `0.0.93`. EPIC **SLD-PUB TERMINÉ**.
 
 == Mission session 076 (TERMINÉE) — Publication slider 0.0.20

@@ -3,6 +3,16 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 078 (2026-10-15) — CI : désactivation des workflows morts (0 s failures) ✅ TERMINÉ
+
+* **Type** : ci (hygiène). Deux workflows échouaient en **0 s** à chaque push
+  (« workflow file issue ») : `generate_deck.yml` et `website.yml` — **entièrement
+  commentés** (stubs morts, sans `name:`/`on:`/`jobs:`). GitHub découvre tout
+  `*.yml` de `.github/workflows/` et échoue à les charger.
+* **Correctif** : `git mv` → `.yml.disabled` (convention `plantuml-gradle`).
+  Aucun code plugin, aucune fonctionnalité retirée.
+* Rapport `.agents/sessions/078-ci-disable-dead-workflows.adoc`.
+
 == Session 077 (2026-10-15) — Cache CI de l'image pgvector (shard BDD `core`) ✅ TERMINÉ
 
 * **Type** : ci (maintenance, cache cross-borough). Le shard `BDD · core` (`pgvector: true`)

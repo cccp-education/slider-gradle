@@ -1,0 +1,36 @@
+= Session 078 — CI : désactivation des workflows morts (0 s failures)
+:toc:
+
+== Contexte
+
+À chaque push, deux workflows slider échouaient en **0 s** avec « This run likely
+failed because of a workflow file issue » : `.github/workflows/generate_deck.yml`
+et `.github/workflows/website.yml`. Faux positifs récurrents (déjà présents au push
+S-076 du 2026-10-14).
+
+== Diagnostic
+
+Les deux fichiers sont **entièrement commentés** (chaque ligne préfixée `#`) : ce sont
+des stubs morts, sans `name:`, sans `on:`, sans `jobs:`. GitHub Actions découvre tout
+`*.yml`/`*.yaml` de `.github/workflows/` et échoue à les charger comme workflows → un
+run `failure` à 0 s par fichier, à chaque push. Aucun rapport avec le code du plugin.
+
+== Correctif
+
+Renommage en **`.disabled`** (suffixe apposé au `.yml` : convention déjà utilisée par
+`plantuml-gradle` pour ses workflows désactivés) : GitHub ne découvre plus ces fichiers.
+
+* `generate_deck.yml` → `generate_deck.yml.disabled`
+* `website.yml` → `website.yml.disabled`
+
+`git mv` (histoire préservée). Aucun autre workflow touché ; aucun code plugin modifié.
+
+== Rappel
+
+Ces deux workflows étaient **déjà inertes** (100 % commentés) ; leur désactivation ne
+retire aucune fonctionnalité. Les workflows actifs restants : `full-tests.yml`,
+`readme_plantuml.yml`, `readme_truth.yml`, `test.yml`.
+
+== Suite
+
+* Vérifier sur le push suivant que les deux runs `failure` 0 s ont disparu.
