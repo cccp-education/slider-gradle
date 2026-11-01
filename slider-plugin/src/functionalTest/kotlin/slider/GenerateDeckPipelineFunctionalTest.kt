@@ -13,10 +13,18 @@ import java.io.File
  *
  * `generateDeckPipeline` is the thin Gradle adapter that orchestrates the koog
  * [slider.pipeline.DeckPipelineGraph] (propose-context → validate-context →
- * generate-deck) in a single invocation. These tests verify the Gradle surface
- * of the task — registration, i18n descriptions, and input guards — without
- * contacting any LLM (the pipeline domain logic is covered by the unit tests
- * of baby-steps 8.3a/8.3b).
+ * generate-deck) in a single invocation. Two concerns only need Gradle:
+ *
+ *  * the **published surface** — the task is registered in the `generate` group
+ *    with a localized description (one TestKit build);
+ *  * the **input guards** — a missing `-Psubject` and an unreachable LLM both fail
+ *    the task with a clear outcome (one build each).
+ *
+ * The description matrix (24 keys × 10 languages) is asserted purely by
+ * [slider.i18n.TaskDescriptionsI18nCatalogTest], and the `-Planguage` wiring is
+ * proven by the single smoke of [slider.i18n.TaskDescriptionsI18nFunctionalTest]
+ * (XB-FP-6, S-322). The pipeline domain logic is covered by the unit tests of
+ * baby-steps 8.3a/8.3b. Measured before: 7 TestKit builds for this class.
  */
 class GenerateDeckPipelineFunctionalTest {
 
@@ -35,51 +43,7 @@ class GenerateDeckPipelineFunctionalTest {
     }
 
     @Test
-    fun `generateDeckPipeline task should be registered`() {
-        writeBuildFile()
-
-        val result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--all", "--quiet")
-            .forwardOutput()
-            .build()
-
-        assertThat(result.output).contains("generateDeckPipeline")
-    }
-
-    @Test
-    fun `generateDeckPipeline task should be in the generate group in English`() {
-        writeBuildFile()
-
-        val output = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--group", "generate", "-Planguage=en", "--quiet")
-            .forwardOutput()
-            .build()
-            .output
-
-        assertThat(output).contains("generateDeckPipeline")
-    }
-
-    @Test
-    fun `generateDeckPipeline task should be in the generate group in French`() {
-        writeBuildFile()
-
-        val output = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--group", "generate", "-Planguage=fr", "--quiet")
-            .forwardOutput()
-            .build()
-            .output
-
-        assertThat(output).contains("generateDeckPipeline")
-    }
-
-    @Test
-    fun `generateDeckPipeline task should have an i18n description in English`() {
+    fun `generateDeckPipeline task is registered in the generate group with a localized description`() {
         writeBuildFile()
 
         val output = GradleRunner.create()
@@ -92,22 +56,6 @@ class GenerateDeckPipelineFunctionalTest {
 
         assertThat(output).contains("generateDeckPipeline")
         assertThat(output).contains("koog pipeline")
-    }
-
-    @Test
-    fun `generateDeckPipeline task should have an i18n description in French`() {
-        writeBuildFile()
-
-        val output = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--group", "generate", "-Planguage=fr", "--quiet")
-            .forwardOutput()
-            .build()
-            .output
-
-        assertThat(output).contains("generateDeckPipeline")
-        assertThat(output).contains("pipeline koog")
     }
 
     @Test
