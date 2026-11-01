@@ -95,6 +95,7 @@ slider = [
     "jackson-module-kotlin",
     "jackson-dataformat-yaml",
     "arrow-core",
+    "arrow-coroutines",
     "arrow-jackson",
     "langchain4j",
     "langchain4j-ollama",
