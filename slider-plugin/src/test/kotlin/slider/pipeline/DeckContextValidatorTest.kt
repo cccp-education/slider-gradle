@@ -265,6 +265,51 @@ class DeckContextValidatorTest {
     }
 
     @Test
+    fun `reports every missing field at once instead of stopping at the first`() {
+        val result = DeckContextValidator.validate("{}")
+
+        assertThat(result).isInstanceOf(ValidationResult.Invalid::class.java)
+        val invalid = result as ValidationResult.Invalid
+        assertThat(invalid.error)
+            .contains("subject")
+            .contains("audience")
+            .contains("duration")
+            .contains("languageCode")
+            .contains("outputFile")
+            .contains("author")
+    }
+
+    @Test
+    fun `reports both author fields when the author object is incomplete`() {
+        val json = """
+            {
+              "subject": "Kotlin",
+              "audience": "devs",
+              "duration": 60,
+              "languageCode": "fr",
+              "outputFile": "deck.adoc",
+              "author": {}
+            }
+        """.trimIndent()
+
+        val result = DeckContextValidator.validate(json)
+
+        assertThat(result).isInstanceOf(ValidationResult.Invalid::class.java)
+        val invalid = result as ValidationResult.Invalid
+        assertThat(invalid.error).contains("name").contains("email")
+    }
+
+    @Test
+    fun `validateEither accumulates violations in a non-empty list`() {
+        val either = DeckContextValidator.validateEither("""{"subject": "Kotlin"}""")
+
+        assertThat(either.isLeft()).isTrue()
+        val errors = either.leftOrNull()
+        assertThat(errors).isNotNull
+        assertThat(errors!!.size).isGreaterThan(1)
+    }
+
+    @Test
     fun `ValidationResult Valid exposes the raw json`() {
         val json = """
             {

@@ -1,5 +1,9 @@
 package slider.pipeline
 
+import arrow.core.Either
+import arrow.core.NonEmptyList
+import arrow.core.left
+import arrow.core.right
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import contracts.i18n.LanguageCatalog
@@ -18,8 +22,13 @@ import contracts.i18n.LanguageCatalog
  *  7. `outputFile` is present and non-blank.
  *  8. `author` object is present with non-blank `name` and `email`.
  *
- * Returns a [ValidationResult] — [ValidationResult.Valid] when all checks pass,
- * [ValidationResult.Invalid] with a human-readable error otherwise.
+ * Functional shape (XB-FP-2, arrow-kt): the checks are **independent pure
+ * functions** returning a list of errors (empty = ok); they are concatenated —
+ * no mutable accumulator — and wrapped in `Either<NonEmptyList<String>, String>`
+ * so that **every** problem is reported at once (the former implementation
+ * short-circuited on the first one). [validate] keeps the historical
+ * [ValidationResult] boundary: the sealed type stays the domain vocabulary and
+ * Arrow is an internal composition tool (D3/D4).
  *
  * Pure — no Gradle, no LLM, no I/O. Uses Jackson (JSON parser) and the shared
  * N0 contract [LanguageCatalog]. Pattern aligned on
@@ -34,65 +43,91 @@ object DeckContextValidator {
      *
      * @param json the raw DeckContext JSON string proposed by the LLM.
      * @return [ValidationResult.Valid] when the JSON is well-formed and complete,
-     *         [ValidationResult.Invalid] with an explanation otherwise.
+     *         [ValidationResult.Invalid] with **all** the violations joined by
+     *         `"; "` otherwise.
      */
-    fun validate(json: String): ValidationResult {
+    fun validate(json: String): ValidationResult =
+        validateEither(json).fold(
+            { errors -> ValidationResult.Invalid(errors.joinToString("; ")) },
+            { validJson -> ValidationResult.Valid(validJson) },
+        )
+
+    /**
+     * Arrow-shaped validation: `Left` carries the non-empty list of violations,
+     * `Right` the validated JSON. Exposed to the module (internal) so that the
+     * composition can be exercised without the sealed boundary.
+     */
+    internal fun validateEither(json: String): Either<NonEmptyList<String>, String> {
         if (json.isBlank()) {
-            return ValidationResult.Invalid("DeckContext JSON is blank")
+            return NonEmptyList("DeckContext JSON is blank", emptyList()).left()
         }
 
-        val root: JsonNode = try {
-            jsonMapper.readTree(json)
-        } catch (e: Exception) {
-            return ValidationResult.Invalid("DeckContext JSON is malformed: ${e.message}")
+        val root: JsonNode = when (val parsed = Either.catch { jsonMapper.readTree(json) }) {
+            is Either.Left -> {
+                return NonEmptyList("DeckContext JSON is malformed: ${parsed.value.message}", emptyList()).left()
+            }
+            is Either.Right -> parsed.value
         }
 
         if (root.isMissingNode || !root.isObject) {
-            return ValidationResult.Invalid("DeckContext JSON must be a JSON object")
+            return NonEmptyList("DeckContext JSON must be a JSON object", emptyList()).left()
         }
 
-        root.textField("subject")?.let { return it }
-        root.textField("audience")?.let { return it }
+        // Independent checks concatenated — no short-circuit, no mutable list.
+        val errors: List<String> =
+            root.requiredText("subject") +
+                root.requiredText("audience") +
+                root.durationErrors() +
+                root.languageErrors() +
+                root.requiredText("outputFile") +
+                root.authorErrors()
 
-        val duration = root.get("duration")
-        if (duration == null || !duration.isNumber || duration.asInt() <= 0) {
-            return ValidationResult.Invalid("DeckContext.duration must be a positive integer")
+        return when {
+            errors.isEmpty() -> json.right()
+            else -> NonEmptyList(errors.first(), errors.drop(1)).left()
         }
-
-        val languageCode = root.get("languageCode")
-        if (languageCode == null || languageCode.asText().isBlank()) {
-            return ValidationResult.Invalid("DeckContext.languageCode is missing or blank")
-        }
-        if (languageCode.asText() !in LanguageCatalog.supportedCodes()) {
-            return ValidationResult.Invalid(
-                "DeckContext.languageCode '${languageCode.asText()}' is not a supported language code",
-            )
-        }
-
-        root.textField("outputFile")?.let { return it }
-
-        val author = root.get("author")
-        if (author == null || !author.isObject) {
-            return ValidationResult.Invalid("DeckContext.author is missing or not an object")
-        }
-        author.textField("name")?.let { return it }
-        author.textField("email")?.let { return it }
-
-        return ValidationResult.Valid(json)
     }
 
-    /**
-     * Returns an [ValidationResult.Invalid] when the field at [name] is missing,
-     * null, or blank — otherwise null.
-     */
-    private fun JsonNode.textField(name: String): ValidationResult.Invalid? {
-        val node = this.get(name)
-        if (node == null || node.isNull) {
-            return ValidationResult.Invalid("DeckContext.$name is missing")
+    /** Missing / null / blank violation for a required text field. */
+    private fun JsonNode.requiredText(name: String): List<String> =
+        when {
+            !has(name) || get(name).isNull -> listOf("DeckContext.$name is missing")
+            get(name).asText().isBlank() -> listOf("DeckContext.$name is blank")
+            else -> emptyList()
         }
-        if (node.asText().isBlank()) {
-            return ValidationResult.Invalid("DeckContext.$name is blank")
+
+    /** `duration` must be a present positive number. */
+    private fun JsonNode.durationErrors(): List<String> {
+        val duration = get("duration")
+        return if (duration == null || !duration.isNumber || duration.asInt() <= 0) {
+            listOf("DeckContext.duration must be a positive integer")
+        } else {
+            emptyList()
         }
-        return null
+    }
+
+    /** `languageCode` must be present and belong to the shared N0 catalog. */
+    private fun JsonNode.languageErrors(): List<String> {
+        val languageCode = get("languageCode")
+        return when {
+            languageCode == null || languageCode.asText().isBlank() ->
+                listOf("DeckContext.languageCode is missing or blank")
+
+            languageCode.asText() !in LanguageCatalog.supportedCodes() ->
+                listOf(
+                    "DeckContext.languageCode '${languageCode.asText()}' is not a supported language code",
+                )
+
+            else -> emptyList()
+        }
+    }
+
+    /** `author` must be an object with non-blank `name` and `email`. */
+    private fun JsonNode.authorErrors(): List<String> {
+        val author = get("author")
+        if (author == null || !author.isObject) {
+            return listOf("DeckContext.author is missing or not an object")
+        }
+        return author.requiredText("name") + author.requiredText("email")
     }
 }
