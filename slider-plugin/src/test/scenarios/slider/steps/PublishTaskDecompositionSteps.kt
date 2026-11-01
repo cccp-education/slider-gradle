@@ -6,8 +6,9 @@ import io.cucumber.java.en.When
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 
-class PublishTaskDecompositionSteps(private val world: SliderWorld) {
-
+class PublishTaskDecompositionSteps(
+    private val world: SliderWorld,
+) {
     @Given("a Gradle project with the slider plugin applied")
     fun createSliderProject() {
         world.createGradleProject()
@@ -15,12 +16,16 @@ class PublishTaskDecompositionSteps(private val world: SliderWorld) {
     }
 
     @When("the project tasks are listed")
-    fun listProjectTasks() = runBlocking {
-        world.executeGradle("tasks", "--quiet")
-    }
+    fun listProjectTasks() =
+        runBlocking {
+            world.executeGradle("tasks", "--quiet")
+        }
 
     @Then("the task {string} should be in the {string} group")
-    fun taskShouldBeInGroup(taskName: String, group: String) = runBlocking {
+    fun taskShouldBeInGroup(
+        taskName: String,
+        group: String,
+    ) = runBlocking {
         world.executeGradle("tasks", "--group", group, "--quiet")
         val output = world.buildResult?.output ?: ""
         assertThat(output)
@@ -29,7 +34,10 @@ class PublishTaskDecompositionSteps(private val world: SliderWorld) {
     }
 
     @Then("the task {string} should depend on {string}")
-    fun taskShouldDependOn(taskName: String, dependency: String) = runBlocking {
+    fun taskShouldDependOn(
+        taskName: String,
+        dependency: String,
+    ) = runBlocking {
         world.executeGradle("$taskName", "--dry-run", "--quiet")
         val output = world.buildResult?.output ?: ""
         assertThat(output)

@@ -22,7 +22,6 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
  * ```
  */
 object GradleWiring {
-
     /**
      * Applies the supplied [spec] to [project]:
      * 1. configures all repositories,
@@ -31,7 +30,10 @@ object GradleWiring {
      *
      * Defaults to [WiringSpec.DEFAULT] when no spec is provided.
      */
-    fun configure(project: Project, spec: WiringSpec = WiringSpec.DEFAULT) {
+    fun configure(
+        project: Project,
+        spec: WiringSpec = WiringSpec.DEFAULT,
+    ) {
         configureRepositories(project, spec.repositories)
         applyPlugins(project, spec.plugins)
         configureDependencies(project, spec.gems)
@@ -47,27 +49,30 @@ object GradleWiring {
     ) {
         repositories.forEach { spec ->
             when (spec.kind) {
-                RepositoryKind.MAVEN -> project.repositories.maven { repo ->
-                    repo.url = project.uri(spec.url!!)
-                    applyRouting(repo, spec.routing)
-                }
-                RepositoryKind.MAVEN_CENTRAL -> project.repositories.mavenCentral { repo ->
-                    applyRouting(repo, spec.routing)
-                }
-                is RepositoryKind.IVY -> project.repositories.ivy { repo ->
-                    repo.url = project.uri(spec.url!!)
-                    repo.patternLayout { layout ->
-                        layout.artifact(spec.kind.artifactPattern)
+                RepositoryKind.MAVEN ->
+                    project.repositories.maven { repo ->
+                        repo.url = project.uri(spec.url!!)
+                        applyRouting(repo, spec.routing)
                     }
-                    repo.metadataSources { sources ->
-                        spec.kind.metadataSources.forEach { src ->
-                            when (src) {
-                                IvyMetadataSource.ARTIFACT -> sources.artifact()
+                RepositoryKind.MAVEN_CENTRAL ->
+                    project.repositories.mavenCentral { repo ->
+                        applyRouting(repo, spec.routing)
+                    }
+                is RepositoryKind.IVY ->
+                    project.repositories.ivy { repo ->
+                        repo.url = project.uri(spec.url!!)
+                        repo.patternLayout { layout ->
+                            layout.artifact(spec.kind.artifactPattern)
+                        }
+                        repo.metadataSources { sources ->
+                            spec.kind.metadataSources.forEach { src ->
+                                when (src) {
+                                    IvyMetadataSource.ARTIFACT -> sources.artifact()
+                                }
                             }
                         }
+                        applyRouting(repo, spec.routing)
                     }
-                    applyRouting(repo, spec.routing)
-                }
             }
         }
     }
@@ -75,14 +80,20 @@ object GradleWiring {
     /**
      * Applies every [plugins] entry to [project] via `project.plugins.apply`.
      */
-    fun applyPlugins(project: Project, plugins: List<PluginSpec>) {
+    fun applyPlugins(
+        project: Project,
+        plugins: List<PluginSpec>,
+    ) {
         plugins.forEach { spec -> project.plugins.apply(spec.id) }
     }
 
     /**
      * Adds every [gems] entry to the `asciidoctorGems` configuration.
      */
-    fun configureDependencies(project: Project, gems: List<GemDependency>) {
+    fun configureDependencies(
+        project: Project,
+        gems: List<GemDependency>,
+    ) {
         gems.forEach { gem ->
             project.dependencies.add("asciidoctorGems", gem.toCoordinates())
         }

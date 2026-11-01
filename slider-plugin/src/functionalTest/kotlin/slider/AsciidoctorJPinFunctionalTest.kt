@@ -23,7 +23,6 @@ import java.io.File
  * worker keeps `3.0.0` and the duplicate JRuby reappears.
  */
 class AsciidoctorJPinFunctionalTest {
-
     @TempDir
     lateinit var projectDir: File
 
@@ -46,17 +45,18 @@ class AsciidoctorJPinFunctionalTest {
     fun `the asciidoctorj version is pinned to the plugin classpath version`() {
         writeBuildFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments(
-                "dependencies",
-                "--configuration",
-                "__\$\$asciidoctorj_asciidoctorRevealJs\$\$__r",
-                "--quiet",
-            )
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments(
+                    "dependencies",
+                    "--configuration",
+                    "__\$\$asciidoctorj_asciidoctorRevealJs\$\$__r",
+                    "--quiet",
+                ).forwardOutput()
+                .build()
 
         assertThat(result.task(":dependencies")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
 

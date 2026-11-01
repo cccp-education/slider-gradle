@@ -7,7 +7,6 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class SlideDeploymentRequestTest {
-
     @TempDir
     lateinit var tempDir: File
 

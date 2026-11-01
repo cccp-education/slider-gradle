@@ -15,12 +15,12 @@ import dev.langchain4j.model.chat.ChatModel
  * string contract keeps [DeckPipelineGraph] free from langchain4j message
  * types.
  */
-class ChatModelDeckLlm(private val model: ChatModel) : DeckLlm {
-
+class ChatModelDeckLlm(
+    private val model: ChatModel,
+) : DeckLlm {
     override fun propose(prompt: String): String = chat(prompt)
 
     override fun generate(prompt: String): String = chat(prompt)
 
-    private fun chat(prompt: String): String =
-        model.chat(listOf(UserMessage.from(prompt))).aiMessage().text()
+    private fun chat(prompt: String): String = model.chat(listOf(UserMessage.from(prompt))).aiMessage().text()
 }

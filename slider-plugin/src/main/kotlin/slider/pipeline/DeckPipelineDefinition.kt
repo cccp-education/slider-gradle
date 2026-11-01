@@ -30,7 +30,6 @@ class DeckPipelineDefinition(
     private val promptBuilder: DeckPromptBuilder,
     private val llm: DeckLlm,
 ) : PipelineDefinition<DeckState> {
-
     override val name: String = NAME
 
     override fun propose(state: DeckState): DeckState {
@@ -45,16 +44,18 @@ class DeckPipelineDefinition(
 
     override fun validate(state: DeckState): DeckState =
         when (val result = DeckContextValidator.validate(state.deckContextJson)) {
-            is ValidationResult.Valid -> state.copy(
-                contextValid = true,
-                stage = DeckStage.CONTEXT_VALIDATED,
-            )
-            is ValidationResult.Invalid -> state.copy(
-                contextValid = false,
-                validationError = result.error,
-                error = result.error,
-                stage = DeckStage.FAILED,
-            )
+            is ValidationResult.Valid ->
+                state.copy(
+                    contextValid = true,
+                    stage = DeckStage.CONTEXT_VALIDATED,
+                )
+            is ValidationResult.Invalid ->
+                state.copy(
+                    contextValid = false,
+                    validationError = result.error,
+                    error = result.error,
+                    stage = DeckStage.FAILED,
+                )
         }
 
     override fun generate(state: DeckState): DeckState {
@@ -71,13 +72,19 @@ class DeckPipelineDefinition(
 
     override fun isFailed(state: DeckState): Boolean = state.stage == DeckStage.FAILED
 
-    override fun onProposeFailure(state: DeckState, cause: Throwable): DeckState =
+    override fun onProposeFailure(
+        state: DeckState,
+        cause: Throwable,
+    ): DeckState =
         state.copy(
             stage = DeckStage.FAILED,
             error = "ProposeContextFailed: ${cause.message}",
         )
 
-    override fun onGenerateFailure(state: DeckState, cause: Throwable): DeckState =
+    override fun onGenerateFailure(
+        state: DeckState,
+        cause: Throwable,
+    ): DeckState =
         state.copy(
             stage = DeckStage.FAILED,
             error = "GenerateDeckFailed: ${cause.message}",

@@ -14,32 +14,34 @@ import slider.ai.AssistantManager.PromptManager
  * langchain4j message types and preserving the existing prompt engineering.
  */
 class PromptManagerDeckPromptBuilder : DeckPromptBuilder {
-
-    override fun buildProposePrompt(state: DeckState): String = buildString {
-        appendLine(PromptManager.contextSystemPrompt)
-        appendLine()
-        appendLine(
-            PromptManager.contextUserMessage(
-                subject = state.subject,
-                language = state.language,
-                authorName = state.authorName,
-                authorEmail = state.authorEmail,
-                ragContext = state.ragContext,
-            ),
-        )
-    }
-
-    override fun buildGeneratePrompt(state: DeckState): String = buildString {
-        appendLine(PromptManager.deckSystemPrompt)
-        appendLine()
-        appendLine(
-            PromptManager.deckUserMessage(
-                ctx = slider.SliderConfig.yamlMapper.readValue(
-                    state.deckContextJson,
-                    slider.DeckContext::class.java,
+    override fun buildProposePrompt(state: DeckState): String =
+        buildString {
+            appendLine(PromptManager.contextSystemPrompt)
+            appendLine()
+            appendLine(
+                PromptManager.contextUserMessage(
+                    subject = state.subject,
+                    language = state.language,
+                    authorName = state.authorName,
+                    authorEmail = state.authorEmail,
+                    ragContext = state.ragContext,
                 ),
-                ragContext = state.ragContext,
-            ),
-        )
-    }
+            )
+        }
+
+    override fun buildGeneratePrompt(state: DeckState): String =
+        buildString {
+            appendLine(PromptManager.deckSystemPrompt)
+            appendLine()
+            appendLine(
+                PromptManager.deckUserMessage(
+                    ctx =
+                        slider.SliderConfig.yamlMapper.readValue(
+                            state.deckContextJson,
+                            slider.DeckContext::class.java,
+                        ),
+                    ragContext = state.ragContext,
+                ),
+            )
+        }
 }

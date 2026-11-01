@@ -11,7 +11,6 @@ package slider.prerequisite
  * `org.gradle.api.JavaVersion.current().majorVersion`).
  */
 object JavaVersionGuard {
-
     /** Minimum supported Java major version. */
     private const val MINIMUM_MAJOR: Int = 23
 
@@ -39,10 +38,11 @@ object JavaVersionGuard {
         require(majorVersionString.isNotBlank()) {
             "education.cccp.slider requires Java 23+. Current: Java <unknown>"
         }
-        val parsed = majorVersionString.trim().toIntOrNull()
-            ?: throw IllegalArgumentException(
-                "education.cccp.slider requires Java 23+. Current: Java $majorVersionString",
-            )
+        val parsed =
+            majorVersionString.trim().toIntOrNull()
+                ?: throw IllegalArgumentException(
+                    "education.cccp.slider requires Java 23+. Current: Java $majorVersionString",
+                )
         requireJava23(parsed)
     }
 }

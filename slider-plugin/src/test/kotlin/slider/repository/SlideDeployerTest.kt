@@ -6,22 +6,22 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class SlideDeployerTest {
-
     @TempDir
     lateinit var tempDir: File
 
     private fun newRequest(
         slidesDir: File = tempDir.resolve("slides").apply { mkdirs() },
         repoDir: File = tempDir.resolve("repo"),
-    ): SlideDeploymentRequest = SlideDeploymentRequest(
-        slidesDir = slidesDir,
-        repoDir = repoDir,
-        remoteUrl = "https://github.com/org/slides.git",
-        branch = "main",
-        commitMessage = "deploy slides",
-        username = "user",
-        password = "token",
-    )
+    ): SlideDeploymentRequest =
+        SlideDeploymentRequest(
+            slidesDir = slidesDir,
+            repoDir = repoDir,
+            remoteUrl = "https://github.com/org/slides.git",
+            branch = "main",
+            commitMessage = "deploy slides",
+            username = "user",
+            password = "token",
+        )
 
     @Test
     fun `createRepoDir should create an empty directory when none exists`() {

@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class TranslatorManagerLanguageTest {
-
     @Test
     fun `supportedLanguages should contain all LanguageCatalog ISO codes`() {
         val supported = TranslatorManager.supportedLanguages

@@ -4,15 +4,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class OverflowDetectorTest {
-
-    private val layout = SlideLayout(
-        viewportWidth = 1280,
-        viewportHeight = 720,
-        marginX = 40.0,
-        marginY = 30.0,
-        titleFontSize = 36.0,
-        bodyFontSize = 18.0,
-    )
+    private val layout =
+        SlideLayout(
+            viewportWidth = 1280,
+            viewportHeight = 720,
+            marginX = 40.0,
+            marginY = 30.0,
+            titleFontSize = 36.0,
+            bodyFontSize = 18.0,
+        )
 
     @Test
     fun `block inside content area fits`() {
@@ -123,13 +123,14 @@ class OverflowDetectorTest {
 
     @Test
     fun `block exactly at content bounds fits`() {
-        val block = TextBlock(
-            text = "Hi",
-            x = 40.0,
-            y = 30.0,
-            width = 1200.0,
-            height = 660.0,
-        )
+        val block =
+            TextBlock(
+                text = "Hi",
+                x = 40.0,
+                y = 30.0,
+                width = 1200.0,
+                height = 660.0,
+            )
 
         val result = OverflowDetector.detect(block, layout)
 

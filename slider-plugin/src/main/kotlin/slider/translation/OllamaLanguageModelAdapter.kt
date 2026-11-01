@@ -19,7 +19,6 @@ import slider.DeckContext
 class OllamaLanguageModelAdapter(
     private val model: ChatModel,
 ) : LanguageModelAdapter {
-
     override fun translate(
         deckContext: DeckContext,
         adocContent: String,
@@ -31,15 +30,16 @@ class OllamaLanguageModelAdapter(
         val sourceName = source?.nativeName ?: sourceLanguage
         val targetName = target?.nativeName ?: targetLanguage
 
-        val systemMsg = SystemMessage.from(
-            "You are a professional translator. Translate the following AsciiDoc " +
-                "presentation content from $sourceName ($sourceLanguage) " +
-                "to $targetName ($targetLanguage). " +
-                "Preserve all AsciiDoc syntax, Reveal.js attributes, and structural " +
-                "elements (= for titles, == for sections, [ ] for attributes). " +
-                "Only translate the human-readable text. " +
-                "Return ONLY the translated AsciiDoc content, no commentary."
-        )
+        val systemMsg =
+            SystemMessage.from(
+                "You are a professional translator. Translate the following AsciiDoc " +
+                    "presentation content from $sourceName ($sourceLanguage) " +
+                    "to $targetName ($targetLanguage). " +
+                    "Preserve all AsciiDoc syntax, Reveal.js attributes, and structural " +
+                    "elements (= for titles, == for sections, [ ] for attributes). " +
+                    "Only translate the human-readable text. " +
+                    "Return ONLY the translated AsciiDoc content, no commentary.",
+            )
         val userMsg = UserMessage.from(adocContent)
 
         return runCatching {

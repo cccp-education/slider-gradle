@@ -1,7 +1,7 @@
 package slider.repository
 
-import slider.SliderConfig.localConf
 import org.gradle.api.Project
+import slider.SliderConfig.localConf
 import java.io.File
 
 /**
@@ -14,7 +14,6 @@ import java.io.File
  * This object replaces the former [slider.SliderManager.Git] nested object.
  */
 object SlidePublisher {
-
     /**
      * Full publish pipeline:
      * - Creates a clean temporary repo directory at [pathTo]
@@ -31,15 +30,16 @@ object SlidePublisher {
         val slidesDir = File(slidesDirPath())
         val repoDir = File(pathTo())
         val pushConf = conf.pushSlides ?: return
-        val request = SlideDeploymentRequest(
-            slidesDir = slidesDir,
-            repoDir = repoDir,
-            remoteUrl = pushConf.repo.repository,
-            branch = pushConf.branch,
-            commitMessage = pushConf.message,
-            username = pushConf.repo.credentials.username,
-            password = pushConf.repo.credentials.password,
-        )
+        val request =
+            SlideDeploymentRequest(
+                slidesDir = slidesDir,
+                repoDir = repoDir,
+                remoteUrl = pushConf.repo.repository,
+                branch = pushConf.branch,
+                commitMessage = pushConf.message,
+                username = pushConf.repo.credentials.username,
+                password = pushConf.repo.credentials.password,
+            )
 
         val repoResult = SlideDeployer.createRepoDir(repoDir)
         if (repoResult is RepoDirResult.Failure) {

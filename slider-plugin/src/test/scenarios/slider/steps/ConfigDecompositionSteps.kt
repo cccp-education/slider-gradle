@@ -9,10 +9,8 @@ import slider.config.SlidesConfigLoader
 import slider.config.YamlMapperFactory
 import java.io.File
 import java.nio.file.Files
-import kotlin.test.assertFailsWith
 
 class ConfigDecompositionSteps : En {
-
     private lateinit var baseDir: File
     private var configPathString: String? = null
     private var resolvedPath: String? = null
@@ -25,8 +23,7 @@ class ConfigDecompositionSteps : En {
     private var parsedPersonAge: Int? = null
     private var writeDatesAsTimetampsEnabled: Boolean? = null
 
-    private fun newTempDir(prefix: String): File =
-        Files.createTempDirectory(prefix).toFile()
+    private fun newTempDir(prefix: String): File = Files.createTempDirectory(prefix).toFile()
 
     init {
 
@@ -93,7 +90,7 @@ class ConfigDecompositionSteps : En {
                       password: "token"
                   branch: "main"
                   message: "deploy slides"
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
 
@@ -138,16 +135,17 @@ class ConfigDecompositionSteps : En {
             File(baseDir, "slides-context.yml").writeText(
                 """
                 srcPath: "$srcPath"
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
 
         When("the configuration is loaded by path and base dir") {
-            loadedConfig = SlidesConfigLoader.load(
-                configPath = "slides-context.yml",
-                baseDir = baseDir.absolutePath,
-                mapper = YamlMapperFactory.create(),
-            )
+            loadedConfig =
+                SlidesConfigLoader.load(
+                    configPath = "slides-context.yml",
+                    baseDir = baseDir.absolutePath,
+                    mapper = YamlMapperFactory.create(),
+                )
         }
 
         // ---- YamlMapperFactory ---------------------------------------------------------
@@ -158,8 +156,10 @@ class ConfigDecompositionSteps : En {
 
         When("the mapping is read by the YAML mapper") {
             val mapper = YamlMapperFactory.create()
-            val mapType = mapper.typeFactory
-                .constructMapType(Map::class.java, String::class.java, String::class.java)
+            val mapType =
+                mapper.typeFactory
+                    .constructMapType(Map::class.java, String::class.java, String::class.java)
+
             @Suppress("UNCHECKED_CAST")
             val parsed = mapper.readValue(requireNotNull(yamlContent), mapType) as Map<String, String>
             parsedName = parsed["name"]
@@ -195,8 +195,9 @@ class ConfigDecompositionSteps : En {
 
         When("the YAML mapper is created") {
             val mapper = YamlMapperFactory.create()
-            writeDatesAsTimetampsEnabled = mapper.serializationConfig
-                .isEnabled(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            writeDatesAsTimetampsEnabled =
+                mapper.serializationConfig
+                    .isEnabled(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
 
         Then("WRITE_DATES_AS_TIMESTAMPS should be disabled") {
@@ -204,5 +205,8 @@ class ConfigDecompositionSteps : En {
         }
     }
 
-    data class Person(val name: String = "", val age: Int = 0)
+    data class Person(
+        val name: String = "",
+        val age: Int = 0,
+    )
 }

@@ -5,16 +5,16 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class TextBlockTest {
-
     @Test
     fun `creates text block with text position and bounding box`() {
-        val block = TextBlock(
-            text = "Hello world",
-            x = 0.0,
-            y = 0.0,
-            width = 200.0,
-            height = 30.0,
-        )
+        val block =
+            TextBlock(
+                text = "Hello world",
+                x = 0.0,
+                y = 0.0,
+                width = 200.0,
+                height = 30.0,
+            )
 
         assertThat(block.text).isEqualTo("Hello world")
         assertThat(block.x).isEqualTo(0.0)

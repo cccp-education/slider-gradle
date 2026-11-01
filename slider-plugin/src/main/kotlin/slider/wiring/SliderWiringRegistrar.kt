@@ -3,7 +3,6 @@ package slider.wiring
 import org.gradle.api.Project
 
 object SliderWiringRegistrar {
-
     fun configureRepositories(project: Project) =
         GradleWiring.configureRepositories(
             project = project,

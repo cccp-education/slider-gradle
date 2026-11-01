@@ -24,14 +24,14 @@ import slider.pipeline.DeckState
  * the Mermaid diagram exposure of the koog graph.
  */
 class DeckPipelineKoogSteps : En {
-
     private var promptBuilder: RecordingPromptBuilder? = null
     private var llm: FakeDeckLlm? = null
     private var graph: DeckPipelineGraph? = null
     private var initialState: DeckState? = null
     private var result: DeckState? = null
 
-    private val validDeckContextJson: String = """
+    private val validDeckContextJson: String =
+        """
         {
           "subject": "Kotlin Coroutines",
           "audience": "developers",
@@ -40,7 +40,15 @@ class DeckPipelineKoogSteps : En {
           "outputFile": "kotlin-coroutines.adoc",
           "author": { "name": "Jane Doe", "email": "jane@example.com" }
         }
-    """.trimIndent()
+        """.trimIndent()
+
+    // Long single-line JSON fixture: wrapping it would obscure the fake LLM payload.
+    @Suppress("ktlint:standard:max-line-length")
+    private fun deckContextJson(
+        duration: Int,
+        languageCode: String,
+    ): String =
+        """{"subject": "Kotlin Coroutines", "audience": "developers", "duration": $duration, "languageCode": "$languageCode", "outputFile": "k.adoc", "author": {"name": "Jane", "email": "j@example.com"}}"""
 
     init {
 
@@ -50,46 +58,51 @@ class DeckPipelineKoogSteps : En {
 
         Given("a deck pipeline with a stub LLM proposing a valid DeckContext and generating an AsciiDoc deck") {
             promptBuilder = RecordingPromptBuilder()
-            llm = FakeDeckLlm(
-                proposeResponse = validDeckContextJson,
-                generateResponse = "== Kotlin Coroutines\n\n== Introduction",
-            )
+            llm =
+                FakeDeckLlm(
+                    proposeResponse = validDeckContextJson,
+                    generateResponse = "== Kotlin Coroutines\n\n== Introduction",
+                )
             graph = DeckPipelineGraph(promptBuilder!!, llm!!)
         }
 
         Given("a deck pipeline with a stub LLM proposing an invalid DeckContext missing the subject and generating nothing") {
             promptBuilder = RecordingPromptBuilder()
-            llm = FakeDeckLlm(
-                proposeResponse = """{"audience": "developers", "duration": 60, "languageCode": "fr"}""",
-                generateResponse = "",
-            )
+            llm =
+                FakeDeckLlm(
+                    proposeResponse = """{"audience": "developers", "duration": 60, "languageCode": "fr"}""",
+                    generateResponse = "",
+                )
             graph = DeckPipelineGraph(promptBuilder!!, llm!!)
         }
 
         Given("a deck pipeline with a stub LLM proposing an invalid DeckContext missing the subject and generating an unreachable deck") {
             promptBuilder = RecordingPromptBuilder()
-            llm = FakeDeckLlm(
-                proposeResponse = """{"audience": "developers", "duration": 60, "languageCode": "fr"}""",
-                generateResponse = "== Should not be reached",
-            )
+            llm =
+                FakeDeckLlm(
+                    proposeResponse = """{"audience": "developers", "duration": 60, "languageCode": "fr"}""",
+                    generateResponse = "== Should not be reached",
+                )
             graph = DeckPipelineGraph(promptBuilder!!, llm!!)
         }
 
         Given("a deck pipeline with a stub LLM proposing an invalid DeckContext with duration {int} and generating nothing") { duration: Int ->
             promptBuilder = RecordingPromptBuilder()
-            llm = FakeDeckLlm(
-                proposeResponse = """{"subject": "Kotlin Coroutines", "audience": "developers", "duration": $duration, "languageCode": "fr", "outputFile": "k.adoc", "author": {"name": "Jane", "email": "j@example.com"}}""",
-                generateResponse = "",
-            )
+            llm =
+                FakeDeckLlm(
+                    proposeResponse = deckContextJson(duration = duration, languageCode = "fr"),
+                    generateResponse = "",
+                )
             graph = DeckPipelineGraph(promptBuilder!!, llm!!)
         }
 
         Given("a deck pipeline with a stub LLM proposing an invalid DeckContext with language code {string} and generating nothing") { code: String ->
             promptBuilder = RecordingPromptBuilder()
-            llm = FakeDeckLlm(
-                proposeResponse = """{"subject": "Kotlin Coroutines", "audience": "developers", "duration": 60, "languageCode": "$code", "outputFile": "k.adoc", "author": {"name": "Jane", "email": "j@example.com"}}""",
-                generateResponse = "",
-            )
+            llm =
+                FakeDeckLlm(
+                    proposeResponse = deckContextJson(duration = 60, languageCode = code),
+                    generateResponse = "",
+                )
             graph = DeckPipelineGraph(promptBuilder!!, llm!!)
         }
 
@@ -107,10 +120,11 @@ class DeckPipelineKoogSteps : En {
 
         Given("a deck pipeline with a stub LLM proposing a valid DeckContext and throwing on generate") {
             promptBuilder = RecordingPromptBuilder()
-            llm = FakeDeckLlm(
-                proposeResponse = validDeckContextJson,
-                generateException = RuntimeException("Generation timed out"),
-            )
+            llm =
+                FakeDeckLlm(
+                    proposeResponse = validDeckContextJson,
+                    generateException = RuntimeException("Generation timed out"),
+                )
             graph = DeckPipelineGraph(promptBuilder!!, llm!!)
         }
 
@@ -119,14 +133,15 @@ class DeckPipelineKoogSteps : En {
         // -------------------------------------------------------------------------
 
         Given("an initial deck state with subject {string} and language {string}") { subject: String, language: String ->
-            initialState = DeckState(
-                subject = subject,
-                language = language,
-                authorName = "Jane Doe",
-                authorEmail = "jane@example.com",
-                ragContext = "",
-                deckContextJson = "",
-            )
+            initialState =
+                DeckState(
+                    subject = subject,
+                    language = language,
+                    authorName = "Jane Doe",
+                    authorEmail = "jane@example.com",
+                    ragContext = "",
+                    deckContextJson = "",
+                )
         }
 
         Given("the RAG context {string}") { ragContext: String ->

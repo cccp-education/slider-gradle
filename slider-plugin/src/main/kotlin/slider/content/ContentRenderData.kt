@@ -60,16 +60,17 @@ data class ContentRenderData(
          * is built progressively. Bypasses [init] invariants — do not use
          * for real validation.
          */
-        val EMPTY: ContentRenderData = ContentRenderData(
-            slideTitle = "",
-            realTextBlocks = emptyList(),
-            computedTitleFontSize = 0.0,
-            computedBodyFontSize = 0.0,
-            computedContrastRatio = 0.0,
-            hasNotesInDom = false,
-            viewportWidth = 0,
-            viewportHeight = 0,
-            bypassInvariants = true,
-        )
+        val EMPTY: ContentRenderData =
+            ContentRenderData(
+                slideTitle = "",
+                realTextBlocks = emptyList(),
+                computedTitleFontSize = 0.0,
+                computedBodyFontSize = 0.0,
+                computedContrastRatio = 0.0,
+                hasNotesInDom = false,
+                viewportWidth = 0,
+                viewportHeight = 0,
+                bypassInvariants = true,
+            )
     }
 }

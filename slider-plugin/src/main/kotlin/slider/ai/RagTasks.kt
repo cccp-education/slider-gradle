@@ -1,16 +1,16 @@
 package slider.ai
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import dev.langchain4j.data.message.SystemMessage
+import dev.langchain4j.data.message.UserMessage
+import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import slider.DeckContext
 import slider.SliderConfig.yamlMapper
 import slider.SliderPlugin.SliderExtension
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel
 import slider.i18n.I18nConfigResolver
-import com.fasterxml.jackson.module.kotlin.readValue
-import dev.langchain4j.data.message.SystemMessage
-import dev.langchain4j.data.message.UserMessage
-import org.gradle.api.tasks.TaskAction
-import org.gradle.work.DisableCachingByDefault
 import java.io.File
 
 // =============================================================================
@@ -28,7 +28,6 @@ import java.io.File
  */
 @DisableCachingByDefault(because = "org.asciidoctor.jvm.gems.classic")
 abstract class ReindexRagTask : RagTask() {
-
     @TaskAction
     fun run() {
         val pgService = service()
@@ -59,62 +58,75 @@ abstract class ReindexRagTask : RagTask() {
  */
 @DisableCachingByDefault(because = "org.asciidoctor.jvm.gems.classic")
 abstract class ProposeDeckContextTask : RagTask() {
-
     @TaskAction
     fun run() {
         val pgService = service()
 
-        val subject = project.findProperty("subject") as? String
-            ?: error(
-                "Missing required property -Psubject.\n" +
-                        "Usage: ./gradlew proposeDeckContext -Psubject=\"Introduction to Kotlin\""
-            )
+        val subject =
+            project.findProperty("subject") as? String
+                ?: error(
+                    "Missing required property -Psubject.\n" +
+                        "Usage: ./gradlew proposeDeckContext -Psubject=\"Introduction to Kotlin\"",
+                )
 
         // Language: cascade 5 couches — CLI -Planguage > gradle.properties > DSL > deck-context.yml > default "fr"
         val ext = project.extensions.findByType(SliderExtension::class.java)
-        val cliProps = mapOf<String, String>(
-            "language" to ((project.findProperty("language") as? String) ?: ""),
-        ).filterValues { it.isNotBlank() }
-        val gradleProps = mapOf<String, String>(
-            "language" to ((project.findProperty("language") as? String) ?: ""),
-        ).filterValues { it.isNotBlank() }
-        val i18nConfig = I18nConfigResolver.resolve(
-            cliProps = cliProps,
-            gradleProperties = gradleProps,
-            dslLanguage = ext?.language?.orNull ?: "",
-            dslSupportedLanguages = emptyList(),
-            yamlLanguageCode = null,
-            defaultLanguage = "fr",
-        )
+        val cliProps =
+            mapOf<String, String>(
+                "language" to ((project.findProperty("language") as? String) ?: ""),
+            ).filterValues { it.isNotBlank() }
+        val gradleProps =
+            mapOf<String, String>(
+                "language" to ((project.findProperty("language") as? String) ?: ""),
+            ).filterValues { it.isNotBlank() }
+        val i18nConfig =
+            I18nConfigResolver.resolve(
+                cliProps = cliProps,
+                gradleProperties = gradleProps,
+                dslLanguage = ext?.language?.orNull ?: "",
+                dslSupportedLanguages = emptyList(),
+                yamlLanguageCode = null,
+                defaultLanguage = "fr",
+            )
         val language = i18nConfig.activeLanguage
 
         // Author: -Pauthor.name / -Pauthor.email
         // Falls back to git config user.name / user.email if not provided
-        val authorName = project.findProperty("author.name") as? String
-            ?: runCatching {
-                ProcessBuilder("git", "config", "user.name")
-                    .directory(project.projectDir)
-                    .start().inputStream.bufferedReader().readLine()
-            }.getOrNull() ?: "Unknown"
-        val authorEmail = project.findProperty("author.email") as? String
-            ?: runCatching {
-                ProcessBuilder("git", "config", "user.email")
-                    .directory(project.projectDir)
-                    .start().inputStream.bufferedReader().readLine()
-            }.getOrNull() ?: "unknown@example.com"
+        val authorName =
+            project.findProperty("author.name") as? String
+                ?: runCatching {
+                    ProcessBuilder("git", "config", "user.name")
+                        .directory(project.projectDir)
+                        .start()
+                        .inputStream
+                        .bufferedReader()
+                        .readLine()
+                }.getOrNull() ?: "Unknown"
+        val authorEmail =
+            project.findProperty("author.email") as? String
+                ?: runCatching {
+                    ProcessBuilder("git", "config", "user.email")
+                        .directory(project.projectDir)
+                        .start()
+                        .inputStream
+                        .bufferedReader()
+                        .readLine()
+                }.getOrNull() ?: "unknown@example.com"
 
-        val outputPath = project.findProperty("output") as? String
-            ?: "slides/misc/${subject.toSlug()}-deck-context.yml"
+        val outputPath =
+            project.findProperty("output") as? String
+                ?: "slides/misc/${subject.toSlug()}-deck-context.yml"
 
         val provider = project.aiProvider
         println("🔍 [1/2] proposeDeckContext — provider: $provider — subject: \"$subject\" — lang: $language")
 
         println("📚 [RAG] Retrieving relevant context chunks…")
         val ragContext = RagManager.run { project.retrieve(subject, pgService) }
-        if (ragContext.isNotEmpty())
+        if (ragContext.isNotEmpty()) {
             println("📚 [RAG] ${ragContext.lines().size} lines of context retrieved.")
-        else
+        } else {
             println("⚠️  [RAG] No relevant chunks found — proceeding without RAG context.")
+        }
 
         val model = project.resolveModel(provider, llmService)
         val systemMsg = SystemMessage.from(AssistantManager.PromptManager.contextSystemPrompt)
@@ -123,16 +135,22 @@ abstract class ProposeDeckContextTask : RagTask() {
         println("🤖 [LLM] Proposing DeckContext…")
         val rawJson = model.chat(listOf(systemMsg, userMsg)).aiMessage().text()
 
-        val ctx: DeckContext = runCatching {
-            val clean = rawJson
-                .removePrefix("```json").removePrefix("```")
-                .removeSuffix("```").trim()
-            yamlMapper.readValue<DeckContext>(clean)
-        }.getOrElse { e ->
-            error("LLM returned invalid JSON for DeckContext: ${e.message}\nRaw response:\n$rawJson")
-        }
+        val ctx: DeckContext =
+            runCatching {
+                val clean =
+                    rawJson
+                        .removePrefix("```json")
+                        .removePrefix("```")
+                        .removeSuffix("```")
+                        .trim()
+                yamlMapper.readValue<DeckContext>(clean)
+            }.getOrElse { e ->
+                error("LLM returned invalid JSON for DeckContext: ${e.message}\nRaw response:\n$rawJson")
+            }
 
-        val outputFile = project.layout.projectDirectory.asFile.resolve(outputPath)
+        val outputFile =
+            project.layout.projectDirectory.asFile
+                .resolve(outputPath)
         outputFile.parentFile.mkdirs()
         outputFile.writeText(yamlMapper.writeValueAsString(ctx))
 
@@ -175,32 +193,35 @@ abstract class ProposeDeckContextTask : RagTask() {
  */
 @DisableCachingByDefault(because = "org.asciidoctor.jvm.gems.classic")
 abstract class GenerateDeckTask : RagTask() {
-
     @TaskAction
     fun run() {
         val pgService = service()
 
-        val contextPath = project.findProperty("deck.context") as? String
-            ?: error(
-                "Missing required property -Pdeck.context.\n" +
-                        "Usage: ./gradlew generateDeck -Pdeck.context=slides/misc/my-deck-context.yml"
-            )
+        val contextPath =
+            project.findProperty("deck.context") as? String
+                ?: error(
+                    "Missing required property -Pdeck.context.\n" +
+                        "Usage: ./gradlew generateDeck -Pdeck.context=slides/misc/my-deck-context.yml",
+                )
 
-        val ctx: DeckContext = File(contextPath)
-            .also { require(it.exists()) { "Deck context file not found: $contextPath" } }
-            .let { yamlMapper.readValue(it, DeckContext::class.java) }
+        val ctx: DeckContext =
+            File(contextPath)
+                .also { require(it.exists()) { "Deck context file not found: $contextPath" } }
+                .let { yamlMapper.readValue(it, DeckContext::class.java) }
 
         val provider = project.aiProvider
         println("🎨 [2/2] generateDeck — provider: $provider — context: $contextPath")
 
         println("📚 [RAG] Retrieving AsciiDoc syntax examples…")
-        val ragContext = RagManager.run {
-            project.retrieve("AsciiDoc Reveal.js slide syntax ${ctx.subject}", pgService)
-        }
-        if (ragContext.isNotEmpty())
+        val ragContext =
+            RagManager.run {
+                project.retrieve("AsciiDoc Reveal.js slide syntax ${ctx.subject}", pgService)
+            }
+        if (ragContext.isNotEmpty()) {
             println("📚 [RAG] ${ragContext.lines().size} lines of AsciiDoc examples retrieved.")
-        else
+        } else {
             println("⚠️  [RAG] No relevant chunks found — relying on system prompt only.")
+        }
 
         val model = project.resolveModel(provider, llmService)
         val systemMsg = SystemMessage.from(AssistantManager.PromptManager.deckSystemPrompt)
@@ -209,9 +230,10 @@ abstract class GenerateDeckTask : RagTask() {
         println("🤖 [LLM] Generating deck…")
         val adocContent = model.chat(listOf(systemMsg, userMsg)).aiMessage().text()
 
-        val outputFile = project.layout.projectDirectory.asFile
-            .resolve("slides/misc")
-            .resolve(ctx.outputFile)
+        val outputFile =
+            project.layout.projectDirectory.asFile
+                .resolve("slides/misc")
+                .resolve(ctx.outputFile)
         outputFile.parentFile.mkdirs()
         outputFile.writeText(adocContent)
 

@@ -9,7 +9,6 @@ package slider.content
  * [slider.rtl.RtlAssertionResult] but sealed for exhaustive `when` matching.
  */
 sealed interface ContentAssertionResult {
-
     /**
      * All assertions passed.
      */
@@ -20,8 +19,9 @@ sealed interface ContentAssertionResult {
      *
      * @param failures non-empty list of [ContentAssertionFailure].
      */
-    data class Failed(val failures: List<ContentAssertionFailure>) : ContentAssertionResult {
-
+    data class Failed(
+        val failures: List<ContentAssertionFailure>,
+    ) : ContentAssertionResult {
         init {
             require(failures.isNotEmpty()) { "ContentAssertionResult.Failed requires at least one failure" }
         }

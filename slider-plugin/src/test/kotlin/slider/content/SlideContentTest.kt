@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class SlideContentTest {
-
     @Test
     fun `creates slide content with title and empty collections by default`() {
         val content = SlideContent(title = "Introduction")
@@ -19,13 +18,14 @@ class SlideContentTest {
 
     @Test
     fun `creates slide content with all fields populated`() {
-        val content = SlideContent(
-            title = "Kotlin Coroutines",
-            subtitles = listOf("Suspending functions", "Structured concurrency"),
-            paragraphs = listOf("Coroutines are lightweight.", "They suspend without blocking threads."),
-            lists = listOf(listOf("launch", "async"), listOf("Job", "Deferred")),
-            speakerNote = "Emphasize the difference between launch and async.",
-        )
+        val content =
+            SlideContent(
+                title = "Kotlin Coroutines",
+                subtitles = listOf("Suspending functions", "Structured concurrency"),
+                paragraphs = listOf("Coroutines are lightweight.", "They suspend without blocking threads."),
+                lists = listOf(listOf("launch", "async"), listOf("Job", "Deferred")),
+                speakerNote = "Emphasize the difference between launch and async.",
+            )
 
         assertThat(content.title).isEqualTo("Kotlin Coroutines")
         assertThat(content.subtitles).containsExactly("Suspending functions", "Structured concurrency")
@@ -106,20 +106,22 @@ class SlideContentTest {
 
     @Test
     fun `two slide contents with same fields are equal`() {
-        val a = SlideContent(
-            title = "Title",
-            subtitles = listOf("Sub"),
-            paragraphs = listOf("Para"),
-            lists = listOf(listOf("item")),
-            speakerNote = "Note",
-        )
-        val b = SlideContent(
-            title = "Title",
-            subtitles = listOf("Sub"),
-            paragraphs = listOf("Para"),
-            lists = listOf(listOf("item")),
-            speakerNote = "Note",
-        )
+        val a =
+            SlideContent(
+                title = "Title",
+                subtitles = listOf("Sub"),
+                paragraphs = listOf("Para"),
+                lists = listOf(listOf("item")),
+                speakerNote = "Note",
+            )
+        val b =
+            SlideContent(
+                title = "Title",
+                subtitles = listOf("Sub"),
+                paragraphs = listOf("Para"),
+                lists = listOf(listOf("item")),
+                speakerNote = "Note",
+            )
 
         assertThat(a).isEqualTo(b)
         assertThat(a.hashCode()).isEqualTo(b.hashCode())
@@ -137,10 +139,11 @@ class SlideContentTest {
     @Test
     fun `is empty returns true when no subtitles paragraphs lists or note`() {
         val empty = SlideContent(title = "Title")
-        val rich = SlideContent(
-            title = "Title",
-            paragraphs = listOf("content"),
-        )
+        val rich =
+            SlideContent(
+                title = "Title",
+                paragraphs = listOf("content"),
+            )
 
         assertThat(empty.isEmpty()).isTrue()
         assertThat(rich.isEmpty()).isFalse()

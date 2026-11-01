@@ -2,11 +2,9 @@ package slider.steps
 
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import slider.prerequisite.JavaVersionGuard
 
 class PrerequisiteDecompositionSteps : En {
-
     private var guardError: Throwable? = null
     private var guardPassed: Boolean = false
 

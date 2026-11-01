@@ -6,7 +6,6 @@ import slider.i18n.SliderMessages
 import java.util.MissingResourceException
 
 class SliderMessagesResolutionSteps : En {
-
     private var resolvedMessage: String = ""
     private var resolutionError: Throwable? = null
 

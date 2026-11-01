@@ -7,7 +7,6 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class AssistantManagerI18nFunctionalTest {
-
     @TempDir
     lateinit var testProjectDir: File
 
@@ -16,12 +15,14 @@ class AssistantManagerI18nFunctionalTest {
         writeBuildFile()
         writeSettingsFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments("tasks", "--group", "collect", "-Planguage=en")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(testProjectDir)
+                .withArguments("tasks", "--group", "collect", "-Planguage=en")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build()
 
         assertThat(result.output).contains("reindexRag")
         assertThat(result.output).contains("Force a full rebuild of the RAG embedding index")
@@ -32,12 +33,14 @@ class AssistantManagerI18nFunctionalTest {
         writeBuildFile()
         writeSettingsFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments("tasks", "--group", "collect", "-Planguage=fr")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(testProjectDir)
+                .withArguments("tasks", "--group", "collect", "-Planguage=fr")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build()
 
         assertThat(result.output).contains("reindexRag")
         assertThat(result.output).contains("Forcer une reconstruction complète")
@@ -48,12 +51,14 @@ class AssistantManagerI18nFunctionalTest {
         writeBuildFile()
         writeSettingsFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments("tasks", "--group", "generate", "-Planguage=en")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(testProjectDir)
+                .withArguments("tasks", "--group", "generate", "-Planguage=en")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build()
 
         assertThat(result.output).contains("proposeDeckContext")
         assertThat(result.output).contains("generateDeck")
@@ -65,12 +70,14 @@ class AssistantManagerI18nFunctionalTest {
         writeBuildFile()
         writeSettingsFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments("tasks", "--group", "generate", "-Planguage=fr")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(testProjectDir)
+                .withArguments("tasks", "--group", "generate", "-Planguage=fr")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build()
 
         assertThat(result.output).contains("proposeDeckContext")
         assertThat(result.output).contains("generateDeck")
@@ -78,16 +85,20 @@ class AssistantManagerI18nFunctionalTest {
     }
 
     private fun writeBuildFile() {
-        testProjectDir.resolve("build.gradle.kts").writeText("""
+        testProjectDir.resolve("build.gradle.kts").writeText(
+            """
             plugins {
                 id("education.cccp.slider")
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     private fun writeSettingsFile() {
-        testProjectDir.resolve("settings.gradle.kts").writeText("""
+        testProjectDir.resolve("settings.gradle.kts").writeText(
+            """
             rootProject.name = "i18n-functional-test"
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 }

@@ -27,32 +27,37 @@ import java.io.File
  * baby-steps 8.3a/8.3b. Measured before: 7 TestKit builds for this class.
  */
 class GenerateDeckPipelineFunctionalTest {
-
     @TempDir
     lateinit var projectDir: File
 
     private fun writeBuildFile() {
-        projectDir.resolve("settings.gradle.kts").writeText("""
+        projectDir.resolve("settings.gradle.kts").writeText(
+            """
             rootProject.name = "generate-deck-pipeline-test"
-        """.trimIndent())
-        projectDir.resolve("build.gradle.kts").writeText("""
+            """.trimIndent(),
+        )
+        projectDir.resolve("build.gradle.kts").writeText(
+            """
             plugins {
                 id("education.cccp.slider")
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun `generateDeckPipeline task is registered in the generate group with a localized description`() {
         writeBuildFile()
 
-        val output = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--group", "generate", "-Planguage=en", "--quiet")
-            .forwardOutput()
-            .build()
-            .output
+        val output =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments("tasks", "--group", "generate", "-Planguage=en", "--quiet")
+                .forwardOutput()
+                .build()
+                .output
 
         assertThat(output).contains("generateDeckPipeline")
         assertThat(output).contains("koog pipeline")
@@ -62,12 +67,14 @@ class GenerateDeckPipelineFunctionalTest {
     fun `generateDeckPipeline without -Psubject should fail with a clear message`() {
         writeBuildFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("generateDeckPipeline", "--quiet")
-            .forwardOutput()
-            .buildAndFail()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments("generateDeckPipeline", "--quiet")
+                .forwardOutput()
+                .buildAndFail()
 
         assertThat(result.output).contains("subject")
         assertThat(result.task(":generateDeckPipeline")?.outcome).isEqualTo(TaskOutcome.FAILED)
@@ -77,18 +84,19 @@ class GenerateDeckPipelineFunctionalTest {
     fun `generateDeckPipeline with -Psubject but no LLM should fail on the propose node`() {
         writeBuildFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments(
-                "generateDeckPipeline",
-                "-Psubject=Kotlin Coroutines",
-                "-Pollama.baseUrl=http://localhost:1",
-                "-Pollama.timeout=1",
-                "--quiet",
-            )
-            .forwardOutput()
-            .buildAndFail()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments(
+                    "generateDeckPipeline",
+                    "-Psubject=Kotlin Coroutines",
+                    "-Pollama.baseUrl=http://localhost:1",
+                    "-Pollama.timeout=1",
+                    "--quiet",
+                ).forwardOutput()
+                .buildAndFail()
 
         assertThat(result.output).contains("generateDeckPipeline")
         assertThat(result.task(":generateDeckPipeline")?.outcome).isEqualTo(TaskOutcome.FAILED)

@@ -14,7 +14,6 @@ import slider.DeckContext
  * (e.g. an Ollama-backed adapter in `slider.ai`).
  */
 interface LanguageModelAdapter {
-
     /**
      * Translates the given AsciiDoc content from [sourceLanguage] to
      * [targetLanguage].

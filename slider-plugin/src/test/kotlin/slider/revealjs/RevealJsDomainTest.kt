@@ -6,12 +6,9 @@ import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class RevealJsDomainTest {
-
     // ---------------------------------------------------------------------------
     // RevealJsAttributesSpec
     // ---------------------------------------------------------------------------
@@ -45,9 +42,10 @@ class RevealJsDomainTest {
 
     @Test
     fun `a custom attributes spec overrides the defaults with supplied entries`() {
-        val custom = RevealJsAttributesSpec.DEFAULT.withOverrides(
-            mapOf(RevealJsAttributeKeys.REVEALJS_THEME to "white"),
-        )
+        val custom =
+            RevealJsAttributesSpec.DEFAULT.withOverrides(
+                mapOf(RevealJsAttributeKeys.REVEALJS_THEME to "white"),
+            )
         assertEquals("white", custom.attributes[RevealJsAttributeKeys.REVEALJS_THEME])
         // other defaults preserved
         assertEquals("coderay", custom.attributes[RevealJsAttributeKeys.SOURCE_HIGHLIGHTER])
@@ -121,7 +119,9 @@ class RevealJsDomainTest {
     // ---------------------------------------------------------------------------
 
     @Test
-    fun `the scanner lists adoc files as slide metadata sorted by name`(@TempDir dir: File) {
+    fun `the scanner lists adoc files as slide metadata sorted by name`(
+        @TempDir dir: File,
+    ) {
         dir.resolve("a-deck.adoc").writeText("= a")
         dir.resolve("z-deck.adoc").writeText("= z")
         dir.resolve("ignore.txt").writeText("ignored")
@@ -136,14 +136,18 @@ class RevealJsDomainTest {
     }
 
     @Test
-    fun `the scanner returns an empty list when the directory does not exist`(@TempDir parent: File) {
+    fun `the scanner returns an empty list when the directory does not exist`(
+        @TempDir parent: File,
+    ) {
         val missing = parent.resolve("does-not-exist")
         val metas = SlideMetadataScanner.scan(missing)
         assertTrue(metas.isEmpty())
     }
 
     @Test
-    fun `the scanner returns an empty list for a directory with no adoc files`(@TempDir dir: File) {
+    fun `the scanner returns an empty list for a directory with no adoc files`(
+        @TempDir dir: File,
+    ) {
         dir.resolve("notes.txt").writeText("ignored")
         assertEquals(0, SlideMetadataScanner.scan(dir).size)
     }
@@ -160,33 +164,42 @@ class RevealJsDomainTest {
 
     @Test
     fun `the dashboard serializer renders a single slide as a one-element array`() {
-        val json = DashboardJsonSerializer.serialize(
-            listOf(SlideMetadata("intro", "intro.html")),
-        )
-        assertEquals("""[
+        val json =
+            DashboardJsonSerializer.serialize(
+                listOf(SlideMetadata("intro", "intro.html")),
+            )
+        assertEquals(
+            """[
   {"name": "intro", "filename": "intro.html"}
-]""", json)
+]""",
+            json,
+        )
     }
 
     @Test
     fun `the dashboard serializer renders multiple slides comma-separated`() {
-        val json = DashboardJsonSerializer.serialize(
-            listOf(
-                SlideMetadata("intro", "intro.html"),
-                SlideMetadata("topic", "topic.html"),
-            ),
-        )
-        assertEquals("""[
+        val json =
+            DashboardJsonSerializer.serialize(
+                listOf(
+                    SlideMetadata("intro", "intro.html"),
+                    SlideMetadata("topic", "topic.html"),
+                ),
+            )
+        assertEquals(
+            """[
   {"name": "intro", "filename": "intro.html"},
   {"name": "topic", "filename": "topic.html"}
-]""", json)
+]""",
+            json,
+        )
     }
 
     @Test
     fun `the dashboard serializer escapes double quotes in slide names`() {
-        val json = DashboardJsonSerializer.serialize(
-            listOf(SlideMetadata("quote\"deck", "quote-deck.html")),
-        )
+        val json =
+            DashboardJsonSerializer.serialize(
+                listOf(SlideMetadata("quote\"deck", "quote-deck.html")),
+            )
         // The embedded double quote in the name must be escaped as \"
         assertTrue(json.contains("quote\\\"deck"))
     }
@@ -196,7 +209,9 @@ class RevealJsDomainTest {
     // ---------------------------------------------------------------------------
 
     @Test
-    fun `a clean build target reports the slides json, images dir and html files`(@TempDir build: File) {
+    fun `a clean build target reports the slides json, images dir and html files`(
+        @TempDir build: File,
+    ) {
         val output = build.resolve("docs").resolve("asciidocRevealJs")
         output.mkdirs()
         output.resolve("slides.json").writeText("[]")
@@ -215,7 +230,9 @@ class RevealJsDomainTest {
     }
 
     @Test
-    fun `a clean build target reports no deletions for a missing output dir`(@TempDir build: File) {
+    fun `a clean build target reports no deletions for a missing output dir`(
+        @TempDir build: File,
+    ) {
         val target = CleanBuildTarget(build.resolve("docs").resolve("asciidocRevealJs"))
         val report = target.collect()
         assertFalse(report.slidesJsonDeleted)
@@ -224,7 +241,9 @@ class RevealJsDomainTest {
     }
 
     @Test
-    fun `a clean build target does not delete non-html non-json non-images files`(@TempDir build: File) {
+    fun `a clean build target does not delete non-html non-json non-images files`(
+        @TempDir build: File,
+    ) {
         val output = build.resolve("docs").resolve("asciidocRevealJs")
         output.mkdirs()
         output.resolve("talaria.css").writeText("body{}")

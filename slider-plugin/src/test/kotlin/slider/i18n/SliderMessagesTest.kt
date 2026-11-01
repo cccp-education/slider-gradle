@@ -10,23 +10,24 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SliderMessagesTest {
-
     @ParameterizedTest
-    @ValueSource(strings = [
-        "task.group.collect",
-        "task.group.slider-ai",
-        "task.reindexRag.description",
-        "task.proposeDeckContext.description",
-        "task.generateDeck.description",
-        "task.helloOllama.description",
-        "task.helloOllamaStreaming.description",
-        "task.helloGemini.description",
-        "task.helloGeminiStreaming.description",
-        "task.helloMistral.description",
-        "task.helloMistralStreaming.description",
-        "task.helloHuggingFace.description",
-        "task.helloHuggingFaceStreaming.description",
-    ])
+    @ValueSource(
+        strings = [
+            "task.group.collect",
+            "task.group.slider-ai",
+            "task.reindexRag.description",
+            "task.proposeDeckContext.description",
+            "task.generateDeck.description",
+            "task.helloOllama.description",
+            "task.helloOllamaStreaming.description",
+            "task.helloGemini.description",
+            "task.helloGeminiStreaming.description",
+            "task.helloMistral.description",
+            "task.helloMistralStreaming.description",
+            "task.helloHuggingFace.description",
+            "task.helloHuggingFaceStreaming.description",
+        ],
+    )
     fun `all new i18n keys resolve in English`(key: String) {
         val value = SliderMessages.get(key, "en")
         assertNotNull(value)
@@ -34,21 +35,23 @@ class SliderMessagesTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = [
-        "task.group.collect",
-        "task.group.slider-ai",
-        "task.reindexRag.description",
-        "task.proposeDeckContext.description",
-        "task.generateDeck.description",
-        "task.helloOllama.description",
-        "task.helloOllamaStreaming.description",
-        "task.helloGemini.description",
-        "task.helloGeminiStreaming.description",
-        "task.helloMistral.description",
-        "task.helloMistralStreaming.description",
-        "task.helloHuggingFace.description",
-        "task.helloHuggingFaceStreaming.description",
-    ])
+    @ValueSource(
+        strings = [
+            "task.group.collect",
+            "task.group.slider-ai",
+            "task.reindexRag.description",
+            "task.proposeDeckContext.description",
+            "task.generateDeck.description",
+            "task.helloOllama.description",
+            "task.helloOllamaStreaming.description",
+            "task.helloGemini.description",
+            "task.helloGeminiStreaming.description",
+            "task.helloMistral.description",
+            "task.helloMistralStreaming.description",
+            "task.helloHuggingFace.description",
+            "task.helloHuggingFaceStreaming.description",
+        ],
+    )
     fun `all new i18n keys resolve in French`(key: String) {
         val value = SliderMessages.get(key, "fr")
         assertNotNull(value)

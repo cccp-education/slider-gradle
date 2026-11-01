@@ -15,7 +15,6 @@ package slider.pipeline
  *  - [generate] → the `generate-deck` node  (returns an AsciiDoc string).
  */
 interface DeckLlm {
-
     /** Calls the LLM with the propose-context prompt; returns a DeckContext JSON blob. */
     fun propose(prompt: String): String
 

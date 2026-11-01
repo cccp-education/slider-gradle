@@ -7,26 +7,29 @@ import slider.AuthorContext
 import slider.DeckContext
 
 class TranslationResultTest {
-
     private val validAuthor = AuthorContext(name = "Test", email = "test@example.com")
 
-    private fun deck(languageCode: String, subject: String = "Kotlin coroutines") = DeckContext(
+    private fun deck(
+        languageCode: String,
+        subject: String = "Kotlin coroutines",
+    ) = DeckContext(
         subject = subject,
         audience = "developers",
         duration = 45,
         languageCode = languageCode,
-        outputFile = "kotlin-coroutines-${languageCode}-deck.adoc",
+        outputFile = "kotlin-coroutines-$languageCode-deck.adoc",
         author = validAuthor,
     )
 
     @Test
     fun `Translated result should expose target language and translated deck`() {
         val translatedDeck = deck("en")
-        val result = TranslationResult.Translated(
-            targetLanguage = "en",
-            translatedDeck = translatedDeck,
-            translatedAdoc = "= Kotlin Coroutines\n\n== Intro\n",
-        )
+        val result =
+            TranslationResult.Translated(
+                targetLanguage = "en",
+                translatedDeck = translatedDeck,
+                translatedAdoc = "= Kotlin Coroutines\n\n== Intro\n",
+            )
 
         assertThat(result.targetLanguage).isEqualTo("en")
         assertThat(result.translatedDeck).isEqualTo(translatedDeck)
@@ -60,10 +63,11 @@ class TranslationResultTest {
 
     @Test
     fun `Skipped result should expose target language and reason`() {
-        val result = TranslationResult.Skipped(
-            targetLanguage = "fr",
-            reason = "Source and target language are the same",
-        )
+        val result =
+            TranslationResult.Skipped(
+                targetLanguage = "fr",
+                reason = "Source and target language are the same",
+            )
 
         assertThat(result.targetLanguage).isEqualTo("fr")
         assertThat(result.reason).contains("same")
@@ -79,10 +83,11 @@ class TranslationResultTest {
 
     @Test
     fun `Failed result should expose target language and error message`() {
-        val result = TranslationResult.Failed(
-            targetLanguage = "zh",
-            errorMessage = "LLM returned empty response",
-        )
+        val result =
+            TranslationResult.Failed(
+                targetLanguage = "zh",
+                errorMessage = "LLM returned empty response",
+            )
 
         assertThat(result.targetLanguage).isEqualTo("zh")
         assertThat(result.errorMessage).contains("empty")
@@ -98,11 +103,12 @@ class TranslationResultTest {
 
     @Test
     fun `status property should distinguish the three variants`() {
-        val translated = TranslationResult.Translated(
-            targetLanguage = "en",
-            translatedDeck = deck("en"),
-            translatedAdoc = "content",
-        )
+        val translated =
+            TranslationResult.Translated(
+                targetLanguage = "en",
+                translatedDeck = deck("en"),
+                translatedAdoc = "content",
+            )
         val skipped = TranslationResult.Skipped("fr", "identity")
         val failed = TranslationResult.Failed("zh", "error")
 

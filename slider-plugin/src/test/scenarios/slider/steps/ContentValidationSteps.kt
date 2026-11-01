@@ -25,7 +25,6 @@ import slider.content.TextBlock
  * call `assertAll`, then assert on the sealed [ContentAssertionResult].
  */
 class ContentValidationSteps : En {
-
     private var slideContent: SlideContent? = null
     private var slideLayout: SlideLayout? = null
     private var renderData: ContentRenderData? = null
@@ -38,8 +37,7 @@ class ContentValidationSteps : En {
         // A priori — SlideContent + SlideLayout → ContentSlideAssertion
         // -------------------------------------------------------------------------
 
-        Given("a slide content with title {string} and a speaker note {string}") {
-            title: String, note: String ->
+        Given("a slide content with title {string} and a speaker note {string}") { title: String, note: String ->
             slideContent = SlideContent(title = title, speakerNote = note)
         }
 
@@ -48,15 +46,21 @@ class ContentValidationSteps : En {
         }
 
         Given("a slide layout with viewport {int}x{int}, margin {int}, title font {int}, body font {int}") {
-            viewportWidth: Int, viewportHeight: Int, margin: Int, titleFont: Int, bodyFont: Int ->
-            slideLayout = SlideLayout(
-                viewportWidth = viewportWidth,
-                viewportHeight = viewportHeight,
-                marginX = margin.toDouble(),
-                marginY = margin.toDouble(),
-                titleFontSize = titleFont.toDouble(),
-                bodyFontSize = bodyFont.toDouble(),
-            )
+            viewportWidth: Int,
+            viewportHeight: Int,
+            margin: Int,
+            titleFont: Int,
+            bodyFont: Int,
+            ->
+            slideLayout =
+                SlideLayout(
+                    viewportWidth = viewportWidth,
+                    viewportHeight = viewportHeight,
+                    marginX = margin.toDouble(),
+                    marginY = margin.toDouble(),
+                    titleFontSize = titleFont.toDouble(),
+                    bodyFontSize = bodyFont.toDouble(),
+                )
         }
 
         When("the content slide assertion is evaluated") {
@@ -84,29 +88,31 @@ class ContentValidationSteps : En {
         // A posteriori — ContentRenderData → ContentRenderAssertion
         // -------------------------------------------------------------------------
 
-        Given("a render snapshot with title {string}, body font {double}, title font {double}, contrast {double}, notes in DOM {string}, viewport {int}x{int}") {
-            title: String, bodyFont: Double, titleFont: Double, contrast: Double, notesInDom: String, viewportWidth: Int, viewportHeight: Int ->
-            renderData = ContentRenderData(
-                slideTitle = title,
-                realTextBlocks = emptyList(),
-                computedTitleFontSize = titleFont,
-                computedBodyFontSize = bodyFont,
-                computedContrastRatio = contrast,
-                hasNotesInDom = notesInDom.toBoolean(),
-                viewportWidth = viewportWidth,
-                viewportHeight = viewportHeight,
-            )
+        Given(
+            "a render snapshot with title {string}, body font {double}, title font {double}, contrast {double}, notes in DOM {string}, viewport {int}x{int}",
+        ) { title: String, bodyFont: Double, titleFont: Double, contrast: Double, notesInDom: String, viewportWidth: Int, viewportHeight: Int ->
+            renderData =
+                ContentRenderData(
+                    slideTitle = title,
+                    realTextBlocks = emptyList(),
+                    computedTitleFontSize = titleFont,
+                    computedBodyFontSize = bodyFont,
+                    computedContrastRatio = contrast,
+                    hasNotesInDom = notesInDom.toBoolean(),
+                    viewportWidth = viewportWidth,
+                    viewportHeight = viewportHeight,
+                )
         }
 
-        Given("a text block at x {int}, y {int}, width {int}, height {int}") {
-            x: Int, y: Int, width: Int, height: Int ->
-            val block = TextBlock(
-                text = "overflowing block",
-                x = x.toDouble(),
-                y = y.toDouble(),
-                width = width.toDouble(),
-                height = height.toDouble(),
-            )
+        Given("a text block at x {int}, y {int}, width {int}, height {int}") { x: Int, y: Int, width: Int, height: Int ->
+            val block =
+                TextBlock(
+                    text = "overflowing block",
+                    x = x.toDouble(),
+                    y = y.toDouble(),
+                    width = width.toDouble(),
+                    height = height.toDouble(),
+                )
             val current = renderData!!
             renderData = current.copy(realTextBlocks = current.realTextBlocks + block)
         }

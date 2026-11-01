@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit
  * ```
  */
 class PlaywrightFixtureSupport {
-
     private lateinit var playwright: Playwright
     private lateinit var browser: Browser
 
@@ -46,7 +45,10 @@ class PlaywrightFixtureSupport {
      * available, so the visual tests cleanly SKIP instead of failing — same doctrine
      * as the workspace's `assumeTrue(isOllamaReady(port))` integration tests.
      */
-    fun requireFixture(property: String, fileName: String) {
+    fun requireFixture(
+        property: String,
+        fileName: String,
+    ) {
         val dir = System.getProperty(property)?.let { Path.of(it) }
         assumeTrue(dir != null && dir.resolve(fileName).toFile().exists()) {
             "Playwright fixture '$fileName' absent (system property '$property') — " +
@@ -56,11 +58,13 @@ class PlaywrightFixtureSupport {
 
     fun launchBrowser() {
         playwright = Playwright.create()
-        browser = playwright.chromium().launch(
-            com.microsoft.playwright.BrowserType.LaunchOptions()
-                .setHeadless(true)
-                .setArgs(listOf("--no-sandbox", "--disable-gpu"))
-        )
+        browser =
+            playwright.chromium().launch(
+                com.microsoft.playwright.BrowserType
+                    .LaunchOptions()
+                    .setHeadless(true)
+                    .setArgs(listOf("--no-sandbox", "--disable-gpu")),
+            )
     }
 
     fun closeBrowser() {
@@ -99,13 +103,20 @@ class PlaywrightFixtureSupport {
         }
     }
 
-    private fun startHttpServer(serveRoot: Path, port: Int = 4335): Process {
-        val process = ProcessBuilder(
-            "python3", "-m", "http.server", port.toString(),
-            "--directory", serveRoot.toAbsolutePath().toString()
-        )
-            .redirectErrorStream(true)
-            .start()
+    private fun startHttpServer(
+        serveRoot: Path,
+        port: Int = 4335,
+    ): Process {
+        val process =
+            ProcessBuilder(
+                "python3",
+                "-m",
+                "http.server",
+                port.toString(),
+                "--directory",
+                serveRoot.toAbsolutePath().toString(),
+            ).redirectErrorStream(true)
+                .start()
 
         val deadline = System.currentTimeMillis() + 15_000
         val url = URI("http://localhost:$port").toURL()

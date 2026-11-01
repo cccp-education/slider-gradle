@@ -8,14 +8,13 @@ import slider.repository.CommitResult
 import slider.repository.CopyResult
 import slider.repository.JGitSlidePusher
 import slider.repository.RepoDirResult
-import slider.repository.SlideDeploymentRequest
 import slider.repository.SlideDeployer
+import slider.repository.SlideDeploymentRequest
 import slider.repository.SlidePushResult
 import java.io.File
 import java.nio.file.Files
 
 class DeploymentRequestSteps : En {
-
     private lateinit var slidesDir: File
     private lateinit var repoDir: File
     private var remoteUrl: String = ""
@@ -41,18 +40,27 @@ class DeploymentRequestSteps : En {
         }
 
         Given("a non-existent slides directory") {
-            slidesDir = Files.createTempDirectory("parent").toFile()
-                .resolve("missing")
+            slidesDir =
+                Files
+                    .createTempDirectory("parent")
+                    .toFile()
+                    .resolve("missing")
         }
 
         Given("a repo directory path {string}") { path: String ->
-            repoDir = Files.createTempDirectory("deploy-test").toFile()
-                .resolve(path)
+            repoDir =
+                Files
+                    .createTempDirectory("deploy-test")
+                    .toFile()
+                    .resolve(path)
         }
 
         Given("a repo directory path {string} with a stale file") { path: String ->
-            repoDir = Files.createTempDirectory("deploy-test").toFile()
-                .resolve(path)
+            repoDir =
+                Files
+                    .createTempDirectory("deploy-test")
+                    .toFile()
+                    .resolve(path)
             repoDir.mkdirs()
             repoDir.resolve("stale.txt").writeText("old")
         }
@@ -75,20 +83,8 @@ class DeploymentRequestSteps : En {
         }
 
         When("the deployment request is created") {
-            request = SlideDeploymentRequest(
-                slidesDir = slidesDir,
-                repoDir = repoDir,
-                remoteUrl = remoteUrl,
-                branch = branch,
-                commitMessage = commitMessage,
-                username = username,
-                password = password,
-            )
-        }
-
-        When("the deployment request creation is attempted") {
-            try {
-                request = SlideDeploymentRequest(
+            request =
+                SlideDeploymentRequest(
                     slidesDir = slidesDir,
                     repoDir = repoDir,
                     remoteUrl = remoteUrl,
@@ -97,6 +93,20 @@ class DeploymentRequestSteps : En {
                     username = username,
                     password = password,
                 )
+        }
+
+        When("the deployment request creation is attempted") {
+            try {
+                request =
+                    SlideDeploymentRequest(
+                        slidesDir = slidesDir,
+                        repoDir = repoDir,
+                        remoteUrl = remoteUrl,
+                        branch = branch,
+                        commitMessage = commitMessage,
+                        username = username,
+                        password = password,
+                    )
             } catch (t: Throwable) {
                 caught = t
             }
@@ -132,15 +142,16 @@ class DeploymentRequestSteps : En {
         }
 
         When("the slides are copied") {
-            val req = request ?: SlideDeploymentRequest(
-                slidesDir = slidesDir,
-                repoDir = repoDir,
-                remoteUrl = remoteUrl.ifBlank { "https://github.com/org/slides.git" },
-                branch = branch.ifBlank { "main" },
-                commitMessage = commitMessage.ifBlank { "deploy" },
-                username = username.ifBlank { "user" },
-                password = password.ifBlank { "token" },
-            )
+            val req =
+                request ?: SlideDeploymentRequest(
+                    slidesDir = slidesDir,
+                    repoDir = repoDir,
+                    remoteUrl = remoteUrl.ifBlank { "https://github.com/org/slides.git" },
+                    branch = branch.ifBlank { "main" },
+                    commitMessage = commitMessage.ifBlank { "deploy" },
+                    username = username.ifBlank { "user" },
+                    password = password.ifBlank { "token" },
+                )
             copyResult = SlideDeployer.copySlides(req)
         }
 
@@ -155,9 +166,17 @@ class DeploymentRequestSteps : En {
         }
 
         Given("a bare git remote is available") {
-            bareRemote = Files.createTempDirectory("bare-remote").toFile()
-                .resolve("remote.git")
-            Git.init().setBare(true).setDirectory(bareRemote!!).call().close()
+            bareRemote =
+                Files
+                    .createTempDirectory("bare-remote")
+                    .toFile()
+                    .resolve("remote.git")
+            Git
+                .init()
+                .setBare(true)
+                .setDirectory(bareRemote!!)
+                .call()
+                .close()
             remoteUrl = "file://${bareRemote!!.absolutePath}"
         }
 
@@ -186,9 +205,10 @@ class DeploymentRequestSteps : En {
 
         Then("the git branch should be {string}") { expected: String ->
             val req = buildRequestFromContext()
-            val repo = FileRepositoryBuilder()
-                .setGitDir(req.repoDir.resolve(".git"))
-                .build()
+            val repo =
+                FileRepositoryBuilder()
+                    .setGitDir(req.repoDir.resolve(".git"))
+                    .build()
             assertThat(repo.branch).isEqualTo(expected)
             repo.close()
         }

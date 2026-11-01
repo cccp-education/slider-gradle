@@ -22,7 +22,6 @@ enum class TranslationStatus {
  * Every variant exposes a [targetLanguage] (ISO 639-1) and a [status].
  */
 sealed class TranslationResult {
-
     abstract val targetLanguage: String
     abstract val status: TranslationStatus
 

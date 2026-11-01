@@ -18,7 +18,7 @@ data class RepositoryConfiguration(
 @JvmRecord
 data class RepositoryCredentials(
     val username: String,
-    val password: String
+    val password: String,
 )
 
 @JvmRecord
@@ -32,7 +32,10 @@ data class GitPushConfiguration(
 
 sealed class WorkspaceError {
     object FileNotFound : WorkspaceError()
-    data class ParsingError(val message: String) : WorkspaceError()
+
+    data class ParsingError(
+        val message: String,
+    ) : WorkspaceError()
 }
 
 data class AiConfiguration(
@@ -42,9 +45,9 @@ data class AiConfiguration(
 )
 
 enum class PageNotesStyle {
-    MINIMAL,        // just a reference
-    DETAILED,       // deep content + references
-    EXERCISES_ONLY  // practical exercises only
+    MINIMAL, // just a reference
+    DETAILED, // deep content + references
+    EXERCISES_ONLY, // practical exercises only
 }
 
 data class NotesConfiguration(

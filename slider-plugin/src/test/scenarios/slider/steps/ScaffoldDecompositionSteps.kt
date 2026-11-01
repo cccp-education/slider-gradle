@@ -15,7 +15,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 class ScaffoldDecompositionSteps : En {
-
     private lateinit var miscDir: File
     private lateinit var projectDir: File
     private var completeness: Boolean? = null
@@ -24,8 +23,7 @@ class ScaffoldDecompositionSteps : En {
     private var deckContext: DeckContext? = null
     private var zipBytes: ByteArray = ByteArray(0)
 
-    private fun newTempDir(prefix: String): File =
-        Files.createTempDirectory(prefix).toFile()
+    private fun newTempDir(prefix: String): File = Files.createTempDirectory(prefix).toFile()
 
     init {
 
@@ -82,11 +80,12 @@ class ScaffoldDecompositionSteps : En {
         }
 
         Given("a slides zip containing directory entries and the file {string}") { fileName: String ->
-            zipBytes = zipOf(
-                "slides/" to null,
-                "slides/misc/" to null,
-                fileName to "<html></html>".toByteArray(),
-            )
+            zipBytes =
+                zipOf(
+                    "slides/" to null,
+                    "slides/misc/" to null,
+                    fileName to "<html></html>".toByteArray(),
+                )
         }
 
         Given("an empty slides zip") {
@@ -146,11 +145,23 @@ class ScaffoldDecompositionSteps : En {
         }
 
         Then("the credentials username should be {string}") { expected: String ->
-            assertThat(slidesConfig?.pushSlides?.repo?.credentials?.username).isEqualTo(expected)
+            assertThat(
+                slidesConfig
+                    ?.pushSlides
+                    ?.repo
+                    ?.credentials
+                    ?.username,
+            ).isEqualTo(expected)
         }
 
         Then("the credentials password should be {string}") { expected: String ->
-            assertThat(slidesConfig?.pushSlides?.repo?.credentials?.password).isEqualTo(expected)
+            assertThat(
+                slidesConfig
+                    ?.pushSlides
+                    ?.repo
+                    ?.credentials
+                    ?.password,
+            ).isEqualTo(expected)
         }
 
         Then("the gemini key list should contain {string}") { expected: String ->

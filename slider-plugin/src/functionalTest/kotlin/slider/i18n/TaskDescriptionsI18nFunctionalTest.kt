@@ -16,7 +16,6 @@ import java.io.File
  * is listed.
  */
 class TaskDescriptionsI18nFunctionalTest {
-
     @TempDir
     lateinit var testProjectDir: File
 
@@ -33,7 +32,8 @@ class TaskDescriptionsI18nFunctionalTest {
             rootProject.name = "task-descriptions-i18n-test"
             """.trimIndent(),
         )
-        return GradleRunner.create()
+        return GradleRunner
+            .create()
             .withProjectDir(testProjectDir)
             .withArguments("tasks", "--all", "-Planguage=$language")
             .withPluginClasspath()
@@ -46,24 +46,25 @@ class TaskDescriptionsI18nFunctionalTest {
     fun `plugin lists every documented task with its localized description`() {
         val output = runTasksWithLanguage("fr")
 
-        val taskNames = listOf(
-            "cleanBuild",
-            "asciidoctorRevealJs",
-            "generateDashboard",
-            "asciidoctor",
-            "serveSlides",
-            "installPlaywright",
-            "visualTest",
-            "deploySlides",
-            "reportTests",
-            "reportFunctionalTests",
-            "generateRevealUiMessages",
-            "translateDeck",
-            "reindexRag",
-            "proposeDeckContext",
-            "generateDeck",
-            "generateDeckPipeline",
-        )
+        val taskNames =
+            listOf(
+                "cleanBuild",
+                "asciidoctorRevealJs",
+                "generateDashboard",
+                "asciidoctor",
+                "serveSlides",
+                "installPlaywright",
+                "visualTest",
+                "deploySlides",
+                "reportTests",
+                "reportFunctionalTests",
+                "generateRevealUiMessages",
+                "translateDeck",
+                "reindexRag",
+                "proposeDeckContext",
+                "generateDeck",
+                "generateDeckPipeline",
+            )
         taskNames.forEach { taskName ->
             assertThat(output)
                 .describedAs("Task '$taskName' should be listed")

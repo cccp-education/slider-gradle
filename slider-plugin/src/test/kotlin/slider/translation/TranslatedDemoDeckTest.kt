@@ -31,7 +31,6 @@ import java.util.stream.Stream
  * - The `outputFile` in each translated context points to the matching `.adoc`.
  */
 class TranslatedDemoDeckTest {
-
     companion object {
         private val sourceCodes = listOf("fr", "en", "ar")
 
@@ -45,14 +44,14 @@ class TranslatedDemoDeckTest {
         @JvmStatic
         fun sourceTargetPairs(): Stream<Arguments> =
             sourceCodes.stream().flatMap { src ->
-                dogfoodTargetCodes.stream()
+                dogfoodTargetCodes
+                    .stream()
                     .filter { it != src }
                     .map { tgt -> Arguments.of(src, tgt) }
             }
 
         @JvmStatic
-        fun sourceCodesProvider(): Stream<Arguments> =
-            sourceCodes.stream().map { Arguments.of(it) }
+        fun sourceCodesProvider(): Stream<Arguments> = sourceCodes.stream().map { Arguments.of(it) }
     }
 
     @ParameterizedTest
@@ -115,10 +114,11 @@ class TranslatedDemoDeckTest {
     @MethodSource("sourceCodesProvider")
     fun `each source deck should have one translated adoc file per other language`(source: String) {
         val expected = dogfoodTargetCodes.count { it != source }
-        val translated = slidesMiscDir().listFiles { f ->
-            f.name.startsWith("capsule-feed-demo-${source}_") &&
-                f.name.endsWith("-deck.adoc")
-        } ?: emptyArray()
+        val translated =
+            slidesMiscDir().listFiles { f ->
+                f.name.startsWith("capsule-feed-demo-${source}_") &&
+                    f.name.endsWith("-deck.adoc")
+            } ?: emptyArray()
         assertThat(translated).hasSize(expected)
     }
 
@@ -126,28 +126,31 @@ class TranslatedDemoDeckTest {
     @MethodSource("sourceCodesProvider")
     fun `each source deck should have one translated context file per other language`(source: String) {
         val expected = dogfoodTargetCodes.count { it != source }
-        val translated = slidesMiscDir().listFiles { f ->
-            f.name.startsWith("capsule-feed-demo-${source}_") &&
-                f.name.endsWith("-deck-context.yml")
-        } ?: emptyArray()
+        val translated =
+            slidesMiscDir().listFiles { f ->
+                f.name.startsWith("capsule-feed-demo-${source}_") &&
+                    f.name.endsWith("-deck-context.yml")
+            } ?: emptyArray()
         assertThat(translated).hasSize(expected)
     }
 
     @Test
     fun `all translated adoc files should exist across all sources`() {
         val expected = sourceCodes.sumOf { src -> dogfoodTargetCodes.count { it != src } }
-        val allAdoc = slidesMiscDir().listFiles { f ->
-            f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck\\.adoc"))
-        } ?: emptyArray()
+        val allAdoc =
+            slidesMiscDir().listFiles { f ->
+                f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck\\.adoc"))
+            } ?: emptyArray()
         assertThat(allAdoc).hasSize(expected)
     }
 
     @Test
     fun `all translated context files should exist across all sources`() {
         val expected = sourceCodes.sumOf { src -> dogfoodTargetCodes.count { it != src } }
-        val allCtx = slidesMiscDir().listFiles { f ->
-            f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck-context\\.yml"))
-        } ?: emptyArray()
+        val allCtx =
+            slidesMiscDir().listFiles { f ->
+                f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck-context\\.yml"))
+            } ?: emptyArray()
         assertThat(allCtx).hasSize(expected)
     }
 
@@ -166,11 +169,16 @@ class TranslatedDemoDeckTest {
         }
     }
 
-    private fun translatedAdoc(source: String, target: String): File =
-        slidesMiscDir().resolve("capsule-feed-demo-${source}_${target}-deck.adoc")
+    private fun translatedAdoc(
+        source: String,
+        target: String,
+    ): File = slidesMiscDir().resolve("capsule-feed-demo-${source}_$target-deck.adoc")
 
-    private fun translatedContext(source: String, target: String): DeckContext {
-        val file = slidesMiscDir().resolve("capsule-feed-demo-${source}_${target}-deck-context.yml")
+    private fun translatedContext(
+        source: String,
+        target: String,
+    ): DeckContext {
+        val file = slidesMiscDir().resolve("capsule-feed-demo-${source}_$target-deck-context.yml")
         assertThat(file.exists())
             .withFailMessage("Translated context not found: ${file.name}")
             .isTrue()

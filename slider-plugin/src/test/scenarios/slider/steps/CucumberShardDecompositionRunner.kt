@@ -27,15 +27,16 @@ import org.junit.platform.suite.api.Suite
 @SelectClasspathResource("features/21_playwright_decomposition.feature")
 @ConfigurationParameter(
     key = FEATURES_PROPERTY_NAME,
-    value = "src/test/features/15_scaffold_decomposition.feature,src/test/features/16_config_decomposition.feature," +
-        "src/test/features/17_prerequisite_decomposition.feature,src/test/features/18_extension_decomposition.feature," +
-        "src/test/features/19_wiring_decomposition.feature,src/test/features/20_revealjs_decomposition.feature," +
-        "src/test/features/21_playwright_decomposition.feature"
+    value =
+        "src/test/features/15_scaffold_decomposition.feature,src/test/features/16_config_decomposition.feature," +
+            "src/test/features/17_prerequisite_decomposition.feature,src/test/features/18_extension_decomposition.feature," +
+            "src/test/features/19_wiring_decomposition.feature,src/test/features/20_revealjs_decomposition.feature," +
+            "src/test/features/21_playwright_decomposition.feature",
 )
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.steps")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
-    value = "pretty, html:build/reports/cucumber-shard-decomposition.html, json:build/reports/cucumber-shard-decomposition.json"
+    value = "pretty, html:build/reports/cucumber-shard-decomposition.html, json:build/reports/cucumber-shard-decomposition.json",
 )
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @wip and not @integration")
 class CucumberShardDecompositionRunner

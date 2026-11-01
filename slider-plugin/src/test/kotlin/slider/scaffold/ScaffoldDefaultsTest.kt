@@ -1,38 +1,26 @@
 package slider.scaffold
 
-import slider.AiConfiguration
-import slider.AuthorContext
-import slider.DeckContext
-import slider.GitPushConfiguration
-import slider.NotesConfiguration
-import slider.PageNotesStyle
-import slider.RevealJsContext
-import slider.RepositoryConfiguration
-import slider.RepositoryCredentials
-import slider.SlideHint
-import slider.SlidesConfiguration
+import arrow.integrations.jackson.module.registerArrowModule
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import arrow.integrations.jackson.module.registerArrowModule
 import org.junit.jupiter.api.io.TempDir
+import slider.PageNotesStyle
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.assertIs
 
 class ScaffoldDefaultsTest {
-
-    private val yamlMapper: ObjectMapper = YAMLMapper()
-        .let { ObjectMapper(YAMLFactory()) }
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .registerKotlinModule()
-        .registerArrowModule()
+    private val yamlMapper: ObjectMapper =
+        YAMLMapper()
+            .let { ObjectMapper(YAMLFactory()) }
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerKotlinModule()
+            .registerArrowModule()
 
     @TempDir
     lateinit var tmpDir: Path
@@ -48,8 +36,20 @@ class ScaffoldDefaultsTest {
         assertEquals("deploy slides", conf.pushSlides?.message)
         assertEquals("slides", conf.pushSlides?.repo?.name)
         assertEquals("https://github.com/your-org/your-slides-repo.git", conf.pushSlides?.repo?.repository)
-        assertEquals("your-username", conf.pushSlides?.repo?.credentials?.username)
-        assertEquals("your-token", conf.pushSlides?.repo?.credentials?.password)
+        assertEquals(
+            "your-username",
+            conf.pushSlides
+                ?.repo
+                ?.credentials
+                ?.username,
+        )
+        assertEquals(
+            "your-token",
+            conf.pushSlides
+                ?.repo
+                ?.credentials
+                ?.password,
+        )
         assertEquals(listOf("your-gemini-api-key"), conf.ai?.gemini)
         assertEquals(listOf("your-mistral-api-key"), conf.ai?.mistral)
         assertEquals(listOf("your-huggingface-api-key"), conf.ai?.huggingface)

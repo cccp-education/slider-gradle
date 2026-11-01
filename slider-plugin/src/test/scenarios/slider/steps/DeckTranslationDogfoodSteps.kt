@@ -1,6 +1,5 @@
 package slider.steps
 
-import contracts.i18n.LanguageCatalog
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
 import slider.DeckContext
@@ -16,7 +15,6 @@ import java.io.File
  * 10 supported languages.
  */
 class DeckTranslationDogfoodSteps : En {
-
     private var currentContext: DeckContext? = null
     private var currentAdoc: String? = null
 
@@ -33,17 +31,18 @@ class DeckTranslationDogfoodSteps : En {
         }
 
         Given("the source deck {string} has been translated") { source: String ->
-            val translated = slidesMiscDir().listFiles { f ->
-                f.name.startsWith("capsule-feed-demo-${source}_") &&
-                    f.name.endsWith("-deck.adoc")
-            } ?: emptyArray()
+            val translated =
+                slidesMiscDir().listFiles { f ->
+                    f.name.startsWith("capsule-feed-demo-${source}_") &&
+                        f.name.endsWith("-deck.adoc")
+                } ?: emptyArray()
             assertThat(translated)
                 .withFailMessage("No translated adoc files found for source '$source'")
                 .isNotEmpty
         }
 
         Given("the translated adoc from {string} to {string} exists") { source: String, target: String ->
-            val file = slidesMiscDir().resolve("capsule-feed-demo-${source}_${target}-deck.adoc")
+            val file = slidesMiscDir().resolve("capsule-feed-demo-${source}_$target-deck.adoc")
             assertThat(file.exists())
                 .withFailMessage("Translated adoc not found: ${file.name}")
                 .isTrue()
@@ -51,7 +50,7 @@ class DeckTranslationDogfoodSteps : En {
         }
 
         Given("the translated context from {string} to {string} exists") { source: String, target: String ->
-            val file = slidesMiscDir().resolve("capsule-feed-demo-${source}_${target}-deck-context.yml")
+            val file = slidesMiscDir().resolve("capsule-feed-demo-${source}_$target-deck-context.yml")
             assertThat(file.exists())
                 .withFailMessage("Translated context not found: ${file.name}")
                 .isTrue()
@@ -98,38 +97,41 @@ class DeckTranslationDogfoodSteps : En {
         }
 
         Then("there should be {int} translated adoc files for source {string}") { count: Int, source: String ->
-            val files = slidesMiscDir().listFiles { f ->
-                f.name.startsWith("capsule-feed-demo-${source}_") &&
-                    f.name.endsWith("-deck.adoc")
-            } ?: emptyArray()
+            val files =
+                slidesMiscDir().listFiles { f ->
+                    f.name.startsWith("capsule-feed-demo-${source}_") &&
+                        f.name.endsWith("-deck.adoc")
+                } ?: emptyArray()
             assertThat(files).hasSize(count)
         }
 
         Then("there should be {int} translated context files for source {string}") { count: Int, source: String ->
-            val files = slidesMiscDir().listFiles { f ->
-                f.name.startsWith("capsule-feed-demo-${source}_") &&
-                    f.name.endsWith("-deck-context.yml")
-            } ?: emptyArray()
+            val files =
+                slidesMiscDir().listFiles { f ->
+                    f.name.startsWith("capsule-feed-demo-${source}_") &&
+                        f.name.endsWith("-deck-context.yml")
+                } ?: emptyArray()
             assertThat(files).hasSize(count)
         }
 
         Then("there should be {int} translated adoc files total") { total: Int ->
-            val files = slidesMiscDir().listFiles { f ->
-                f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck\\.adoc"))
-            } ?: emptyArray()
+            val files =
+                slidesMiscDir().listFiles { f ->
+                    f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck\\.adoc"))
+                } ?: emptyArray()
             assertThat(files).hasSize(total)
         }
 
         Then("there should be {int} translated context files total") { total: Int ->
-            val files = slidesMiscDir().listFiles { f ->
-                f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck-context\\.yml"))
-            } ?: emptyArray()
+            val files =
+                slidesMiscDir().listFiles { f ->
+                    f.name.matches(Regex("capsule-feed-demo-(fr|en|ar)_[a-z]{2}-deck-context\\.yml"))
+                } ?: emptyArray()
             assertThat(files).hasSize(total)
         }
     }
 
-    private fun demoContextFile(code: String): File =
-        slidesMiscDir().resolve("capsule-feed-demo-$code-deck-context.yml")
+    private fun demoContextFile(code: String): File = slidesMiscDir().resolve("capsule-feed-demo-$code-deck-context.yml")
 
     private fun resolveSlidesMiscDir(): File {
         val dir = resolveRepoRoot()

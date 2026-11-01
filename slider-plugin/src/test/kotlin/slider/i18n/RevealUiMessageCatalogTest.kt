@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class RevealUiMessageCatalogTest {
-
     @Test
     fun `catalog should expose one RevealUiMessages per LanguageCatalog entry`() {
         val catalog = RevealUiMessageCatalog.all()
@@ -80,11 +79,14 @@ class RevealUiMessageCatalogTest {
             assertThat(messages.nav.up).withFailMessage("up blank for ${messages.languageCode}").isNotBlank()
             assertThat(messages.nav.help).withFailMessage("help blank for ${messages.languageCode}").isNotBlank()
             assertThat(messages.controls.overview)
-                .withFailMessage("overview blank for ${messages.languageCode}").isNotBlank()
+                .withFailMessage("overview blank for ${messages.languageCode}")
+                .isNotBlank()
             assertThat(messages.controls.speakerNotes)
-                .withFailMessage("speakerNotes blank for ${messages.languageCode}").isNotBlank()
+                .withFailMessage("speakerNotes blank for ${messages.languageCode}")
+                .isNotBlank()
             assertThat(messages.controls.fullscreen)
-                .withFailMessage("fullscreen blank for ${messages.languageCode}").isNotBlank()
+                .withFailMessage("fullscreen blank for ${messages.languageCode}")
+                .isNotBlank()
         }
     }
 

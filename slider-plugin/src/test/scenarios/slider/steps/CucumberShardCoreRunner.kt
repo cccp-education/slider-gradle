@@ -28,13 +28,14 @@ import org.junit.platform.suite.api.Suite
 @SelectClasspathResource("features/4_auto_animate.feature")
 @ConfigurationParameter(
     key = FEATURES_PROPERTY_NAME,
-    value = "src/test/features/1_minimal_configuration.feature,src/test/features/2_propose_deck_context.feature," +
-        "src/test/features/3_revealjs_transition.feature,src/test/features/4_auto_animate.feature"
+    value =
+        "src/test/features/1_minimal_configuration.feature,src/test/features/2_propose_deck_context.feature," +
+            "src/test/features/3_revealjs_transition.feature,src/test/features/4_auto_animate.feature",
 )
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.steps")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
-    value = "pretty, html:build/reports/cucumber-shard-core.html, json:build/reports/cucumber-shard-core.json"
+    value = "pretty, html:build/reports/cucumber-shard-core.html, json:build/reports/cucumber-shard-core.json",
 )
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @wip and not @integration")
 class CucumberShardCoreRunner

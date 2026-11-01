@@ -24,7 +24,6 @@ package slider.extension
 data class AsciidoctorJPin(
     val version: String = DEFAULT_VERSION,
 ) {
-
     init {
         require(version.isNotBlank()) { "AsciidoctorJPin.version must not be blank" }
     }

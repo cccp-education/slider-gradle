@@ -1,11 +1,11 @@
 package slider.repository
 
-import slider.SliderConfig.localConf
-import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
-import slider.i18n.SliderMessages
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import slider.SliderConfig.localConf
+import slider.Slides.RevealJsSlides.TASK_PUBLISH_SLIDES
+import slider.i18n.SliderMessages
 
 /**
  * Thin Gradle adapter that registers the `deploySlides` task previously
@@ -16,7 +16,6 @@ import org.gradle.kotlin.dsl.register
  * only wires them into a Gradle `DefaultTask` declaration.
  */
 object PublishTaskRegistrar {
-
     /**
      * Registers the `deploySlides` task on [project].
      *
@@ -35,13 +34,18 @@ object PublishTaskRegistrar {
             }
             doLast {
                 val conf = project.localConf
-                val repoDir = project.layout.buildDirectory.get().asFile
-                    .resolve(conf.pushSlides!!.to)
+                val repoDir =
+                    project.layout.buildDirectory
+                        .get()
+                        .asFile
+                        .resolve(conf.pushSlides!!.to)
 
                 SlidePublisher.publish(
                     project = project,
                     slidesDirPath = {
-                        project.layout.buildDirectory.get().asFile
+                        project.layout.buildDirectory
+                            .get()
+                            .asFile
                             .resolve(conf.srcPath!!)
                             .absolutePath
                     },

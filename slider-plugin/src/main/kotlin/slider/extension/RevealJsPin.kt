@@ -18,7 +18,6 @@ data class RevealJsPin(
     val repository: String = DEFAULT_REPOSITORY,
     val tag: String = DEFAULT_TAG,
 ) {
-
     init {
         require(version.isNotBlank()) { "RevealJsPin.version must not be blank" }
         require(organisation.isNotBlank()) { "RevealJsPin.organisation must not be blank" }

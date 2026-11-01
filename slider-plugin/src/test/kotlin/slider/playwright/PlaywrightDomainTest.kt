@@ -5,16 +5,16 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class PlaywrightDomainTest {
-
     // ---------------------------------------------------------------------------
     // PlaywrightDir
     // ---------------------------------------------------------------------------
 
     @Test
-    fun `a playwright dir resolves project_src_test_playwright`(@TempDir projectDir: File) {
+    fun `a playwright dir resolves project_src_test_playwright`(
+        @TempDir projectDir: File,
+    ) {
         val dir = PlaywrightDir(projectDir)
         assertEquals(File(projectDir, "src/test/playwright"), dir.asFile())
     }
@@ -25,7 +25,9 @@ class PlaywrightDomainTest {
     }
 
     @Test
-    fun `a playwright dir config path resolves playwright_config_ts`(@TempDir projectDir: File) {
+    fun `a playwright dir config path resolves playwright_config_ts`(
+        @TempDir projectDir: File,
+    ) {
         val dir = PlaywrightDir(projectDir)
         assertEquals(
             File(projectDir, "src/test/playwright/playwright.config.ts").absolutePath,
@@ -39,10 +41,11 @@ class PlaywrightDomainTest {
 
     @Test
     fun `a serve command keeps its package name and target dir`() {
-        val cmd = ServeCommand(
-            packageName = "@bundle-serve@0.1.0",
-            servedDir = File("/tmp/proj/build/docs/asciidocRevealJs"),
-        )
+        val cmd =
+            ServeCommand(
+                packageName = "@bundle-serve@0.1.0",
+                servedDir = File("/tmp/proj/build/docs/asciidocRevealJs"),
+            )
         assertEquals("@bundle-serve@0.1.0", cmd.packageName)
         assertEquals(File("/tmp/proj/build/docs/asciidocRevealJs"), cmd.servedDir)
     }
@@ -104,10 +107,11 @@ class PlaywrightDomainTest {
 
     @Test
     fun `a visual test command keeps its binary and config path`() {
-        val cmd = VisualTestCommand(
-            binary = "playwright",
-            configPath = "/tmp/proj/src/test/playwright/playwright.config.ts",
-        )
+        val cmd =
+            VisualTestCommand(
+                binary = "playwright",
+                configPath = "/tmp/proj/src/test/playwright/playwright.config.ts",
+            )
         assertEquals("playwright", cmd.binary)
         assertEquals(
             "/tmp/proj/src/test/playwright/playwright.config.ts",

@@ -19,7 +19,6 @@ import slider.content.TextBlock
  * can be validated individually in a test loop.
  */
 object ContentPlaywrightAdapter {
-
     /**
      * Extracts a [ContentRenderData] snapshot from the slide at [slideIndex]
      * in the rendered Reveal.js deck loaded in [page].
@@ -31,7 +30,10 @@ object ContentPlaywrightAdapter {
      * Returns `computedContrastRatio = 0.0` when the title or body elements
      * are not found — this triggers `P1_CONTRAST` (0 < 4.5) downstream.
      */
-    fun extract(page: Page, slideIndex: Int = 0): ContentRenderData {
+    fun extract(
+        page: Page,
+        slideIndex: Int = 0,
+    ): ContentRenderData {
         page.waitForSelector(".reveal .slides section")
 
         val slide = page.locator(".reveal .slides section").nth(slideIndex)
@@ -77,13 +79,17 @@ object ContentPlaywrightAdapter {
         }
     }
 
-    private fun computedFontSize(page: Page, selector: String): Double {
+    private fun computedFontSize(
+        page: Page,
+        selector: String,
+    ): Double {
         val px = page.evalOnSelector(selector, "el => getComputedStyle(el).fontSize") as String
         return px.removeSuffix("px").toDouble()
     }
 
     private fun computedContrast(page: Page): Double {
-        val js = """
+        val js =
+            """
             () => {
                 const title = document.querySelector('.reveal .slides section h2, .reveal .slides section h1');
                 const body = document.querySelector('.reveal .slides section p, .reveal .slides section li');
@@ -108,7 +114,7 @@ object ContentPlaywrightAdapter {
                 });
                 return 0.2126 * r + 0.7152 * g + 0.0722 * b;
             }
-        """.trimIndent()
+            """.trimIndent()
         return (page.evaluate(js) as Number).toDouble()
     }
 }

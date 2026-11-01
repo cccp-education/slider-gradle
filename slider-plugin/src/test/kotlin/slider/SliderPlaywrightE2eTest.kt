@@ -34,7 +34,6 @@ import java.nio.file.Path
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SliderPlaywrightE2eTest {
-
     companion object {
         private val support = PlaywrightFixtureSupport()
 
@@ -63,9 +62,10 @@ class SliderPlaywrightE2eTest {
             val screenshotPath = fixtureDir.resolve("e2e-screenshot.png")
             Files.deleteIfExists(screenshotPath)
             page.screenshot(
-                com.microsoft.playwright.Page.ScreenshotOptions()
+                com.microsoft.playwright.Page
+                    .ScreenshotOptions()
                     .setPath(screenshotPath)
-                    .setFullPage(false)
+                    .setFullPage(false),
             )
 
             PlaywrightAssertions.assertThat(page).hasTitle("Capsule Feed Demo (English)")
@@ -101,8 +101,9 @@ class SliderPlaywrightE2eTest {
     }
 
     private fun resolveFixtureDir(property: String): Path {
-        val dir = System.getProperty(property)
-            ?: error("System property '$property' not set — run './gradlew test'")
+        val dir =
+            System.getProperty(property)
+                ?: error("System property '$property' not set — run './gradlew test'")
         return Path.of(dir).toAbsolutePath().normalize()
     }
 }

@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class AsciidoctorJPinTest {
-
     @Test
     fun `the default pin targets AsciidoctorJ 3_0_1`() {
         assertEquals("3.0.1", AsciidoctorJPin().version)

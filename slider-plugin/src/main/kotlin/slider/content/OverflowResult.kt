@@ -24,7 +24,6 @@ enum class OverflowReason {
  * [Overflow] with a [OverflowReason].
  */
 sealed interface OverflowResult {
-
     /**
      * The block fits within the slide content area.
      */

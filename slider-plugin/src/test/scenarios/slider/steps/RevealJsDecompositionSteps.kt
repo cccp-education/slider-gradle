@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import slider.revealjs.CleanBuildTarget
 import slider.revealjs.DashboardJsonSerializer
 import slider.revealjs.RevealJsAttributesSpec
-import slider.revealjs.RevealJsAttributeKeys
 import slider.revealjs.RevealJsOutputDir
 import slider.revealjs.SlideMetadata
 import slider.revealjs.SlideMetadataScanner
@@ -14,7 +13,6 @@ import java.io.File
 import java.nio.file.Files
 
 class RevealJsDecompositionSteps : En {
-
     private var attributesSpec: RevealJsAttributesSpec? = null
     private var specError: Throwable? = null
     private var outputDir: RevealJsOutputDir? = null
@@ -36,14 +34,12 @@ class RevealJsDecompositionSteps : En {
             specError = null
         }
 
-        When("a custom attributes spec overrides the default with {string} set to {string}") {
-            key: String, value: String ->
+        When("a custom attributes spec overrides the default with {string} set to {string}") { key: String, value: String ->
             attributesSpec = RevealJsAttributesSpec.DEFAULT.withOverrides(mapOf(key to value))
             specError = null
         }
 
-        When("an attributes spec is built with {string} set to {string}") {
-            key: String, value: String ->
+        When("an attributes spec is built with {string} set to {string}") { key: String, value: String ->
             try {
                 attributesSpec = RevealJsAttributesSpec(mapOf(key to value))
             } catch (e: Throwable) {
@@ -93,8 +89,7 @@ class RevealJsDecompositionSteps : En {
         // SlideMetadata
         // -------------------------------------------------------------------------
 
-        When("a slide metadata is built with name {string} filename {string}") {
-            name: String, filename: String ->
+        When("a slide metadata is built with name {string} filename {string}") { name: String, filename: String ->
             metadata = SlideMetadata(name = name, filename = filename)
             metadataError = null
         }
@@ -126,8 +121,11 @@ class RevealJsDecompositionSteps : En {
         // -------------------------------------------------------------------------
 
         When("the scanner scans a missing directory") {
-            val missing = Files.createTempDirectory("scanner-missing").toFile()
-                .resolve("does-not-exist")
+            val missing =
+                Files
+                    .createTempDirectory("scanner-missing")
+                    .toFile()
+                    .resolve("does-not-exist")
             val metas = SlideMetadataScanner.scan(missing)
             metadata = null
             cleanedCount = metas.size
@@ -146,9 +144,10 @@ class RevealJsDecompositionSteps : En {
         }
 
         When("the dashboard serializer serialises a slide named {string}") { name: String ->
-            json = DashboardJsonSerializer.serialize(
-                listOf(SlideMetadata(name = name, filename = "$name.html")),
-            )
+            json =
+                DashboardJsonSerializer.serialize(
+                    listOf(SlideMetadata(name = name, filename = "$name.html")),
+                )
         }
 
         Then("the json payload should be {string}") { expected: String ->
@@ -164,8 +163,11 @@ class RevealJsDecompositionSteps : En {
         // -------------------------------------------------------------------------
 
         When("a clean build target collects a missing output dir") {
-            val missing = Files.createTempDirectory("clean-missing").toFile()
-                .resolve("missing-output")
+            val missing =
+                Files
+                    .createTempDirectory("clean-missing")
+                    .toFile()
+                    .resolve("missing-output")
             val report = CleanBuildTarget(missing).collect()
             cleanedCount = report.cleanedCount()
             slidesJsonDeleted = report.slidesJsonDeleted

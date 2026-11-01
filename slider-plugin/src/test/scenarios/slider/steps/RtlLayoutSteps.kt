@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import slider.i18n.RevealRtlResolver
 
 class RtlLayoutSteps : En {
-
     private var deckLanguage: String = ""
     private var rtlEnabled: Boolean = false
     private var rtlLanguages: Set<String> = emptySet()
@@ -35,7 +34,11 @@ class RtlLayoutSteps : En {
         }
 
         Then("they should be exactly the catalog RTL languages") {
-            val expected = LanguageCatalog.ALL.filter { it.rtl }.map { it.code }.toSet()
+            val expected =
+                LanguageCatalog.ALL
+                    .filter { it.rtl }
+                    .map { it.code }
+                    .toSet()
             assertThat(rtlLanguages).containsExactlyInAnyOrderElementsOf(expected)
         }
     }

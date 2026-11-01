@@ -4,23 +4,24 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ContentSlideAssertionTest {
-
-    private val layout = SlideLayout(
-        viewportWidth = 1280,
-        viewportHeight = 720,
-        marginX = 40.0,
-        marginY = 40.0,
-        titleFontSize = 40.0,
-        bodyFontSize = 20.0,
-    )
+    private val layout =
+        SlideLayout(
+            viewportWidth = 1280,
+            viewportHeight = 720,
+            marginX = 40.0,
+            marginY = 40.0,
+            titleFontSize = 40.0,
+            bodyFontSize = 20.0,
+        )
 
     @Test
     fun `a complete slide with speaker note passes all assertions`() {
-        val content = SlideContent(
-            title = "Introduction",
-            paragraphs = listOf("Short paragraph."),
-            speakerNote = "Welcome the audience.",
-        )
+        val content =
+            SlideContent(
+                title = "Introduction",
+                paragraphs = listOf("Short paragraph."),
+                speakerNote = "Welcome the audience.",
+            )
 
         val result = ContentSlideAssertion.assertAll(content, layout)
 
@@ -30,11 +31,12 @@ class ContentSlideAssertionTest {
     @Test
     fun `P0 overflow fails when a paragraph is too long for the content width`() {
         val longText = "x".repeat(200)
-        val content = SlideContent(
-            title = "Overflow",
-            paragraphs = listOf(longText),
-            speakerNote = "Note",
-        )
+        val content =
+            SlideContent(
+                title = "Overflow",
+                paragraphs = listOf(longText),
+                speakerNote = "Note",
+            )
 
         val result = ContentSlideAssertion.assertAll(content, layout)
 
@@ -45,10 +47,11 @@ class ContentSlideAssertionTest {
 
     @Test
     fun `P0 missing notes fails when slide has no speaker note`() {
-        val content = SlideContent(
-            title = "No Notes",
-            paragraphs = listOf("Some text."),
-        )
+        val content =
+            SlideContent(
+                title = "No Notes",
+                paragraphs = listOf("Some text."),
+            )
 
         val result = ContentSlideAssertion.assertAll(content, layout)
 
@@ -59,19 +62,21 @@ class ContentSlideAssertionTest {
 
     @Test
     fun `P1 font size fails when body font size is below minimum`() {
-        val smallFontLayout = SlideLayout(
-            viewportWidth = 1280,
-            viewportHeight = 720,
-            marginX = 40.0,
-            marginY = 40.0,
-            titleFontSize = 40.0,
-            bodyFontSize = 8.0,
-        )
-        val content = SlideContent(
-            title = "Tiny",
-            paragraphs = listOf("Text."),
-            speakerNote = "Note",
-        )
+        val smallFontLayout =
+            SlideLayout(
+                viewportWidth = 1280,
+                viewportHeight = 720,
+                marginX = 40.0,
+                marginY = 40.0,
+                titleFontSize = 40.0,
+                bodyFontSize = 8.0,
+            )
+        val content =
+            SlideContent(
+                title = "Tiny",
+                paragraphs = listOf("Text."),
+                speakerNote = "Note",
+            )
 
         val result = ContentSlideAssertion.assertAll(content, smallFontLayout)
 
@@ -82,19 +87,21 @@ class ContentSlideAssertionTest {
 
     @Test
     fun `P1 contrast fails when title-body font ratio is too low`() {
-        val flatRatioLayout = SlideLayout(
-            viewportWidth = 1280,
-            viewportHeight = 720,
-            marginX = 40.0,
-            marginY = 40.0,
-            titleFontSize = 22.0,
-            bodyFontSize = 20.0,
-        )
-        val content = SlideContent(
-            title = "Flat",
-            paragraphs = listOf("Text."),
-            speakerNote = "Note",
-        )
+        val flatRatioLayout =
+            SlideLayout(
+                viewportWidth = 1280,
+                viewportHeight = 720,
+                marginX = 40.0,
+                marginY = 40.0,
+                titleFontSize = 22.0,
+                bodyFontSize = 20.0,
+            )
+        val content =
+            SlideContent(
+                title = "Flat",
+                paragraphs = listOf("Text."),
+                speakerNote = "Note",
+            )
 
         val result = ContentSlideAssertion.assertAll(content, flatRatioLayout)
 
@@ -117,18 +124,20 @@ class ContentSlideAssertionTest {
     @Test
     fun `all failures are reported at once`() {
         val longText = "x".repeat(300)
-        val tinyLayout = SlideLayout(
-            viewportWidth = 1280,
-            viewportHeight = 720,
-            marginX = 40.0,
-            marginY = 40.0,
-            titleFontSize = 9.0,
-            bodyFontSize = 8.0,
-        )
-        val content = SlideContent(
-            title = longText,
-            paragraphs = listOf(longText),
-        )
+        val tinyLayout =
+            SlideLayout(
+                viewportWidth = 1280,
+                viewportHeight = 720,
+                marginX = 40.0,
+                marginY = 40.0,
+                titleFontSize = 9.0,
+                bodyFontSize = 8.0,
+            )
+        val content =
+            SlideContent(
+                title = longText,
+                paragraphs = listOf(longText),
+            )
 
         val result = ContentSlideAssertion.assertAll(content, tinyLayout)
 
@@ -175,11 +184,12 @@ class ContentSlideAssertionTest {
 
     @Test
     fun `ContentAssertionResult Failed exposes failures list`() {
-        val failure = ContentAssertionFailure(
-            code = ContentAssertionCode.P0_MISSING_NOTES,
-            message = "P0_MISSING_NOTES — slide has no speaker note",
-            slideRef = "Title",
-        )
+        val failure =
+            ContentAssertionFailure(
+                code = ContentAssertionCode.P0_MISSING_NOTES,
+                message = "P0_MISSING_NOTES — slide has no speaker note",
+                slideRef = "Title",
+            )
 
         val failed = ContentAssertionResult.Failed(listOf(failure))
 

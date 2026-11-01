@@ -18,41 +18,50 @@ package slider.content
  *   ([MIN_TITLE_BODY_RATIO] = 1.25), indicating a flat visual hierarchy.
  */
 object ContentSlideAssertion {
-
     const val MIN_BODY_FONT_SIZE: Double = 14.0
     const val MIN_TITLE_BODY_RATIO: Double = 1.25
 
-    fun assertAll(content: SlideContent, layout: SlideLayout): ContentAssertionResult {
-        val failures = buildList {
-            overflowFailures(content, layout).forEach(::add)
-            if (!content.hasSpeakerNote()) {
-                add(failure(ContentAssertionCode.P0_MISSING_NOTES, content, "slide has no speaker note"))
+    fun assertAll(
+        content: SlideContent,
+        layout: SlideLayout,
+    ): ContentAssertionResult {
+        val failures =
+            buildList {
+                overflowFailures(content, layout).forEach(::add)
+                if (!content.hasSpeakerNote()) {
+                    add(failure(ContentAssertionCode.P0_MISSING_NOTES, content, "slide has no speaker note"))
+                }
+                if (layout.bodyFontSize < MIN_BODY_FONT_SIZE) {
+                    add(
+                        failure(
+                            ContentAssertionCode.P1_FONT_SIZE,
+                            content,
+                            "bodyFontSize=${layout.bodyFontSize} < MIN_BODY_FONT_SIZE=$MIN_BODY_FONT_SIZE",
+                        ),
+                    )
+                }
+                val ratio = layout.titleFontSize / layout.bodyFontSize
+                if (ratio < MIN_TITLE_BODY_RATIO) {
+                    add(
+                        failure(
+                            ContentAssertionCode.P1_CONTRAST,
+                            content,
+                            "title/body ratio=$ratio < MIN_TITLE_BODY_RATIO=$MIN_TITLE_BODY_RATIO",
+                        ),
+                    )
+                }
             }
-            if (layout.bodyFontSize < MIN_BODY_FONT_SIZE) {
-                add(
-                    failure(
-                        ContentAssertionCode.P1_FONT_SIZE,
-                        content,
-                        "bodyFontSize=${layout.bodyFontSize} < MIN_BODY_FONT_SIZE=$MIN_BODY_FONT_SIZE",
-                    ),
-                )
-            }
-            val ratio = layout.titleFontSize / layout.bodyFontSize
-            if (ratio < MIN_TITLE_BODY_RATIO) {
-                add(
-                    failure(
-                        ContentAssertionCode.P1_CONTRAST,
-                        content,
-                        "title/body ratio=$ratio < MIN_TITLE_BODY_RATIO=$MIN_TITLE_BODY_RATIO",
-                    ),
-                )
-            }
+        return if (failures.isEmpty()) {
+            ContentAssertionResult.Passed
+        } else {
+            ContentAssertionResult.Failed(failures)
         }
-        return if (failures.isEmpty()) ContentAssertionResult.Passed
-        else ContentAssertionResult.Failed(failures)
     }
 
-    private fun overflowFailures(content: SlideContent, layout: SlideLayout): List<ContentAssertionFailure> {
+    private fun overflowFailures(
+        content: SlideContent,
+        layout: SlideLayout,
+    ): List<ContentAssertionFailure> {
         val failures = mutableListOf<ContentAssertionFailure>()
         titleOverflow(content, layout)?.let(failures::add)
         content.paragraphs.forEachIndexed { i, paragraph ->
@@ -61,7 +70,10 @@ object ContentSlideAssertion {
         return failures
     }
 
-    private fun titleOverflow(content: SlideContent, layout: SlideLayout): ContentAssertionFailure? {
+    private fun titleOverflow(
+        content: SlideContent,
+        layout: SlideLayout,
+    ): ContentAssertionFailure? {
         val block = textBlock(content.title, layout.marginX, layout.marginY, layout.titleFontSize)
         return overflowFailure(block, layout, content, "title")
     }
@@ -77,7 +89,12 @@ object ContentSlideAssertion {
         return overflowFailure(block, layout, content, "paragraph[$index]")
     }
 
-    private fun textBlock(text: String, x: Double, y: Double, fontSize: Double): TextBlock =
+    private fun textBlock(
+        text: String,
+        x: Double,
+        y: Double,
+        fontSize: Double,
+    ): TextBlock =
         TextBlock(
             text = text,
             x = x,
@@ -95,9 +112,14 @@ object ContentSlideAssertion {
         val result = OverflowDetector.detect(block, layout)
         return if (result is OverflowResult.Overflow) {
             failure(ContentAssertionCode.P0_OVERFLOW, content, "$what — ${result.message}")
-        } else null
+        } else {
+            null
+        }
     }
 
-    private fun failure(code: ContentAssertionCode, content: SlideContent, detail: String): ContentAssertionFailure =
-        ContentAssertionFailure(code, "${code.name} — $detail", content.title)
+    private fun failure(
+        code: ContentAssertionCode,
+        content: SlideContent,
+        detail: String,
+    ): ContentAssertionFailure = ContentAssertionFailure(code, "${code.name} — $detail", content.title)
 }

@@ -33,7 +33,6 @@ import org.gradle.work.DisableCachingByDefault
  */
 @DisableCachingByDefault(because = "jruby")
 abstract class RagTask : DefaultTask() {
-
     @get:ServiceReference
     abstract val pgVectorService: Property<PgVectorService>
 
@@ -44,6 +43,5 @@ abstract class RagTask : DefaultTask() {
      * Starts the container on first call (idempotent), then returns the live
      * [PgVectorService] instance. Safe to call multiple times in a task action.
      */
-    protected fun service(): PgVectorService =
-        pgVectorService.get().also { it.start() }
+    protected fun service(): PgVectorService = pgVectorService.get().also { it.start() }
 }

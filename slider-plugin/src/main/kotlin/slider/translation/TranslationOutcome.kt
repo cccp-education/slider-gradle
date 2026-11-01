@@ -20,14 +20,12 @@ data class TranslationOutcome(
     }
 
     companion object {
-
         val EMPTY = TranslationOutcome(emptyList())
 
         /**
          * Factory that validates and wraps a list of results.
          */
-        fun of(results: List<TranslationResult>): TranslationOutcome =
-            if (results.isEmpty()) EMPTY else TranslationOutcome(results)
+        fun of(results: List<TranslationResult>): TranslationOutcome = if (results.isEmpty()) EMPTY else TranslationOutcome(results)
     }
 
     val totalCount: Int get() = results.size
@@ -44,30 +42,25 @@ data class TranslationOutcome(
     /**
      * Returns only the [TranslationResult.Translated] results.
      */
-    fun translatedResults(): List<TranslationResult.Translated> =
-        results.filterIsInstance<TranslationResult.Translated>()
+    fun translatedResults(): List<TranslationResult.Translated> = results.filterIsInstance<TranslationResult.Translated>()
 
     /**
      * Returns only the [TranslationResult.Failed] results.
      */
-    fun failures(): List<TranslationResult.Failed> =
-        results.filterIsInstance<TranslationResult.Failed>()
+    fun failures(): List<TranslationResult.Failed> = results.filterIsInstance<TranslationResult.Failed>()
 
     /**
      * Returns the target languages of all successfully translated decks.
      */
-    fun translatedLanguages(): List<String> =
-        translatedResults().map { it.targetLanguage }
+    fun translatedLanguages(): List<String> = translatedResults().map { it.targetLanguage }
 
     /**
      * True when every result is [TranslationStatus.TRANSLATED].
      */
-    fun isAllTranslated(): Boolean =
-        results.all { it.status == TranslationStatus.TRANSLATED }
+    fun isAllTranslated(): Boolean = results.all { it.status == TranslationStatus.TRANSLATED }
 
     /**
      * Human-readable summary line with counts.
      */
-    fun summary(): String =
-        "$translatedCount translated, $skippedCount skipped, $failedCount failed (total $totalCount)"
+    fun summary(): String = "$translatedCount translated, $skippedCount skipped, $failedCount failed (total $totalCount)"
 }

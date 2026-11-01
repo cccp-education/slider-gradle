@@ -16,7 +16,6 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
  * .yamlMapper` extension property.
  */
 object YamlMapperFactory {
-
     /**
      * Builds a fresh `ObjectMapper` configured for YAML, Kotlin and Arrow.
      *
@@ -26,9 +25,10 @@ object YamlMapperFactory {
      * The factory centralises the configuration so every call site uses the
      * same serialisation policy.
      */
-    fun create(): ObjectMapper = YAMLFactory()
-        .let(::ObjectMapper)
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .registerKotlinModule()
-        .registerArrowModule()
+    fun create(): ObjectMapper =
+        YAMLFactory()
+            .let(::ObjectMapper)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .registerKotlinModule()
+            .registerArrowModule()
 }

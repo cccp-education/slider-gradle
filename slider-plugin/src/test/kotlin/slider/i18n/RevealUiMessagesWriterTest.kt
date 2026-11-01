@@ -6,7 +6,6 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class RevealUiMessagesWriterTest {
-
     @TempDir
     lateinit var outputDir: File
 

@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import slider.i18n.SliderMessages
 
 class AssistantManagerI18nSteps : En {
-
     private var resolvedMessage: String = ""
 
     init {

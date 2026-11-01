@@ -1,4 +1,6 @@
 import build.CucumberTaskSpec
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+import org.gradle.plugin.compatibility.compatibility
 
 // ── buildscript resolutionStrategy ────────────────────────────────────────────────
 // Gradle 9.5.1 pinne annotations:13.0 (Kotlin embedded) en strictly.
@@ -6,12 +8,12 @@ import build.CucumberTaskSpec
 // annotations:26.0.2-1. Codebase-plugin exclut koog-agents mais les sous-modules
 // koog transitifs contournent l'exclusion. Solution : forcer annotations:26.0.2-1.
 buildscript {
-    repositories { mavenLocal(); mavenCentral() }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
     configurations.all { resolutionStrategy { force("org.jetbrains:annotations:26.0.2-1") } }
 }
-
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-import org.gradle.plugin.compatibility.compatibility
 
 plugins {
     `java-library`
@@ -22,6 +24,7 @@ plugins {
     id("education.cccp.build.functional-test") version "0.0.7"
     id("education.cccp.build.cucumber") version "0.0.7"
     id("education.cccp.build.logback-exclusion") version "0.0.7"
+    id("education.cccp.build.lint") version "0.0.7"
 }
 
 group = "education.cccp"
@@ -35,7 +38,7 @@ repositories {
         "https://plugins.gradle.org/m2/",
 //        "https://maven.xillio.com/artifactory/libs-release/",
         "https://mvnrepository.com/repos/springio-plugins-release",
-        "https://archiva-repository.apache.org/archiva/repository/public/"
+        "https://archiva-repository.apache.org/archiva/repository/public/",
     ).forEach(::maven)
 }
 
@@ -81,12 +84,17 @@ dependencies {
 
     // functionalTest additional deps (convention fournit gradleTestKit + junit + assertj)
     functionalTestConventions {
-        additionalDependencies = listOf(
-            "org.slf4j:slf4j-api:2.0.17",
-            "ch.qos.logback:logback-classic:1.5.26",
-            libs.mockito.kotlin.get().toString(),
-            libs.mockito.junit.jupiter.get().toString()
-        )
+        additionalDependencies =
+            listOf(
+                "org.slf4j:slf4j-api:2.0.17",
+                "ch.qos.logback:logback-classic:1.5.26",
+                libs.mockito.kotlin
+                    .get()
+                    .toString(),
+                libs.mockito.junit.jupiter
+                    .get()
+                    .toString(),
+            )
     }
 }
 
@@ -100,43 +108,44 @@ cucumberConventions {
     // and disjointness are guarded by slider.ci.SliderCucumberShardCoverageTest.
     // Each shard keeps the one-JVM/aggregate efficiency; no shard needs ffmpeg or
     // Chromium — every slider feature is pure-domain.
-    additionalTasks = listOf(
-        CucumberTaskSpec(
-            name = "cucumberTestShardCore",
-            runnerClass = "slider.steps.CucumberShardCoreRunner",
-            timeoutMinutes = 30,
-        ),
-        CucumberTaskSpec(
-            name = "cucumberTestShardI18n",
-            runnerClass = "slider.steps.CucumberShardI18nRunner",
-            timeoutMinutes = 30,
-        ),
-        CucumberTaskSpec(
-            name = "cucumberTestShardTranslation",
-            runnerClass = "slider.steps.CucumberShardTranslationRunner",
-            timeoutMinutes = 30,
-        ),
-        CucumberTaskSpec(
-            name = "cucumberTestShardRepository",
-            runnerClass = "slider.steps.CucumberShardRepositoryRunner",
-            timeoutMinutes = 30,
-        ),
-        CucumberTaskSpec(
-            name = "cucumberTestShardDecomposition",
-            runnerClass = "slider.steps.CucumberShardDecompositionRunner",
-            timeoutMinutes = 30,
-        ),
-        CucumberTaskSpec(
-            name = "cucumberTestShardContent",
-            runnerClass = "slider.steps.CucumberShardContentRunner",
-            timeoutMinutes = 30,
-        ),
-        CucumberTaskSpec(
-            name = "cucumberTestShardPipeline",
-            runnerClass = "slider.steps.CucumberShardPipelineRunner",
-            timeoutMinutes = 30,
-        ),
-    )
+    additionalTasks =
+        listOf(
+            CucumberTaskSpec(
+                name = "cucumberTestShardCore",
+                runnerClass = "slider.steps.CucumberShardCoreRunner",
+                timeoutMinutes = 30,
+            ),
+            CucumberTaskSpec(
+                name = "cucumberTestShardI18n",
+                runnerClass = "slider.steps.CucumberShardI18nRunner",
+                timeoutMinutes = 30,
+            ),
+            CucumberTaskSpec(
+                name = "cucumberTestShardTranslation",
+                runnerClass = "slider.steps.CucumberShardTranslationRunner",
+                timeoutMinutes = 30,
+            ),
+            CucumberTaskSpec(
+                name = "cucumberTestShardRepository",
+                runnerClass = "slider.steps.CucumberShardRepositoryRunner",
+                timeoutMinutes = 30,
+            ),
+            CucumberTaskSpec(
+                name = "cucumberTestShardDecomposition",
+                runnerClass = "slider.steps.CucumberShardDecompositionRunner",
+                timeoutMinutes = 30,
+            ),
+            CucumberTaskSpec(
+                name = "cucumberTestShardContent",
+                runnerClass = "slider.steps.CucumberShardContentRunner",
+                timeoutMinutes = 30,
+            ),
+            CucumberTaskSpec(
+                name = "cucumberTestShardPipeline",
+                runnerClass = "slider.steps.CucumberShardPipelineRunner",
+                timeoutMinutes = 30,
+            ),
+        )
 }
 
 // Exclude Cucumber step definitions from the unit `test` task.
@@ -162,11 +171,15 @@ tasks.withType<Test>().configureEach {
     // RTL fixture: build/playwright-fixtures/rtl/ (requires -Planguage=ar)
     systemProperty(
         "playwright.ltr.fixtures.dir",
-        layout.projectDirectory.dir("../build/playwright-fixtures/ltr").asFile.absolutePath
+        layout.projectDirectory
+            .dir("../build/playwright-fixtures/ltr")
+            .asFile.absolutePath,
     )
     systemProperty(
         "playwright.rtl.fixtures.dir",
-        layout.projectDirectory.dir("../build/playwright-fixtures/rtl").asFile.absolutePath
+        layout.projectDirectory
+            .dir("../build/playwright-fixtures/rtl")
+            .asFile.absolutePath,
     )
 }
 
@@ -175,7 +188,10 @@ gradlePlugin {
         vcsUrl = "https://github.com/cheroliv/slider-gradle.git"
         website = "https://cheroliv.com"
         create("slider") {
-            id = libs.plugins.slider.get().pluginId
+            id =
+                libs.plugins.slider
+                    .get()
+                    .pluginId
             implementationClass = "slider.SliderPlugin"
             displayName = "Slider Plugin"
             description = "Gradle plugin for slider generation."
@@ -190,7 +206,7 @@ gradlePlugin {
                 "mistal-ai",
                 "huggingface",
                 "gemini",
-                "kotlin-DSL"
+                "kotlin-DSL",
             ).run(tags::set)
 
             @Suppress("UnstableApiUsage")

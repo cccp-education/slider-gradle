@@ -6,7 +6,6 @@ import slider.extension.AsciidoctorJPin
 import slider.extension.RevealJsPin
 
 class ExtensionDecompositionSteps : En {
-
     private var pin: RevealJsPin? = null
     private var asciidoctorJPin: AsciidoctorJPin? = null
     private var constructionError: Throwable? = null
@@ -19,29 +18,50 @@ class ExtensionDecompositionSteps : En {
         }
 
         When("a Reveal.js pin is built with a blank version") {
-            try { RevealJsPin(version = "") } catch (e: Throwable) { constructionError = e }
+            try {
+                RevealJsPin(version = "")
+            } catch (e: Throwable) {
+                constructionError = e
+            }
         }
 
         When("a Reveal.js pin is built with a blank tag") {
-            try { RevealJsPin(tag = "   ") } catch (e: Throwable) { constructionError = e }
+            try {
+                RevealJsPin(tag = "   ")
+            } catch (e: Throwable) {
+                constructionError = e
+            }
         }
 
         When("a Reveal.js pin is built with a blank organisation") {
-            try { RevealJsPin(organisation = "") } catch (e: Throwable) { constructionError = e }
+            try {
+                RevealJsPin(organisation = "")
+            } catch (e: Throwable) {
+                constructionError = e
+            }
         }
 
         When("a Reveal.js pin is built with a blank repository") {
-            try { RevealJsPin(repository = "") } catch (e: Throwable) { constructionError = e }
+            try {
+                RevealJsPin(repository = "")
+            } catch (e: Throwable) {
+                constructionError = e
+            }
         }
 
         When("a Reveal.js pin is built with version {string} organisation {string} repository {string} tag {string}") {
-            version: String, organisation: String, repository: String, tag: String ->
-            pin = RevealJsPin(
-                version = version,
-                organisation = organisation,
-                repository = repository,
-                tag = tag,
-            )
+            version: String,
+            organisation: String,
+            repository: String,
+            tag: String,
+            ->
+            pin =
+                RevealJsPin(
+                    version = version,
+                    organisation = organisation,
+                    repository = repository,
+                    tag = tag,
+                )
             constructionError = null
         }
 
@@ -72,7 +92,11 @@ class ExtensionDecompositionSteps : En {
         }
 
         When("an AsciidoctorJ pin is built with a blank version") {
-            try { AsciidoctorJPin(version = "   ") } catch (e: Throwable) { constructionError = e }
+            try {
+                AsciidoctorJPin(version = "   ")
+            } catch (e: Throwable) {
+                constructionError = e
+            }
         }
 
         When("an AsciidoctorJ pin is built with version {string}") { version: String ->

@@ -24,12 +24,12 @@ import org.junit.platform.suite.api.Suite
 @SelectClasspathResource("features/24_slide_content_validation.feature")
 @ConfigurationParameter(
     key = FEATURES_PROPERTY_NAME,
-    value = "src/test/features/10_rtl_visual_validation.feature,src/test/features/24_slide_content_validation.feature"
+    value = "src/test/features/10_rtl_visual_validation.feature,src/test/features/24_slide_content_validation.feature",
 )
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.steps")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
-    value = "pretty, html:build/reports/cucumber-shard-content.html, json:build/reports/cucumber-shard-content.json"
+    value = "pretty, html:build/reports/cucumber-shard-content.html, json:build/reports/cucumber-shard-content.json",
 )
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @wip and not @integration")
 class CucumberShardContentRunner

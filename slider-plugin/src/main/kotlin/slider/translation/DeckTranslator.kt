@@ -23,7 +23,6 @@ class DeckTranslator(
     private val modelAdapter: LanguageModelAdapter,
     private val adocContent: String,
 ) {
-
     /**
      * Executes all tasks in the given plan and returns the aggregated outcome.
      *
@@ -42,32 +41,35 @@ class DeckTranslator(
     fun translate(plan: DeckTranslationPlan): TranslationOutcome {
         if (plan.tasks.isEmpty()) return TranslationOutcome.EMPTY
 
-        val results = plan.tasks.map { task ->
-            val translatedAdoc = modelAdapter.translate(
-                deckContext = task.sourceDeck,
-                adocContent = adocContent,
-                sourceLanguage = task.from,
-                targetLanguage = task.to,
-            )
+        val results =
+            plan.tasks.map { task ->
+                val translatedAdoc =
+                    modelAdapter.translate(
+                        deckContext = task.sourceDeck,
+                        adocContent = adocContent,
+                        sourceLanguage = task.from,
+                        targetLanguage = task.to,
+                    )
 
-            if (translatedAdoc.isNullOrBlank()) {
-                TranslationResult.Failed(
-                    targetLanguage = task.to,
-                    errorMessage = "LLM returned empty or null response for '${task.to}'",
-                )
-            } else {
-                val rtlAdjusted = ensureRtlDirection(translatedAdoc, task.to)
-                val translatedDeck = task.sourceDeck.copy(
-                    languageCode = task.to,
-                    outputFile = buildOutputFile(task.sourceDeck, task.to),
-                )
-                TranslationResult.Translated(
-                    targetLanguage = task.to,
-                    translatedDeck = translatedDeck,
-                    translatedAdoc = rtlAdjusted,
-                )
+                if (translatedAdoc.isNullOrBlank()) {
+                    TranslationResult.Failed(
+                        targetLanguage = task.to,
+                        errorMessage = "LLM returned empty or null response for '${task.to}'",
+                    )
+                } else {
+                    val rtlAdjusted = ensureRtlDirection(translatedAdoc, task.to)
+                    val translatedDeck =
+                        task.sourceDeck.copy(
+                            languageCode = task.to,
+                            outputFile = buildOutputFile(task.sourceDeck, task.to),
+                        )
+                    TranslationResult.Translated(
+                        targetLanguage = task.to,
+                        translatedDeck = translatedDeck,
+                        translatedAdoc = rtlAdjusted,
+                    )
+                }
             }
-        }
 
         return TranslationOutcome.of(results)
     }
@@ -81,17 +83,21 @@ class DeckTranslator(
      * If the original filename already ends with `_{lang}-deck.adoc`, the
      * language segment is replaced rather than appended.
      */
-    private fun buildOutputFile(sourceDeck: DeckContext, targetLanguage: String): String {
+    private fun buildOutputFile(
+        sourceDeck: DeckContext,
+        targetLanguage: String,
+    ): String {
         val original = sourceDeck.outputFile
         val deckSuffix = "-deck.adoc"
         return if (original.endsWith(deckSuffix)) {
             val base = original.removeSuffix(deckSuffix)
             val langPattern = Regex("_[a-zA-Z]{2}$")
-            val cleanBase = if (langPattern.containsMatchIn(base)) {
-                langPattern.replace(base, "")
-            } else {
-                base
-            }
+            val cleanBase =
+                if (langPattern.containsMatchIn(base)) {
+                    langPattern.replace(base, "")
+                } else {
+                    base
+                }
             "${cleanBase}_$targetLanguage$deckSuffix"
         } else {
             original.replace(Regex("\\.adoc$"), "_$targetLanguage.adoc")
@@ -110,12 +116,16 @@ class DeckTranslator(
      * The LLM does not always preserve or adjust this attribute, so the
      * domain service guarantees it post-translation.
      */
-    private fun ensureRtlDirection(adoc: String, targetLanguage: String): String {
+    private fun ensureRtlDirection(
+        adoc: String,
+        targetLanguage: String,
+    ): String {
         val isRtl = LanguageCatalog.findByCode(targetLanguage)?.rtl == true
         val rtlAttr = ":revealjs_direction: rtl"
         return if (isRtl) {
-            if (adoc.contains(rtlAttr)) adoc
-            else {
+            if (adoc.contains(rtlAttr)) {
+                adoc
+            } else {
                 val lines = adoc.lines().toMutableList()
                 val headerEnd = lines.indexOfFirst { it.isBlank() }.takeIf { it > 0 } ?: lines.size
                 lines.add(headerEnd, rtlAttr)

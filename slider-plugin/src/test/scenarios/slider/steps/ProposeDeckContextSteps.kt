@@ -2,13 +2,13 @@
 
 package slider.steps
 
-import slider.SliderConfig.yamlMapper
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import slider.SliderConfig.yamlMapper
 import java.io.File
 
 /**
@@ -21,8 +21,9 @@ import java.io.File
  * via `-Pollama.baseUrl=http://localhost:<port>`. LangChain4j's OllamaChatModel
  * then hits the mock instead of a real Ollama instance.
  */
-class ProposeDeckContextSteps(private val world: SliderWorld) {
-
+class ProposeDeckContextSteps(
+    private val world: SliderWorld,
+) {
     // -------------------------------------------------------------------------
     // Mock LLM — valid DeckContext JSON response fixture
     // -------------------------------------------------------------------------
@@ -32,23 +33,28 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
      * The LLM mock always returns this — it is structurally valid and parseable
      * by Jackson into a [slider.DeckContext].
      */
-    private fun validDeckContextJson(subject: String, language: String = "fr"): String {
-        val slug = subject.lowercase()
-            .replace(Regex("[àáâãäå]"), "a")
-            .replace(Regex("[èéêë]"), "e")
-            .replace(Regex("[ìíîï]"), "i")
-            .replace(Regex("[òóôõö]"), "o")
-            .replace(Regex("[ùúûü]"), "u")
-            .replace(Regex("[ç]"), "c")
-            .replace(Regex("[^a-z0-9]+"), "-")
-            .trim('-')
+    private fun validDeckContextJson(
+        subject: String,
+        language: String = "fr",
+    ): String {
+        val slug =
+            subject
+                .lowercase()
+                .replace(Regex("[àáâãäå]"), "a")
+                .replace(Regex("[èéêë]"), "e")
+                .replace(Regex("[ìíîï]"), "i")
+                .replace(Regex("[òóôõö]"), "o")
+                .replace(Regex("[ùúûü]"), "u")
+                .replace(Regex("[ç]"), "c")
+                .replace(Regex("[^a-z0-9]+"), "-")
+                .trim('-')
         return """
             {
               "subject": "$subject",
               "audience": "développeurs Kotlin intermédiaires",
               "duration": 60,
               "languageCode": "$language",
-              "outputFile": "${slug}_${language}-deck.adoc",
+              "outputFile": "${slug}_$language-deck.adoc",
               "author": { "name": "cheroliv", "email": "cheroliv@example.com" },
               "revealjs": {
                 "theme": "sky",
@@ -73,7 +79,7 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     // -------------------------------------------------------------------------
@@ -96,14 +102,20 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     // -------------------------------------------------------------------------
 
     @When("I execute the task {string} without any properties")
-    fun executeTaskWithoutProperties(taskName: String) = runBlocking {
-        world.executeGradleExpectingFailure(taskName)
-    }
+    fun executeTaskWithoutProperties(taskName: String) =
+        runBlocking {
+            world.executeGradleExpectingFailure(taskName)
+        }
 
     @When("I execute the task {string} with properties:")
-    fun executeTaskWithProperties(taskName: String, table: DataTable) = runBlocking {
-        val properties = table.asMap(String::class.java, String::class.java)
-            .toMutableMap()
+    fun executeTaskWithProperties(
+        taskName: String,
+        table: DataTable,
+    ) = runBlocking {
+        val properties =
+            table
+                .asMap(String::class.java, String::class.java)
+                .toMutableMap()
 
         // Inject mock server URL if running — forces Ollama provider
         world.mockServerPort?.let { port ->
@@ -156,9 +168,10 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     fun noFileMatchingShouldExist(pattern: String) {
         val dir = world.projectDir!!.resolve(pattern.substringBefore("*").trimEnd('/'))
         val glob = pattern.substringAfterLast('/')
-        val matches = dir.listFiles { f ->
-            f.name.matches(glob.replace("*", ".*").toRegex())
-        } ?: emptyArray()
+        val matches =
+            dir.listFiles { f ->
+                f.name.matches(glob.replace("*", ".*").toRegex())
+            } ?: emptyArray()
         assertThat(matches)
             .describedAs("Expected no file matching $pattern but found: ${matches.map { it.name }}")
             .isEmpty()
@@ -176,9 +189,10 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
 
     private fun lastDeckContextFile(): File {
         val miscDir = world.projectDir!!.resolve("slides/misc")
-        return miscDir.listFiles { f ->
-            f.name.endsWith("-deck-context.yml")
-        }?.maxByOrNull { it.lastModified() }
+        return miscDir
+            .listFiles { f ->
+                f.name.endsWith("-deck-context.yml")
+            }?.maxByOrNull { it.lastModified() }
             ?: error("No *-deck-context.yml found in ${miscDir.absolutePath}")
     }
 
@@ -191,7 +205,10 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     }
 
     @Then("the DeckContext field {string} should equal {string}")
-    fun deckContextFieldShouldEqual(dottedPath: String, expected: String) {
+    fun deckContextFieldShouldEqual(
+        dottedPath: String,
+        expected: String,
+    ) {
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
         val parts = dottedPath.split(".")
         if (parts.size > 1) {
@@ -207,7 +224,10 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     }
 
     @Then("the DeckContext {string} should match the pattern {string}")
-    fun deckContextFieldShouldMatchPattern(field: String, pattern: String) {
+    fun deckContextFieldShouldMatchPattern(
+        field: String,
+        pattern: String,
+    ) {
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
         val value = ctx[field].toString()
         // pattern "<slug>_<lang>-deck.adoc" → regex [a-z0-9-]+_[a-z]{2}-deck\.adoc
@@ -220,6 +240,7 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     @Then("the DeckContext author name should equal {string}")
     fun deckContextAuthorNameShouldEqual(expected: String) {
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
+
         @Suppress("UNCHECKED_CAST")
         val author = ctx["author"] as? Map<String, Any?>
         assertThat(author?.get("name").toString()).isEqualTo(expected)
@@ -228,6 +249,7 @@ class ProposeDeckContextSteps(private val world: SliderWorld) {
     @Then("the DeckContext author email should equal {string}")
     fun deckContextAuthorEmailShouldEqual(expected: String) {
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
+
         @Suppress("UNCHECKED_CAST")
         val author = ctx["author"] as? Map<String, Any?>
         assertThat(author?.get("email").toString()).isEqualTo(expected)

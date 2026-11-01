@@ -8,7 +8,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class YamlMapperFactoryTest {
-
     @Test
     fun `create returns a configured ObjectMapper`() {
         val mapper = YamlMapperFactory.create()
@@ -19,8 +18,10 @@ class YamlMapperFactoryTest {
     fun `create reads a simple YAML mapping as a Map`() {
         val mapper = YamlMapperFactory.create()
         val yaml = "name: slider\nversion: 0.0.11\n"
-        val mapType = mapper.typeFactory
-            .constructMapType(Map::class.java, String::class.java, String::class.java)
+        val mapType =
+            mapper.typeFactory
+                .constructMapType(Map::class.java, String::class.java, String::class.java)
+
         @Suppress("UNCHECKED_CAST")
         val parsed = mapper.readValue(yaml, mapType) as Map<String, String>
         assertEquals("slider", parsed["name"])
@@ -29,7 +30,10 @@ class YamlMapperFactoryTest {
 
     @Test
     fun `create supports Kotlin data classes`() {
-        data class Person(val name: String, val age: Int)
+        data class Person(
+            val name: String,
+            val age: Int,
+        )
 
         val mapper = YamlMapperFactory.create()
         val yaml = "name: Alice\nage: 30\n"
@@ -41,8 +45,9 @@ class YamlMapperFactoryTest {
     @Test
     fun `create disables WRITE_DATES_AS_TIMESTAMPS`() {
         val mapper = YamlMapperFactory.create()
-        val enabled = mapper.serializationConfig
-            .isEnabled(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        val enabled =
+            mapper.serializationConfig
+                .isEnabled(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         assertFalse(enabled)
     }
 

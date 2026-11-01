@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class RevealRtlResolverTest {
-
     @Test
     fun `resolveRtl should return true for Arabic`() {
         assertThat(RevealRtlResolver.resolveRtl("ar")).isTrue()

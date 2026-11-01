@@ -35,7 +35,6 @@ import contracts.i18n.LanguageCatalog
  * [slider.content.ContentSlideAssertion] (object pur, returns sealed result).
  */
 object DeckContextValidator {
-
     private val jsonMapper: ObjectMapper = ObjectMapper()
 
     /**
@@ -62,12 +61,13 @@ object DeckContextValidator {
             return NonEmptyList("DeckContext JSON is blank", emptyList()).left()
         }
 
-        val root: JsonNode = when (val parsed = Either.catch { jsonMapper.readTree(json) }) {
-            is Either.Left -> {
-                return NonEmptyList("DeckContext JSON is malformed: ${parsed.value.message}", emptyList()).left()
+        val root: JsonNode =
+            when (val parsed = Either.catch { jsonMapper.readTree(json) }) {
+                is Either.Left -> {
+                    return NonEmptyList("DeckContext JSON is malformed: ${parsed.value.message}", emptyList()).left()
+                }
+                is Either.Right -> parsed.value
             }
-            is Either.Right -> parsed.value
-        }
 
         if (root.isMissingNode || !root.isObject) {
             return NonEmptyList("DeckContext JSON must be a JSON object", emptyList()).left()

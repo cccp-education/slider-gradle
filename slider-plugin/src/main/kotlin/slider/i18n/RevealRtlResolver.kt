@@ -15,14 +15,13 @@ import contracts.i18n.LanguageCatalog
  * `RevealJSOptions.setRightToLeft` from the resolved deck language.
  */
 object RevealRtlResolver {
-
     /** Returns true when [languageCode] is a RTL language (Arabic, Urdu), false otherwise. */
-    fun resolveRtl(languageCode: String): Boolean =
-        LanguageCatalog.findByCode(languageCode)?.rtl == true
+    fun resolveRtl(languageCode: String): Boolean = LanguageCatalog.findByCode(languageCode)?.rtl == true
 
     /** Returns the set of ISO codes that require RTL layout. */
-    fun rtlLanguages(): Set<String> = LanguageCatalog.ALL
-        .filter { it.rtl }
-        .map { it.code }
-        .toSet()
+    fun rtlLanguages(): Set<String> =
+        LanguageCatalog.ALL
+            .filter { it.rtl }
+            .map { it.code }
+            .toSet()
 }

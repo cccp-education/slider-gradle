@@ -3,7 +3,6 @@ package slider.translation
 import contracts.i18n.LanguageCatalog
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import slider.AuthorContext
 import slider.DeckContext
 import slider.SliderConfig.yamlMapper
 import java.io.File
@@ -17,7 +16,6 @@ import java.io.File
  * and reference their sibling `.adoc` files via [DeckContext.outputFile].
  */
 class DemoDeckContextTest {
-
     @Test
     fun `fr demo deck-context should parse with valid languageCode and matching adoc`() {
         val ctx = loadDemoContext("fr")
@@ -99,7 +97,10 @@ class DemoDeckContextTest {
         return yamlMapper.readValue(file, DeckContext::class.java)
     }
 
-    private fun adocFor(ctx: DeckContext, code: String): File {
+    private fun adocFor(
+        ctx: DeckContext,
+        code: String,
+    ): File {
         val parent = demoContextFile(code).parentFile
         return File(parent, ctx.outputFile)
     }

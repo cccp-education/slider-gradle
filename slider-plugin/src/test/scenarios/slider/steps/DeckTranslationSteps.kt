@@ -3,7 +3,6 @@ package slider.steps
 import contracts.i18n.LanguageCatalog
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import slider.AuthorContext
 import slider.DeckContext
 import slider.translation.DeckTranslationPlan
@@ -11,10 +10,8 @@ import slider.translation.DeckTranslator
 import slider.translation.LanguageModelAdapter
 import slider.translation.TranslationOutcome
 import slider.translation.TranslationRequest
-import slider.translation.TranslationResult
 
 class DeckTranslationSteps : En {
-
     private lateinit var sourceDeck: DeckContext
     private var caught: Throwable? = null
     private var request: TranslationRequest? = null
@@ -61,25 +58,28 @@ Welcome.
         }
 
         Given("a stub LLM that returns content for {string} and {string}") { lang1: String, lang2: String ->
-            stubResponses = mapOf(
-                lang1 to "= Translated content for $lang1",
-                lang2 to "= Translated content for $lang2",
-            )
+            stubResponses =
+                mapOf(
+                    lang1 to "= Translated content for $lang1",
+                    lang2 to "= Translated content for $lang2",
+                )
         }
 
         Given("a stub LLM that returns content for {string} but null for {string}") { lang1: String, lang2: String ->
-            stubResponses = mapOf(
-                lang1 to "= Translated content for $lang1",
-                lang2 to null,
-            )
+            stubResponses =
+                mapOf(
+                    lang1 to "= Translated content for $lang1",
+                    lang2 to null,
+                )
         }
 
         Given("a stub LLM that returns content for {string} and {string} but null for {string}") { lang1: String, lang2: String, lang3: String ->
-            stubResponses = mapOf(
-                lang1 to "= Translated content for $lang1",
-                lang2 to "= Translated content for $lang2",
-                lang3 to null,
-            )
+            stubResponses =
+                mapOf(
+                    lang1 to "= Translated content for $lang1",
+                    lang2 to "= Translated content for $lang2",
+                    lang3 to null,
+                )
         }
 
         Given("a stub LLM that returns null for {string}") { lang: String ->
@@ -158,7 +158,7 @@ Welcome.
 
         Then("the request should target all LanguageCatalog supported codes") {
             assertThat(request!!.targetLanguages).containsExactlyInAnyOrderElementsOf(
-                LanguageCatalog.supportedCodes().toList()
+                LanguageCatalog.supportedCodes().toList(),
             )
         }
 

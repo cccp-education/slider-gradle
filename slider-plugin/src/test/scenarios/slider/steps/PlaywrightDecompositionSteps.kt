@@ -10,7 +10,6 @@ import slider.playwright.VisualTestCommand
 import java.io.File
 
 class PlaywrightDecompositionSteps : En {
-
     private var playwrightDir: PlaywrightDir? = null
     private var playwrightDirError: Throwable? = null
     private var serveCommand: ServeCommand? = null
@@ -57,8 +56,7 @@ class PlaywrightDecompositionSteps : En {
         // ServeCommand
         // -------------------------------------------------------------------------
 
-        When("a serve command is built with package {string} and served dir {string}") {
-            packageName: String, servedDir: String ->
+        When("a serve command is built with package {string} and served dir {string}") { packageName: String, servedDir: String ->
             serveCommand = ServeCommand(packageName = packageName, servedDir = File(servedDir))
             serveError = null
         }
@@ -106,8 +104,7 @@ class PlaywrightDecompositionSteps : En {
             installError = null
         }
 
-        When("an install command is built with browsers {string} and {string}") {
-            b1: String, b2: String ->
+        When("an install command is built with browsers {string} and {string}") { b1: String, b2: String ->
             installCommand = InstallCommand(binary = "playwright", browsers = listOf(b1, b2))
             installError = null
         }
@@ -147,8 +144,7 @@ class PlaywrightDecompositionSteps : En {
         // VisualTestCommand
         // -------------------------------------------------------------------------
 
-        When("a visual test command is built with binary {string} and config path {string}") {
-            binary: String, configPath: String ->
+        When("a visual test command is built with binary {string} and config path {string}") { binary: String, configPath: String ->
             visualCommand = VisualTestCommand(binary = binary, configPath = configPath)
             visualError = null
         }

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test
  * Baby-step 8.3b (SLD-8 US-8.3): graph topology + happy path + failure modes.
  */
 class DeckPipelineGraphTest {
-
-    private val validDeckContextJson = """
+    private val validDeckContextJson =
+        """
         {
           "subject": "Kotlin Coroutines",
           "audience": "developers",
@@ -24,29 +24,32 @@ class DeckPipelineGraphTest {
           "outputFile": "kotlin-coroutines.adoc",
           "author": { "name": "Jane Doe", "email": "jane@example.com" }
         }
-    """.trimIndent()
+        """.trimIndent()
 
     private fun initialState(
         subject: String = "Kotlin Coroutines",
         language: String = "fr",
-    ): DeckState = DeckState(
-        subject = subject,
-        language = language,
-        authorName = "Jane Doe",
-        authorEmail = "jane@example.com",
-        ragContext = "Async programming on the JVM.",
-        deckContextJson = "",
-    )
+    ): DeckState =
+        DeckState(
+            subject = subject,
+            language = language,
+            authorName = "Jane Doe",
+            authorEmail = "jane@example.com",
+            ragContext = "Async programming on the JVM.",
+            deckContextJson = "",
+        )
 
     @Test
     fun `execute returns a DeckState with stage DECK_GENERATED on the happy path`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(
-                proposeResponse = validDeckContextJson,
-                generateResponse = "== Kotlin Coroutines\n\n== Introduction",
-            ),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm =
+                    FakeDeckLlm(
+                        proposeResponse = validDeckContextJson,
+                        generateResponse = "== Kotlin Coroutines\n\n== Introduction",
+                    ),
+            )
 
         val result = graph.execute(initialState())
 
@@ -59,10 +62,11 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute populates deckContextJson from the propose-context node`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
+            )
 
         val result = graph.execute(initialState())
 
@@ -71,13 +75,15 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute stops at CONTEXT_VALIDATED stage when the LLM proposes an invalid context`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(
-                proposeResponse = """{"subject": "missing fields"}""",
-                generateResponse = "== Should not be reached",
-            ),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm =
+                    FakeDeckLlm(
+                        proposeResponse = """{"subject": "missing fields"}""",
+                        generateResponse = "== Should not be reached",
+                    ),
+            )
 
         val result = graph.execute(initialState())
 
@@ -90,10 +96,11 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute reports the validator error when context is invalid`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(proposeResponse = "", generateResponse = ""),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm = FakeDeckLlm(proposeResponse = "", generateResponse = ""),
+            )
 
         val result = graph.execute(initialState())
 
@@ -103,10 +110,11 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute fails the pipeline when the propose-context LLM throws`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(proposeException = RuntimeException("LLM unavailable")),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm = FakeDeckLlm(proposeException = RuntimeException("LLM unavailable")),
+            )
 
         val result = graph.execute(initialState())
 
@@ -117,13 +125,15 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute fails the pipeline when the generate-deck LLM throws`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(
-                proposeResponse = validDeckContextJson,
-                generateException = RuntimeException("Generation failed"),
-            ),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm =
+                    FakeDeckLlm(
+                        proposeResponse = validDeckContextJson,
+                        generateException = RuntimeException("Generation failed"),
+                    ),
+            )
 
         val result = graph.execute(initialState())
 
@@ -135,10 +145,11 @@ class DeckPipelineGraphTest {
     @Test
     fun `execute calls the prompt builder with the running state for propose`() {
         val promptBuilder = FakeDeckPromptBuilder()
-        val graph = DeckPipelineGraph(
-            promptBuilder = promptBuilder,
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = ""),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = promptBuilder,
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = ""),
+            )
 
         graph.execute(initialState())
 
@@ -149,10 +160,11 @@ class DeckPipelineGraphTest {
     @Test
     fun `execute calls the prompt builder with the validated state for generate`() {
         val promptBuilder = FakeDeckPromptBuilder()
-        val graph = DeckPipelineGraph(
-            promptBuilder = promptBuilder,
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = promptBuilder,
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
+            )
 
         graph.execute(initialState())
 
@@ -165,10 +177,11 @@ class DeckPipelineGraphTest {
     @Test
     fun `execute does not call generate prompt when context is invalid`() {
         val promptBuilder = FakeDeckPromptBuilder()
-        val graph = DeckPipelineGraph(
-            promptBuilder = promptBuilder,
-            llm = FakeDeckLlm(proposeResponse = "{}", generateResponse = "== Should not be reached"),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = promptBuilder,
+                llm = FakeDeckLlm(proposeResponse = "{}", generateResponse = "== Should not be reached"),
+            )
 
         graph.execute(initialState())
 
@@ -208,10 +221,11 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `asMermaidDiagram returns a non-blank mermaid graph description`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = ""),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = ""),
+            )
 
         val mermaid = graph.asMermaidDiagram()
 
@@ -220,10 +234,11 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute preserves the initial subject and language through the pipeline`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
+            )
 
         val result = graph.execute(initialState(subject = "Reactive Streams", language = "en"))
 
@@ -233,10 +248,11 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute preserves ragContext through the pipeline`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
+            )
 
         val result = graph.execute(initialState().copy(ragContext = "custom RAG context"))
 
@@ -246,10 +262,11 @@ class DeckPipelineGraphTest {
     @Test
     fun `execute transitions through CONTEXT_PROPOSED before CONTEXT_VALIDATED`() {
         val promptBuilder = TrackingPromptBuilder()
-        val graph = DeckPipelineGraph(
-            promptBuilder = promptBuilder,
-            llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = promptBuilder,
+                llm = FakeDeckLlm(proposeResponse = validDeckContextJson, generateResponse = "== Deck"),
+            )
 
         graph.execute(initialState())
 
@@ -261,13 +278,15 @@ class DeckPipelineGraphTest {
 
     @Test
     fun `execute sets stage FAILED when generate throws despite valid context`() {
-        val graph = DeckPipelineGraph(
-            promptBuilder = FakeDeckPromptBuilder(),
-            llm = FakeDeckLlm(
-                proposeResponse = validDeckContextJson,
-                generateException = IllegalStateException("timeout"),
-            ),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = FakeDeckPromptBuilder(),
+                llm =
+                    FakeDeckLlm(
+                        proposeResponse = validDeckContextJson,
+                        generateException = IllegalStateException("timeout"),
+                    ),
+            )
 
         val result = graph.execute(initialState())
 

@@ -10,7 +10,6 @@ import java.io.File
 import java.nio.file.Files
 
 class RevealUiI18nSteps : En {
-
     private var catalog: List<RevealUiMessages> = emptyList()
     private var queriedMessages: RevealUiMessages? = null
     private var outputDir: File = Files.createTempDirectory("reveal-ui-i18n-cucumber").toFile()

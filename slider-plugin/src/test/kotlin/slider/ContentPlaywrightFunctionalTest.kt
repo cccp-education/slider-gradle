@@ -35,7 +35,6 @@ import java.nio.file.Path
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ContentPlaywrightFunctionalTest {
-
     companion object {
         private const val PORT = 4337
         private val support = PlaywrightFixtureSupport()
@@ -71,8 +70,9 @@ class ContentPlaywrightFunctionalTest {
     }
 
     private fun resolveFixtureDir(property: String): Path {
-        val dir = System.getProperty(property)
-            ?: error("System property '$property' not set — run './gradlew test'")
+        val dir =
+            System.getProperty(property)
+                ?: error("System property '$property' not set — run './gradlew test'")
         return Path.of(dir).toAbsolutePath().normalize()
     }
 }

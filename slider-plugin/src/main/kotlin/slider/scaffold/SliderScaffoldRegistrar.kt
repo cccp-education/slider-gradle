@@ -1,14 +1,13 @@
 package slider.scaffold
 
+import org.gradle.api.Project
 import slider.SliderConfig.yamlMapper
 import slider.SliderPlugin
 import slider.Slides.Slide.DEFAULT_SLIDES_FOLDER
 import slider.Slides.Slide.SLIDES_CONTEXT_YML
 import slider.Slides.Slide.SLIDES_FOLDER
-import org.gradle.api.Project
 
 object SliderScaffoldRegistrar {
-
     fun scaffoldSlidesIfAbsent(project: Project) {
         with(project) {
             val slidesDir = layout.projectDirectory.asFile.resolve(SLIDES_FOLDER)
@@ -16,13 +15,14 @@ object SliderScaffoldRegistrar {
 
             if (slidesDir.exists() && SlidesScaffolder.isSlidesConfigComplete(miscDir)) return
 
-            val zip = SliderPlugin::class.java
-                .classLoader
-                .getResourceAsStream("slides.zip")
-                ?: error(
-                    "slides.zip not found in plugin classpath. " +
-                            "Please report this issue at https://github.com/cheroliv/slider-gradle"
-                )
+            val zip =
+                SliderPlugin::class.java
+                    .classLoader
+                    .getResourceAsStream("slides.zip")
+                    ?: error(
+                        "slides.zip not found in plugin classpath. " +
+                            "Please report this issue at https://github.com/cheroliv/slider-gradle",
+                    )
 
             val result = SlidesScaffolder.extractSlidesZip(zip, layout.projectDirectory.asFile)
             when (result) {
@@ -52,9 +52,10 @@ object SliderScaffoldRegistrar {
 
     fun scaffoldDeckContextIfAbsent(project: Project) {
         with(project) {
-            val miscDir = layout.projectDirectory.asFile
-                .resolve(SLIDES_FOLDER)
-                .resolve(DEFAULT_SLIDES_FOLDER)
+            val miscDir =
+                layout.projectDirectory.asFile
+                    .resolve(SLIDES_FOLDER)
+                    .resolve(DEFAULT_SLIDES_FOLDER)
             val deckContext = miscDir.resolve("example-deck-context.yml")
 
             if (deckContext.exists()) return

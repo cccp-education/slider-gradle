@@ -24,7 +24,6 @@ package slider.content
  * string and returns pure value objects.
  */
 object AsciidocContentParser {
-
     fun parseDeck(adocContent: String): List<SlideContent> {
         require(adocContent.isNotBlank()) { "adocContent must not be blank" }
 
@@ -157,45 +156,42 @@ object AsciidocContentParser {
         lists.clear()
     }
 
-    private fun flushParagraph(sink: MutableList<String>, paragraphs: MutableList<String>) {
+    private fun flushParagraph(
+        sink: MutableList<String>,
+        paragraphs: MutableList<String>,
+    ) {
         if (sink.isEmpty()) return
         val joined = sink.joinToString(" ").trim()
         if (joined.isNotBlank()) paragraphs.add(joined)
         sink.clear()
     }
 
-    private fun flushList(sink: MutableList<String>, lists: MutableList<List<String>>) {
+    private fun flushList(
+        sink: MutableList<String>,
+        lists: MutableList<List<String>>,
+    ) {
         if (sink.isEmpty()) return
         lists.add(sink.toList())
         sink.clear()
     }
 
-    private fun isLevel1Heading(line: String): Boolean =
-        line.startsWith("= ") && !line.startsWith("== ")
+    private fun isLevel1Heading(line: String): Boolean = line.startsWith("= ") && !line.startsWith("== ")
 
-    private fun isLevel2Heading(line: String): Boolean =
-        line.startsWith("== ") && !line.startsWith("=== ")
+    private fun isLevel2Heading(line: String): Boolean = line.startsWith("== ") && !line.startsWith("=== ")
 
-    private fun isLevel3Heading(line: String): Boolean =
-        line.startsWith("=== ") && !line.startsWith("==== ")
+    private fun isLevel3Heading(line: String): Boolean = line.startsWith("=== ") && !line.startsWith("==== ")
 
-    private fun isLevel4PlusHeading(line: String): Boolean =
-        line.startsWith("==== ")
+    private fun isLevel4PlusHeading(line: String): Boolean = line.startsWith("==== ")
 
-    private fun isAuthorLine(line: String): Boolean =
-        line.isNotBlank() && !line.startsWith(":") && !line.startsWith("=") && !line.startsWith("[")
+    private fun isAuthorLine(line: String): Boolean = line.isNotBlank() && !line.startsWith(":") && !line.startsWith("=") && !line.startsWith("[")
 
-    private fun isAttributeEntry(line: String): Boolean =
-        line.trimStart().startsWith(":")
+    private fun isAttributeEntry(line: String): Boolean = line.trimStart().startsWith(":")
 
-    private fun isAttributeList(line: String): Boolean =
-        line.trimStart().startsWith("[") && line.trimEnd().endsWith("]")
+    private fun isAttributeList(line: String): Boolean = line.trimStart().startsWith("[") && line.trimEnd().endsWith("]")
 
-    private fun isComment(line: String): Boolean =
-        line.trimStart().startsWith("//")
+    private fun isComment(line: String): Boolean = line.trimStart().startsWith("//")
 
-    private fun isBulletItem(line: String): Boolean =
-        line.trimStart().startsWith("* ") || line.trimStart() == "*"
+    private fun isBulletItem(line: String): Boolean = line.trimStart().startsWith("* ") || line.trimStart() == "*"
 
     private fun isSpeakerNoteStart(line: String): Boolean {
         val t = line.trimStart()

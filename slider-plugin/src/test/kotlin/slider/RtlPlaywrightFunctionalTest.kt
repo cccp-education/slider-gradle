@@ -35,7 +35,6 @@ import java.nio.file.Path
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RtlPlaywrightFunctionalTest {
-
     companion object {
         private val support = PlaywrightFixtureSupport()
 
@@ -67,23 +66,25 @@ class RtlPlaywrightFunctionalTest {
                 """() => {
                     const reveal = document.querySelector('.reveal');
                     return reveal && (reveal.classList.contains('rtl') || reveal.classList.contains('ready'));
-                }"""
+                }""",
             )
 
-            val revealRtlConfig = page.evaluate(
-                """() => {
+            val revealRtlConfig =
+                page.evaluate(
+                    """() => {
                     const scripts = document.querySelectorAll('script');
                     for (const s of scripts) {
                         if (s.textContent && s.textContent.includes('rtl: true')) return true;
                     }
                     return false;
-                }"""
-            ) as Boolean
+                }""",
+                ) as Boolean
 
-            val revealHasRtlClass = page.evalOnSelector(
-                ".reveal",
-                "el => el.classList.contains('rtl')"
-            ) as Boolean
+            val revealHasRtlClass =
+                page.evalOnSelector(
+                    ".reveal",
+                    "el => el.classList.contains('rtl')",
+                ) as Boolean
 
             val navNextLeft = page.locator(".reveal .controls .navigate-left").count() > 0
 
@@ -96,19 +97,21 @@ class RtlPlaywrightFunctionalTest {
             val screenshotPath = fixtureDir.resolve("rtl-screenshot.png")
             Files.deleteIfExists(screenshotPath)
             page.screenshot(
-                com.microsoft.playwright.Page.ScreenshotOptions()
+                com.microsoft.playwright.Page
+                    .ScreenshotOptions()
                     .setPath(screenshotPath)
-                    .setFullPage(false)
+                    .setFullPage(false),
             )
 
-            val renderData = SlideRenderData(
-                revealRtlConfig = revealRtlConfig,
-                revealHasRtlClass = revealHasRtlClass,
-                navNextLeft = navNextLeft,
-                viewportWidth = viewport!!.width,
-                slideBoxX = slideBox!!.x,
-                slideBoxWidth = slideBox.width,
-            )
+            val renderData =
+                SlideRenderData(
+                    revealRtlConfig = revealRtlConfig,
+                    revealHasRtlClass = revealHasRtlClass,
+                    navNextLeft = navNextLeft,
+                    viewportWidth = viewport!!.width,
+                    slideBoxX = slideBox!!.x,
+                    slideBoxWidth = slideBox.width,
+                )
 
             val assertionResult = RtlSlideAssertion.assertAll(renderData)
 
@@ -123,8 +126,9 @@ class RtlPlaywrightFunctionalTest {
     }
 
     private fun resolveFixtureDir(property: String): Path {
-        val dir = System.getProperty(property)
-            ?: error("System property '$property' not set — run './gradlew test'")
+        val dir =
+            System.getProperty(property)
+                ?: error("System property '$property' not set — run './gradlew test'")
         return Path.of(dir).toAbsolutePath().normalize()
     }
 }

@@ -5,7 +5,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class AsciidocContentParserTest {
-
     @Test
     fun `parseDeck should reject blank adoc content`() {
         assertThatThrownBy {
@@ -16,12 +15,13 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should return empty list when no level-2 heading found`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck title
             :revealjs_theme: sky
 
             No slide heading here, just a paragraph.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -30,11 +30,12 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should extract a single slide with title only`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Introduction
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -45,7 +46,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should extract multiple slides`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == First Slide
@@ -55,7 +57,7 @@ class AsciidocContentParserTest {
             == Second Slide
 
             Content two.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -65,7 +67,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should collect paragraphs between headings`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -73,7 +76,7 @@ class AsciidocContentParserTest {
             First paragraph.
 
             Second paragraph.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -83,7 +86,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should collect subtitles from level-3 headings`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -95,7 +99,7 @@ class AsciidocContentParserTest {
             === Subtitle Two
 
             More content.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -104,7 +108,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should collect bullet lists`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -112,7 +117,7 @@ class AsciidocContentParserTest {
             * item one
             * item two
             * item three
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -122,7 +127,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should collect multiple consecutive bullet lists separated by blank line`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -130,7 +136,7 @@ class AsciidocContentParserTest {
             * first list item
 
             * second list item
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -141,7 +147,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should extract speaker note from NOTE speaker block`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -152,7 +159,7 @@ class AsciidocContentParserTest {
             --
             Remember to emphasize the introduction.
             --
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -162,7 +169,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should preserve multi-line speaker notes`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -172,7 +180,7 @@ class AsciidocContentParserTest {
             Line one.
             Line two.
             --
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -181,7 +189,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should handle NOTE speaker with extra attributes`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -190,7 +199,7 @@ class AsciidocContentParserTest {
             --
             Note with attributes.
             --
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -199,13 +208,14 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should treat slide without NOTE speaker block as having null note`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
 
             No note here.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -215,7 +225,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should ignore level-3 speaker note blocks for slide segmentation`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -226,7 +237,7 @@ class AsciidocContentParserTest {
             --
             A note under a subtitle.
             --
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -238,14 +249,15 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should ignore attribute lines preceding the level-2 heading`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             [.slide,data-transition="zoom"]
             == Titled Slide
 
             Content.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -254,7 +266,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should only treat level-2 headings as slides`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck Title
 
             == Real Slide
@@ -264,7 +277,7 @@ class AsciidocContentParserTest {
             content
 
             == Another Slide
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -275,11 +288,12 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should trim whitespace in titles`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             ==   Spaced Title  
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -288,7 +302,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should handle a slide with all content types`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Full Slide
@@ -306,7 +321,7 @@ class AsciidocContentParserTest {
             --
             Speaker note text.
             --
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -321,7 +336,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should skip document header level-1 heading`() {
-        val adoc = """
+        val adoc =
+            """
             = Document Title
             author <author@example.com>
             :revealjs_theme: sky
@@ -329,7 +345,7 @@ class AsciidocContentParserTest {
             == First Slide
 
             content
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -339,11 +355,12 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should not treat the level-1 heading as a slide`() {
-        val adoc = """
+        val adoc =
+            """
             = Only Document Title
 
             No slide here.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -352,7 +369,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should separate consecutive bullet items with no blank line as one list`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -360,7 +378,7 @@ class AsciidocContentParserTest {
             * one
             * two
             * three
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -370,7 +388,8 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should ignore comment lines`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
 
             == Slide
@@ -378,7 +397,7 @@ class AsciidocContentParserTest {
             // This is a comment
 
             Real paragraph.
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 
@@ -387,14 +406,15 @@ class AsciidocContentParserTest {
 
     @Test
     fun `parseDeck should ignore attribute entries starting with colon`() {
-        val adoc = """
+        val adoc =
+            """
             = Deck
             :revealjs_theme: sky
 
             == Slide
 
             content
-        """.trimIndent()
+            """.trimIndent()
 
         val slides = AsciidocContentParser.parseDeck(adoc)
 

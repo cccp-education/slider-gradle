@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import slider.i18n.I18nConfigResolver
 
 class I18nFallbackSteps : En {
-
     private var resolvedActiveLanguage: String = ""
     private var resolvedFallbackLanguage: String = ""
     private var resolvedSupportedLanguages: List<String> = emptyList()
@@ -15,53 +14,57 @@ class I18nFallbackSteps : En {
     init {
 
         When("the i18n config is resolved with default language {string}") { default: String ->
-            val resolved = I18nConfigResolver.resolve(
-                cliProps = emptyMap(),
-                gradleProperties = emptyMap(),
-                dslLanguage = "",
-                dslSupportedLanguages = emptyList(),
-                yamlLanguageCode = null,
-                defaultLanguage = default,
-            )
+            val resolved =
+                I18nConfigResolver.resolve(
+                    cliProps = emptyMap(),
+                    gradleProperties = emptyMap(),
+                    dslLanguage = "",
+                    dslSupportedLanguages = emptyList(),
+                    yamlLanguageCode = null,
+                    defaultLanguage = default,
+                )
             resolvedFallbackLanguage = resolved.fallbackLanguage
             resolvedActiveLanguage = resolved.activeLanguage
         }
 
         When("the i18n config is resolved with CLI language {string} and default {string}") { cli: String, default: String ->
-            val resolved = I18nConfigResolver.resolve(
-                cliProps = mapOf("language" to cli),
-                gradleProperties = emptyMap(),
-                dslLanguage = "",
-                dslSupportedLanguages = emptyList(),
-                yamlLanguageCode = null,
-                defaultLanguage = default,
-            )
+            val resolved =
+                I18nConfigResolver.resolve(
+                    cliProps = mapOf("language" to cli),
+                    gradleProperties = emptyMap(),
+                    dslLanguage = "",
+                    dslSupportedLanguages = emptyList(),
+                    yamlLanguageCode = null,
+                    defaultLanguage = default,
+                )
             resolvedActiveLanguage = resolved.activeLanguage
             resolvedFallbackLanguage = resolved.fallbackLanguage
             validationResult = resolved.validate()
         }
 
         When("the i18n config is resolved with empty CLI language and gradle properties language {string}") { gradleProp: String ->
-            val resolved = I18nConfigResolver.resolve(
-                cliProps = emptyMap(),
-                gradleProperties = mapOf("language" to gradleProp),
-                dslLanguage = "",
-                dslSupportedLanguages = emptyList(),
-                yamlLanguageCode = null,
-                defaultLanguage = "fr",
-            )
+            val resolved =
+                I18nConfigResolver.resolve(
+                    cliProps = emptyMap(),
+                    gradleProperties = mapOf("language" to gradleProp),
+                    dslLanguage = "",
+                    dslSupportedLanguages = emptyList(),
+                    yamlLanguageCode = null,
+                    defaultLanguage = "fr",
+                )
             resolvedActiveLanguage = resolved.activeLanguage
         }
 
         When("the i18n config is resolved with CLI language {string} and empty supported languages") { cli: String ->
-            val resolved = I18nConfigResolver.resolve(
-                cliProps = mapOf("language" to cli),
-                gradleProperties = emptyMap(),
-                dslLanguage = "",
-                dslSupportedLanguages = emptyList(),
-                yamlLanguageCode = null,
-                defaultLanguage = "fr",
-            )
+            val resolved =
+                I18nConfigResolver.resolve(
+                    cliProps = mapOf("language" to cli),
+                    gradleProperties = emptyMap(),
+                    dslLanguage = "",
+                    dslSupportedLanguages = emptyList(),
+                    yamlLanguageCode = null,
+                    defaultLanguage = "fr",
+                )
             resolvedSupportedLanguages = resolved.supportedLanguages
         }
 

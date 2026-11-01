@@ -54,25 +54,27 @@ import java.time.Duration
  * implementation("com.github.docker-java:docker-java-transport-httpclient5:3.3.6")
  * ```
  */
-abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoCloseable {
-
+abstract class PgVectorService :
+    BuildService<PgVectorService.Params>,
+    AutoCloseable {
     // -------------------------------------------------------------------------
     // Parameters
     // -------------------------------------------------------------------------
 
     interface Params : BuildServiceParameters {
-        val image:          Property<String>
-        val database:       Property<String>
-        val user:           Property<String>
-        val password:       Property<String>
-        val table:          Property<String>
-        val startupTimeout: Property<Long>   // seconds
+        val image: Property<String>
+        val database: Property<String>
+        val user: Property<String>
+        val password: Property<String>
+        val table: Property<String>
+        val startupTimeout: Property<Long> // seconds
+
         /**
          * If set, PgVectorService skips Docker entirely and connects to this
          * external port on localhost. Used in tests via Testcontainers.
          * Set via Gradle property -Ppgvector.port=<port>.
          */
-        val externalPort:   Property<Int>
+        val externalPort: Property<Int>
     }
 
     // -------------------------------------------------------------------------
@@ -87,9 +89,9 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
         private set
 
     val database: String get() = parameters.database.get()
-    val user:     String get() = parameters.user.get()
+    val user: String get() = parameters.user.get()
     val password: String get() = parameters.password.get()
-    val table:    String get() = parameters.table.get()
+    val table: String get() = parameters.table.get()
 
     /** Whether [start] has already been called. */
     @Volatile private var started = false
@@ -120,13 +122,15 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
 
     private fun doStart() {
         val config = DefaultDockerClientConfig.createDefaultConfigBuilder().build()
-        val httpClient = ApacheDockerHttpClient.Builder()
-            .dockerHost(config.dockerHost)
-            .sslConfig(config.sslConfig)
-            .maxConnections(10)
-            .connectionTimeout(Duration.ofSeconds(10))
-            .responseTimeout(Duration.ofSeconds(30))
-            .build()
+        val httpClient =
+            ApacheDockerHttpClient
+                .Builder()
+                .dockerHost(config.dockerHost)
+                .sslConfig(config.sslConfig)
+                .maxConnections(10)
+                .connectionTimeout(Duration.ofSeconds(10))
+                .responseTimeout(Duration.ofSeconds(30))
+                .build()
 
         docker = DockerClientImpl.getInstance(config, httpClient)
 
@@ -135,30 +139,33 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
         ensureImagePresent(image)
 
         // Create container — bind internal 5432 to a random host port (0)
-        val pgPort     = ExposedPort.tcp(INTERNAL_PORT)
+        val pgPort = ExposedPort.tcp(INTERNAL_PORT)
         val portBinding = Ports().also { it.bind(pgPort, Ports.Binding.bindPort(0)) }
 
-        val container: CreateContainerResponse = docker
-            .createContainerCmd(image)
-            .withExposedPorts(pgPort)
-            .withHostConfig(
-                HostConfig.newHostConfig()
-                    .withPortBindings(portBinding)
-                    .withAutoRemove(true)   // container removed as soon as it stops
-            )
-            .withEnv(
-                "POSTGRES_DB=${parameters.database.get()}",
-                "POSTGRES_USER=${parameters.user.get()}",
-                "POSTGRES_PASSWORD=${parameters.password.get()}",
-            )
-            .exec()
+        val container: CreateContainerResponse =
+            docker
+                .createContainerCmd(image)
+                .withExposedPorts(pgPort)
+                .withHostConfig(
+                    HostConfig
+                        .newHostConfig()
+                        .withPortBindings(portBinding)
+                        .withAutoRemove(true), // container removed as soon as it stops
+                ).withEnv(
+                    "POSTGRES_DB=${parameters.database.get()}",
+                    "POSTGRES_USER=${parameters.user.get()}",
+                    "POSTGRES_PASSWORD=${parameters.password.get()}",
+                ).exec()
 
         containerId = container.id
         docker.startContainerCmd(containerId).exec()
 
         // Resolve the actual host port assigned by Docker
-        val bindings = docker.inspectContainerCmd(containerId).exec()
-            .networkSettings.ports.bindings
+        val bindings =
+            docker
+                .inspectContainerCmd(containerId)
+                .exec()
+                .networkSettings.ports.bindings
         port = bindings[pgPort]
             ?.firstOrNull()
             ?.hostPortSpec
@@ -176,8 +183,8 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
     // -------------------------------------------------------------------------
 
     override fun close() {
-        if (!started) return  // start() was never called — nothing to stop
-        if (parameters.externalPort.isPresent) return  // external mode — nothing to stop
+        if (!started) return // start() was never called — nothing to stop
+        if (parameters.externalPort.isPresent) return // external mode — nothing to stop
         runCatching {
             docker.stopContainerCmd(containerId).withTimeout(10).exec()
             println("🐘 [PgVectorService] Container stopped.")
@@ -192,14 +199,17 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
     // -------------------------------------------------------------------------
 
     private fun ensureImagePresent(image: String) {
-        val available = docker.listImagesCmd()
-            .withImageNameFilter(image)
-            .exec()
-            .isNotEmpty()
+        val available =
+            docker
+                .listImagesCmd()
+                .withImageNameFilter(image)
+                .exec()
+                .isNotEmpty()
 
         if (!available) {
             println("🐘 [PgVectorService] Pulling image $image…")
-            docker.pullImageCmd(image)
+            docker
+                .pullImageCmd(image)
                 .start()
                 .awaitCompletion()
             println("🐘 [PgVectorService] Image pulled.")
@@ -211,25 +221,29 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
      * connections or [Params.startupTimeout] is reached.
      */
     private fun waitUntilReady() {
-        val timeoutMs  = parameters.startupTimeout.get() * 1_000L
-        val pollMs     = 500L
-        val deadline   = System.currentTimeMillis() + timeoutMs
-        var ready      = false
+        val timeoutMs = parameters.startupTimeout.get() * 1_000L
+        val pollMs = 500L
+        val deadline = System.currentTimeMillis() + timeoutMs
+        var ready = false
 
         while (System.currentTimeMillis() < deadline) {
-            val exec = docker.execCreateCmd(containerId)
-                .withCmd(
-                    "pg_isready",
-                    "-U", parameters.user.get(),
-                    "-d", parameters.database.get(),
-                )
-                .withAttachStdout(true)
-                .withAttachStderr(true)
-                .exec()
+            val exec =
+                docker
+                    .execCreateCmd(containerId)
+                    .withCmd(
+                        "pg_isready",
+                        "-U",
+                        parameters.user.get(),
+                        "-d",
+                        parameters.database.get(),
+                    ).withAttachStdout(true)
+                    .withAttachStderr(true)
+                    .exec()
 
-            docker.execStartCmd(exec.id)
+            docker
+                .execStartCmd(exec.id)
                 .start()
-                .awaitCompletion()  // blocks until pg_isready exits
+                .awaitCompletion() // blocks until pg_isready exits
 
             val exitCode = docker.inspectExecCmd(exec.id).exec().exitCodeLong
             if (exitCode == 0L) {
@@ -239,10 +253,12 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
             Thread.sleep(pollMs)
         }
 
-        if (!ready) error(
-            "[PgVectorService] PostgreSQL did not become ready within " +
-                    "${parameters.startupTimeout.get()}s on port $port."
-        )
+        if (!ready) {
+            error(
+                "[PgVectorService] PostgreSQL did not become ready within " +
+                    "${parameters.startupTimeout.get()}s on port $port.",
+            )
+        }
 
         println("🐘 [PgVectorService] PostgreSQL ready on port $port.")
     }
@@ -255,11 +271,11 @@ abstract class PgVectorService : BuildService<PgVectorService.Params>, AutoClose
         private const val INTERNAL_PORT = 5432
 
         /** Default parameter values — mirrors docker-compose.yml. */
-        const val DEFAULT_IMAGE    = "pgvector/pgvector:pg17"
+        const val DEFAULT_IMAGE = "pgvector/pgvector:pg17"
         const val DEFAULT_DATABASE = "slider_rag"
-        const val DEFAULT_USER     = "slider"
+        const val DEFAULT_USER = "slider"
         const val DEFAULT_PASSWORD = "slider"
-        const val DEFAULT_TABLE    = "embeddings"
-        const val DEFAULT_TIMEOUT  = 30L  // seconds
+        const val DEFAULT_TABLE = "embeddings"
+        const val DEFAULT_TIMEOUT = 30L // seconds
     }
 }

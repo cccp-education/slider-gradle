@@ -5,10 +5,10 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class DeckContextValidatorTest {
-
     @Test
     fun `validates a well-formed DeckContext JSON with all required fields`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin Coroutines",
               "audience": "developers",
@@ -17,7 +17,7 @@ class DeckContextValidatorTest {
               "outputFile": "kotlin-coroutines.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -51,7 +51,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON missing the subject field`() {
-        val json = """
+        val json =
+            """
             {
               "audience": "developers",
               "duration": 60,
@@ -59,7 +60,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -70,7 +71,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON with a blank subject value`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "   ",
               "audience": "developers",
@@ -79,7 +81,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -90,7 +92,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON missing the audience field`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "duration": 60,
@@ -98,7 +101,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -109,7 +112,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON missing the duration field`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -117,7 +121,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -128,7 +132,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON with a non-positive duration`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -137,7 +142,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -148,7 +153,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON with an invalid languageCode`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -157,7 +163,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -168,7 +174,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON missing the outputFile field`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -176,7 +183,7 @@ class DeckContextValidatorTest {
               "languageCode": "fr",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -187,7 +194,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON with a blank outputFile`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -196,7 +204,7 @@ class DeckContextValidatorTest {
               "outputFile": "  ",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -207,7 +215,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON missing the author object`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -215,7 +224,7 @@ class DeckContextValidatorTest {
               "languageCode": "fr",
               "outputFile": "deck.adoc"
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -226,7 +235,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON with an author missing the name`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -235,7 +245,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -246,7 +256,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `rejects JSON with an author missing the email`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -255,7 +266,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -281,7 +292,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `reports both author fields when the author object is incomplete`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -290,7 +302,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": {}
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 
@@ -311,7 +323,8 @@ class DeckContextValidatorTest {
 
     @Test
     fun `ValidationResult Valid exposes the raw json`() {
-        val json = """
+        val json =
+            """
             {
               "subject": "Kotlin",
               "audience": "devs",
@@ -320,7 +333,7 @@ class DeckContextValidatorTest {
               "outputFile": "deck.adoc",
               "author": { "name": "Jane Doe", "email": "jane@example.com" }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val result = DeckContextValidator.validate(json)
 

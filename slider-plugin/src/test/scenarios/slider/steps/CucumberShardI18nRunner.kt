@@ -26,14 +26,15 @@ import org.junit.platform.suite.api.Suite
 @SelectClasspathResource("features/25_slider_messages_resolution.feature")
 @ConfigurationParameter(
     key = FEATURES_PROPERTY_NAME,
-    value = "src/test/features/5_translator_i18n.feature,src/test/features/6_reveal_ui_i18n.feature," +
-        "src/test/features/7_rtl_layout.feature,src/test/features/8_i18n_fallback.feature," +
-        "src/test/features/9_assistant_manager_i18n.feature,src/test/features/25_slider_messages_resolution.feature"
+    value =
+        "src/test/features/5_translator_i18n.feature,src/test/features/6_reveal_ui_i18n.feature," +
+            "src/test/features/7_rtl_layout.feature,src/test/features/8_i18n_fallback.feature," +
+            "src/test/features/9_assistant_manager_i18n.feature,src/test/features/25_slider_messages_resolution.feature",
 )
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.steps")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
-    value = "pretty, html:build/reports/cucumber-shard-i18n.html, json:build/reports/cucumber-shard-i18n.json"
+    value = "pretty, html:build/reports/cucumber-shard-i18n.html, json:build/reports/cucumber-shard-i18n.json",
 )
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @wip and not @integration")
 class CucumberShardI18nRunner

@@ -1,8 +1,11 @@
 package slider.translation
 
+import codebase.koog.llm.service.LlmBuildService
 import contracts.i18n.LanguageCatalog
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
+import org.gradle.api.services.ServiceReference
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -10,13 +13,10 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import slider.DeckContext
-import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
 import slider.SliderConfig.yamlMapper
+import slider.Slides.RevealJsSlides.TASK_TRANSLATE_DECK
 import slider.ai.AssistantManager.aiProvider
 import slider.ai.AssistantManager.resolveModel
-import codebase.koog.llm.service.LlmBuildService
-import org.gradle.api.provider.Property
-import org.gradle.api.services.ServiceReference
 import slider.i18n.SliderMessages
 import java.io.File
 
@@ -48,7 +48,6 @@ import java.io.File
  */
 @DisableCachingByDefault(because = "LLM call is non-deterministic")
 abstract class TranslateDeckTask : DefaultTask() {
-
     @get:ServiceReference
     abstract val llmService: Property<LlmBuildService>
 
@@ -70,29 +69,33 @@ abstract class TranslateDeckTask : DefaultTask() {
     fun run() {
         val lang = SliderMessages.resolveLanguage(project)
 
-        val contextFile = File(deckContextPath)
-            .also { require(it.exists()) { SliderMessages.format("translate.error.deckContextNotFound", lang, deckContextPath) } }
+        val contextFile =
+            File(deckContextPath)
+                .also { require(it.exists()) { SliderMessages.format("translate.error.deckContextNotFound", lang, deckContextPath) } }
 
         val sourceDeck: DeckContext = yamlMapper.readValue(contextFile, DeckContext::class.java)
         sourceDeck.requireValidLanguage()
 
-        val adocFile = deckAdocPath?.let(::File)
-            ?: contextFile.parentFile.resolve(sourceDeck.outputFile)
+        val adocFile =
+            deckAdocPath?.let(::File)
+                ?: contextFile.parentFile.resolve(sourceDeck.outputFile)
         require(adocFile.exists()) {
             SliderMessages.format("translate.error.adocNotFound", lang, adocFile.absolutePath)
         }
         val adocContent = adocFile.readText()
 
-        val targetLanguages = targetLanguagesRaw
-            ?.split(",")
-            ?.map { it.trim().lowercase() }
-            ?.filter { it.isNotEmpty() }
-            ?: LanguageCatalog.supportedCodes().toList()
+        val targetLanguages =
+            targetLanguagesRaw
+                ?.split(",")
+                ?.map { it.trim().lowercase() }
+                ?.filter { it.isNotEmpty() }
+                ?: LanguageCatalog.supportedCodes().toList()
 
-        val request = TranslationRequest(
-            sourceDeck = sourceDeck,
-            targetLanguages = targetLanguages,
-        )
+        val request =
+            TranslationRequest(
+                sourceDeck = sourceDeck,
+                targetLanguages = targetLanguages,
+            )
         val plan = DeckTranslationPlan.from(request)
 
         if (plan.tasks.isEmpty()) {
@@ -113,9 +116,10 @@ abstract class TranslateDeckTask : DefaultTask() {
 
         val outputDir = contextFile.parentFile
         outcome.translatedResults().forEach { result ->
-            val ctxFile = outputDir.resolve(
-                result.translatedDeck.outputFile.replace(".adoc", "-context.yml")
-            )
+            val ctxFile =
+                outputDir.resolve(
+                    result.translatedDeck.outputFile.replace(".adoc", "-context.yml"),
+                )
             yamlMapper.writeValue(ctxFile, result.translatedDeck)
 
             val adocOut = outputDir.resolve(result.translatedDeck.outputFile)
@@ -137,9 +141,10 @@ abstract class TranslateDeckTask : DefaultTask() {
  */
 fun Project.registerTranslateDeckTask() {
     val lang = SliderMessages.resolveLanguage(this)
-    val llmServiceProvider = slider.ai.AssistantManager.run {
-        this@registerTranslateDeckTask.registerLlmBuildService()
-    }
+    val llmServiceProvider =
+        slider.ai.AssistantManager.run {
+            this@registerTranslateDeckTask.registerLlmBuildService()
+        }
     tasks.register<TranslateDeckTask>(TASK_TRANSLATE_DECK) {
         group = SliderMessages.get("task.group.translator", lang)
         description = SliderMessages.get("task.translateDeck.description", lang)

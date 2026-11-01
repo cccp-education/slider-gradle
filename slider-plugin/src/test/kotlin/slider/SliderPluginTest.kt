@@ -1,38 +1,37 @@
 package slider
 
-//import com.cheroliv.bakery.FileSystemManager.createCnameFile
-//import com.cheroliv.bakery.FileSystemManager.yamlMapper
-//import com.fasterxml.jackson.module.kotlin.readValue
-//import org.assertj.core.api.Assertions.assertThat
-//import org.gradle.api.Action
-//import org.gradle.api.Project
-//import org.gradle.api.Task
-//import org.gradle.api.artifacts.*
-//import org.gradle.api.artifacts.dsl.DependencyHandler
-//import org.gradle.api.file.Directory
-//import org.gradle.api.file.DirectoryProperty
-//import org.gradle.api.file.ProjectLayout
-//import org.gradle.api.logging.Logger
-//import org.gradle.api.plugins.ExtensionContainer
-//import org.gradle.api.plugins.PluginContainer
-//import org.gradle.api.provider.Property
-//import org.gradle.api.provider.Provider
-//import org.gradle.api.tasks.JavaExec
-//import org.gradle.api.tasks.TaskCollection
-//import org.gradle.api.tasks.TaskContainer
-//import org.gradle.testfixtures.ProjectBuilder
-//import org.jbake.gradle.JBakeExtension
-//import org.jbake.gradle.JBakePlugin
-//import org.jbake.gradle.JBakeTask
-//import org.junit.jupiter.api.*
-//import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
-//import org.junit.jupiter.api.io.TempDir
-//import org.mockito.kotlin.*
-//import java.io.File
-//import java.util.*
-//import kotlin.text.Charsets.UTF_8
+// import com.cheroliv.bakery.FileSystemManager.createCnameFile
+// import com.cheroliv.bakery.FileSystemManager.yamlMapper
+// import com.fasterxml.jackson.module.kotlin.readValue
+// import org.assertj.core.api.Assertions.assertThat
+// import org.gradle.api.Action
+// import org.gradle.api.Project
+// import org.gradle.api.Task
+// import org.gradle.api.artifacts.*
+// import org.gradle.api.artifacts.dsl.DependencyHandler
+// import org.gradle.api.file.Directory
+// import org.gradle.api.file.DirectoryProperty
+// import org.gradle.api.file.ProjectLayout
+// import org.gradle.api.logging.Logger
+// import org.gradle.api.plugins.ExtensionContainer
+// import org.gradle.api.plugins.PluginContainer
+// import org.gradle.api.provider.Property
+// import org.gradle.api.provider.Provider
+// import org.gradle.api.tasks.JavaExec
+// import org.gradle.api.tasks.TaskCollection
+// import org.gradle.api.tasks.TaskContainer
+// import org.gradle.testfixtures.ProjectBuilder
+// import org.jbake.gradle.JBakeExtension
+// import org.jbake.gradle.JBakePlugin
+// import org.jbake.gradle.JBakeTask
+// import org.junit.jupiter.api.*
+// import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
+// import org.junit.jupiter.api.io.TempDir
+// import org.mockito.kotlin.*
+// import java.io.File
+// import java.util.*
+// import kotlin.text.Charsets.UTF_8
 import kotlin.test.Test
-
 
 class SliderPluginTest {
     @Test

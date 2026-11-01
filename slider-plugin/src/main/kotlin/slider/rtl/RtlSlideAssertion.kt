@@ -18,14 +18,14 @@ package slider.rtl
  * - **P1_OVERFLOW**    — the slide bounding box fits within the viewport width.
  */
 object RtlSlideAssertion {
-
     fun assertAll(data: SlideRenderData): RtlAssertionResult {
-        val failures = buildList {
-            if (!hasRtlConfig(data)) add(failure(RtlAssertionCode.P0_RTL_CONFIG, data.revealRtlConfig.toString()))
-            if (!hasRtlClass(data)) add(failure(RtlAssertionCode.P0_RTL_CLASS, data.revealHasRtlClass.toString()))
-            if (!isNavNextOnLeft(data)) add(failure(RtlAssertionCode.P0_NAV, data.navNextLeft.toString()))
-            if (!isWithinViewport(data)) add(failure(RtlAssertionCode.P1_OVERFLOW, "${data.slideBoxX} + ${data.slideBoxWidth} > ${data.viewportWidth}"))
-        }
+        val failures =
+            buildList {
+                if (!hasRtlConfig(data)) add(failure(RtlAssertionCode.P0_RTL_CONFIG, data.revealRtlConfig.toString()))
+                if (!hasRtlClass(data)) add(failure(RtlAssertionCode.P0_RTL_CLASS, data.revealHasRtlClass.toString()))
+                if (!isNavNextOnLeft(data)) add(failure(RtlAssertionCode.P0_NAV, data.navNextLeft.toString()))
+                if (!isWithinViewport(data)) add(failure(RtlAssertionCode.P1_OVERFLOW, "${data.slideBoxX} + ${data.slideBoxWidth} > ${data.viewportWidth}"))
+            }
         return RtlAssertionResult.of(failures)
     }
 
@@ -35,9 +35,10 @@ object RtlSlideAssertion {
 
     private fun isNavNextOnLeft(data: SlideRenderData): Boolean = data.navNextLeft
 
-    private fun isWithinViewport(data: SlideRenderData): Boolean =
-        data.slideBoxX >= 0.0 && data.slideBoxX + data.slideBoxWidth <= data.viewportWidth.toDouble()
+    private fun isWithinViewport(data: SlideRenderData): Boolean = data.slideBoxX >= 0.0 && data.slideBoxX + data.slideBoxWidth <= data.viewportWidth.toDouble()
 
-    private fun failure(code: RtlAssertionCode, actual: String): RtlAssertionFailure =
-        RtlAssertionFailure(code, "${code.name} — expected RTL layout, got: $actual")
+    private fun failure(
+        code: RtlAssertionCode,
+        actual: String,
+    ): RtlAssertionFailure = RtlAssertionFailure(code, "${code.name} — expected RTL layout, got: $actual")
 }

@@ -44,6 +44,5 @@ data class SlideContent(
     fun hasSpeakerNote(): Boolean = speakerNote != null
 
     /** `true` when the slide has no subtitles, paragraphs, lists, or speaker note. */
-    fun isEmpty(): Boolean =
-        subtitles.isEmpty() && paragraphs.isEmpty() && lists.isEmpty() && speakerNote == null
+    fun isEmpty(): Boolean = subtitles.isEmpty() && paragraphs.isEmpty() && lists.isEmpty() && speakerNote == null
 }

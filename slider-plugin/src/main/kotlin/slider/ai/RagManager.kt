@@ -56,20 +56,19 @@ import java.security.MessageDigest
  * ```
  */
 object RagManager {
-
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
 
-    private const val CHUNK_SIZE    = 512   // characters per chunk
-    private const val CHUNK_OVERLAP = 64    // overlap between consecutive chunks
-    private const val MAX_RESULTS   = 4     // chunks returned per query
-    private const val MIN_SCORE     = 0.65  // cosine-similarity threshold
-    private const val EMBEDDING_DIM = 384   // AllMiniLmL6V2 output dimension
+    private const val CHUNK_SIZE = 512 // characters per chunk
+    private const val CHUNK_OVERLAP = 64 // overlap between consecutive chunks
+    private const val MAX_RESULTS = 4 // chunks returned per query
+    private const val MIN_SCORE = 0.65 // cosine-similarity threshold
+    private const val EMBEDDING_DIM = 384 // AllMiniLmL6V2 output dimension
 
     // Metadata keys stored alongside each chunk in pgvector
-    private const val META_SOURCE    = "source"     // relative file path
-    private const val META_FILE_HASH = "file_hash"  // SHA-256 of file content
+    private const val META_SOURCE = "source" // relative file path
+    private const val META_FILE_HASH = "file_hash" // SHA-256 of file content
 
     // -------------------------------------------------------------------------
     // Lazily initialised embedding model (shared across all tasks in the build)
@@ -91,16 +90,21 @@ object RagManager {
      *
      * @param pgService the [PgVectorService] instance provided by Gradle
      */
-    fun Project.retrieve(query: String, pgService: PgVectorService): String {
+    fun Project.retrieve(
+        query: String,
+        pgService: PgVectorService,
+    ): String {
         val store = buildStore(pgService)
         ensureIndexed(store)
 
         val queryEmbedding: Embedding = embeddingModel.embed(query).content()
-        val request = EmbeddingSearchRequest.builder()
-            .queryEmbedding(queryEmbedding)
-            .maxResults(MAX_RESULTS)
-            .minScore(MIN_SCORE)
-            .build()
+        val request =
+            EmbeddingSearchRequest
+                .builder()
+                .queryEmbedding(queryEmbedding)
+                .maxResults(MAX_RESULTS)
+                .minScore(MIN_SCORE)
+                .build()
         val result: EmbeddingSearchResult<TextSegment> = store.search(request)
 
         if (result.matches().isEmpty()) return ""
@@ -154,7 +158,8 @@ object RagManager {
         return try {
             System.setProperty("ssl", "false")
             System.setProperty("sslmode", "disable")
-            PgVectorEmbeddingStore.builder()
+            PgVectorEmbeddingStore
+                .builder()
                 .host("localhost")
                 .port(pgService.port)
                 .database(pgService.database)
@@ -171,7 +176,10 @@ object RagManager {
         }
     }
 
-    private fun restoreSystemProperty(key: String, previous: String?) {
+    private fun restoreSystemProperty(
+        key: String,
+        previous: String?,
+    ) {
         if (previous == null) System.clearProperty(key) else System.setProperty(key, previous)
     }
 
@@ -192,16 +200,16 @@ object RagManager {
         store: PgVectorEmbeddingStore,
         forceAll: Boolean,
     ) {
-        val sources  = collectSources()
+        val sources = collectSources()
         val splitter: DocumentSplitter =
             DocumentSplitters.recursive(CHUNK_SIZE, CHUNK_OVERLAP)
-        var indexed  = 0
-        var skipped  = 0
+        var indexed = 0
+        var skipped = 0
 
         sources.forEach { file ->
             val relativePath = file.relativeTo(projectDir).path
-            val fileHash     = file.sha256()
-            val text         = file.readText()
+            val fileHash = file.sha256()
+            val text = file.readText()
             if (text.isBlank()) return@forEach
 
             if (!forceAll && isAlreadyIndexed(store, relativePath, fileHash)) {
@@ -214,11 +222,13 @@ object RagManager {
                 store.removeAll(metadataKey(META_SOURCE).isEqualTo(relativePath))
             }
 
-            val document = Document.from(
-                text,
-                Metadata.from(META_SOURCE, relativePath)
-                    .put(META_FILE_HASH, fileHash),
-            )
+            val document =
+                Document.from(
+                    text,
+                    Metadata
+                        .from(META_SOURCE, relativePath)
+                        .put(META_FILE_HASH, fileHash),
+                )
             val segments: List<TextSegment> = splitter.split(document)
             val embeddings: List<Embedding> = embeddingModel.embedAll(segments).content()
             store.addAll(embeddings, segments)
@@ -239,36 +249,45 @@ object RagManager {
         store: PgVectorEmbeddingStore,
         filePath: String,
         fileHash: String,
-    ): Boolean = runCatching {
-        val dummyEmbedding = Embedding.from(FloatArray(EMBEDDING_DIM) { 0f })
-        val filter = metadataKey(META_SOURCE).isEqualTo(filePath)
-            .and(metadataKey(META_FILE_HASH).isEqualTo(fileHash))
-        val request = EmbeddingSearchRequest.builder()
-            .queryEmbedding(dummyEmbedding)
-            .maxResults(1)
-            .minScore(-1.0)
-            .filter(filter)
-            .build()
-        store.search(request).matches().isNotEmpty()
-    }.getOrDefault(false)
+    ): Boolean =
+        runCatching {
+            val dummyEmbedding = Embedding.from(FloatArray(EMBEDDING_DIM) { 0f })
+            val filter =
+                metadataKey(META_SOURCE)
+                    .isEqualTo(filePath)
+                    .and(metadataKey(META_FILE_HASH).isEqualTo(fileHash))
+            val request =
+                EmbeddingSearchRequest
+                    .builder()
+                    .queryEmbedding(dummyEmbedding)
+                    .maxResults(1)
+                    .minScore(-1.0)
+                    .filter(filter)
+                    .build()
+            store.search(request).matches().isNotEmpty()
+        }.getOrDefault(false)
 
     // -------------------------------------------------------------------------
     // Source collection
     // -------------------------------------------------------------------------
 
-    private fun Project.collectSources(): List<File> = buildList {
-        projectDir.walkTopDown()
-            .filter { it.isFile && it.extension == "adoc" }
-            .forEach { add(it) }
+    private fun Project.collectSources(): List<File> =
+        buildList {
+            projectDir
+                .walkTopDown()
+                .filter { it.isFile && it.extension == "adoc" }
+                .forEach { add(it) }
 
-        projectDir.walkTopDown()
-            .filter { it.isFile && it.name.endsWith("-deck-context.yml") }
-            .forEach { add(it) }
+            projectDir
+                .walkTopDown()
+                .filter { it.isFile && it.name.endsWith("-deck-context.yml") }
+                .forEach { add(it) }
 
-        projectDir.listFiles { f ->
-            f.isFile && f.name.startsWith("README") && f.name.endsWith(".adoc")
-        }?.forEach { add(it) }
-    }
+            projectDir
+                .listFiles { f ->
+                    f.isFile && f.name.startsWith("README") && f.name.endsWith(".adoc")
+                }?.forEach { add(it) }
+        }
 
     // -------------------------------------------------------------------------
     // File hash helper

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class JGitSlidePusherTest {
-
     @TempDir
     lateinit var tempDir: File
 
@@ -16,7 +15,12 @@ class JGitSlidePusherTest {
 
     private fun createBareRemote(): File {
         bareRemote = tempDir.resolve("remote.git")
-        Git.init().setBare(true).setDirectory(bareRemote).call().close()
+        Git
+            .init()
+            .setBare(true)
+            .setDirectory(bareRemote)
+            .call()
+            .close()
         return bareRemote
     }
 
@@ -75,9 +79,10 @@ class JGitSlidePusherTest {
 
         JGitSlidePusher.initAndCommit(req)
 
-        val repo = FileRepositoryBuilder()
-            .setGitDir(req.repoDir.resolve(".git"))
-            .build()
+        val repo =
+            FileRepositoryBuilder()
+                .setGitDir(req.repoDir.resolve(".git"))
+                .build()
         assertThat(repo.branch).isEqualTo("gh-pages")
         repo.close()
     }
@@ -88,9 +93,10 @@ class JGitSlidePusherTest {
 
         JGitSlidePusher.initAndCommit(req)
 
-        val repo = FileRepositoryBuilder()
-            .setGitDir(req.repoDir.resolve(".git"))
-            .build()
+        val repo =
+            FileRepositoryBuilder()
+                .setGitDir(req.repoDir.resolve(".git"))
+                .build()
         val remoteConfig = repo.config.getString("remote", "origin", "url")
         assertThat(remoteConfig).isEqualTo(req.remoteUrl)
         repo.close()

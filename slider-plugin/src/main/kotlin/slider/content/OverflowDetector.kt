@@ -21,18 +21,22 @@ package slider.content
  * conservative estimate for proportional fonts (Latin average is ~0.45-0.5em).
  */
 object OverflowDetector {
-
     private const val AVERAGE_GLYPH_WIDTH_RATIO = 0.5
 
-    fun detect(block: TextBlock, layout: SlideLayout): OverflowResult {
+    fun detect(
+        block: TextBlock,
+        layout: SlideLayout,
+    ): OverflowResult {
         horizontalOverflow(block, layout)?.let { return it }
         verticalOverflow(block, layout)?.let { return it }
         estimatedTextOverflow(block, layout)?.let { return it }
         return OverflowResult.Fits
     }
 
-    fun overflows(block: TextBlock, layout: SlideLayout): Boolean =
-        detect(block, layout) is OverflowResult.Overflow
+    fun overflows(
+        block: TextBlock,
+        layout: SlideLayout,
+    ): Boolean = detect(block, layout) is OverflowResult.Overflow
 
     private fun horizontalOverflow(
         block: TextBlock,
@@ -44,7 +48,7 @@ object OverflowDetector {
             return OverflowResult.Overflow(
                 OverflowReason.HORIZONTAL_OVERFLOW,
                 "${OverflowReason.HORIZONTAL_OVERFLOW.name} — block x=${block.x}, rightEdge=${block.rightEdge}, " +
-                    "leftMargin=${leftEdge}, viewportWidth=${rightEdge}",
+                    "leftMargin=$leftEdge, viewportWidth=$rightEdge",
             )
         }
         return null
@@ -60,7 +64,7 @@ object OverflowDetector {
             return OverflowResult.Overflow(
                 OverflowReason.VERTICAL_OVERFLOW,
                 "${OverflowReason.VERTICAL_OVERFLOW.name} — block y=${block.y}, bottomEdge=${block.bottomEdge}, " +
-                    "topMargin=${topEdge}, viewportHeight=${bottomEdge}",
+                    "topMargin=$topEdge, viewportHeight=$bottomEdge",
             )
         }
         return null

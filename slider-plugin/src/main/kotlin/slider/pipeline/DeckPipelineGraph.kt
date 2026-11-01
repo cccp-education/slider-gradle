@@ -36,7 +36,6 @@ class DeckPipelineGraph(
     promptBuilder: DeckPromptBuilder,
     llm: DeckLlm,
 ) {
-
     private val delegate = pipelineGraph(DeckPipelineDefinition(promptBuilder, llm))
 
     val graph: AIAgentGraphStrategy<DeckState, DeckState> = delegate.graph

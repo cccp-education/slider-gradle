@@ -34,9 +34,7 @@ data class DeckTranslationPlan(
     val targetLanguages: List<String>,
     val tasks: List<TranslationTask>,
 ) {
-
     companion object {
-
         /**
          * Builds a plan from a [TranslationRequest].
          *
@@ -46,9 +44,10 @@ data class DeckTranslationPlan(
          */
         fun from(request: TranslationRequest): DeckTranslationPlan {
             val from = request.sourceDeck.languageCode
-            val tasks = request.targetLanguages
-                .filter { it != from }
-                .map { to -> TranslationTask(from = from, to = to, sourceDeck = request.sourceDeck) }
+            val tasks =
+                request.targetLanguages
+                    .filter { it != from }
+                    .map { to -> TranslationTask(from = from, to = to, sourceDeck = request.sourceDeck) }
             return DeckTranslationPlan(
                 sourceLanguage = from,
                 targetLanguages = request.targetLanguages,

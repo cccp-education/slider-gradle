@@ -22,13 +22,14 @@ import org.junit.platform.suite.api.Suite
 @SelectClasspathResource("features/20_publish_task_decomposition.feature")
 @ConfigurationParameter(
     key = FEATURES_PROPERTY_NAME,
-    value = "src/test/features/11_deployment_request.feature,src/test/features/12_git_push_adapter.feature," +
-        "src/test/features/20_publish_task_decomposition.feature"
+    value =
+        "src/test/features/11_deployment_request.feature,src/test/features/12_git_push_adapter.feature," +
+            "src/test/features/20_publish_task_decomposition.feature",
 )
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.steps")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
-    value = "pretty, html:build/reports/cucumber-shard-repository.html, json:build/reports/cucumber-shard-repository.json"
+    value = "pretty, html:build/reports/cucumber-shard-repository.html, json:build/reports/cucumber-shard-repository.json",
 )
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @wip and not @integration")
 class CucumberShardRepositoryRunner

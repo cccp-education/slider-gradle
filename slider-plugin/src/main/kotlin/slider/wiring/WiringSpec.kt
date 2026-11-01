@@ -8,7 +8,6 @@ package slider.wiring
  * Gradle adapter (see [GradleWiring]) can pattern-match without instanceof.
  */
 sealed interface GroupRouting {
-
     /**
      * No include/exclude filter — repository accepts every group.
      */
@@ -17,7 +16,9 @@ sealed interface GroupRouting {
     /**
      * Include only the supplied [group] in the repository content filter.
      */
-    data class IncludeGroup(val group: String) : GroupRouting {
+    data class IncludeGroup(
+        val group: String,
+    ) : GroupRouting {
         init {
             require(group.isNotBlank()) { "group must not be blank" }
         }
@@ -26,7 +27,9 @@ sealed interface GroupRouting {
     /**
      * Exclude the supplied [group] from the repository content filter.
      */
-    data class ExcludeGroup(val group: String) : GroupRouting {
+    data class ExcludeGroup(
+        val group: String,
+    ) : GroupRouting {
         init {
             require(group.isNotBlank()) { "group must not be blank" }
         }
@@ -53,7 +56,6 @@ enum class IvyMetadataSource {
  *                     and metadata sources
  */
 sealed interface RepositoryKind {
-
     /**
      * A Maven repository hosted at a fixed URL.
      */
@@ -61,7 +63,11 @@ sealed interface RepositoryKind {
 
     /**
      * The Maven Central repository (Gradle built-in, no URL needed).
+     *
+     * SCREAMING_SNAKE_CASE is kept deliberately: this constant is part of the public
+     * DSL and is referenced verbatim by the wiring BDD feature (`"MAVEN_CENTRAL"`).
      */
+    @Suppress("ktlint:standard:class-naming")
     object MAVEN_CENTRAL : RepositoryKind
 
     /**
@@ -97,15 +103,18 @@ data class RepositorySpec(
 ) {
     init {
         when (kind) {
-            RepositoryKind.MAVEN -> require(!url.isNullOrBlank()) {
-                "Maven repository requires a non-blank url"
-            }
-            RepositoryKind.MAVEN_CENTRAL -> require(url == null) {
-                "MavenCentral repository must not declare a url"
-            }
-            is RepositoryKind.IVY -> require(!url.isNullOrBlank()) {
-                "Ivy repository requires a non-blank url"
-            }
+            RepositoryKind.MAVEN ->
+                require(!url.isNullOrBlank()) {
+                    "Maven repository requires a non-blank url"
+                }
+            RepositoryKind.MAVEN_CENTRAL ->
+                require(url == null) {
+                    "MavenCentral repository must not declare a url"
+                }
+            is RepositoryKind.IVY ->
+                require(!url.isNullOrBlank()) {
+                    "Ivy repository requires a non-blank url"
+                }
         }
     }
 }
@@ -115,7 +124,9 @@ data class RepositorySpec(
  *
  * @property id  Gradle plugin id, e.g. `org.asciidoctor.jvm.gems.classic`
  */
-data class PluginSpec(val id: String) {
+data class PluginSpec(
+    val id: String,
+) {
     init {
         require(id.isNotBlank()) { "plugin id must not be blank" }
     }
@@ -167,7 +178,6 @@ data class WiringSpec(
     val gems: List<GemDependency>,
 ) {
     companion object {
-
         /**
          * Default wiring used by [slider.SliderManager]:
          *
@@ -179,55 +189,60 @@ data class WiringSpec(
          *   revealjs classic.
          * - 1 gem: `rubygems:asciidoctor-revealjs:5.2.0@gem`.
          */
-        val DEFAULT: WiringSpec = WiringSpec(
-            repositories = listOf(
-                RepositorySpec(
-                    kind = RepositoryKind.MAVEN,
-                    url = "https://plugins.gradle.org/m2/",
-                    routing = GroupRouting.None,
-                ),
-                RepositorySpec(
-                    kind = RepositoryKind.MAVEN,
-                    url = "https://repo.gradle.org/gradle/libs-releases/",
-                    routing = GroupRouting.ExcludeGroup("rubygems"),
-                ),
-                RepositorySpec(
-                    kind = RepositoryKind.MAVEN,
-                    url = "https://repo.gradle.org/ui/native/jcenter-backup/",
-                    routing = GroupRouting.IncludeGroup("rubygems"),
-                ),
-                RepositorySpec(
-                    kind = RepositoryKind.MAVEN,
-                    url = "https://maven.xillio.com/artifactory/libs-release/",
-                    routing = GroupRouting.IncludeGroup("rubygems"),
-                ),
-                RepositorySpec(
-                    kind = RepositoryKind.MAVEN_CENTRAL,
-                    url = null,
-                    routing = GroupRouting.ExcludeGroup("rubygems"),
-                ),
-                RepositorySpec(
-                    kind = RepositoryKind.IVY(
-                        artifactPattern = "[module]-[revision].gem",
-                        metadataSources = listOf(IvyMetadataSource.ARTIFACT),
+        val DEFAULT: WiringSpec =
+            WiringSpec(
+                repositories =
+                    listOf(
+                        RepositorySpec(
+                            kind = RepositoryKind.MAVEN,
+                            url = "https://plugins.gradle.org/m2/",
+                            routing = GroupRouting.None,
+                        ),
+                        RepositorySpec(
+                            kind = RepositoryKind.MAVEN,
+                            url = "https://repo.gradle.org/gradle/libs-releases/",
+                            routing = GroupRouting.ExcludeGroup("rubygems"),
+                        ),
+                        RepositorySpec(
+                            kind = RepositoryKind.MAVEN,
+                            url = "https://repo.gradle.org/ui/native/jcenter-backup/",
+                            routing = GroupRouting.IncludeGroup("rubygems"),
+                        ),
+                        RepositorySpec(
+                            kind = RepositoryKind.MAVEN,
+                            url = "https://maven.xillio.com/artifactory/libs-release/",
+                            routing = GroupRouting.IncludeGroup("rubygems"),
+                        ),
+                        RepositorySpec(
+                            kind = RepositoryKind.MAVEN_CENTRAL,
+                            url = null,
+                            routing = GroupRouting.ExcludeGroup("rubygems"),
+                        ),
+                        RepositorySpec(
+                            kind =
+                                RepositoryKind.IVY(
+                                    artifactPattern = "[module]-[revision].gem",
+                                    metadataSources = listOf(IvyMetadataSource.ARTIFACT),
+                                ),
+                            url = "https://rubygems.org/gems/",
+                            routing = GroupRouting.IncludeGroup("rubygems"),
+                        ),
                     ),
-                    url = "https://rubygems.org/gems/",
-                    routing = GroupRouting.IncludeGroup("rubygems"),
-                ),
-            ),
-            plugins = listOf(
-                PluginSpec("com.github.node-gradle.node"),
-                PluginSpec("org.asciidoctor.jvm.gems.classic"),
-                PluginSpec("org.asciidoctor.jvm.revealjs.classic"),
-            ),
-            gems = listOf(
-                GemDependency(
-                    group = "rubygems",
-                    name = "asciidoctor-revealjs",
-                    version = "5.2.0",
-                    classifier = "gem",
-                ),
-            ),
-        )
+                plugins =
+                    listOf(
+                        PluginSpec("com.github.node-gradle.node"),
+                        PluginSpec("org.asciidoctor.jvm.gems.classic"),
+                        PluginSpec("org.asciidoctor.jvm.revealjs.classic"),
+                    ),
+                gems =
+                    listOf(
+                        GemDependency(
+                            group = "rubygems",
+                            name = "asciidoctor-revealjs",
+                            version = "5.2.0",
+                            classifier = "gem",
+                        ),
+                    ),
+            )
     }
 }

@@ -9,7 +9,6 @@ package slider.pipeline
  * deterministic stub, without depending on `slider.ai` or Gradle.
  */
 interface DeckPromptBuilder {
-
     /**
      * Prompt for the `propose-context` node — asks the LLM to propose a
      * DeckContext JSON blob from the subject, language, and RAG context.

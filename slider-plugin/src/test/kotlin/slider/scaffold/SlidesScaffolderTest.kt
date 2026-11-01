@@ -4,13 +4,11 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class SlidesScaffolderTest {
-
     @TempDir
     lateinit var projectDir: Path
 
@@ -62,10 +60,11 @@ class SlidesScaffolderTest {
 
     @Test
     fun `extractSlidesZip creates all files from a non-empty zip input stream`() {
-        val zipBytes = zipOf(
-            "slides/misc/index.html" to "<html></html>".toByteArray(),
-            "slides/misc/intro-deck.adoc" to "= Intro".toByteArray(),
-        )
+        val zipBytes =
+            zipOf(
+                "slides/misc/index.html" to "<html></html>".toByteArray(),
+                "slides/misc/intro-deck.adoc" to "= Intro".toByteArray(),
+            )
         val result = SlidesScaffolder.extractSlidesZip(zipBytes.inputStream(), projectDir.toFile())
 
         assertIs<ScaffoldResult.Created>(result)
@@ -75,11 +74,12 @@ class SlidesScaffolderTest {
 
     @Test
     fun `extractSlidesZip skips directory entries`() {
-        val zipBytes = zipOf(
-            "slides/" to null,
-            "slides/misc/" to null,
-            "slides/misc/index.html" to "<html></html>".toByteArray(),
-        )
+        val zipBytes =
+            zipOf(
+                "slides/" to null,
+                "slides/misc/" to null,
+                "slides/misc/index.html" to "<html></html>".toByteArray(),
+            )
         val result = SlidesScaffolder.extractSlidesZip(zipBytes.inputStream(), projectDir.toFile())
 
         assertIs<ScaffoldResult.Created>(result)
@@ -89,9 +89,10 @@ class SlidesScaffolderTest {
 
     @Test
     fun `extractSlidesZip returns Created when at least one file is extracted`() {
-        val zipBytes = zipOf(
-            "slides/misc/index.html" to "<html></html>".toByteArray(),
-        )
+        val zipBytes =
+            zipOf(
+                "slides/misc/index.html" to "<html></html>".toByteArray(),
+            )
         val result = SlidesScaffolder.extractSlidesZip(zipBytes.inputStream(), projectDir.toFile())
 
         assertIs<ScaffoldResult.Created>(result)

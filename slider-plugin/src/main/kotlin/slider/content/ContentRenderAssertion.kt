@@ -23,55 +23,59 @@ package slider.content
  * [ContentSlideAssertion]. [MIN_CONTRAST_RATIO] is new (WCAG AA = 4.5).
  */
 object ContentRenderAssertion {
-
     /** WCAG AA minimum contrast ratio for normal text. */
     const val MIN_CONTRAST_RATIO: Double = 4.5
 
     fun assertAll(data: ContentRenderData): ContentAssertionResult {
-        val failures = buildList {
-            addAll(overflowFailures(data))
-            if (!data.hasNotesInDom) {
-                add(
-                    failure(
-                        ContentAssertionCode.P0_MISSING_NOTES,
-                        "slide has no speaker note rendered in DOM",
-                        data.slideTitle,
-                    ),
-                )
+        val failures =
+            buildList {
+                addAll(overflowFailures(data))
+                if (!data.hasNotesInDom) {
+                    add(
+                        failure(
+                            ContentAssertionCode.P0_MISSING_NOTES,
+                            "slide has no speaker note rendered in DOM",
+                            data.slideTitle,
+                        ),
+                    )
+                }
+                if (data.computedBodyFontSize < ContentSlideAssertion.MIN_BODY_FONT_SIZE) {
+                    add(
+                        failure(
+                            ContentAssertionCode.P1_FONT_SIZE,
+                            "computed body font size ${data.computedBodyFontSize} < ${ContentSlideAssertion.MIN_BODY_FONT_SIZE}",
+                            data.slideTitle,
+                        ),
+                    )
+                }
+                if (data.computedContrastRatio < MIN_CONTRAST_RATIO) {
+                    add(
+                        failure(
+                            ContentAssertionCode.P1_CONTRAST,
+                            "computed contrast ratio ${data.computedContrastRatio} < $MIN_CONTRAST_RATIO (WCAG AA)",
+                            data.slideTitle,
+                        ),
+                    )
+                }
             }
-            if (data.computedBodyFontSize < ContentSlideAssertion.MIN_BODY_FONT_SIZE) {
-                add(
-                    failure(
-                        ContentAssertionCode.P1_FONT_SIZE,
-                        "computed body font size ${data.computedBodyFontSize} < ${ContentSlideAssertion.MIN_BODY_FONT_SIZE}",
-                        data.slideTitle,
-                    ),
-                )
-            }
-            if (data.computedContrastRatio < MIN_CONTRAST_RATIO) {
-                add(
-                    failure(
-                        ContentAssertionCode.P1_CONTRAST,
-                        "computed contrast ratio ${data.computedContrastRatio} < $MIN_CONTRAST_RATIO (WCAG AA)",
-                        data.slideTitle,
-                    ),
-                )
-            }
+        return if (failures.isEmpty()) {
+            ContentAssertionResult.Passed
+        } else {
+            ContentAssertionResult.Failed(failures)
         }
-        return if (failures.isEmpty()) ContentAssertionResult.Passed
-        else ContentAssertionResult.Failed(failures)
     }
 
     private fun overflowFailures(data: ContentRenderData): List<ContentAssertionFailure> =
         data.realTextBlocks.mapIndexedNotNull { index, block ->
-            val layout = SlideLayout(
-                viewportWidth = data.viewportWidth,
-                viewportHeight = data.viewportHeight,
-                marginX = 0.0,
-                marginY = 0.0,
-                titleFontSize = data.computedTitleFontSize,
-                bodyFontSize = data.computedBodyFontSize,
-            )
+            val layout =
+                SlideLayout(
+                    viewportWidth = data.viewportWidth,
+                    viewportHeight = data.viewportHeight,
+                    marginX = 0.0,
+                    marginY = 0.0,
+                    titleFontSize = data.computedTitleFontSize,
+                    bodyFontSize = data.computedBodyFontSize,
+                )
             val result = OverflowDetector.detect(block, layout)
             if (result is OverflowResult.Overflow) {
                 failure(
@@ -79,13 +83,14 @@ object ContentRenderAssertion {
                     "text block $index — ${result.message}",
                     data.slideTitle,
                 )
-            } else null
+            } else {
+                null
+            }
         }
 
     private fun failure(
         code: ContentAssertionCode,
         detail: String,
         slideRef: String,
-    ): ContentAssertionFailure =
-        ContentAssertionFailure(code, "${code.name} — $detail", slideRef)
+    ): ContentAssertionFailure = ContentAssertionFailure(code, "${code.name} — $detail", slideRef)
 }

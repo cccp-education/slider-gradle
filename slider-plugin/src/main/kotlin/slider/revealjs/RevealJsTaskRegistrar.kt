@@ -4,12 +4,9 @@ import org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.OUT_OF_PROCESS
 import org.asciidoctor.gradle.jvm.slides.AsciidoctorJRevealJSTask
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.register
 import slider.i18n.SliderMessages
-import java.io.File
-import java.io.File.separator
 
 /**
  * Thin Gradle adapter that registers the three Reveal.js-related tasks
@@ -28,7 +25,6 @@ import java.io.File.separator
  * only translates that data into Gradle task declarations.
  */
 object RevealJsTaskRegistrar {
-
     /**
      * Registers the three Reveal.js tasks on [project], wired in dependency
      * order: `cleanBuild` → `asciidoctorRevealJs` → `generateDashboard`.
@@ -53,10 +49,17 @@ object RevealJsTaskRegistrar {
             group = SliderMessages.get("task.group.build", lang)
             description = SliderMessages.get("task.cleanBuild.description", lang)
             doFirst {
-                val outputDir = RevealJsOutputDir(project.layout.buildDirectory.get().asFile).asFile()
+                val outputDir =
+                    RevealJsOutputDir(
+                        project.layout.buildDirectory
+                            .get()
+                            .asFile,
+                    ).asFile()
                 val report = CleanBuildTarget(outputDir).collect()
                 logger.lifecycle(
-                    SliderMessages.format("task.cleanBuild.cleaned", lang,
+                    SliderMessages.format(
+                        "task.cleanBuild.cleaned",
+                        lang,
                         report.cleanedCount(),
                         outputDir.absolutePath,
                         report.slidesJsonDeleted,
@@ -76,14 +79,23 @@ object RevealJsTaskRegistrar {
     @Suppress("MISSING_DEPENDENCY_SUPERCLASS_IN_TYPE_ARGUMENT")
     fun registerAsciidoctorRevealJsTask(project: Project) {
         val sourceDir = SlideSourceDir(project.layout.projectDirectory.asFile)
-        val outputDir = RevealJsOutputDir(project.layout.buildDirectory.get().asFile)
-        val attributes = RevealJsAttributesSpec.DEFAULT.withOverrides(
-            mapOf(
-                RevealJsAttributeKeys.BUILD_GRADLE to
-                    project.layout.projectDirectory.asFile.resolve("build.gradle.kts").absolutePath,
-                RevealJsAttributeKeys.ENDPOINT_URL to "https://github.com/pages-content/slides/",
-            ),
-        ).attributes
+        val outputDir =
+            RevealJsOutputDir(
+                project.layout.buildDirectory
+                    .get()
+                    .asFile,
+            )
+        val attributes =
+            RevealJsAttributesSpec.DEFAULT
+                .withOverrides(
+                    mapOf(
+                        RevealJsAttributeKeys.BUILD_GRADLE to
+                            project.layout.projectDirectory.asFile
+                                .resolve("build.gradle.kts")
+                                .absolutePath,
+                        RevealJsAttributeKeys.ENDPOINT_URL to "https://github.com/pages-content/slides/",
+                    ),
+                ).attributes
 
         project.tasks.getByName<AsciidoctorJRevealJSTask>(TASK_ASCIIDOCTOR_REVEALJS) {
             val lang = SliderMessages.resolveLanguage(project)
@@ -109,7 +121,8 @@ object RevealJsTaskRegistrar {
             }
             revealjsOptions {
                 // Resolve and log the AsciiDoc source directory
-                sourceDir.asFile()
+                sourceDir
+                    .asFile()
                     .apply { println("Slide source absolute path: $absolutePath") }
                     .let(::setSourceDir)
                 // Output path mirrors the source file location
@@ -133,7 +146,12 @@ object RevealJsTaskRegistrar {
      */
     fun registerDashboardTask(project: Project) {
         val sourceDir = SlideSourceDir(project.layout.projectDirectory.asFile)
-        val outputDir = RevealJsOutputDir(project.layout.buildDirectory.get().asFile)
+        val outputDir =
+            RevealJsOutputDir(
+                project.layout.buildDirectory
+                    .get()
+                    .asFile,
+            )
         val lang = SliderMessages.resolveLanguage(project)
 
         project.tasks.register<DefaultTask>(TASK_DASHBOARD_SLIDES_BUILD) {
@@ -141,8 +159,12 @@ object RevealJsTaskRegistrar {
             description = SliderMessages.get("task.generateDashboard.description", lang)
             doLast {
                 // Log the source index.html content for traceability
-                sourceDir.asFile().listFiles()?.find { it.name == "index.html" }
-                    ?.readText()?.trimIndent()
+                sourceDir
+                    .asFile()
+                    .listFiles()
+                    ?.find { it.name == "index.html" }
+                    ?.readText()
+                    ?.trimIndent()
                     ?.run { "index.html:\n$this" }
                     ?.run(logger::info)
 

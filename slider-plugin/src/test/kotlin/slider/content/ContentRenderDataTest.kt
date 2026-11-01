@@ -5,27 +5,28 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ContentRenderDataTest {
-
-    private fun validTextBlock(): TextBlock = TextBlock(
-        text = "Hello",
-        x = 10.0,
-        y = 20.0,
-        width = 100.0,
-        height = 30.0,
-    )
+    private fun validTextBlock(): TextBlock =
+        TextBlock(
+            text = "Hello",
+            x = 10.0,
+            y = 20.0,
+            width = 100.0,
+            height = 30.0,
+        )
 
     @Test
     fun `data class ContentRenderData accepts valid fields`() {
-        val data = ContentRenderData(
-            slideTitle = "Introduction",
-            realTextBlocks = listOf(validTextBlock()),
-            computedTitleFontSize = 36.0,
-            computedBodyFontSize = 18.0,
-            computedContrastRatio = 7.2,
-            hasNotesInDom = true,
-            viewportWidth = 1280,
-            viewportHeight = 720,
-        )
+        val data =
+            ContentRenderData(
+                slideTitle = "Introduction",
+                realTextBlocks = listOf(validTextBlock()),
+                computedTitleFontSize = 36.0,
+                computedBodyFontSize = 18.0,
+                computedContrastRatio = 7.2,
+                hasNotesInDom = true,
+                viewportWidth = 1280,
+                viewportHeight = 720,
+            )
 
         assertThat(data.slideTitle).isEqualTo("Introduction")
         assertThat(data.realTextBlocks).hasSize(1)
@@ -152,16 +153,17 @@ class ContentRenderDataTest {
 
     @Test
     fun `accepts empty realTextBlocks list`() {
-        val data = ContentRenderData(
-            slideTitle = "Title",
-            realTextBlocks = listOf(),
-            computedTitleFontSize = 36.0,
-            computedBodyFontSize = 18.0,
-            computedContrastRatio = 7.2,
-            hasNotesInDom = true,
-            viewportWidth = 1280,
-            viewportHeight = 720,
-        )
+        val data =
+            ContentRenderData(
+                slideTitle = "Title",
+                realTextBlocks = listOf(),
+                computedTitleFontSize = 36.0,
+                computedBodyFontSize = 18.0,
+                computedContrastRatio = 7.2,
+                hasNotesInDom = true,
+                viewportWidth = 1280,
+                viewportHeight = 720,
+            )
 
         assertThat(data.realTextBlocks).isEmpty()
     }

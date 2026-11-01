@@ -7,23 +7,27 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class TranslatorFunctionalTest {
-
     @TempDir
     lateinit var projectDir: File
 
     private fun writeBuildFile() {
-        projectDir.resolve("settings.gradle.kts").writeText("""
+        projectDir.resolve("settings.gradle.kts").writeText(
+            """
             rootProject.name = "translator-test"
-        """.trimIndent())
-        projectDir.resolve("build.gradle.kts").writeText("""
+            """.trimIndent(),
+        )
+        projectDir.resolve("build.gradle.kts").writeText(
+            """
             plugins {
                 id("education.cccp.slider.translator")
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     private fun runTask(task: String): String =
-        GradleRunner.create()
+        GradleRunner
+            .create()
             .withProjectDir(projectDir)
             .withPluginClasspath()
             .withArguments(task, "--quiet")
@@ -68,13 +72,15 @@ class TranslatorFunctionalTest {
     fun `translate task should be registered for all 10 languages permutations`() {
         writeBuildFile()
 
-        val output = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--group", "translator", "--quiet")
-            .forwardOutput()
-            .build()
-            .output
+        val output =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments("tasks", "--group", "translator", "--quiet")
+                .forwardOutput()
+                .build()
+                .output
 
         assertThat(output).contains("translateFrToEn")
         assertThat(output).contains("translateEnToZh")

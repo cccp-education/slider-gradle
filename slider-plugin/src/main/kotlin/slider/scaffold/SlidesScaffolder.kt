@@ -1,15 +1,5 @@
 package slider.scaffold
 
-import slider.AiConfiguration
-import slider.DeckContext
-import slider.GitPushConfiguration
-import slider.NotesConfiguration
-import slider.PageNotesStyle
-import slider.RevealJsContext
-import slider.RepositoryConfiguration
-import slider.RepositoryCredentials
-import slider.SlideHint
-import slider.SlidesConfiguration
 import java.io.File
 import java.io.InputStream
 import java.util.zip.ZipInputStream
@@ -26,7 +16,6 @@ import java.util.zip.ZipInputStream
  * - Extract a bundled slides.zip into a target directory ([extractSlidesZip])
  */
 object SlidesScaffolder {
-
     private const val INDEX_HTML = "index.html"
     private const val DECK_ADOC_SUFFIX = "-deck.adoc"
 
@@ -40,9 +29,10 @@ object SlidesScaffolder {
      */
     fun isSlidesConfigComplete(miscDir: File): Boolean {
         if (!miscDir.resolve(INDEX_HTML).exists()) return false
-        val decks = miscDir.listFiles { f ->
-            f.isFile && f.name.endsWith(DECK_ADOC_SUFFIX)
-        }
+        val decks =
+            miscDir.listFiles { f ->
+                f.isFile && f.name.endsWith(DECK_ADOC_SUFFIX)
+            }
         return decks?.isNotEmpty() ?: false
     }
 
@@ -52,8 +42,11 @@ object SlidesScaffolder {
      * [ScaffoldResult.Created] on success, [ScaffoldResult.Failed] if the
      * stream is empty or unreadable.
      */
-    fun extractSlidesZip(zipStream: InputStream, targetDir: File): ScaffoldResult {
-        return try {
+    fun extractSlidesZip(
+        zipStream: InputStream,
+        targetDir: File,
+    ): ScaffoldResult =
+        try {
             var extracted = 0
             ZipInputStream(zipStream).use { zis ->
                 generateSequence { zis.nextEntry }
@@ -66,10 +59,12 @@ object SlidesScaffolder {
                         extracted++
                     }
             }
-            if (extracted == 0) ScaffoldResult.Failed("slides.zip contains no files")
-            else ScaffoldResult.Created(targetDir.absolutePath)
+            if (extracted == 0) {
+                ScaffoldResult.Failed("slides.zip contains no files")
+            } else {
+                ScaffoldResult.Created(targetDir.absolutePath)
+            }
         } catch (e: Exception) {
             ScaffoldResult.Failed(e.message ?: "Cannot extract slides.zip")
         }
-    }
 }

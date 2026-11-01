@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class JavaVersionGuardTest {
-
     @Test
     fun `accepts a Java version strictly above the minimum`() {
         assertEquals(Unit, JavaVersionGuard.requireJava23(24))

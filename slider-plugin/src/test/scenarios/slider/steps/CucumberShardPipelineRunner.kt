@@ -20,12 +20,12 @@ import org.junit.platform.suite.api.Suite
 @SelectClasspathResource("features/26_deck_pipeline_koog.feature")
 @ConfigurationParameter(
     key = FEATURES_PROPERTY_NAME,
-    value = "src/test/features/26_deck_pipeline_koog.feature"
+    value = "src/test/features/26_deck_pipeline_koog.feature",
 )
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "slider.steps")
 @ConfigurationParameter(
     key = PLUGIN_PROPERTY_NAME,
-    value = "pretty, html:build/reports/cucumber-shard-pipeline.html, json:build/reports/cucumber-shard-pipeline.json"
+    value = "pretty, html:build/reports/cucumber-shard-pipeline.html, json:build/reports/cucumber-shard-pipeline.json",
 )
 @ConfigurationParameter(key = FILTER_TAGS_PROPERTY_NAME, value = "not @wip and not @integration")
 class CucumberShardPipelineRunner

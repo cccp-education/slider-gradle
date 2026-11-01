@@ -21,7 +21,6 @@ import slider.Slides.RevealJsSlides.GROUP_TASK_SLIDER
  * is asked to perform.
  */
 object SliderExtensionRegistrar {
-
     /**
      * Registers the `slider {}` DSL extension and pins the Reveal.js template
      * on the supplied [project].
@@ -29,7 +28,10 @@ object SliderExtensionRegistrar {
      * The Reveal.js pin defaults to [RevealJsPin] (reveal.js 5.2.1) and can be
      * overridden by passing a custom [pin], which is useful for tests.
      */
-    fun configure(project: Project, pin: RevealJsPin = RevealJsPin()) {
+    fun configure(
+        project: Project,
+        pin: RevealJsPin = RevealJsPin(),
+    ) {
         registerSliderExtension(project)
         pinRevealJsTemplate(project, pin)
         pinAsciidoctorJ(project)
@@ -45,7 +47,10 @@ object SliderExtensionRegistrar {
     /**
      * Pins the Reveal.js template on the AsciidoctorJ RevealJSExtension.
      */
-    fun pinRevealJsTemplate(project: Project, pin: RevealJsPin = RevealJsPin()) {
+    fun pinRevealJsTemplate(
+        project: Project,
+        pin: RevealJsPin = RevealJsPin(),
+    ) {
         project.extensions.getByType(RevealJSExtension::class.java).apply {
             version = pin.version
             templateGitHub { gh ->
@@ -66,7 +71,10 @@ object SliderExtensionRegistrar {
      * `asciidoctorGemsPrepare` abort and leaves the gem jar empty (see
      * [AsciidoctorJPin]). Pinning one version keeps a single JRuby runtime.
      */
-    fun pinAsciidoctorJ(project: Project, pin: AsciidoctorJPin = AsciidoctorJPin()) {
+    fun pinAsciidoctorJ(
+        project: Project,
+        pin: AsciidoctorJPin = AsciidoctorJPin(),
+    ) {
         project.extensions.getByType(AsciidoctorJExtension::class.java).apply {
             setVersion(pin.version)
         }

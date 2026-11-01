@@ -4,25 +4,26 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ContentRenderAssertionTest {
+    private fun validTextBlock(): TextBlock =
+        TextBlock(
+            text = "Hello",
+            x = 10.0,
+            y = 10.0,
+            width = 100.0,
+            height = 30.0,
+        )
 
-    private fun validTextBlock(): TextBlock = TextBlock(
-        text = "Hello",
-        x = 10.0,
-        y = 10.0,
-        width = 100.0,
-        height = 30.0,
-    )
-
-    private fun validRenderData(): ContentRenderData = ContentRenderData(
-        slideTitle = "Introduction",
-        realTextBlocks = listOf(validTextBlock()),
-        computedTitleFontSize = 36.0,
-        computedBodyFontSize = 18.0,
-        computedContrastRatio = 7.2,
-        hasNotesInDom = true,
-        viewportWidth = 1280,
-        viewportHeight = 720,
-    )
+    private fun validRenderData(): ContentRenderData =
+        ContentRenderData(
+            slideTitle = "Introduction",
+            realTextBlocks = listOf(validTextBlock()),
+            computedTitleFontSize = 36.0,
+            computedBodyFontSize = 18.0,
+            computedContrastRatio = 7.2,
+            hasNotesInDom = true,
+            viewportWidth = 1280,
+            viewportHeight = 720,
+        )
 
     @Test
     fun `full valid render data passes all assertions`() {
@@ -33,13 +34,14 @@ class ContentRenderAssertionTest {
 
     @Test
     fun `P0 overflow fails when a real text block overflows viewport`() {
-        val overflowingBlock = TextBlock(
-            text = "Hello",
-            x = -10.0,
-            y = 10.0,
-            width = 100.0,
-            height = 30.0,
-        )
+        val overflowingBlock =
+            TextBlock(
+                text = "Hello",
+                x = -10.0,
+                y = 10.0,
+                width = 100.0,
+                height = 30.0,
+            )
         val data = validRenderData().copy(realTextBlocks = listOf(overflowingBlock))
 
         val result = ContentRenderAssertion.assertAll(data)
@@ -84,23 +86,25 @@ class ContentRenderAssertionTest {
 
     @Test
     fun `all failures are reported at once`() {
-        val overflowingBlock = TextBlock(
-            text = "Hello",
-            x = -10.0,
-            y = 10.0,
-            width = 100.0,
-            height = 30.0,
-        )
-        val data = ContentRenderData(
-            slideTitle = "Broken Slide",
-            realTextBlocks = listOf(overflowingBlock),
-            computedTitleFontSize = 36.0,
-            computedBodyFontSize = 8.0,
-            computedContrastRatio = 2.0,
-            hasNotesInDom = false,
-            viewportWidth = 1280,
-            viewportHeight = 720,
-        )
+        val overflowingBlock =
+            TextBlock(
+                text = "Hello",
+                x = -10.0,
+                y = 10.0,
+                width = 100.0,
+                height = 30.0,
+            )
+        val data =
+            ContentRenderData(
+                slideTitle = "Broken Slide",
+                realTextBlocks = listOf(overflowingBlock),
+                computedTitleFontSize = 36.0,
+                computedBodyFontSize = 8.0,
+                computedContrastRatio = 2.0,
+                hasNotesInDom = false,
+                viewportWidth = 1280,
+                viewportHeight = 720,
+            )
 
         val result = ContentRenderAssertion.assertAll(data)
 
@@ -116,10 +120,11 @@ class ContentRenderAssertionTest {
 
     @Test
     fun `each failure carries the slide title as slideRef`() {
-        val data = validRenderData().copy(
-            slideTitle = "My Rendered Slide",
-            hasNotesInDom = false,
-        )
+        val data =
+            validRenderData().copy(
+                slideTitle = "My Rendered Slide",
+                hasNotesInDom = false,
+            )
 
         val result = ContentRenderAssertion.assertAll(data)
 

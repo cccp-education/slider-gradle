@@ -5,22 +5,22 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class DeckStateTest {
-
     @Test
     fun `creates a DeckState with all fields populated`() {
-        val state = DeckState(
-            subject = "Kotlin Coroutines",
-            language = "fr",
-            authorName = "Jane Doe",
-            authorEmail = "jane@example.com",
-            ragContext = "Async programming on the JVM.",
-            deckContextJson = """{"subject":"Kotlin Coroutines"}""",
-            contextValid = true,
-            validationError = null,
-            deckAdoc = "== Title",
-            error = null,
-            stage = DeckStage.DECK_GENERATED,
-        )
+        val state =
+            DeckState(
+                subject = "Kotlin Coroutines",
+                language = "fr",
+                authorName = "Jane Doe",
+                authorEmail = "jane@example.com",
+                ragContext = "Async programming on the JVM.",
+                deckContextJson = """{"subject":"Kotlin Coroutines"}""",
+                contextValid = true,
+                validationError = null,
+                deckAdoc = "== Title",
+                error = null,
+                stage = DeckStage.DECK_GENERATED,
+            )
 
         assertThat(state.subject).isEqualTo("Kotlin Coroutines")
         assertThat(state.language).isEqualTo("fr")
@@ -37,14 +37,15 @@ class DeckStateTest {
 
     @Test
     fun `creates a DeckState with defaults for a fresh pipeline run`() {
-        val state = DeckState(
-            subject = "Kotlin Coroutines",
-            language = "fr",
-            authorName = "Jane Doe",
-            authorEmail = "jane@example.com",
-            ragContext = "Async programming on the JVM.",
-            deckContextJson = "",
-        )
+        val state =
+            DeckState(
+                subject = "Kotlin Coroutines",
+                language = "fr",
+                authorName = "Jane Doe",
+                authorEmail = "jane@example.com",
+                ragContext = "Async programming on the JVM.",
+                deckContextJson = "",
+            )
 
         assertThat(state.contextValid).isFalse()
         assertThat(state.validationError).isNull()
@@ -129,14 +130,15 @@ class DeckStateTest {
 
     @Test
     fun `allows a blank ragContext — RAG is optional`() {
-        val state = DeckState(
-            subject = "Subject",
-            language = "fr",
-            authorName = "Jane Doe",
-            authorEmail = "jane@example.com",
-            ragContext = "",
-            deckContextJson = "",
-        )
+        val state =
+            DeckState(
+                subject = "Subject",
+                language = "fr",
+                authorName = "Jane Doe",
+                authorEmail = "jane@example.com",
+                ragContext = "",
+                deckContextJson = "",
+            )
 
         assertThat(state.ragContext).isEmpty()
     }
@@ -227,19 +229,21 @@ class DeckStateTest {
 
     @Test
     fun `copy returns a new instance with the modified fields`() {
-        val initial = DeckState(
-            subject = "Subject",
-            language = "fr",
-            authorName = "Jane Doe",
-            authorEmail = "jane@example.com",
-            ragContext = "ctx",
-            deckContextJson = "",
-        )
+        val initial =
+            DeckState(
+                subject = "Subject",
+                language = "fr",
+                authorName = "Jane Doe",
+                authorEmail = "jane@example.com",
+                ragContext = "ctx",
+                deckContextJson = "",
+            )
 
-        val proposed = initial.copy(
-            deckContextJson = """{"subject":"Subject"}""",
-            stage = DeckStage.CONTEXT_PROPOSED,
-        )
+        val proposed =
+            initial.copy(
+                deckContextJson = """{"subject":"Subject"}""",
+                stage = DeckStage.CONTEXT_PROPOSED,
+            )
 
         assertThat(proposed).isNotSameAs(initial)
         assertThat(proposed.subject).isEqualTo(initial.subject)
@@ -250,14 +254,15 @@ class DeckStateTest {
 
     @Test
     fun `isImmutable — all fields are val via data class copy`() {
-        val state = DeckState(
-            subject = "S",
-            language = "fr",
-            authorName = "Jane",
-            authorEmail = "jane@example.com",
-            ragContext = "ctx",
-            deckContextJson = "",
-        )
+        val state =
+            DeckState(
+                subject = "S",
+                language = "fr",
+                authorName = "Jane",
+                authorEmail = "jane@example.com",
+                ragContext = "ctx",
+                deckContextJson = "",
+            )
 
         val newState = state.copy(contextValid = true, stage = DeckStage.CONTEXT_VALIDATED)
 

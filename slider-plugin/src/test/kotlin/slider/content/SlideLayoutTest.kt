@@ -5,17 +5,17 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class SlideLayoutTest {
-
     @Test
     fun `creates slide layout with viewport margins and font sizes`() {
-        val layout = SlideLayout(
-            viewportWidth = 1280,
-            viewportHeight = 720,
-            marginX = 40.0,
-            marginY = 30.0,
-            titleFontSize = 36.0,
-            bodyFontSize = 18.0,
-        )
+        val layout =
+            SlideLayout(
+                viewportWidth = 1280,
+                viewportHeight = 720,
+                marginX = 40.0,
+                marginY = 30.0,
+                titleFontSize = 36.0,
+                bodyFontSize = 18.0,
+            )
 
         assertThat(layout.viewportWidth).isEqualTo(1280)
         assertThat(layout.viewportHeight).isEqualTo(720)

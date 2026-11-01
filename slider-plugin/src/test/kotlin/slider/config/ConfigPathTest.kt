@@ -1,13 +1,12 @@
 package slider.config
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import java.io.File
 import java.nio.file.Files
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class ConfigPathTest {
-
     @Test
     fun `rejects a blank path`() {
         assertFailsWith<IllegalArgumentException> { ConfigPath("") }

@@ -9,7 +9,15 @@ package slider.scaffold
  * - [Failed] — the operation could not complete, [reason] explains why
  */
 sealed class ScaffoldResult {
-    data class Created(val path: String) : ScaffoldResult()
-    data class Skipped(val path: String) : ScaffoldResult()
-    data class Failed(val reason: String) : ScaffoldResult()
+    data class Created(
+        val path: String,
+    ) : ScaffoldResult()
+
+    data class Skipped(
+        val path: String,
+    ) : ScaffoldResult()
+
+    data class Failed(
+        val reason: String,
+    ) : ScaffoldResult()
 }

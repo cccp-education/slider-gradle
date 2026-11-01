@@ -1,13 +1,13 @@
 package slider.pipeline
 
 import codebase.koog.llm.service.LlmBuildService
-import slider.ai.AssistantManager.aiProvider
-import slider.ai.AssistantManager.resolveModel
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.services.ServiceReference
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import slider.ai.AssistantManager.aiProvider
+import slider.ai.AssistantManager.resolveModel
 
 /**
  * Gradle task: `generateDeckPipeline`
@@ -38,34 +38,43 @@ import org.gradle.work.DisableCachingByDefault
  */
 @DisableCachingByDefault(because = "LLM orchestration")
 abstract class GenerateDeckPipelineTask : DefaultTask() {
-
     @get:ServiceReference
     abstract val llmService: Property<LlmBuildService>
 
     @TaskAction
     fun run() {
-        val subject = project.findProperty("subject") as? String
-            ?: error(
-                "Missing required property -Psubject.\n" +
-                    "Usage: ./gradlew generateDeckPipeline -Psubject=\"Introduction to Kotlin\""
-            )
+        val subject =
+            project.findProperty("subject") as? String
+                ?: error(
+                    "Missing required property -Psubject.\n" +
+                        "Usage: ./gradlew generateDeckPipeline -Psubject=\"Introduction to Kotlin\"",
+                )
 
-        val language = (project.findProperty("language") as? String)
-            ?.takeIf { it.isNotBlank() }
-            ?: "fr"
+        val language =
+            (project.findProperty("language") as? String)
+                ?.takeIf { it.isNotBlank() }
+                ?: "fr"
 
-        val authorName = project.findProperty("author.name") as? String
-            ?: runCatching {
-                ProcessBuilder("git", "config", "user.name")
-                    .directory(project.projectDir)
-                    .start().inputStream.bufferedReader().readLine()
-            }.getOrNull() ?: "Unknown"
-        val authorEmail = project.findProperty("author.email") as? String
-            ?: runCatching {
-                ProcessBuilder("git", "config", "user.email")
-                    .directory(project.projectDir)
-                    .start().inputStream.bufferedReader().readLine()
-            }.getOrNull() ?: "unknown@example.com"
+        val authorName =
+            project.findProperty("author.name") as? String
+                ?: runCatching {
+                    ProcessBuilder("git", "config", "user.name")
+                        .directory(project.projectDir)
+                        .start()
+                        .inputStream
+                        .bufferedReader()
+                        .readLine()
+                }.getOrNull() ?: "Unknown"
+        val authorEmail =
+            project.findProperty("author.email") as? String
+                ?: runCatching {
+                    ProcessBuilder("git", "config", "user.email")
+                        .directory(project.projectDir)
+                        .start()
+                        .inputStream
+                        .bufferedReader()
+                        .readLine()
+                }.getOrNull() ?: "unknown@example.com"
 
         val ragContext = (project.findProperty("deck.ragContext") as? String) ?: ""
         val provider = project.aiProvider
@@ -73,19 +82,21 @@ abstract class GenerateDeckPipelineTask : DefaultTask() {
         println("🎨 [pipeline] generateDeckPipeline — provider: $provider — subject: \"$subject\" — lang: $language")
 
         val model = project.resolveModel(provider, llmService)
-        val graph = DeckPipelineGraph(
-            promptBuilder = PromptManagerDeckPromptBuilder(),
-            llm = ChatModelDeckLlm(model),
-        )
+        val graph =
+            DeckPipelineGraph(
+                promptBuilder = PromptManagerDeckPromptBuilder(),
+                llm = ChatModelDeckLlm(model),
+            )
 
-        val initial = DeckState(
-            subject = subject,
-            language = language,
-            authorName = authorName,
-            authorEmail = authorEmail,
-            ragContext = ragContext,
-            deckContextJson = "",
-        )
+        val initial =
+            DeckState(
+                subject = subject,
+                language = language,
+                authorName = authorName,
+                authorEmail = authorEmail,
+                ragContext = ragContext,
+                deckContextJson = "",
+            )
 
         val result = graph.execute(initial)
 
@@ -93,11 +104,15 @@ abstract class GenerateDeckPipelineTask : DefaultTask() {
             error("generateDeckPipeline failed at stage ${result.stage}: ${result.error}")
         }
 
-        val outputFile = (project.findProperty("deck.output") as? String)
-            ?.let { project.layout.projectDirectory.asFile.resolve(it) }
-            ?: project.layout.projectDirectory.asFile
-                .resolve("slides/misc")
-                .resolve(subject.toSlug() + "-deck_${language}.adoc")
+        val outputFile =
+            (project.findProperty("deck.output") as? String)
+                ?.let {
+                    project.layout.projectDirectory.asFile
+                        .resolve(it)
+                }
+                ?: project.layout.projectDirectory.asFile
+                    .resolve("slides/misc")
+                    .resolve(subject.toSlug() + "-deck_$language.adoc")
         outputFile.parentFile.mkdirs()
         outputFile.writeText(result.deckAdoc)
 

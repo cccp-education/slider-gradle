@@ -8,32 +8,37 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class TranslateDeckFunctionalTest {
-
     @TempDir
     lateinit var projectDir: File
 
     private fun writeBuildFile() {
-        projectDir.resolve("settings.gradle.kts").writeText("""
+        projectDir.resolve("settings.gradle.kts").writeText(
+            """
             rootProject.name = "translate-deck-test"
-        """.trimIndent())
-        projectDir.resolve("build.gradle.kts").writeText("""
+            """.trimIndent(),
+        )
+        projectDir.resolve("build.gradle.kts").writeText(
+            """
             plugins {
                 id("education.cccp.slider")
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 
     @Test
     fun `translateDeck task should be registered in the translator group`() {
         writeBuildFile()
 
-        val output = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--group", "translator", "--quiet")
-            .forwardOutput()
-            .build()
-            .output
+        val output =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments("tasks", "--group", "translator", "--quiet")
+                .forwardOutput()
+                .build()
+                .output
 
         assertThat(output).contains("translateDeck")
     }
@@ -42,12 +47,14 @@ class TranslateDeckFunctionalTest {
     fun `translateDeck task should appear in the full task list`() {
         writeBuildFile()
 
-        val result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments("tasks", "--quiet")
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments("tasks", "--quiet")
+                .forwardOutput()
+                .build()
 
         assertThat(result.output).contains("translateDeck")
         assertThat(result.output).contains("Translate a deck")
@@ -57,7 +64,8 @@ class TranslateDeckFunctionalTest {
     fun `translateDeck with all target languages equal to source should skip without LLM`() {
         writeBuildFile()
         val deckDir = projectDir.resolve("fixtures/decks").apply { mkdirs() }
-        deckDir.resolve("demo-deck-context.yml").writeText("""
+        deckDir.resolve("demo-deck-context.yml").writeText(
+            """
             subject: "Demo"
             audience: "Testers"
             duration: 10
@@ -66,24 +74,28 @@ class TranslateDeckFunctionalTest {
             author:
               name: "tester"
               email: "t@example.com"
-        """.trimIndent())
-        deckDir.resolve("demo-fr-deck.adoc").writeText("""
+            """.trimIndent(),
+        )
+        deckDir.resolve("demo-fr-deck.adoc").writeText(
+            """
             = Demo
 
             == Slide
             Content
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
-        val result = GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments(
-                "translateDeck",
-                "-Pdeck.context=${deckDir.resolve("demo-deck-context.yml").absolutePath}",
-                "-Ptarget.languages=fr",
-            )
-            .forwardOutput()
-            .build()
+        val result =
+            GradleRunner
+                .create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withArguments(
+                    "translateDeck",
+                    "-Pdeck.context=${deckDir.resolve("demo-deck-context.yml").absolutePath}",
+                    "-Ptarget.languages=fr",
+                ).forwardOutput()
+                .build()
 
         assertThat(result.task(":translateDeck")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
         assertThat(result.output).contains("No target languages to translate into")

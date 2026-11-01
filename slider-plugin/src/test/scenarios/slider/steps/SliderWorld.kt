@@ -1,8 +1,14 @@
 package slider.steps
 
 import com.sun.net.httpserver.HttpServer
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withTimeout
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner.create
 import org.slf4j.Logger
@@ -40,10 +46,11 @@ class SliderWorld {
      * as Gradle properties passed to the task under test.
      */
     fun startPgVector() {
-        val container = PostgreSQLContainer("pgvector/pgvector:pg17")
-            .withDatabaseName("slider_rag")
-            .withUsername("slider")
-            .withPassword("slider")
+        val container =
+            PostgreSQLContainer("pgvector/pgvector:pg17")
+                .withDatabaseName("slider_rag")
+                .withUsername("slider")
+                .withPassword("slider")
         container.start()
         pgContainer = container
         log.info("pgvector container started on port ${container.firstMappedPort}")
@@ -63,15 +70,16 @@ class SliderWorld {
      * Returns Gradle properties to connect the task to the running pgvector container.
      * Inject these into [executeGradle] properties map.
      */
-    fun pgProperties(): Map<String, String> = pgPort?.let {
-        mapOf(
-            "pgvector.host" to "localhost",
-            "pgvector.port" to it.toString(),
-            "pgvector.database" to pgDatabase,
-            "pgvector.user" to pgUser,
-            "pgvector.password" to pgPassword,
-        )
-    } ?: emptyMap()
+    fun pgProperties(): Map<String, String> =
+        pgPort?.let {
+            mapOf(
+                "pgvector.host" to "localhost",
+                "pgvector.port" to it.toString(),
+                "pgvector.database" to pgDatabase,
+                "pgvector.user" to pgUser,
+                "pgvector.password" to pgPassword,
+            )
+        } ?: emptyMap()
 
     // -------------------------------------------------------------------------
     // Ollama — local detection + Testcontainers fallback
@@ -95,9 +103,10 @@ class SliderWorld {
             log.info("Ollama detected locally at $ollamaBaseUrl")
         } else {
             log.info("Ollama not found locally — starting Testcontainers Ollama...")
-            val container = object : GenericContainer<Nothing>(
-                DockerImageName.parse("ollama/ollama:latest")
-            ) {}
+            val container =
+                object : GenericContainer<Nothing>(
+                    DockerImageName.parse("ollama/ollama:latest"),
+                ) {}
             container.withExposedPorts(11434)
             container.waitingFor(Wait.forHttp("/api/tags").forStatusCode(200))
             container.start()
@@ -107,13 +116,14 @@ class SliderWorld {
         }
     }
 
-    private fun isOllamaLocal(): Boolean = runCatching {
-        val conn = URI("http://localhost:11439/api/tags").toURL().openConnection() as HttpURLConnection
-        conn.connectTimeout = 1_000
-        conn.readTimeout = 1_000
-        conn.requestMethod = "GET"
-        conn.responseCode == 200
-    }.getOrDefault(false)
+    private fun isOllamaLocal(): Boolean =
+        runCatching {
+            val conn = URI("http://localhost:11439/api/tags").toURL().openConnection() as HttpURLConnection
+            conn.connectTimeout = 1_000
+            conn.readTimeout = 1_000
+            conn.requestMethod = "GET"
+            conn.responseCode == 200
+        }.getOrDefault(false)
 
     fun stopOllama() {
         ollamaContainer?.stop()
@@ -145,13 +155,14 @@ class SliderWorld {
         val port = server.address.port
         mockServerPort = port
 
-        val ollamaResponse = """
+        val ollamaResponse =
+            """
             {
               "model": "smollm:135m",
               "message": { "role": "assistant", "content": ${escapeJson(responseBody)} },
               "done": true
             }
-        """.trimIndent().toByteArray()
+            """.trimIndent().toByteArray()
 
         server.createContext("/api/chat") { exchange ->
             exchange.sendResponseHeaders(200, ollamaResponse.size.toLong())
@@ -169,8 +180,7 @@ class SliderWorld {
         mockServerPort = null
     }
 
-    private fun escapeJson(value: String): String =
-        "\"${value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")}\""
+    private fun escapeJson(value: String): String = "\"${value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")}\""
 
     // -------------------------------------------------------------------------
     // Gradle execution
@@ -188,19 +198,20 @@ class SliderWorld {
         val propArgs = properties.map { (k, v) -> "-P$k=$v" }
         val allArgs = tasks.toList() + propArgs + "--stacktrace"
         log.info("Starting async Gradle execution: $allArgs")
-        return scope.async {
-            try {
-                create()
-                    .withProjectDir(projectDir!!)
-                    .withArguments(allArgs)
-                    .withPluginClasspath()
-                    .build()
-            } catch (e: Exception) {
-                log.error("Gradle build failed", e)
-                exception = e
-                throw e
-            }
-        }.also { asyncJobs.add(it) }
+        return scope
+            .async {
+                try {
+                    create()
+                        .withProjectDir(projectDir!!)
+                        .withArguments(allArgs)
+                        .withPluginClasspath()
+                        .build()
+                } catch (e: Exception) {
+                    log.error("Gradle build failed", e)
+                    exception = e
+                    throw e
+                }
+            }.also { asyncJobs.add(it) }
     }
 
     /**
@@ -215,37 +226,42 @@ class SliderWorld {
         val propArgs = properties.map { (k, v) -> "-P$k=$v" }
         val allArgs = tasks.toList() + propArgs + "--stacktrace"
         log.info("Starting async Gradle execution (expecting failure): $allArgs")
-        return scope.async {
-            try {
-                create()
-                    .withProjectDir(projectDir!!)
-                    .withArguments(allArgs)
-                    .withPluginClasspath()
-                    .buildAndFail()
-            } catch (e: Exception) {
-                log.error("Unexpected exception during expected-failure build", e)
-                exception = e
-                throw e
-            }
-        }.also { asyncJobs.add(it) }
+        return scope
+            .async {
+                try {
+                    create()
+                        .withProjectDir(projectDir!!)
+                        .withArguments(allArgs)
+                        .withPluginClasspath()
+                        .buildAndFail()
+                } catch (e: Exception) {
+                    log.error("Unexpected exception during expected-failure build", e)
+                    exception = e
+                    throw e
+                }
+            }.also { asyncJobs.add(it) }
     }
 
     suspend fun executeGradle(
         vararg tasks: String,
         properties: Map<String, String> = emptyMap(),
-    ): BuildResult = executeGradleAsync(*tasks, properties = properties)
-        .await()
-        .also { buildResult = it }
+    ): BuildResult =
+        executeGradleAsync(*tasks, properties = properties)
+            .await()
+            .also { buildResult = it }
 
     suspend fun executeGradleExpectingFailure(
         vararg tasks: String,
         properties: Map<String, String> = emptyMap(),
-    ): BuildResult = executeGradleAsyncExpectingFailure(*tasks, properties = properties)
-        .await()
-        .also { buildResult = it }
+    ): BuildResult =
+        executeGradleAsyncExpectingFailure(*tasks, properties = properties)
+            .await()
+            .also { buildResult = it }
 
-    suspend fun <T> withTimeout(seconds: Long, block: suspend () -> T): T =
-        withTimeout(seconds * 1000) { block() }
+    suspend fun <T> withTimeout(
+        seconds: Long,
+        block: suspend () -> T,
+    ): T = withTimeout(seconds * 1000) { block() }
 
     suspend fun awaitAll() {
         if (asyncJobs.isNotEmpty()) {
@@ -262,22 +278,23 @@ class SliderWorld {
     fun createGradleProject(configFileName: String = "slides-context.yml"): File {
         val pluginId = "education.cccp.slider"
         val buildScriptContent = "slider { configPath = file(\"$configFileName\").absolutePath }"
-        createTempFile("gradle-test-", "").apply {
-            delete()
-            mkdirs()
-        }.run {
-            resolve("settings.gradle.kts")
-                .apply { createNewFile() }
-                .writeText(
-                    "pluginManagement.repositories.gradlePluginPortal()\n" +
-                            "rootProject.name = \"${name}\""
-                )
-            resolve("build.gradle.kts")
-                .apply { createNewFile() }
-                .writeText("plugins { id(\"$pluginId\") }\n$buildScriptContent")
-            projectDir = this
-            return this
-        }
+        createTempFile("gradle-test-", "")
+            .apply {
+                delete()
+                mkdirs()
+            }.run {
+                resolve("settings.gradle.kts")
+                    .apply { createNewFile() }
+                    .writeText(
+                        "pluginManagement.repositories.gradlePluginPortal()\n" +
+                            "rootProject.name = \"${name}\"",
+                    )
+                resolve("build.gradle.kts")
+                    .apply { createNewFile() }
+                    .writeText("plugins { id(\"$pluginId\") }\n$buildScriptContent")
+                projectDir = this
+                return this
+            }
     }
 
     // -------------------------------------------------------------------------

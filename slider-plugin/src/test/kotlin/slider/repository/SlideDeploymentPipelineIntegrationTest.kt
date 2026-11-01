@@ -14,7 +14,6 @@ import java.io.File
  * Uses a local bare Git repository as the "remote" — no network access.
  */
 class SlideDeploymentPipelineIntegrationTest {
-
     @TempDir
     lateinit var tempDir: File
 
@@ -24,7 +23,12 @@ class SlideDeploymentPipelineIntegrationTest {
 
     private fun setupBareRemote(): File {
         bareRemote = tempDir.resolve("bare-remote.git")
-        Git.init().setBare(true).setDirectory(bareRemote).call().close()
+        Git
+            .init()
+            .setBare(true)
+            .setDirectory(bareRemote)
+            .call()
+            .close()
         return bareRemote
     }
 
@@ -45,15 +49,16 @@ class SlideDeploymentPipelineIntegrationTest {
         remoteUrl: String = "file://${bareRemote.absolutePath}",
         branch: String = "main",
         commitMessage: String = "integration test deploy",
-    ): SlideDeploymentRequest = SlideDeploymentRequest(
-        slidesDir = slidesDir,
-        repoDir = repoDir,
-        remoteUrl = remoteUrl,
-        branch = branch,
-        commitMessage = commitMessage,
-        username = "user",
-        password = "token",
-    )
+    ): SlideDeploymentRequest =
+        SlideDeploymentRequest(
+            slidesDir = slidesDir,
+            repoDir = repoDir,
+            remoteUrl = remoteUrl,
+            branch = branch,
+            commitMessage = commitMessage,
+            username = "user",
+            password = "token",
+        )
 
     @Test
     fun `pipeline should init commit and push to a local bare remote`() {
@@ -95,7 +100,12 @@ class SlideDeploymentPipelineIntegrationTest {
         // JGit's default (`refs/heads/master`), whereas the local `init.defaultBranch`
         // config (`main`) is absent on a CI runner — `git.log()` (HEAD follow) would
         // then throw NoHeadException. Naming the ref is deterministic everywhere.
-        val commits = git.log().add(remoteRepo.resolve("refs/heads/main")).call().toList()
+        val commits =
+            git
+                .log()
+                .add(remoteRepo.resolve("refs/heads/main"))
+                .call()
+                .toList()
         assertThat(commits).hasSize(1)
         assertThat(commits[0].fullMessage).isEqualTo("custom message from integration test")
         git.close()

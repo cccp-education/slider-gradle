@@ -2,17 +2,14 @@ package slider.steps
 
 import io.cucumber.java8.En
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import slider.wiring.GemDependency
 import slider.wiring.GroupRouting
 import slider.wiring.PluginSpec
 import slider.wiring.RepositoryKind
 import slider.wiring.RepositorySpec
-import slider.wiring.GemDependency
 import slider.wiring.WiringSpec
-import java.net.URI
 
 class WiringDecompositionSteps : En {
-
     private var routing: GroupRouting? = null
     private var routingError: Throwable? = null
     private var repository: RepositorySpec? = null
@@ -56,12 +53,13 @@ class WiringDecompositionSteps : En {
         }
 
         Then("the routing group should be {string}") { expected: String ->
-            val actual = when (val r = routing) {
-                is GroupRouting.IncludeGroup -> r.group
-                is GroupRouting.ExcludeGroup -> r.group
-                GroupRouting.None -> null
-                null -> null
-            }
+            val actual =
+                when (val r = routing) {
+                    is GroupRouting.IncludeGroup -> r.group
+                    is GroupRouting.ExcludeGroup -> r.group
+                    GroupRouting.None -> null
+                    null -> null
+                }
             assertThat(actual).isEqualTo(expected)
         }
 
@@ -76,11 +74,12 @@ class WiringDecompositionSteps : En {
         // -------------------------------------------------------------------------
 
         When("a Maven repository spec is built with url {string} and no routing") { url: String ->
-            repository = RepositorySpec(
-                kind = RepositoryKind.MAVEN,
-                url = url,
-                routing = GroupRouting.None,
-            )
+            repository =
+                RepositorySpec(
+                    kind = RepositoryKind.MAVEN,
+                    url = url,
+                    routing = GroupRouting.None,
+                )
             repositoryError = null
         }
 
@@ -93,11 +92,12 @@ class WiringDecompositionSteps : En {
         }
 
         When("a MavenCentral repository spec is built excluding {string}") { group: String ->
-            repository = RepositorySpec(
-                kind = RepositoryKind.MAVEN_CENTRAL,
-                url = null,
-                routing = GroupRouting.ExcludeGroup(group),
-            )
+            repository =
+                RepositorySpec(
+                    kind = RepositoryKind.MAVEN_CENTRAL,
+                    url = null,
+                    routing = GroupRouting.ExcludeGroup(group),
+                )
             repositoryError = null
         }
 
@@ -122,12 +122,13 @@ class WiringDecompositionSteps : En {
         }
 
         Then("the repository kind should be {string}") { expected: String ->
-            val actual = when (repository?.kind) {
-                RepositoryKind.MAVEN -> "MAVEN"
-                RepositoryKind.MAVEN_CENTRAL -> "MAVEN_CENTRAL"
-                is RepositoryKind.IVY -> "IVY"
-                null -> null
-            }
+            val actual =
+                when (repository?.kind) {
+                    RepositoryKind.MAVEN -> "MAVEN"
+                    RepositoryKind.MAVEN_CENTRAL -> "MAVEN_CENTRAL"
+                    is RepositoryKind.IVY -> "IVY"
+                    null -> null
+                }
             assertThat(actual).isEqualTo(expected)
         }
 
@@ -169,13 +170,18 @@ class WiringDecompositionSteps : En {
         // -------------------------------------------------------------------------
 
         When("a gem dependency is built with group {string} name {string} version {string} classifier {string}") {
-            group: String, name: String, version: String, classifier: String ->
-            gem = GemDependency(
-                group = group,
-                name = name,
-                version = version,
-                classifier = classifier,
-            )
+            group: String,
+            name: String,
+            version: String,
+            classifier: String,
+            ->
+            gem =
+                GemDependency(
+                    group = group,
+                    name = name,
+                    version = version,
+                    classifier = classifier,
+                )
             gemError = null
         }
 
@@ -226,21 +232,21 @@ class WiringDecompositionSteps : En {
             assertThat(spec?.plugins?.first()?.id).isEqualTo(expected)
         }
 
-        Then("the spec should include the {string} group on at least one repository") {
-            group: String ->
-            val hasInclude = spec?.repositories.orEmpty().any { repo ->
-                repo.routing is GroupRouting.IncludeGroup &&
-                    (repo.routing as GroupRouting.IncludeGroup).group == group
-            }
+        Then("the spec should include the {string} group on at least one repository") { group: String ->
+            val hasInclude =
+                spec?.repositories.orEmpty().any { repo ->
+                    repo.routing is GroupRouting.IncludeGroup &&
+                        (repo.routing as GroupRouting.IncludeGroup).group == group
+                }
             assertThat(hasInclude).isTrue()
         }
 
-        Then("the spec should exclude the {string} group on at least one repository") {
-            group: String ->
-            val hasExclude = spec?.repositories.orEmpty().any { repo ->
-                repo.routing is GroupRouting.ExcludeGroup &&
-                    (repo.routing as GroupRouting.ExcludeGroup).group == group
-            }
+        Then("the spec should exclude the {string} group on at least one repository") { group: String ->
+            val hasExclude =
+                spec?.repositories.orEmpty().any { repo ->
+                    repo.routing is GroupRouting.ExcludeGroup &&
+                        (repo.routing as GroupRouting.ExcludeGroup).group == group
+                }
             assertThat(hasExclude).isTrue()
         }
 

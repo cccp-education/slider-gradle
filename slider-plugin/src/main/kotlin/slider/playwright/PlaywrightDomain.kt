@@ -9,7 +9,9 @@ import java.io.File
  * Centralises the path resolution so the adapter [PlaywrightTaskRegistrar] no
  * longer needs a private `Project.playwrightDir()` extension.
  */
-data class PlaywrightDir(val projectDir: File) {
+data class PlaywrightDir(
+    val projectDir: File,
+) {
     init {
         require(projectDir.path.isNotBlank()) { "projectDir must not be blank" }
     }
@@ -66,14 +68,14 @@ data class InstallCommand(
     }
 
     companion object {
-
         /**
          * Default install command — installs only the chromium browser.
          */
-        val DEFAULT: InstallCommand = InstallCommand(
-            binary = "playwright",
-            browsers = listOf("chromium"),
-        )
+        val DEFAULT: InstallCommand =
+            InstallCommand(
+                binary = "playwright",
+                browsers = listOf("chromium"),
+            )
     }
 
     /**

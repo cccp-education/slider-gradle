@@ -8,7 +8,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class WiringSpecTest {
-
     // ---------------------------------------------------------------------------
     // GroupRouting
     // ---------------------------------------------------------------------------
@@ -45,11 +44,12 @@ class WiringSpecTest {
 
     @Test
     fun `a Maven repository spec keeps its url and routing`() {
-        val spec = RepositorySpec(
-            kind = RepositoryKind.MAVEN,
-            url = "https://plugins.gradle.org/m2/",
-            routing = GroupRouting.None,
-        )
+        val spec =
+            RepositorySpec(
+                kind = RepositoryKind.MAVEN,
+                url = "https://plugins.gradle.org/m2/",
+                routing = GroupRouting.None,
+            )
         assertEquals(RepositoryKind.MAVEN, spec.kind)
         assertEquals("https://plugins.gradle.org/m2/", spec.url)
         assertIs<GroupRouting.None>(spec.routing)
@@ -57,11 +57,12 @@ class WiringSpecTest {
 
     @Test
     fun `a MavenCentral repository spec has no url`() {
-        val spec = RepositorySpec(
-            kind = RepositoryKind.MAVEN_CENTRAL,
-            url = null,
-            routing = GroupRouting.ExcludeGroup("rubygems"),
-        )
+        val spec =
+            RepositorySpec(
+                kind = RepositoryKind.MAVEN_CENTRAL,
+                url = null,
+                routing = GroupRouting.ExcludeGroup("rubygems"),
+            )
         assertEquals(RepositoryKind.MAVEN_CENTRAL, spec.kind)
         assertNull(spec.url)
         assertIs<GroupRouting.ExcludeGroup>(spec.routing)
@@ -69,14 +70,16 @@ class WiringSpecTest {
 
     @Test
     fun `an Ivy repository spec keeps its pattern layout and metadata source`() {
-        val spec = RepositorySpec(
-            kind = RepositoryKind.IVY(
-                artifactPattern = "[module]-[revision].gem",
-                metadataSources = listOf(IvyMetadataSource.ARTIFACT),
-            ),
-            url = "https://rubygems.org/gems/",
-            routing = GroupRouting.IncludeGroup("rubygems"),
-        )
+        val spec =
+            RepositorySpec(
+                kind =
+                    RepositoryKind.IVY(
+                        artifactPattern = "[module]-[revision].gem",
+                        metadataSources = listOf(IvyMetadataSource.ARTIFACT),
+                    ),
+                url = "https://rubygems.org/gems/",
+                routing = GroupRouting.IncludeGroup("rubygems"),
+            )
         val ivy = spec.kind as RepositoryKind.IVY
         assertEquals("[module]-[revision].gem", ivy.artifactPattern)
         assertEquals(listOf(IvyMetadataSource.ARTIFACT), ivy.metadataSources)
@@ -105,11 +108,12 @@ class WiringSpecTest {
 
     @Test
     fun `a MavenCentral repository accepts a null url`() {
-        val spec = RepositorySpec(
-            kind = RepositoryKind.MAVEN_CENTRAL,
-            url = null,
-            routing = GroupRouting.None,
-        )
+        val spec =
+            RepositorySpec(
+                kind = RepositoryKind.MAVEN_CENTRAL,
+                url = null,
+                routing = GroupRouting.None,
+            )
         assertNull(spec.url)
     }
 
@@ -117,10 +121,11 @@ class WiringSpecTest {
     fun `an Ivy repository rejects a blank url`() {
         assertFailsWith<IllegalArgumentException> {
             RepositorySpec(
-                kind = RepositoryKind.IVY(
-                    artifactPattern = "[module]-[revision].gem",
-                    metadataSources = listOf(IvyMetadataSource.ARTIFACT),
-                ),
+                kind =
+                    RepositoryKind.IVY(
+                        artifactPattern = "[module]-[revision].gem",
+                        metadataSources = listOf(IvyMetadataSource.ARTIFACT),
+                    ),
                 url = "",
                 routing = GroupRouting.None,
             )
@@ -131,10 +136,11 @@ class WiringSpecTest {
     fun `an Ivy repository rejects an empty metadata source list`() {
         assertFailsWith<IllegalArgumentException> {
             RepositorySpec(
-                kind = RepositoryKind.IVY(
-                    artifactPattern = "[module]-[revision].gem",
-                    metadataSources = emptyList(),
-                ),
+                kind =
+                    RepositoryKind.IVY(
+                        artifactPattern = "[module]-[revision].gem",
+                        metadataSources = emptyList(),
+                    ),
                 url = "https://rubygems.org/gems/",
                 routing = GroupRouting.None,
             )
@@ -165,12 +171,13 @@ class WiringSpecTest {
 
     @Test
     fun `a gem dependency keeps its coordinates`() {
-        val gem = GemDependency(
-            group = "rubygems",
-            name = "asciidoctor-revealjs",
-            version = "5.2.0",
-            classifier = "gem",
-        )
+        val gem =
+            GemDependency(
+                group = "rubygems",
+                name = "asciidoctor-revealjs",
+                version = "5.2.0",
+                classifier = "gem",
+            )
         assertEquals("rubygems", gem.group)
         assertEquals("asciidoctor-revealjs", gem.name)
         assertEquals("5.2.0", gem.version)
@@ -207,12 +214,13 @@ class WiringSpecTest {
 
     @Test
     fun `a gem dependency renders its ivy coordinates string`() {
-        val gem = GemDependency(
-            group = "rubygems",
-            name = "asciidoctor-revealjs",
-            version = "5.2.0",
-            classifier = "gem",
-        )
+        val gem =
+            GemDependency(
+                group = "rubygems",
+                name = "asciidoctor-revealjs",
+                version = "5.2.0",
+                classifier = "gem",
+            )
         assertEquals("rubygems:asciidoctor-revealjs:5.2.0@gem", gem.toCoordinates())
     }
 
@@ -250,14 +258,15 @@ class WiringSpecTest {
 
     @Test
     fun `the default wiring spec routes rubygems repos with include or exclude groups`() {
-        val routingGroups = WiringSpec.DEFAULT.repositories
-            .mapNotNull { spec ->
-                when (val r = spec.routing) {
-                    is GroupRouting.IncludeGroup -> "include:${r.group}"
-                    is GroupRouting.ExcludeGroup -> "exclude:${r.group}"
-                    GroupRouting.None -> null
+        val routingGroups =
+            WiringSpec.DEFAULT.repositories
+                .mapNotNull { spec ->
+                    when (val r = spec.routing) {
+                        is GroupRouting.IncludeGroup -> "include:${r.group}"
+                        is GroupRouting.ExcludeGroup -> "exclude:${r.group}"
+                        GroupRouting.None -> null
+                    }
                 }
-            }
         assertTrue(routingGroups.contains("include:rubygems"))
         assertTrue(routingGroups.contains("exclude:rubygems"))
     }

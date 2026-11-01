@@ -16,8 +16,7 @@ data class RtlAssertionResult(
     companion object {
         fun success(): RtlAssertionResult = RtlAssertionResult(true, emptyList())
 
-        fun of(failures: List<RtlAssertionFailure>): RtlAssertionResult =
-            RtlAssertionResult(failures.isEmpty(), failures)
+        fun of(failures: List<RtlAssertionFailure>): RtlAssertionResult = RtlAssertionResult(failures.isEmpty(), failures)
     }
 }
 

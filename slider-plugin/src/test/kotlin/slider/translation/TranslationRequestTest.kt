@@ -2,14 +2,12 @@ package slider.translation
 
 import contracts.i18n.LanguageCatalog
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import slider.AuthorContext
 import slider.DeckContext
 
 class TranslationRequestTest {
-
     private val validAuthor = AuthorContext(name = "Test", email = "test@example.com")
 
     private fun validDeck(
@@ -29,9 +27,10 @@ class TranslationRequestTest {
 
     @Test
     fun `should construct with valid deck and default target languages`() {
-        val req = TranslationRequest(
-            sourceDeck = validDeck(),
-        )
+        val req =
+            TranslationRequest(
+                sourceDeck = validDeck(),
+            )
 
         assertThat(req.sourceDeck.subject).isEqualTo("Kotlin coroutines")
         assertThat(req.sourceDeck.languageCode).isEqualTo("fr")
@@ -40,10 +39,11 @@ class TranslationRequestTest {
 
     @Test
     fun `should construct with explicit target languages`() {
-        val req = TranslationRequest(
-            sourceDeck = validDeck(),
-            targetLanguages = listOf("en", "ar", "zh"),
-        )
+        val req =
+            TranslationRequest(
+                sourceDeck = validDeck(),
+                targetLanguages = listOf("en", "ar", "zh"),
+            )
 
         assertThat(req.targetLanguages).containsExactly("en", "ar", "zh")
     }
@@ -113,10 +113,11 @@ class TranslationRequestTest {
 
     @Test
     fun `should accept source language not in target list (translate to all others`() {
-        val req = TranslationRequest(
-            sourceDeck = validDeck(languageCode = "fr"),
-            targetLanguages = (allCodes - "fr"),
-        )
+        val req =
+            TranslationRequest(
+                sourceDeck = validDeck(languageCode = "fr"),
+                targetLanguages = (allCodes - "fr"),
+            )
 
         assertThat(req.targetLanguages).hasSize(allCodes.size - 1)
         assertThat(req.targetLanguages).doesNotContain("fr")
@@ -124,10 +125,11 @@ class TranslationRequestTest {
 
     @Test
     fun `should accept source language also in target list (no special handling)`() {
-        val req = TranslationRequest(
-            sourceDeck = validDeck(languageCode = "fr"),
-            targetLanguages = allCodes,
-        )
+        val req =
+            TranslationRequest(
+                sourceDeck = validDeck(languageCode = "fr"),
+                targetLanguages = allCodes,
+            )
 
         assertThat(req.targetLanguages).contains("fr")
     }

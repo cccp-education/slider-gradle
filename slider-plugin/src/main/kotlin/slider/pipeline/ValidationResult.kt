@@ -9,13 +9,14 @@ package slider.pipeline
  * [slider.content.ContentAssertionResult] (sealed for exhaustive `when` matching).
  */
 sealed interface ValidationResult {
-
     /**
      * The JSON is a well-formed DeckContext with all required fields.
      *
      * @param json the raw JSON string that was validated.
      */
-    data class Valid(val json: String) : ValidationResult {
+    data class Valid(
+        val json: String,
+    ) : ValidationResult {
         init {
             require(json.isNotBlank()) { "ValidationResult.Valid.json must not be blank" }
         }
@@ -26,7 +27,9 @@ sealed interface ValidationResult {
      *
      * @param error human-readable explanation of what failed.
      */
-    data class Invalid(val error: String) : ValidationResult {
+    data class Invalid(
+        val error: String,
+    ) : ValidationResult {
         init {
             require(error.isNotBlank()) { "ValidationResult.Invalid.error must not be blank" }
         }

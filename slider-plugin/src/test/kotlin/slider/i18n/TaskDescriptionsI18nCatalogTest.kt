@@ -16,34 +16,33 @@ import org.junit.jupiter.params.provider.ValueSource
  * functional suite keeps a single smoke build.
  */
 class TaskDescriptionsI18nCatalogTest {
-
-
-    private val taskKeys = listOf(
-        "asciidoctor",
-        "asciidoctorRevealJs",
-        "cleanBuild",
-        "deploySlides",
-        "generateDashboard",
-        "generateDeck",
-        "generateDeckPipeline",
-        "generateRevealUiMessages",
-        "helloGemini",
-        "helloGeminiStreaming",
-        "helloHuggingFace",
-        "helloHuggingFaceStreaming",
-        "helloMistral",
-        "helloMistralStreaming",
-        "helloOllama",
-        "helloOllamaStreaming",
-        "installPlaywright",
-        "proposeDeckContext",
-        "reindexRag",
-        "reportFunctionalTests",
-        "reportTests",
-        "serveSlides",
-        "translateDeck",
-        "visualTest",
-    ).map { "task.$it.description" }
+    private val taskKeys =
+        listOf(
+            "asciidoctor",
+            "asciidoctorRevealJs",
+            "cleanBuild",
+            "deploySlides",
+            "generateDashboard",
+            "generateDeck",
+            "generateDeckPipeline",
+            "generateRevealUiMessages",
+            "helloGemini",
+            "helloGeminiStreaming",
+            "helloHuggingFace",
+            "helloHuggingFaceStreaming",
+            "helloMistral",
+            "helloMistralStreaming",
+            "helloOllama",
+            "helloOllamaStreaming",
+            "installPlaywright",
+            "proposeDeckContext",
+            "reindexRag",
+            "reportFunctionalTests",
+            "reportTests",
+            "serveSlides",
+            "translateDeck",
+            "visualTest",
+        ).map { "task.$it.description" }
 
     @ParameterizedTest
     @ValueSource(strings = ["en", "fr", "zh", "hi", "es", "ar", "bn", "pt", "ru", "ur"])

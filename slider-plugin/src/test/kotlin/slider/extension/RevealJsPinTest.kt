@@ -5,7 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class RevealJsPinTest {
-
     @Test
     fun `the default pin targets revealjs 5_2_1`() {
         val pin = RevealJsPin()
@@ -50,12 +49,13 @@ class RevealJsPinTest {
 
     @Test
     fun `a custom pin preserves all supplied values`() {
-        val pin = RevealJsPin(
-            version = "6.0.0",
-            organisation = "custom-org",
-            repository = "custom-repo",
-            tag = "6.0.0",
-        )
+        val pin =
+            RevealJsPin(
+                version = "6.0.0",
+                organisation = "custom-org",
+                repository = "custom-repo",
+                tag = "6.0.0",
+            )
         assertEquals("6.0.0", pin.version)
         assertEquals("custom-org", pin.organisation)
         assertEquals("custom-repo", pin.repository)

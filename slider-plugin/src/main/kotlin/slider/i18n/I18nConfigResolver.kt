@@ -4,7 +4,6 @@ import contracts.i18n.I18nConfig
 import contracts.i18n.LanguageCatalog
 
 object I18nConfigResolver {
-
     fun resolve(
         cliProps: Map<String, String>,
         gradleProperties: Map<String, String>,
@@ -30,12 +29,13 @@ object I18nConfigResolver {
         defaultLanguage: String,
     ): String {
         val supported = LanguageCatalog.supportedCodes()
-        val candidates = listOf(
-            cliProps["language"],
-            gradleProperties["language"],
-            dslLanguage.takeIf { it.isNotBlank() },
-            yamlLanguageCode,
-        )
+        val candidates =
+            listOf(
+                cliProps["language"],
+                gradleProperties["language"],
+                dslLanguage.takeIf { it.isNotBlank() },
+                yamlLanguageCode,
+            )
         return candidates.firstOrNull { c -> c != null && c in supported } ?: defaultLanguage
     }
 
@@ -46,15 +46,17 @@ object I18nConfigResolver {
         active: String,
     ): List<String> {
         val supported = LanguageCatalog.supportedCodes()
-        val cliList = cliProps["supportedLanguages"]
-            ?.split(",")
-            ?.map { it.trim().lowercase() }
-            ?.filter { it in supported }
+        val cliList =
+            cliProps["supportedLanguages"]
+                ?.split(",")
+                ?.map { it.trim().lowercase() }
+                ?.filter { it in supported }
         if (!cliList.isNullOrEmpty()) return cliList
-        val propsList = gradleProperties["supportedLanguages"]
-            ?.split(",")
-            ?.map { it.trim().lowercase() }
-            ?.filter { it in supported }
+        val propsList =
+            gradleProperties["supportedLanguages"]
+                ?.split(",")
+                ?.map { it.trim().lowercase() }
+                ?.filter { it in supported }
         if (!propsList.isNullOrEmpty()) return propsList
         if (dslSupportedLanguages.isNotEmpty()) {
             return dslSupportedLanguages.map { it.lowercase() }.filter { it in supported }

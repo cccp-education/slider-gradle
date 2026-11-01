@@ -33,33 +33,36 @@ import slider.i18n.SliderMessages
  * and will be expelled in a future cleanup EPIC.
  */
 object AssistantManager {
-
     // =========================================================================
     // Provider selection
     // =========================================================================
 
-    const val PROP_AI_PROVIDER     = "ai.provider"
-    const val PROVIDER_OLLAMA      = "ollama"
-    const val PROVIDER_GEMINI      = "gemini"
-    const val PROVIDER_MISTRAL     = "mistral"
+    const val PROP_AI_PROVIDER = "ai.provider"
+    const val PROVIDER_OLLAMA = "ollama"
+    const val PROVIDER_GEMINI = "gemini"
+    const val PROVIDER_MISTRAL = "mistral"
     const val PROVIDER_HUGGINGFACE = "huggingface"
 
     /** Reads `-Pai.provider`, defaulting to `"ollama"` when absent or blank. */
     val Project.aiProvider: String
-        get() = (findProperty(PROP_AI_PROVIDER) as? String
-            ?: PROVIDER_OLLAMA).lowercase().trim()
+        get() =
+            (
+                findProperty(PROP_AI_PROVIDER) as? String
+                    ?: PROVIDER_OLLAMA
+            ).lowercase().trim()
 
     // =========================================================================
     // Local model catalog (legacy — used by deprecated TranslatorManager)
     // =========================================================================
 
     val localModels
-        get() = setOf(
-            "smollm:135m"                    to "SmollM",
-            "llama3.2:3b-instruct-q8_0"      to "LlamaTiny",
-            "smollm:135m-instruct-v0.2-q8_0" to "SmollMInstruct",
-            "gemma3:1b-it-fp16"              to "Gemma3Instruct",
-        )
+        get() =
+            setOf(
+                "smollm:135m" to "SmollM",
+                "llama3.2:3b-instruct-q8_0" to "LlamaTiny",
+                "smollm:135m-instruct-v0.2-q8_0" to "SmollMInstruct",
+                "gemma3:1b-it-fp16" to "Gemma3Instruct",
+            )
 
     // =========================================================================
     // LlmBuildService registration + model resolution
@@ -75,7 +78,8 @@ object AssistantManager {
      */
     fun Project.registerLlmBuildService(): Provider<LlmBuildService> =
         gradle.sharedServices.registerIfAbsent(
-            "sliderLlmService", LlmBuildService::class.java
+            "sliderLlmService",
+            LlmBuildService::class.java,
         ) { spec: BuildServiceSpec<LlmBuildService.Params> ->
             spec.parameters.model.convention(project.aiProvider)
             spec.maxParallelUsages.set(1)
@@ -118,21 +122,23 @@ object AssistantManager {
     // =========================================================================
 
     fun Project.createChatTasks() {
-        val pgServiceProvider = gradle.sharedServices.registerIfAbsent(
-            "pgVectorService", PgVectorService::class.java
-        ) { spec: BuildServiceSpec<PgVectorService.Params> ->
-            spec.parameters.image.convention(PgVectorService.DEFAULT_IMAGE)
-            spec.parameters.database.convention(PgVectorService.DEFAULT_DATABASE)
-            spec.parameters.user.convention(PgVectorService.DEFAULT_USER)
-            spec.parameters.password.convention(PgVectorService.DEFAULT_PASSWORD)
-            spec.parameters.table.convention(PgVectorService.DEFAULT_TABLE)
-            spec.parameters.startupTimeout.convention(PgVectorService.DEFAULT_TIMEOUT)
-            // If -Ppgvector.port is provided, use external pgvector (e.g. Testcontainers)
-            (project.findProperty("pgvector.port") as? String)?.toIntOrNull()?.let {
-                spec.parameters.externalPort.set(it)
+        val pgServiceProvider =
+            gradle.sharedServices.registerIfAbsent(
+                "pgVectorService",
+                PgVectorService::class.java,
+            ) { spec: BuildServiceSpec<PgVectorService.Params> ->
+                spec.parameters.image.convention(PgVectorService.DEFAULT_IMAGE)
+                spec.parameters.database.convention(PgVectorService.DEFAULT_DATABASE)
+                spec.parameters.user.convention(PgVectorService.DEFAULT_USER)
+                spec.parameters.password.convention(PgVectorService.DEFAULT_PASSWORD)
+                spec.parameters.table.convention(PgVectorService.DEFAULT_TABLE)
+                spec.parameters.startupTimeout.convention(PgVectorService.DEFAULT_TIMEOUT)
+                // If -Ppgvector.port is provided, use external pgvector (e.g. Testcontainers)
+                (project.findProperty("pgvector.port") as? String)?.toIntOrNull()?.let {
+                    spec.parameters.externalPort.set(it)
+                }
+                spec.maxParallelUsages.set(1)
             }
-            spec.maxParallelUsages.set(1)
-        }
 
         val llmServiceProvider = registerLlmBuildService()
 
@@ -191,9 +197,7 @@ object AssistantManager {
         }
     }
 
-    private fun Project.registerGenerateDeckPipelineTask(
-        llmServiceProvider: Provider<LlmBuildService>,
-    ) {
+    private fun Project.registerGenerateDeckPipelineTask(llmServiceProvider: Provider<LlmBuildService>) {
         tasks.register("generateDeckPipeline", slider.pipeline.GenerateDeckPipelineTask::class.java) {
             val lang = SliderMessages.resolveLanguage(this@registerGenerateDeckPipelineTask)
             it.group = SliderMessages.get("task.group.generate", lang)
@@ -208,36 +212,48 @@ object AssistantManager {
     // =========================================================================
 
     fun Project.createOllamaChatModel(model: String = "smollm:135m"): dev.langchain4j.model.ollama.OllamaChatModel =
-        dev.langchain4j.model.ollama.OllamaChatModel.builder().apply {
-            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
-            modelName(findProperty("ollama.modelName") as? String ?: model)
-            temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
-            java.time.Duration.ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000)
-            logRequests(true)
-            logResponses(true)
-        }.build()
+        dev.langchain4j.model.ollama.OllamaChatModel
+            .builder()
+            .apply {
+                baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
+                modelName(findProperty("ollama.modelName") as? String ?: model)
+                temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
+                java.time.Duration.ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000)
+                logRequests(true)
+                logResponses(true)
+            }.build()
 
     fun Project.createOllamaStreamingChatModel(model: String = "smollm:135m"): dev.langchain4j.model.ollama.OllamaStreamingChatModel =
-        dev.langchain4j.model.ollama.OllamaStreamingChatModel.builder().apply {
-            baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
-            modelName(findProperty("ollama.modelName") as? String ?: model)
-            temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
-            java.time.Duration.ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000)
-            logRequests(true)
-            logResponses(true)
-        }.build()
+        dev.langchain4j.model.ollama.OllamaStreamingChatModel
+            .builder()
+            .apply {
+                baseUrl(findProperty("ollama.baseUrl") as? String ?: "http://localhost:11439")
+                modelName(findProperty("ollama.modelName") as? String ?: model)
+                temperature(findProperty("ollama.temperature") as? Double ?: 0.8)
+                java.time.Duration.ofSeconds(findProperty("ollama.timeout") as? Long ?: 6_000)
+                logRequests(true)
+                logResponses(true)
+            }.build()
 
     suspend fun generateStreamingResponse(
         model: dev.langchain4j.model.chat.StreamingChatModel,
-        promptMessage: String
+        promptMessage: String,
     ): arrow.core.Either<Throwable, dev.langchain4j.model.chat.response.ChatResponse> =
         arrow.core.Either.Companion.catch {
             kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
-                model.chat(promptMessage, object : dev.langchain4j.model.chat.response.StreamingChatResponseHandler {
-                    override fun onPartialResponse(partialResponse: String) = print(partialResponse)
-                    override fun onCompleteResponse(response: dev.langchain4j.model.chat.response.ChatResponse) = continuation.resumeWith(Result.success(response))
-                    override fun onError(error: Throwable) { continuation.cancel(error) }
-                })
+                model.chat(
+                    promptMessage,
+                    object : dev.langchain4j.model.chat.response.StreamingChatResponseHandler {
+                        override fun onPartialResponse(partialResponse: String) = print(partialResponse)
+
+                        override fun onCompleteResponse(response: dev.langchain4j.model.chat.response.ChatResponse) =
+                            continuation.resumeWith(Result.success(response))
+
+                        override fun onError(error: Throwable) {
+                            continuation.cancel(error)
+                        }
+                    },
+                )
             }
         }
 
@@ -246,12 +262,12 @@ object AssistantManager {
     // =========================================================================
 
     object PromptManager {
-
         // ---------------------------------------------------------------------
         // Step 1 — DeckContext proposal
         // ---------------------------------------------------------------------
 
-        val contextSystemPrompt = """
+        val contextSystemPrompt =
+            """
 You are E-3PO, an expert instructional designer for adult technical training.
 
 Your task is to propose a structured DeckContext for a slide deck.
@@ -296,7 +312,7 @@ no explanation, no preamble:
 - speakerHint: what the presenter should say/demonstrate on that slide
 - pageNotesHint: references, exercises or deeper content for learners
 - outputFile: must follow the pattern <subject-slug>-deck_<lang>.adoc (e.g. kotlin-coroutines-deck_fr.adoc, spring-boot-intro-deck_en.adoc)
-""".trimIndent()
+            """.trimIndent()
 
         fun contextUserMessage(
             subject: String,
@@ -304,29 +320,31 @@ no explanation, no preamble:
             authorName: String,
             authorEmail: String,
             ragContext: String,
-        ): String = buildString {
-            appendLine("Propose a complete DeckContext JSON for the following subject:")
-            appendLine()
-            appendLine("Subject : $subject")
-            appendLine("Language: $language")
-            appendLine("The outputFile MUST follow the pattern: <subject-slug>_${language}-deck.adoc")
-            appendLine("Author name : $authorName")
-            appendLine("Author email: $authorEmail")
-            appendLine()
-            if (ragContext.isNotEmpty()) {
-                appendLine("## Relevant examples from the project (use as structural reference)")
+        ): String =
+            buildString {
+                appendLine("Propose a complete DeckContext JSON for the following subject:")
                 appendLine()
-                appendLine(ragContext)
+                appendLine("Subject : $subject")
+                appendLine("Language: $language")
+                appendLine("The outputFile MUST follow the pattern: <subject-slug>_$language-deck.adoc")
+                appendLine("Author name : $authorName")
+                appendLine("Author email: $authorEmail")
                 appendLine()
+                if (ragContext.isNotEmpty()) {
+                    appendLine("## Relevant examples from the project (use as structural reference)")
+                    appendLine()
+                    appendLine(ragContext)
+                    appendLine()
+                }
+                appendLine("Return ONLY the JSON object. No explanation, no markdown fences.")
             }
-            appendLine("Return ONLY the JSON object. No explanation, no markdown fences.")
-        }
 
         // ---------------------------------------------------------------------
         // Step 2 — Deck generation
         // ---------------------------------------------------------------------
 
-        val deckSystemPrompt = """
+        val deckSystemPrompt =
+            """
 You are E-3PO, an expert at generating AsciiDoc/Reveal.js slide decks.
 
 ## OUTPUT CONTRACT
@@ -395,53 +413,57 @@ Use auto-animate for:
 - List growth (items appearing one by one)
 - Element repositioning (title moves up, body appears)
 - Style transitions (color, size, margin changes)
-""".trimIndent()
+            """.trimIndent()
 
-        fun deckUserMessage(ctx: DeckContext, ragContext: String): String = buildString {
-            appendLine("Generate a complete Reveal.js slide deck with the following context:")
-            appendLine()
-            appendLine("Subject   : ${ctx.subject}")
-            appendLine("Audience  : ${ctx.audience}")
-            appendLine("Duration  : ${ctx.duration} minutes")
-            appendLine("Language  : ${ctx.languageCode}")
-            appendLine("OutputFile: ${ctx.outputFile}")
-            appendLine()
-            appendLine("Author:")
-            appendLine("  Name  : ${ctx.author.name}")
-            appendLine("  Email : ${ctx.author.email}")
-            appendLine()
-            appendLine("Reveal.js configuration:")
-            appendLine("  theme        : ${ctx.revealjs.theme}")
-            appendLine("  transition   : ${ctx.revealjs.transition}")
-            appendLine("  slideNumber  : ${ctx.revealjs.slideNumber}")
-            appendLine("  width        : ${ctx.revealjs.width}")
-            appendLine("  height       : ${ctx.revealjs.height}")
-            appendLine()
-            appendLine("Notes configuration:")
-            appendLine("  speakerNotes   : ${ctx.notes.speakerNotes}")
-            appendLine("  pageNotes      : ${ctx.notes.pageNotes}")
-            appendLine("  pageNotesStyle : ${ctx.notes.pageNotesStyle}")
-            appendLine()
-            if (ctx.slides.isEmpty())
-                appendLine("No slide hints provided — build a pedagogically appropriate structure.")
-            else {
-                appendLine("Slide hints (follow this order and these titles exactly):")
-                ctx.slides.forEach { hint ->
-                    appendLine("  - title: ${hint.title}")
-                    hint.transition?.let   { appendLine("    transition: $it") }
-                    if (hint.autoAnimate) appendLine("    autoAnimate: true")
-                    hint.autoAnimateEasing?.let { appendLine("    autoAnimateEasing: $it") }
-                    hint.autoAnimateDuration?.let { appendLine("    autoAnimateDuration: $it") }
-                    hint.speakerHint?.let  { appendLine("    speakerHint: $it") }
-                    hint.pageNotesHint?.let { appendLine("    pageNotesHint: $it") }
+        fun deckUserMessage(
+            ctx: DeckContext,
+            ragContext: String,
+        ): String =
+            buildString {
+                appendLine("Generate a complete Reveal.js slide deck with the following context:")
+                appendLine()
+                appendLine("Subject   : ${ctx.subject}")
+                appendLine("Audience  : ${ctx.audience}")
+                appendLine("Duration  : ${ctx.duration} minutes")
+                appendLine("Language  : ${ctx.languageCode}")
+                appendLine("OutputFile: ${ctx.outputFile}")
+                appendLine()
+                appendLine("Author:")
+                appendLine("  Name  : ${ctx.author.name}")
+                appendLine("  Email : ${ctx.author.email}")
+                appendLine()
+                appendLine("Reveal.js configuration:")
+                appendLine("  theme        : ${ctx.revealjs.theme}")
+                appendLine("  transition   : ${ctx.revealjs.transition}")
+                appendLine("  slideNumber  : ${ctx.revealjs.slideNumber}")
+                appendLine("  width        : ${ctx.revealjs.width}")
+                appendLine("  height       : ${ctx.revealjs.height}")
+                appendLine()
+                appendLine("Notes configuration:")
+                appendLine("  speakerNotes   : ${ctx.notes.speakerNotes}")
+                appendLine("  pageNotes      : ${ctx.notes.pageNotes}")
+                appendLine("  pageNotesStyle : ${ctx.notes.pageNotesStyle}")
+                appendLine()
+                if (ctx.slides.isEmpty()) {
+                    appendLine("No slide hints provided — build a pedagogically appropriate structure.")
+                } else {
+                    appendLine("Slide hints (follow this order and these titles exactly):")
+                    ctx.slides.forEach { hint ->
+                        appendLine("  - title: ${hint.title}")
+                        hint.transition?.let { appendLine("    transition: $it") }
+                        if (hint.autoAnimate) appendLine("    autoAnimate: true")
+                        hint.autoAnimateEasing?.let { appendLine("    autoAnimateEasing: $it") }
+                        hint.autoAnimateDuration?.let { appendLine("    autoAnimateDuration: $it") }
+                        hint.speakerHint?.let { appendLine("    speakerHint: $it") }
+                        hint.pageNotesHint?.let { appendLine("    pageNotesHint: $it") }
+                    }
+                }
+                if (ragContext.isNotEmpty()) {
+                    appendLine()
+                    appendLine("## AsciiDoc syntax reference examples (from project — use as style guide)")
+                    appendLine()
+                    appendLine(ragContext)
                 }
             }
-            if (ragContext.isNotEmpty()) {
-                appendLine()
-                appendLine("## AsciiDoc syntax reference examples (from project — use as style guide)")
-                appendLine()
-                appendLine(ragContext)
-            }
-        }
     }
 }

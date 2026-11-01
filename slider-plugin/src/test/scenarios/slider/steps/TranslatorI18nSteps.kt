@@ -6,7 +6,6 @@ import org.assertj.core.api.Assertions.assertThat
 import slider.translate.TranslatorManager
 
 class TranslatorI18nSteps : En {
-
     private var supportedLanguages: Set<String> = emptySet()
     private var translationTasks: Set<Pair<String, Pair<String, String>>> = emptySet()
     private var prompt: String = ""
@@ -30,9 +29,10 @@ class TranslatorI18nSteps : En {
         }
 
         When("translation tasks are generated from supported languages") {
-            translationTasks = TranslatorManager.run {
-                supportedLanguages.translationTasks()
-            }
+            translationTasks =
+                TranslatorManager.run {
+                    supportedLanguages.translationTasks()
+                }
         }
 
         Then("no task should translate a language to itself") {
@@ -54,9 +54,10 @@ class TranslatorI18nSteps : En {
         }
 
         When("a translation prompt is generated from {string} to {string} for text {string}") { from: String, to: String, text: String ->
-            prompt = TranslatorManager.PromptManager.run {
-                (from to to).getTranslatePromptMessage(text)
-            }
+            prompt =
+                TranslatorManager.PromptManager.run {
+                    (from to to).getTranslatePromptMessage(text)
+                }
         }
 
         Then("the prompt should contain the native name of {string}") { code: String ->

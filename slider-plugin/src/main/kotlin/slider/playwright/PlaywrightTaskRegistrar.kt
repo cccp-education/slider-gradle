@@ -3,11 +3,11 @@ package slider.playwright
 import com.github.gradle.node.npm.task.NpxTask
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
+import slider.Slides.RevealJsSlides.GROUP_TASK_SLIDER
+import slider.Slides.Serve.SERVE_DEP
 import slider.i18n.SliderMessages
 import slider.revealjs.RevealJsOutputDir
 import slider.revealjs.RevealJsTaskRegistrar
-import slider.Slides.Serve.SERVE_DEP
-import slider.Slides.RevealJsSlides.GROUP_TASK_SLIDER
 
 /**
  * Thin Gradle adapter that registers the three Playwright-related tasks
@@ -24,7 +24,6 @@ import slider.Slides.RevealJsSlides.GROUP_TASK_SLIDER
  * this object only translates that data into Gradle `NpxTask` declarations.
  */
 object PlaywrightTaskRegistrar {
-
     /**
      * Registers the three Playwright tasks on [project], wired in the
      * dependency order: `serveSlides` and `visualTest` both depend on the
@@ -41,11 +40,17 @@ object PlaywrightTaskRegistrar {
      * `npx <SERVE_DEP> <outputDir>` using [ServeCommand].
      */
     fun registerServeSlidesTask(project: Project) {
-        val outputDir = RevealJsOutputDir(project.layout.buildDirectory.get().asFile).asFile()
-        val serveCommand = ServeCommand(
-            packageName = SERVE_DEP,
-            servedDir = outputDir,
-        )
+        val outputDir =
+            RevealJsOutputDir(
+                project.layout.buildDirectory
+                    .get()
+                    .asFile,
+            ).asFile()
+        val serveCommand =
+            ServeCommand(
+                packageName = SERVE_DEP,
+                servedDir = outputDir,
+            )
         val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<NpxTask>(PlaywrightTaskNames.SERVE_SLIDES) {
             group = SliderMessages.get("task.group.info", lang)
@@ -83,10 +88,11 @@ object PlaywrightTaskRegistrar {
      */
     fun registerVisualTestTask(project: Project) {
         val playwrightDir = PlaywrightDir(project.layout.projectDirectory.asFile)
-        val visualCommand = VisualTestCommand(
-            binary = "playwright",
-            configPath = playwrightDir.configPath(),
-        )
+        val visualCommand =
+            VisualTestCommand(
+                binary = "playwright",
+                configPath = playwrightDir.configPath(),
+            )
         val lang = SliderMessages.resolveLanguage(project)
         project.tasks.register<NpxTask>(PlaywrightTaskNames.VISUAL_TEST) {
             group = GROUP_TASK_SLIDER

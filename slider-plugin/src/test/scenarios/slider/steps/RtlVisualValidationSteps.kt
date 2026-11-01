@@ -8,22 +8,28 @@ import slider.rtl.RtlSlideAssertion
 import slider.rtl.SlideRenderData
 
 class RtlVisualValidationSteps : En {
-
     private var renderData: SlideRenderData? = null
     private var assertionResult: RtlAssertionResult? = null
 
     init {
 
         Given("a slide render data with rtl config {string}, rtl class {string}, nav next left {string}, viewport {int}, slide x {int}, slide width {int}") {
-            rtlConfig: String, rtlClass: String, navNextLeft: String, viewport: Int, slideX: Int, slideWidth: Int ->
-            renderData = SlideRenderData(
-                revealRtlConfig = rtlConfig.toBoolean(),
-                revealHasRtlClass = rtlClass.toBoolean(),
-                navNextLeft = navNextLeft.toBoolean(),
-                viewportWidth = viewport,
-                slideBoxX = slideX.toDouble(),
-                slideBoxWidth = slideWidth.toDouble(),
-            )
+            rtlConfig: String,
+            rtlClass: String,
+            navNextLeft: String,
+            viewport: Int,
+            slideX: Int,
+            slideWidth: Int,
+            ->
+            renderData =
+                SlideRenderData(
+                    revealRtlConfig = rtlConfig.toBoolean(),
+                    revealHasRtlClass = rtlClass.toBoolean(),
+                    navNextLeft = navNextLeft.toBoolean(),
+                    viewportWidth = viewport,
+                    slideBoxX = slideX.toDouble(),
+                    slideBoxWidth = slideWidth.toDouble(),
+                )
             assertionResult = RtlSlideAssertion.assertAll(renderData!!)
         }
 
