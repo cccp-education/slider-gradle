@@ -27,153 +27,165 @@ object AsciidocContentParser {
     fun parseDeck(adocContent: String): List<SlideContent> {
         require(adocContent.isNotBlank()) { "adocContent must not be blank" }
 
-        val lines = adocContent.lines()
-        val slides = mutableListOf<SlideContent>()
+        return adocContent
+            .lines()
+            .withIndex()
+            .fold(ParseState(), ::reduce)
+            .finish()
+    }
 
-        var currentTitle: String? = null
-        val subtitles = mutableListOf<String>()
-        val paragraphs = mutableListOf<String>()
-        val lists = mutableListOf<List<String>>()
-        var speakerNote: String? = null
+    /**
+     * Immutable accumulator threaded through [reduce] — replaces the former
+     * mutable buffers and flags. The completed [slides] are never mutated;
+     * each transition returns a new state.
+     *
+     * @param paragraphBuffer lines of the paragraph being accumulated.
+     * @param listBuffer      items of the bullet list being accumulated.
+     * @param afterDocumentHeader set once a level-1 heading is seen, so the
+     *        author line right under the document title can be skipped.
+     */
+    private data class ParseState(
+        val slides: List<SlideContent> = emptyList(),
+        val title: String? = null,
+        val subtitles: List<String> = emptyList(),
+        val paragraphs: List<String> = emptyList(),
+        val lists: List<List<String>> = emptyList(),
+        val speakerNote: String? = null,
+        val paragraphBuffer: List<String> = emptyList(),
+        val listBuffer: List<String> = emptyList(),
+        val inNote: Boolean = false,
+        val noteOpened: Boolean = false,
+        val noteLines: List<String> = emptyList(),
+        val afterDocumentHeader: Boolean = false,
+    ) {
+        /** Flushes the trailing paragraph, list and slide, then exposes the result. */
+        fun finish(): List<SlideContent> = flushList().flushParagraph().flushSlide().slides
+    }
 
-        val currentParagraph = mutableListOf<String>()
-        val currentList = mutableListOf<String>()
+    /** Pure state transition for one source line. */
+    private fun reduce(
+        state: ParseState,
+        indexedLine: IndexedValue<String>,
+    ): ParseState {
+        val line = indexedLine.value
+        return when {
+            isLevel1Heading(line) ->
+                state
+                    .flushList()
+                    .flushParagraph()
+                    .copy(afterDocumentHeader = true)
 
-        var inNote = false
-        var noteOpened = false
-        val noteLines = mutableListOf<String>()
+            state.afterDocumentHeader && indexedLine.index == 1 && isAuthorLine(line) -> state
 
-        var afterDocumentHeader = false
+            isSpeakerNoteStart(line) ->
+                state
+                    .flushList()
+                    .flushParagraph()
+                    .copy(inNote = true, noteOpened = false, noteLines = emptyList())
 
-        for ((index, line) in lines.withIndex()) {
-            when {
-                isLevel1Heading(line) -> {
-                    flushList(currentList, lists)
-                    flushParagraph(currentParagraph, paragraphs)
-                    afterDocumentHeader = true
-                }
+            isAttributeEntry(line) || isAttributeList(line) || isComment(line) -> state
 
-                afterDocumentHeader && index == 1 && isAuthorLine(line) -> {
-                    // author line following `= Title`, skip
-                }
+            isLevel2Heading(line) ->
+                state
+                    .flushSlide()
+                    .copy(
+                        title = line.removePrefix("==").trim(),
+                        subtitles = emptyList(),
+                        paragraphs = emptyList(),
+                        lists = emptyList(),
+                        speakerNote = null,
+                        paragraphBuffer = emptyList(),
+                        listBuffer = emptyList(),
+                        inNote = false,
+                        noteOpened = false,
+                        noteLines = emptyList(),
+                    )
 
-                isSpeakerNoteStart(line) -> {
-                    flushList(currentList, lists)
-                    flushParagraph(currentParagraph, paragraphs)
-                    inNote = true
-                    noteOpened = false
-                    noteLines.clear()
-                }
+            isLevel3Heading(line) ->
+                state
+                    .flushList()
+                    .flushParagraph()
+                    .appendSubtitle(line.removePrefix("===").trim())
 
-                isAttributeEntry(line) || isAttributeList(line) || isComment(line) -> {
-                    // ignored structural lines
-                }
+            state.inNote && !state.noteOpened && line.trimStart().startsWith("--") ->
+                state.copy(noteOpened = true)
 
-                isLevel2Heading(line) -> {
-                    flush(slideSink = slides, currentTitle, subtitles, paragraphs, lists, speakerNote)
-                    currentTitle = line.removePrefix("==").trim()
-                    subtitles.clear()
-                    paragraphs.clear()
-                    lists.clear()
-                    speakerNote = null
-                    currentParagraph.clear()
-                    currentList.clear()
-                    inNote = false
-                    noteOpened = false
-                    noteLines.clear()
-                }
+            state.inNote && state.noteOpened && line.trimStart().startsWith("--") -> state.closeNote()
 
-                isLevel3Heading(line) -> {
-                    flushList(currentList, lists)
-                    flushParagraph(currentParagraph, paragraphs)
-                    subtitles.add(line.removePrefix("===").trim())
-                }
+            state.inNote && state.noteOpened -> state.appendNoteLine(line)
 
-                inNote && !noteOpened && line.trimStart().startsWith("--") -> {
-                    noteOpened = true
-                }
+            isBulletItem(line) ->
+                state
+                    .flushParagraph()
+                    .appendListItem(line.trimStart().removePrefix("*").trim())
 
-                inNote && noteOpened && line.trimStart().startsWith("--") -> {
-                    val note = noteLines.joinToString("\n").trim()
-                    if (note.isNotBlank()) speakerNote = note
-                    inNote = false
-                    noteOpened = false
-                    noteLines.clear()
-                }
+            line.isBlank() -> state.flushList().flushParagraph()
 
-                inNote && noteOpened -> noteLines.add(line)
+            isLevel4PlusHeading(line) ->
+                state
+                    .flushList()
+                    .flushParagraph()
+                    .appendSubtitle(line.replaceFirst(level4Prefix, "").trim())
 
-                isBulletItem(line) -> {
-                    flushParagraph(currentParagraph, paragraphs)
-                    currentList.add(line.trimStart().removePrefix("*").trim())
-                }
-
-                line.isBlank() -> {
-                    flushList(currentList, lists)
-                    flushParagraph(currentParagraph, paragraphs)
-                }
-
-                isLevel4PlusHeading(line) -> {
-                    flushList(currentList, lists)
-                    flushParagraph(currentParagraph, paragraphs)
-                    subtitles.add(line.replaceFirst(Regex("^={4,}\\s*"), "").trim())
-                }
-
-                else -> {
-                    flushList(currentList, lists)
-                    currentParagraph.add(line.trim())
-                }
-            }
+            else -> state.flushList().appendParagraphLine(line.trim())
         }
-        flushList(currentList, lists)
-        flushParagraph(currentParagraph, paragraphs)
-        flush(slideSink = slides, currentTitle, subtitles, paragraphs, lists, speakerNote)
-
-        return slides.toList()
     }
 
-    private fun flush(
-        slideSink: MutableList<SlideContent>,
-        title: String?,
-        subtitles: MutableList<String>,
-        paragraphs: MutableList<String>,
-        lists: MutableList<List<String>>,
-        speakerNote: String?,
-    ) {
-        if (title == null) return
-        // Skip slides with no content at all? No — a title-only slide is valid.
-        slideSink.add(
-            SlideContent(
-                title = title,
-                subtitles = subtitles.toList(),
-                paragraphs = paragraphs.toList(),
-                lists = lists.toList(),
-                speakerNote = speakerNote,
-            ),
+    /** Appends the pending subtitles/paragraphs/lists as a slide (no-op without a title). */
+    private fun ParseState.flushSlide(): ParseState {
+        val currentTitle = title ?: return this
+        // A title-only slide is valid.
+        return copy(
+            slides =
+                slides +
+                    SlideContent(
+                        title = currentTitle,
+                        subtitles = subtitles,
+                        paragraphs = paragraphs,
+                        lists = lists,
+                        speakerNote = speakerNote,
+                    ),
+            subtitles = emptyList(),
+            paragraphs = emptyList(),
+            lists = emptyList(),
         )
-        subtitles.clear()
-        paragraphs.clear()
-        lists.clear()
     }
 
-    private fun flushParagraph(
-        sink: MutableList<String>,
-        paragraphs: MutableList<String>,
-    ) {
-        if (sink.isEmpty()) return
-        val joined = sink.joinToString(" ").trim()
-        if (joined.isNotBlank()) paragraphs.add(joined)
-        sink.clear()
+    /** Joins the pending paragraph lines into one paragraph (no-op when empty). */
+    private fun ParseState.flushParagraph(): ParseState {
+        if (paragraphBuffer.isEmpty()) return this
+        val joined = paragraphBuffer.joinToString(" ").trim()
+        return copy(
+            paragraphs = if (joined.isNotBlank()) paragraphs + joined else paragraphs,
+            paragraphBuffer = emptyList(),
+        )
     }
 
-    private fun flushList(
-        sink: MutableList<String>,
-        lists: MutableList<List<String>>,
-    ) {
-        if (sink.isEmpty()) return
-        lists.add(sink.toList())
-        sink.clear()
+    /** Closes the pending bullet list (no-op when empty). */
+    private fun ParseState.flushList(): ParseState {
+        if (listBuffer.isEmpty()) return this
+        return copy(lists = lists + listOf(listBuffer), listBuffer = emptyList())
     }
+
+    private fun ParseState.closeNote(): ParseState {
+        val note = noteLines.joinToString("\n").trim()
+        return copy(
+            speakerNote = if (note.isNotBlank()) note else speakerNote,
+            inNote = false,
+            noteOpened = false,
+            noteLines = emptyList(),
+        )
+    }
+
+    private fun ParseState.appendSubtitle(subtitle: String): ParseState = copy(subtitles = subtitles + subtitle)
+
+    private fun ParseState.appendNoteLine(line: String): ParseState = copy(noteLines = noteLines + line)
+
+    private fun ParseState.appendListItem(item: String): ParseState = copy(listBuffer = listBuffer + item)
+
+    private fun ParseState.appendParagraphLine(line: String): ParseState = copy(paragraphBuffer = paragraphBuffer + line)
+
+    private val level4Prefix = Regex("^={4,}\\s*")
 
     private fun isLevel1Heading(line: String): Boolean = line.startsWith("= ") && !line.startsWith("== ")
 
