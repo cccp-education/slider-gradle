@@ -77,7 +77,7 @@ class SlideDeploymentPipelineIntegrationTest {
         assertThat(pushResult).isInstanceOf(SlidePushResult.Success::class.java)
 
         val remoteRepo = FileRepositoryBuilder().setGitDir(bareRemote).build()
-        assertThat(remoteRepo.allRefs).isNotEmpty
+        assertThat(remoteRepo.refDatabase.refs).isNotEmpty
         assertThat(remoteRepo.resolve("refs/heads/gh-pages")).isNotNull()
         remoteRepo.close()
     }

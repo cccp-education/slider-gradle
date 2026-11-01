@@ -111,7 +111,7 @@ class JGitSlidePusherTest {
 
         assertThat(result).isInstanceOf(SlidePushResult.Success::class.java)
         val remoteRepo = FileRepositoryBuilder().setGitDir(bareRemote).build()
-        assertThat(remoteRepo.allRefs).isNotEmpty
+        assertThat(remoteRepo.refDatabase.refs).isNotEmpty
         remoteRepo.close()
     }
 

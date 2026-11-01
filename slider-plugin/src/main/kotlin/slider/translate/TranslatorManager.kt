@@ -19,11 +19,6 @@ import slider.ai.AssistantManager.localModels
 import slider.translate.TranslatorManager.PromptManager.getTranslatePromptMessage
 import java.lang.System.getProperty
 
-@Deprecated(
-    message = "Replaced by slider.translation domain (EPIC SLD-5). Use translateDeck task instead.",
-    replaceWith = ReplaceWith("slider.translation.DeckTranslator"),
-    level = DeprecationLevel.WARNING,
-)
 object TranslatorManager {
     @JvmStatic
     val String.uppercaseFirstChar: String
@@ -92,7 +87,7 @@ $text
         }
     }
 
-    fun Project.createDisplaySupportedLanguagesTask() =
+    internal fun Project.registerDisplaySupportedLanguagesTask() =
         tasks.register<DefaultTask>("displaySupportedLanguages") {
             group = "translator"
             description = "Dislpay supported languages"
@@ -105,8 +100,15 @@ $text
             }
         }
 
+    @Deprecated(
+        message = "Replaced by slider.translation domain (EPIC SLD-5). Use translateDeck task instead.",
+        replaceWith = ReplaceWith("slider.translation.DeckTranslator"),
+        level = DeprecationLevel.WARNING,
+    )
+    fun Project.createDisplaySupportedLanguagesTask() = registerDisplaySupportedLanguagesTask()
+
     // Creating tasks for each model
-    fun Project.createTranslationTasks(): Unit =
+    internal fun Project.registerTranslationTasks(): Unit =
         run {
             supportedLanguages
                 .translationTasks()
@@ -115,6 +117,13 @@ $text
                     createStreamingTranslationChatTask(MODEL, it)
                 }
         }
+
+    @Deprecated(
+        message = "Replaced by slider.translation domain (EPIC SLD-5). Use translateDeck task instead.",
+        replaceWith = ReplaceWith("slider.translation.DeckTranslator"),
+        level = DeprecationLevel.WARNING,
+    )
+    fun Project.createTranslationTasks(): Unit = registerTranslationTasks()
 
     @DisableCachingByDefault(because = "jruby")
     open class InputTranslationTextTask : DefaultTask() {

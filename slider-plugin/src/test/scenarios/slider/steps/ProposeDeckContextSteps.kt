@@ -212,10 +212,9 @@ class ProposeDeckContextSteps(
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
         val parts = dottedPath.split(".")
         if (parts.size > 1) {
-            @Suppress("UNCHECKED_CAST")
             var current: Map<String, Any?> = ctx
             for (i in 0 until parts.size - 1) {
-                current = (current[parts[i]] as? Map<String, Any?>) ?: error("Path segment '${parts[i]}' is null or not a map")
+                current = asStringKeyedMap(current[parts[i]]) ?: error("Path segment '${parts[i]}' is null or not a map")
             }
             assertThat(current[parts.last()].toString()).isEqualTo(expected)
         } else {
@@ -241,8 +240,7 @@ class ProposeDeckContextSteps(
     fun deckContextAuthorNameShouldEqual(expected: String) {
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
 
-        @Suppress("UNCHECKED_CAST")
-        val author = ctx["author"] as? Map<String, Any?>
+        val author = asStringKeyedMap(ctx["author"])
         assertThat(author?.get("name").toString()).isEqualTo(expected)
     }
 
@@ -250,8 +248,19 @@ class ProposeDeckContextSteps(
     fun deckContextAuthorEmailShouldEqual(expected: String) {
         val ctx = loadDeckContext(lastDeckContextFile().relativeTo(world.projectDir!!).path)
 
-        @Suppress("UNCHECKED_CAST")
-        val author = ctx["author"] as? Map<String, Any?>
+        val author = asStringKeyedMap(ctx["author"])
         assertThat(author?.get("email").toString()).isEqualTo(expected)
+    }
+
+    /**
+     * Checked conversion to a string-keyed map.
+     *
+     * Returns null unless [value] is a [Map] whose keys are all strings, so no
+     * unchecked cast is needed to traverse nested DeckContext fields.
+     */
+    private fun asStringKeyedMap(value: Any?): Map<String, Any?>? {
+        val map = value as? Map<*, *> ?: return null
+        if (map.keys.any { it !is String }) return null
+        return map.entries.associate { (key, entryValue) -> key as String to entryValue }
     }
 }

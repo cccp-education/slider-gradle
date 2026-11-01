@@ -236,7 +236,7 @@ class WiringDecompositionSteps : En {
             val hasInclude =
                 spec?.repositories.orEmpty().any { repo ->
                     repo.routing is GroupRouting.IncludeGroup &&
-                        (repo.routing as GroupRouting.IncludeGroup).group == group
+                        repo.routing.group == group
                 }
             assertThat(hasInclude).isTrue()
         }
@@ -245,7 +245,7 @@ class WiringDecompositionSteps : En {
             val hasExclude =
                 spec?.repositories.orEmpty().any { repo ->
                     repo.routing is GroupRouting.ExcludeGroup &&
-                        (repo.routing as GroupRouting.ExcludeGroup).group == group
+                        repo.routing.group == group
                 }
             assertThat(hasExclude).isTrue()
         }
