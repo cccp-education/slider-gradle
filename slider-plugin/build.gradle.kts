@@ -19,12 +19,12 @@ plugins {
     `java-library`
     alias(libs.plugins.publish)
     alias(libs.plugins.codebase)
-    id("education.cccp.build.gradle-plugin") version "0.0.12"
-    id("education.cccp.build.publishing") version "0.0.12"
-    id("education.cccp.build.functional-test") version "0.0.12"
-    id("education.cccp.build.cucumber") version "0.0.12"
-    id("education.cccp.build.logback-exclusion") version "0.0.12"
-    id("education.cccp.build.lint") version "0.0.12"
+    id("education.cccp.build.gradle-plugin") version "0.0.13"
+    id("education.cccp.build.publishing") version "0.0.13"
+    id("education.cccp.build.functional-test") version "0.0.13"
+    id("education.cccp.build.cucumber") version "0.0.13"
+    id("education.cccp.build.logback-exclusion") version "0.0.13"
+    id("education.cccp.build.lint") version "0.0.13"
 }
 
 group = "education.cccp"
