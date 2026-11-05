@@ -216,6 +216,7 @@ gradlePlugin {
                     // with Configuration Cache. Will be revisited when asciidoctor-gradle
                     // stabilises beyond 5.0.0-alpha.1.
                     configurationCache = false
+                    isolatedProjects = false
                 }
             }
         }
@@ -225,6 +226,13 @@ gradlePlugin {
             displayName = "Slider Translator Plugin"
             description = "Gradle plugin for slide translation across 10 languages."
             tags.set(listOf("translation", "i18n", "llm", "ollama", "kotlin-DSL"))
+            @Suppress("UnstableApiUsage")
+            compatibility {
+                features {
+                    configurationCache = false
+                    isolatedProjects = false
+                }
+            }
         }
     }
 }
