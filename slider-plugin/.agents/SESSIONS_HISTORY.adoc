@@ -1490,3 +1490,9 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 | 005 | 2026-05-30 | feat+tests+refactor | SLD-3a Playwright-jvm e2e foundations — renommage package com.cheroliv.slider→slider (20 fichiers), fix bug dormant TASK_ASCIIDOCTOR_REVEALJS, implementationClass fix, playwright-jvm 1.52.0, GradleRunner e2e BUILD SUCCESSFUL, Playwright navigate ⚠️ file:// CDN | 8/10
 | 004 | 2026-05-17 | feat | EPIC SLD-2 — US-2.1+2.2+2.3 (Playwright integration, visualTest task, talaria.css theme pro, 17/17 Cucumber PASS) | ✅ TERMINE
 |===
+
+== Session 079 — JitPack mirror (CNV-16) — 2026-11-09
+
+Publication JitPack de slider-plugin 0.0.20. JitPack : 0.0.20 — POM HTTP 200. Shim `useModule` pour
+`education.cccp.build.*` (tag JitPack `0.0.15`). Rapport
+`slider-plugin/.agents/sessions/079-jitpack-mirror.adoc`.

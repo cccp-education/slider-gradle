@@ -827,3 +827,7 @@ _Non-périmètre_ :
 | `../../BACKLOG.adoc` | Resume public du backlog (source de verite = cet INDEX) | LAZY
 | `slider-plugin/doc/SLD-1_UPGRADE_REVEALJS_AUTO_ANIMATE.adoc` | Spec technique EPIC SLD-1 | LAZY
 |===
+
+== Session 079 — JitPack mirror (CNV-16)
+
+Publication JitPack de slider-plugin 0.0.20. JitPack : 0.0.20 — POM HTTP 200.
