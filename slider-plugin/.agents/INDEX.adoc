@@ -15,8 +15,8 @@ _Resume public_ : link:../../BACKLOG.adoc[BACKLOG.adoc racine]
 '''
 == REGLES ABSOLUES (resume)
 
-=== 1. COMMITS/GIT — INTERDICTION FORMELLE sans permission
-=== 2. PUBLISH — INTERDICTION FORMELLE sans permission (publishSlides inclus)
+=== 1. COMMITS/GIT — AUTORISÉS (décision pilote 2026-11-11 : tous repos publics)
+=== 2. PUBLISH — ACCORD PILOTE PERMANENT (décisions 2026-10-31 + 2026-11-11)
 === 3. DAG N2 — importable par N3 runner-gradle, jamais importe N3
 === 4. PROCEDURE DE FIN DE SESSION — 6 ETAPES OBLIGATOIRES
 === 5. HOOK OUVERTURE — Checklist SESSION_CHECKLIST.adoc obligatoire
