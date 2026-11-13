@@ -179,10 +179,16 @@ class SliderCucumberShardCoverageTest {
     fun `the unit job runs the plain test task`() {
         // The unit job must run `test` (which excludes the shard runners and the
         // environment-gated Playwright visual tests) — a missing unit job would let
-        // the whole unit suite silently drop out of CI.
+        // the whole unit suite silently drop out of CI. GBL-013: the gate is
+        // delegated to `ci/run.sh test`, so the guard validates the contract too.
         val ci = workflow.readText()
+        val contract = repoRoot.resolve("ci/run.sh").readText()
+
         assertThat(ci)
-            .describedAs("full-tests.yml must run the unit `test` task")
+            .describedAs("full-tests.yml must delegate the unit gate to ci/run.sh test")
+            .contains("ci/run.sh test")
+        assertThat(contract)
+            .describedAs("ci/run.sh test must run the unit `test` task")
             .contains("./gradlew test")
     }
 }
