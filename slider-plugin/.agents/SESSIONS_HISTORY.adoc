@@ -1520,3 +1520,9 @@ Publication JitPack de slider-plugin 0.0.20. JitPack : 0.0.20 — POM HTTP 200. 
 BDD/functional (Playwright, pgvector) restent hôte. Run `43508915399` **VERT**
 (commit `4a3c918`). Rapport `.agents/sessions/081-gbl-013-wave2.adoc`.
 
+
+== Session 082 — EAGER : publication JitPack canal unique — 2026-11-14
+
+Alignement EAGER : JitPack canal unique ; Maven Central/Sonatype et
+Gradle Plugin Portal **retirés**. Aucun code, aucun test, aucune
+publication. Rapport `.agents/sessions/082-eager-publication-jitpack-only.adoc`.

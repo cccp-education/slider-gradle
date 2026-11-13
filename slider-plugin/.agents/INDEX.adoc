@@ -833,3 +833,9 @@ _Non-périmètre_ :
 == Session 079 — JitPack mirror (CNV-16)
 
 Publication JitPack de slider-plugin 0.0.20. JitPack : 0.0.20 — POM HTTP 200.
+
+== Session 082 — EAGER : publication JitPack canal unique (2026-11-14)
+
+Alignement EAGER (AGENT/PROMPT_REPRISE) : JitPack canal unique ;
+Central/Portal retirés. Zéro code. Rapport
+`.agents/sessions/082-eager-publication-jitpack-only.adoc`.
