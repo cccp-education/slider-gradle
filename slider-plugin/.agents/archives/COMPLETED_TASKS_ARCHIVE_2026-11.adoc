@@ -9,3 +9,4 @@
 * Shards BDD/functional (Playwright, pgvector) restent hôte.
 * Run `43508915399` VERT (commit `4a3c918`).
 * Rapport `.agents/sessions/081-gbl-013-wave2.adoc`.
+* Session 082 — EAGER : publication JitPack canal unique (AGENT/PROMPT_REPRISE alignés ; Central/Portal retirés) — 2026-11-14.
