@@ -1,0 +1,60 @@
+= Session 080 — CNV-17 : JitPack canal unique
+:toc: left
+:icons: font
+
+:session: 080
+:date: 2026-11-14
+:type: build / publication (cross-borough)
+:statut: TERMINÉE
+
+== Contexte
+
+Décision pilote du 2026-11-13 (EPIC CNV-17, `conventions-gradle`) : JitPack
+devient le **canal unique** des artefacts publics `education.cccp` — un
+artefact = un canal = un nom = une version. Central (quota Sonatype jusqu'au
+2026-12-01) et le Portal ne sont plus ciblés pour `foundry/public/**` ;
+`foundry/private/**` et `office/**` restent inchangés. Cadrage :
+`conventions-gradle/conventions-plugin/.agents/CADRAGE_EPIC_CNV_17_JITPACK_PRIMARY.adoc`.
+
+== Changements
+
+* **Contrat N0** : `education.cccp:i18n-contracts:0.0.4` →
+  `com.github.cccp-education.workspace-bom:i18n-contracts:0.0.136` (version
+  unifiée au tag).
+* **N1** : `codebase-plugin` au groupe JitPack
+  `com.github.cccp-education.codebase-gradle:codebase-plugin:0.0.18`
+  (déjà aligné sur le skeleton N1 `PipelineGraph`, S-074).
+* **Shim** : `education.cccp.build.*` →
+  `conventions-gradle:conventions-plugin:0.0.17` (tag **sans** préfixe `v`).
+* **JitPack** ajouté à `dependencyResolutionManagement` (racine + sous-build).
+* `koog` reste `1.3.0` (aligné sur le compile-time de `codebase 0.0.18`).
+  Zéro code métier, zéro test local (Local = Build, Tests = CI).
+
+== Preuves CI
+
+[cols="3,2,2", options="header"]
+|===
+| Commit | Workflow | Résultat
+| `467346f` — catalogues JitPack + workspace 0.0.136 | `Full Tests` `43463712106` | ✅ success
+| `c5c7dfe` — shim `0.0.17` sans préfixe `v` | `Full Tests` `43469751420` | ✅ success
+|===
+
+La matrice parallèle (unit + 7 shards BDD + 3 shards functionalTest) reste
+verte sur le canal JitPack.
+
+== Fichiers touchés
+* `settings.gradle.kts` (racine `slider-gradle`) + `slider-plugin/settings.gradle.kts`
+  — shim `0.0.17` + dépôt JitPack.
+* `slider-plugin/gradle/libs.versions.toml` — `i18n-contracts 0.0.4 → 0.0.136`
+  (groupe JitPack), `codebase-plugin` groupe JitPack `0.0.18`.
+* `jitpack.yml` inchangé (recette CNV-16 valide : JDK 25, `CI=true`,
+  `./gradlew -p slider-plugin publishToMavenLocal`).
+
+== État et suite
+
+* Version locale `0.0.20` ; publication par tag JitPack (`vX.Y.Z`).
+* Tous les EPICs feature et PUB sont clos ; working tree propre, CI verte.
+* **Suite : maintenance.** Aucun item actionnable au backlog ; prochaine
+  session à arbitrer par le pilote (dette technique, bumps, code review).
+* Détail transversal : rapports CNV-17 de `conventions-gradle` (S-045) et
+  `workspace-bom` (N0 `0.0.136`).

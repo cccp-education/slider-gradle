@@ -1,79 +1,60 @@
-= PROMPT_REPRISE — slider-gradle — Session 070
-:session: 070
-:date: 2026-09-07
+= PROMPT_REPRISE — slider-gradle (Session 080 terminée — CNV-17/JitPack)
+:session: 081
+:date: 2026-11-14
 
-== Sessions 066-069 terminées — EPIC PUB 0.0.18 clôturé, borough DORMANT
+== Session 080 accomplie — CNV-17 : JitPack canal unique
 
-* S-066 : Publication slider 0.0.16 + BOM 0.0.17 + sync capsule.
-* S-067 : Aplatissement structure `slider-plugin/slider/` → `slider-plugin/`
-  (fix contrat d'architecture, 211 fichiers déplacés `git mv`, build
-  mono-projet autonome, `./gradlew check` VERT).
-* S-068 : Audit version + EPIC PUB bump backlog (gouvernance pure).
-* S-069 : Publication slider **0.0.18** + BOM **0.0.19** sur Maven Central
-  (bundles `3720936a` / `2160075f`). EPIC PUB 0.0.18 TERMINÉ 3/3 US.
-  Session pure ops (zéro code production hors bump version).
+Décision pilote 2026-11-13 : JitPack devient le **canal unique** des artefacts
+publics `education.cccp` (un artefact = un canal = un nom = une version).
+Central (quota Sonatype jusqu'au 2026-12-01) et le Portal ne sont plus ciblés
+pour `foundry/public/**`.
 
-== Prochaine session — 070
+* **Contrat N0** : `education.cccp:i18n-contracts:0.0.4` →
+  `com.github.cccp-education.workspace-bom:i18n-contracts:0.0.136`.
+* **N1** : `codebase-plugin` au groupe JitPack
+  `com.github.cccp-education.codebase-gradle:codebase-plugin:0.0.18`.
+* **Shim** : `education.cccp.build.*` → tag JitPack
+  `conventions-plugin:0.0.17` (correctif : **sans** préfixe `v`).
+* **JitPack** ajouté à `dependencyResolutionManagement` (racine + sous-build).
+* Aucun code métier modifié, zéro test local. **CI `Full Tests` verte**
+  `43469751420` (`c5c7dfe`) et `43463712106` (`467346f`).
 
-[IMPORTANT]
-Borough DORMANT — tous EPICs feature clos (SLD-0→11, SLD-CR3, CR-GLOBALE-002,
-CNV-6/7/8, PUB 0.0.1→0.0.18). Aucun travail planifié.
+Rapport : `.agents/sessions/080-cnv-17-jitpack-channel.adoc`.
+Cadrage : `conventions-gradle/conventions-plugin/.agents/CADRAGE_EPIC_CNV_17_JITPACK_PRIMARY.adoc`.
 
-=== ⚠️ État git post-S-069 à consigner (à faire en ouverture)
+== État du code (sortie de session)
 
-Commits post-S-069 non consignés dans un rapport de session :
+* Version locale `0.0.20` ; publication par tag JitPack (`vX.Y.Z`).
+* `codebase 0.0.18`, `koog 1.3.0`, `i18n-contracts 0.0.136` (JitPack).
+* Langues : `LanguageCatalog` N0 (22 langues, RTL `ar`/`ur`/`fa`).
+* Domaines DDD : `slider.repository`, `rtl`, `i18n`, `translation`, `scaffold`,
+  `config`, `prerequisite`, `extension`, `wiring`, `revealjs`, `playwright`,
+  `content`, `pipeline` (+ `slider.ai` via adapter N1 codebase).
+* `SliderPlugin.kt` 30 lignes ; `SliderManager.kt` supprimé.
+* Working tree propre ; CI verte au dernier commit.
 
-* `1237a2c` — bump codebase-plugin 0.0.7 → 0.0.11 (sync Central)
-* `f279468` — remove opencode.json + update Gradle & Kotlin
-* `6d1d8cb` — align conventions-plugin 0.0.4
+== Mission session 081 — maintenance
 
-Action d'ouverture : `git log --oneline -10`, confirmer intentionnels,
-conserver consignation pour un futur rapport si absent.
+Aucun EPIC feature ouvert (SLD-0→11, SLD-CR3, CR-GLOBALE-002, CNV-6/7/8,
+PUB 0.0.1→0.0.20 clos). Travail possible sur demande pilote :
 
-=== Option A — Maintenance
-
-* Dette technique ciblée, bumps de dépendances, code review.
-* Hygiene : 3 backups orphelins à la racine (`build.gradle.kts.backup`,
-  `.bak3`, `.backup4`) — purge à valider par le pilote.
-
-=== Option B — Cross-borough
-
-* MEM-CAT-ROLLOUT (MEMPHIS) : le catalogue workspace référence déjà
-  `slider-plugin` (fix EPIC MEMPHIS-BOM-FIX). Rien à faire côté slider.
-* Assister bakery/capsule si demandé.
-
-=== Option C — Nouvel EPIC
-
-* Cadrer si besoin identifié.
+. Dette technique ciblée et bumps de dépendances (`koog` aligné N1, etc.).
+. Code review / hygiène (backups orphelins à la racine : `build.gradle.kts.backup`,
+   `.bak3`, `.backup4` — purge à valider par le pilote).
+. Cross-borough : assister bakery/capsule si demandé.
+. Nouvel EPIC seulement si besoin identifié.
 
 == Rappels
 
-- GroupId : `education.cccp`, Plugin IDs : `education.cccp.slider` +
-  `education.cccp.slider.translator` (déprécié)
-- Version locale : 0.0.18 (Central : 0.0.18). Conventions 0.0.4.
-- BOM workspace-bom : Central 0.0.31 (MEM-CAT-ROLLOUT S-032, constraint
-  slider-plugin 0.0.18)
-- codebase-plugin : Central 0.0.10 (local 0.0.11)
-- conventions-gradle : Central 0.0.3 (local 0.0.4)
-- i18n-contracts : Central 0.0.2
-- 10 langues cibles : en, zh, hi, es, fr, ar, bn, pt, ru, ur
-- Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber)
-- English only: code, Gherkin, comments — no French
-- Package Cucumber steps : `slider.steps`
-- Domaines DDD (16) : `slider.repository`, `slider.rtl`, `slider.i18n`,
-  `slider.translate` (déprécié), `slider.translation`, `slider.scaffold`,
-  `slider.config`, `slider.prerequisite`, `slider.extension`, `slider.wiring`,
-  `slider.revealjs`, `slider.playwright`, `slider.content`,
-  `slider.pipeline` (clos S-065 — 10 prod + 4 test),
-  `SliderConfig` + `SliderTasks` + `slider.ai` (adapter N1 codebase, S-073
-  LLM-ADAPTER-EXTRACT : la copie locale `LlmProviderChatModelAdapter` est
-  supprimée, le borough consomme `codebase.koog.llm.adapter`).
-- `SliderManager.kt` supprimé. `SliderPlugin.kt` 30 lignes.
-- 1 test cucumber @Skip préexistant (JRuby gem isolé — non lié playwright)
-- `./gradlew check` VERT (959 unit + 45 functional + 265 cucumber,
-  0 FAIL, 1 SKIP) — baseline S-065/S-069 préservée
-- EPICs clos : SLD-0→11 + SLD-CR3 + CNV-6/7/8 + PUB 0.0.1→0.0.18 + CR-GLOBALE-002
-- Build se lance depuis `slider-plugin/` (project `:slider`)
-- Décisions : `slider-plugin/.agents/DECISIONS_ARCHITECTURE.adoc`
-  (001 PicoContainer rejeté, 002 slider consomme codebase)
-- Patterns koog : `office/pilotage/codebase/KOOG_AGENTIC_PATTERNS.adoc`
+* **Local = Build, Tests = CI** : compiler/builder uniquement ; jamais
+  `test`/`check` local.
+* **Un artefact = un canal = un nom = une version** : ne jamais réintroduire une
+  coordonnée Central dans un catalogue publié.
+* Version = tag : bump **avant** le tag `vX.Y.Z`, version servie `X.Y.Z`.
+* Shim : `conventions-plugin:0.0.17` (sans `v`).
+* Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber).
+* English only : code, Gherkin, commentaires.
+* Package des steps Cucumber : `slider.steps`.
+* Build depuis `slider-plugin/` (project `:slider`).
+* Décisions : `.agents/DECISIONS_ARCHITECTURE.adoc`
+  (001 PicoContainer rejeté, 002 slider consomme codebase).

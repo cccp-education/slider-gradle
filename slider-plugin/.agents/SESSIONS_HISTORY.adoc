@@ -3,6 +3,20 @@
 _Date creation_ : 2026-05-10
 
 
+== Session 080 (2026-11-14) — CNV-17 : JitPack canal unique ✅ TERMINÉ
+
+* **Type** : build / publication (cross-borough). Décision pilote 2026-11-13 :
+  JitPack devient le canal unique des artefacts publics `education.cccp`.
+* **Livrable** : `i18n-contracts` en coordonnée JitPack
+  `com.github.cccp-education.workspace-bom:i18n-contracts:0.0.136` (fin de
+  `education.cccp:i18n-contracts:0.0.4`) ; `codebase-plugin` au groupe JitPack
+  `0.0.18` ; shim `conventions-plugin:0.0.17` **sans préfixe `v`** ; JitPack en
+  résolution de dépendances (racine + sous-build).
+* **Preuves** : CI `Full Tests` **verte** `43469751420` (`c5c7dfe`) et
+  `43463712106` (`467346f`) ; zéro test local (Local = Build, Tests = CI).
+* Zéro code métier modifié, zéro secret. Rapport
+  `.agents/sessions/080-cnv-17-jitpack-channel.adoc`.
+
 == Session 078 (2026-10-15) — CI : désactivation des workflows morts (0 s failures) ✅ TERMINÉ
 
 * **Type** : ci (hygiène). Deux workflows échouaient en **0 s** à chaque push

@@ -1,7 +1,8 @@
 = PROMPT_REPRISE — Slider Gradle
 
-_Session terminee_ : 078 — **CI : désactivation des workflows morts** (`generate_deck.yml`, `website.yml` → `.disabled`, 0 s failures) ✅ — `git mv` ; rapport `.agents/sessions/078-ci-disable-dead-workflows.adoc`.
-_Prochaine session_ : 079 — à arbitrer par le pilote.
+_Copie de travail_ : la version canonique est `../PROMPT_REPRISE.adoc` (session 080 close).
+_Session terminee_ : 080 — **CNV-17 : JitPack canal unique** ✅ — `i18n-contracts`/`codebase-plugin` en coordonnées JitPack, shim `conventions-plugin:0.0.17` (sans `v`), CI `Full Tests` verte `43469751420`. Rapport `.agents/sessions/080-cnv-17-jitpack-channel.adoc`.
+_Prochaine session_ : 081 — maintenance (aucun item backlog actionnable).
 _Session terminee (précédente)_ : 077 — **Cache CI de l'image pgvector (shard BDD `core`)** ✅ — `docker save/load` + `actions/cache` (pattern ollama) ; workflow-only. Rapport `.agents/sessions/077-ci-cache-pgvector.adoc`.
 _Session terminee (précédente)_ : 076 — **Publication slider 0.0.20** (Maven Central, bundle `36c53dc9`, propagation repo1 HTTP 200) + consommateur racine `0.0.20` + MEMPHIS BOM/catalog `0.0.93`. EPIC **SLD-PUB TERMINÉ**.
 

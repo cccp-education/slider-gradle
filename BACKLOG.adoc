@@ -1231,3 +1231,15 @@ _Detail complet_ : voir link:slider-plugin/.agents/INDEX.adoc#epic-sld-3-detail-
 |===
 
 _Total_ : 3 US, ~6 pts (3/3 terminées, S-041). _Dépendance_ : SLD-6 terminé. _Source_ : Session 097 (cadrage initial), livré Session 041.
+
+'''
+
+== Session 080 — CNV-17 (JitPack canal unique) — 2026-11-14
+
+Migration de publication terminée : `i18n-contracts` en coordonnée JitPack
+`com.github.cccp-education.workspace-bom:i18n-contracts:0.0.136`,
+`codebase-plugin` au groupe JitPack `0.0.18`, shim `conventions-plugin:0.0.17`
+sans préfixe `v`, JitPack en résolution de dépendances (racine + sous-build).
+CI `Full Tests` verte `43469751420` / `43463712106`. Aucun item backlog
+nouveau : la suite est de la **maintenance**. Rapport
+`slider-plugin/.agents/sessions/080-cnv-17-jitpack-channel.adoc`.
