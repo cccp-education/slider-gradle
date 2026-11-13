@@ -558,3 +558,10 @@ Nouveaux fichiers de production : 2 (`CapsuleScript.kt` + `AsciidocSpeakerNotePa
 Nouveaux fichiers de test : 6 (3 unit + 1 functional + 1 feature + 1 steps)
 
 Total : 28 unit + 4 functional + 58 cucumber = 90 PASS.
+
+== GBL-013 US-5 (S-081) — delta tests
+
+* `SliderCucumberShardCoverageTest` — garde `the unit job runs the plain test
+  task` réalignée sur le contrat : `full-tests.yml` doit déléguer à
+  `ci/run.sh test` **et** `ci/run.sh` doit contenir `./gradlew test`. Aucun test
+  métier modifié ; couverture inchangée (CI `43508915399`).
