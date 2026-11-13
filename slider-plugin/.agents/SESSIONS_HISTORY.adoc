@@ -1510,3 +1510,13 @@ SLD-2 ✅ + SLD-3 ✅ clôturés. Slider-gradle en maintenance.
 Publication JitPack de slider-plugin 0.0.20. JitPack : 0.0.20 — POM HTTP 200. Shim `useModule` pour
 `education.cccp.build.*` (tag JitPack `0.0.15`). Rapport
 `slider-plugin/.agents/sessions/079-jitpack-mirror.adoc`.
+
+== Session 081 — GBL-013 vague 2 : gates unit/PR dans l'image — 2026-11-14
+
+`ci/run.sh` (`fast` = `test`, `test` = `test` + `ktlintCheck`) ; `test.yml` et
+`full-tests.yml` (job `unit`) épinglés sur
+`cccpeducation/cccp-ci-base@sha256:4722c1bc…` ; garde
+`SliderCucumberShardCoverageTest` réalignée sur le contrat. Shards
+BDD/functional (Playwright, pgvector) restent hôte. Run `43508915399` **VERT**
+(commit `4a3c918`). Rapport `.agents/sessions/081-gbl-013-wave2.adoc`.
+

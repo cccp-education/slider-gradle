@@ -1,0 +1,24 @@
+= Session 081 — GBL-013 vague 2 : gates unit/PR dans l'image de runtime
+:date: 2026-11-14
+:borough: MIAMI (slider-gradle)
+
+== Livré
+
+* `ci/run.sh` — `fast` (`test`) et `test` (`test` + `ktlintCheck`).
+* `.github/workflows/test.yml` (PR gate) et `full-tests.yml` (job `unit`)
+  épinglés sur `cccpeducation/cccp-ci-base@sha256:4722c1bc…` ; `setup-java`
+  supprimé, délégation à `ci/run.sh`.
+* Garde `SliderCucumberShardCoverageTest` réalignée sur le contrat : le job
+  unit doit appeler `ci/run.sh test`, et le contrat doit contenir `test`.
+* Shards BDD/functional (Playwright, pgvector) restent sur l'hôte.
+* Run `43508915399` **VERT** (commit `4a3c918`), après un premier run rouge
+  `43507434595` (garde qui encodait l'ancien inline).
+
+== Notes
+
+Les tests visuels Playwright self-skippent sans fixtures, donc le job unit
+tourne dans l'image sans Chromium. Aucune publication.
+
+== Suivant
+
+US-5 se poursuit sur les dépôts restants.

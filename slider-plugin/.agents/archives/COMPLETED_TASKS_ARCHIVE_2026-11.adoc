@@ -1,0 +1,11 @@
+= Archive des tâches terminées — Novembre 2026 (slider-gradle)
+
+== S-081 — GBL-013 vague 2 : gates unit/PR dans l'image ✅
+
+* `ci/run.sh` (`fast` = `test`, `test` = `test` + `ktlintCheck`).
+* `test.yml` et `full-tests.yml` (job `unit`) épinglés sur
+  `cccpeducation/cccp-ci-base@sha256:4722c1bc…` ; `setup-java` supprimé.
+* Garde `SliderCucumberShardCoverageTest` réalignée sur le contrat.
+* Shards BDD/functional (Playwright, pgvector) restent hôte.
+* Run `43508915399` VERT (commit `4a3c918`).
+* Rapport `.agents/sessions/081-gbl-013-wave2.adoc`.

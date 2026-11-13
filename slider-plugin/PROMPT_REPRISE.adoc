@@ -1,6 +1,17 @@
-= PROMPT_REPRISE — slider-gradle (Session 080 terminée — CNV-17/JitPack)
-:session: 081
+= PROMPT_REPRISE — slider-gradle (Session 081 terminée — GBL-013 vague 2)
+:session: 082
 :date: 2026-11-14
+
+== Session 081 accomplie — GBL-013 vague 2 : gates unit/PR dans l'image
+
+* `ci/run.sh` (`fast` = `test`, `test` = `test` + `ktlintCheck`).
+* `test.yml` (PR gate) et `full-tests.yml` (job `unit`) épinglés sur
+  `cccpeducation/cccp-ci-base@sha256:4722c1bc…` ; `setup-java` supprimé.
+* Garde `SliderCucumberShardCoverageTest` réalignée sur le contrat
+  (`ci/run.sh test` + contenu du contrat).
+* Shards BDD/functional (Playwright, pgvector) restent hôte.
+* Run `43508915399` **VERT** (commit `4a3c918`). Rapport
+  `.agents/sessions/081-gbl-013-wave2.adoc`.
 
 == Session 080 accomplie — CNV-17 : JitPack canal unique
 
