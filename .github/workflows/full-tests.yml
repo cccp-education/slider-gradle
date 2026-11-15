@@ -35,12 +35,12 @@ jobs:
     container:
       image: cccpeducation/cccp-ci-base@sha256:4722c1bcc71c0343c05257842b774715fc2574ff79182599a29fe8c1361cbeb3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Verify Gradle wrapper version
         uses: cccp-education/conventions-gradle/.github/actions/verify-gradle-wrapper@main
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # GBL-013 US-5 — the runtime image provides JDK 25; `ci/run.sh test`
       # runs unit tests and the ktlint gate in the same daemon.
@@ -51,7 +51,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-unit
           path: slider-plugin/build/reports/
@@ -96,23 +96,23 @@ jobs:
             task: cucumberTestShardPipeline
             pgvector: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '25'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # Cache the pgvector image as a `docker save` tar (mirrors the ollama
       # pattern) so the image is not re-pulled on every run.
       - name: Restore pgvector image cache
         if: ${{ matrix.pgvector }}
         id: pgvector-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/pgvector-pg17.tar
           key: pgvector-pg17-${{ runner.os }}
@@ -135,7 +135,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-${{ matrix.task }}
           path: slider-plugin/build/reports/
@@ -158,16 +158,16 @@ jobs:
           - name: "Functional · translate+pipeline"
             tests: "--tests slider.TranslateDeckFunctionalTest --tests slider.TranslatorFunctionalTest --tests slider.GenerateDeckPipelineFunctionalTest"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '25'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run functional shard
         run: ./gradlew functionalTest ${{ matrix.tests }}
@@ -177,7 +177,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reports-functionalshard-${{ strategy.job-index }}
           path: slider-plugin/build/reports/
