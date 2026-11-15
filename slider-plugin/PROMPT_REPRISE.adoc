@@ -1,71 +1,61 @@
-= PROMPT_REPRISE — slider-gradle (Session 081 terminée — GBL-013 vague 2)
-:session: 082
-:date: 2026-11-14
+= PROMPT_REPRISE — slider-gradle (Session 084 terminée → 085)
+:session: 085
+:date: 2026-11-15
+:etat: ✅ S-084 — GBL-014-4 (shim `conventions-plugin 0.0.19`) + GBL-013-10 (actions `node24`-natives, image `cccp-ci-base` Node 26 LTS)
 
-== Session 081 accomplie — GBL-013 vague 2 : gates unit/PR dans l'image
+== Session 084 (TERMINÉE) — transversal du 2026-11-15
 
-* `ci/run.sh` (`fast` = `test`, `test` = `test` + `ktlintCheck`).
-* `test.yml` (PR gate) et `full-tests.yml` (job `unit`) épinglés sur
-  `cccpeducation/cccp-ci-base@sha256:4722c1bc…` ; `setup-java` supprimé.
-* Garde `SliderCucumberShardCoverageTest` réalignée sur le contrat
-  (`ci/run.sh test` + contenu du contrat).
-* Shards BDD/functional (Playwright, pgvector) restent hôte.
-* Run `43508915399` **VERT** (commit `4a3c918`). Rapport
-  `.agents/sessions/081-gbl-013-wave2.adoc`.
+* **GBL-014-4** (`a385d65`) : shim `useModule(...)` `0.0.18 → 0.0.19` dans
+  `settings.gradle.kts` (racine + plugin) ; condition `channel == "jitpack"`
+  conservée. CI `Full Tests` `43674487235` verte.
+* **GBL-013-10** (`57c605d`) : `checkout@v7`, `setup-java@v6`,
+  `setup-gradle@v6`, `upload-artifact@v7`, `cache@v6` sur
+  `full-tests.yml`/`test.yml`/`readme_plantuml.yml`/`readme_truth.yml` ;
+  workflows désactivés alignés (`e9b6b55`). Pas de `setup-node` (features
+  pure-domaine), Node porté par l'image.
+* **GBL-013-10** (`5f20b3a`) : digest
+  `sha256:4722c1bc… → sha256:03ead378…` (image reconstruite sur Node 26.13.1).
+* CI vertes : `43683419555`, `43688243655`, `43690101435`.
+* Rapport `.agents/sessions/084-gbl-014-4-and-node-lts.adoc`.
 
-== Session 080 accomplie — CNV-17 : JitPack canal unique
+== Session 083 (TERMINÉE) — GBL-014-5 canal
 
-Décision pilote 2026-11-13 : JitPack devient le **canal unique** des artefacts
-publics `education.cccp` (un artefact = un canal = un nom = une version).
-Central (quota Sonatype jusqu'au 2026-12-01) et le Portal ne sont plus ciblés
-pour `foundry/public/**`.
-
-* **Contrat N0** : `education.cccp:i18n-contracts:0.0.4` →
-  `com.github.cccp-education.workspace-bom:i18n-contracts:0.0.136`.
-* **N1** : `codebase-plugin` au groupe JitPack
-  `com.github.cccp-education.codebase-gradle:codebase-plugin:0.0.18`.
-* **Shim** : `education.cccp.build.*` → tag JitPack
-  `conventions-plugin:0.0.17` (correctif : **sans** préfixe `v`).
-* **JitPack** ajouté à `dependencyResolutionManagement` (racine + sous-build).
-* Aucun code métier modifié, zéro test local. **CI `Full Tests` verte**
-  `43469751420` (`c5c7dfe`) et `43463712106` (`467346f`).
-
-Rapport : `.agents/sessions/080-cnv-17-jitpack-channel.adoc`.
-Cadrage : `conventions-gradle/conventions-plugin/.agents/CADRAGE_EPIC_CNV_17_JITPACK_PRIMARY.adoc`.
+* Settings conditionnels `-Pchannel` (racine + plugin), `ci/run.sh -Pchannel`
+  + `verifyChannel` ; `Full Tests` `43656044520`.
+* Rapport `.agents/sessions/083-gbl-014-5-channel.adoc`.
 
 == État du code (sortie de session)
 
 * Version locale `0.0.20` ; publication par tag JitPack (`vX.Y.Z`).
+* Shim conventions **`0.0.19`** (JitPack) ; `0.0.20` non propagé ici.
 * `codebase 0.0.18`, `koog 1.3.0`, `i18n-contracts 0.0.136` (JitPack).
 * Langues : `LanguageCatalog` N0 (22 langues, RTL `ar`/`ur`/`fa`).
 * Domaines DDD : `slider.repository`, `rtl`, `i18n`, `translation`, `scaffold`,
   `config`, `prerequisite`, `extension`, `wiring`, `revealjs`, `playwright`,
   `content`, `pipeline` (+ `slider.ai` via adapter N1 codebase).
-* `SliderPlugin.kt` 30 lignes ; `SliderManager.kt` supprimé.
 * Working tree propre ; CI verte au dernier commit.
 
-== Mission session 081 — maintenance
+== Mission session 085 — maintenance et suivi transverse
 
-Aucun EPIC feature ouvert (SLD-0→11, SLD-CR3, CR-GLOBALE-002, CNV-6/7/8,
-PUB 0.0.1→0.0.20 clos). Travail possible sur demande pilote :
+Aucun EPIC feature ouvert. Priorités, sur demande pilote :
 
-. Dette technique ciblée et bumps de dépendances (`koog` aligné N1, etc.).
-. Code review / hygiène (backups orphelins à la racine : `build.gradle.kts.backup`,
-   `.bak3`, `.backup4` — purge à valider par le pilote).
-. Cross-borough : assister bakery/capsule si demandé.
-. Nouvel EPIC seulement si besoin identifié.
+. **GBL-014-5 rollout** : shim `0.0.19 → 0.0.20` et alignement des dépôts
+   publics restants ; `CHANNEL=central` inopérant avant US-7 (markers après
+   2026-12-01).
+. **GBL-014-3** : deux catalogues/BOM projetés (`workspace-bom`) +
+   `CatalogueNoMix` ; le BOM JitPack n'est **pas** un `platform`.
+. Dette technique ciblée, code review, assistance cross-borough sur demande.
 
 == Rappels
 
 * **Local = Build, Tests = CI** : compiler/builder uniquement ; jamais
   `test`/`check` local.
-* **Un artefact = un canal = un nom = une version** : ne jamais réintroduire une
-  coordonnée Central dans un catalogue publié.
+* **Un artefact = un canal = un nom = une version** : ne jamais réintroduire
+  une coordonnée Central dans un catalogue publié.
 * Version = tag : bump **avant** le tag `vX.Y.Z`, version servie `X.Y.Z`.
-* Shim : `conventions-plugin:0.0.17` (sans `v`).
+* Shim : `conventions-plugin:0.0.19` (sans `v`).
 * Baby-step TDD : RED → GREEN → REFACTOR (unit → functional → cucumber).
-* English only : code, Gherkin, commentaires.
-* Package des steps Cucumber : `slider.steps`.
-* Build depuis `slider-plugin/` (project `:slider`).
-* Décisions : `.agents/DECISIONS_ARCHITECTURE.adoc`
-  (001 PicoContainer rejeté, 002 slider consomme codebase).
+* English only : code, Gherkin, commentaires. Zéro Python.
+* Package des steps Cucumber : `slider.steps`. Build depuis `slider-plugin/`.
+* Décisions : `.agents/DECISIONS_ARCHITECTURE.adoc` (001 PicoContainer
+  rejeté, 002 slider consomme codebase).

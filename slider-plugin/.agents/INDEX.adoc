@@ -4,6 +4,7 @@
 _Regles absolues_ : voir `AGENT.adoc`
 _DAG_ : N2 — Plugin Gradle de generation de presentations (Regle 4bis)
 
+_Derniere mise a jour : 2026-11-15 — Session 084 — GBL-014-4 (shim `conventions-plugin 0.0.19`) + GBL-013-10 (actions `node24`-natives, image `cccp-ci-base` Node 26 LTS `sha256:03ead378…`). CI `43674487235`, `43683419555`, `43688243655`, `43690101435` vertes. Aucun code, aucun test, aucune publication. Rapport `.agents/sessions/084-gbl-014-4-and-node-lts.adoc`._
 _Derniere mise a jour_ : 2026-11-14 (S-083 — **GBL-014-5** ✅ : settings conditionnels sur `-Pchannel` (racine + plugin), shim conventions `0.0.18`, `ci/run.sh -Pchannel` + `verifyChannel` ; `Full Tests` `43656044520` verte, commit `fe2e472`. Aucun test modifié, aucune publication. Rapport `.agents/sessions/083-gbl-014-5-channel.adoc`.)
 _Derniere mise a jour_ : 2026-11-14 (S-081 — **GBL-013 vague 2** ✅ — `ci/run.sh` (`fast`/`test`) + `test.yml`/`full-tests.yml` job `unit` épinglés sur `cccpeducation/cccp-ci-base@sha256:4722c1bc…` ; garde `SliderCucumberShardCoverageTest` réalignée ; run `43508915399` VERT.)
 _Derniere mise a jour_ : 2026-11-14 (S-080 — **CNV-17 JitPack canal unique** : `i18n-contracts` en coordonnée `com.github.cccp-education.workspace-bom:i18n-contracts:0.0.136`, `codebase-plugin` groupe JitPack `0.0.18`, shim `conventions-plugin:0.0.17` sans préfixe `v`, JitPack en résolution de dépendances. CI `Full Tests` verte `43469751420` / `43463712106`.)

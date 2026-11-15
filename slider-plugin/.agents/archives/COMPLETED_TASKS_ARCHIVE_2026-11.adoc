@@ -17,3 +17,13 @@
   `0.0.18`, `ci/run.sh -Pchannel` + `verifyChannel`.
 * `Full Tests` `43656044520` verte (commit `fe2e472`).
 * Rapport `.agents/sessions/083-gbl-014-5-channel.adoc`.
+
+== S-084 — GBL-014-4 + GBL-013-10 ✅
+
+* Shim conventions `0.0.18 → 0.0.19` (`a385d65`), condition `-Pchannel`
+  conservée.
+* Actions `node24`-natives sur workflows actifs (`57c605d`) et désactivés
+  (`e9b6b55`).
+* Digest image `sha256:03ead378…` (Node 26.13.1, `5f20b3a`).
+* CI `43674487235`, `43683419555`, `43688243655`, `43690101435` vertes.
+* Rapport `.agents/sessions/084-gbl-014-4-and-node-lts.adoc`.

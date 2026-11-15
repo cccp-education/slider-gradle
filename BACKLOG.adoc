@@ -1249,4 +1249,16 @@ nouveau : la suite est de la **maintenance**. Rapport
 * **US-5 ✅ S-083** : settings conditionnels (racine + plugin), shim
   conventions `0.0.18`, `ci/run.sh -Pchannel` + `verifyChannel`.
 * `Full Tests` `43656044520` verte (commit `fe2e472`).
-* Rapport `slider-plugin/.agents/sessions/083-gbl-014-5-channel.adoc`.
+* **US-4 ✅ S-084** : shim `conventions-plugin 0.0.19` (racine + plugin,
+  `a385d65`) ; `Full Tests` `43674487235` verte.
+* Rapport `slider-plugin/.agents/sessions/083-gbl-014-5-channel.adoc` et
+  `084-gbl-014-4-and-node-lts.adoc`.
+
+== GBL-013-10 — Node 26 LTS et actions `node24`-natives
+
+* ✅ **S-084** : `checkout@v7`, `setup-java@v6`, `setup-gradle@v6`,
+  `upload-artifact@v7`, `cache@v6` sur les workflows actifs (`57c605d`) et
+  désactivés (`e9b6b55`) ; digest `cccp-ci-base` `sha256:03ead378…`
+  (Node 26.13.1, `5f20b3a`).
+* CI vertes `43683419555`, `43688243655`, `43690101435`.
+* Rapport `slider-plugin/.agents/sessions/084-gbl-014-4-and-node-lts.adoc`.
