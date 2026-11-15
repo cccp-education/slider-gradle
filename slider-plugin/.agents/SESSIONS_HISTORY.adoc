@@ -1526,3 +1526,10 @@ BDD/functional (Playwright, pgvector) restent hôte. Run `43508915399` **VERT**
 Alignement EAGER : JitPack canal unique ; Maven Central/Sonatype et
 Gradle Plugin Portal **retirés**. Aucun code, aucun test, aucune
 publication. Rapport `.agents/sessions/082-eager-publication-jitpack-only.adoc`.
+
+== Session 083 — GBL-014-5 canal — 2026-11-14
+
+Settings conditionnels (racine + plugin) sur `-Pchannel`, shim conventions
+`0.0.18`, `ci/run.sh -Pchannel` + `verifyChannel`. `Full Tests` `43656044520`
+verte (commit `fe2e472`). Aucun test modifié, aucune publication. Rapport
+`.agents/sessions/083-gbl-014-5-channel.adoc`.

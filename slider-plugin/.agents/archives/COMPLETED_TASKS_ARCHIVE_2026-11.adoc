@@ -10,3 +10,10 @@
 * Run `43508915399` VERT (commit `4a3c918`).
 * Rapport `.agents/sessions/081-gbl-013-wave2.adoc`.
 * Session 082 — EAGER : publication JitPack canal unique (AGENT/PROMPT_REPRISE alignés ; Central/Portal retirés) — 2026-11-14.
+
+== S-083 — GBL-014-5 canal ✅
+
+* Settings conditionnels (racine + plugin) sur `-Pchannel`, shim conventions
+  `0.0.18`, `ci/run.sh -Pchannel` + `verifyChannel`.
+* `Full Tests` `43656044520` verte (commit `fe2e472`).
+* Rapport `.agents/sessions/083-gbl-014-5-channel.adoc`.
