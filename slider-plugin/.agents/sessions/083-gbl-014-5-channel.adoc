@@ -1,0 +1,26 @@
+= Session 083 — GBL-014-5 : canal de publication dans la CI
+:date: 2026-11-14
+:scope: slider-gradle — settings conditionnels, shim `0.0.18`, `ci/run.sh -Pchannel`
+:statut: ✅ LIVRÉ — `Full Tests` CI `43656044520` VERTE (commit `fe2e472`)
+
+== Changements
+
+* `settings.gradle.kts` (racine) + `slider-plugin/settings.gradle.kts` :
+  `publicationChannel = -Pchannel` (défaut `jitpack`) ; dépôt JitPack + shim
+  `useModule(...)` **seulement** en `jitpack` ; shim `0.0.17` → **`0.0.18`**.
+* `ci/run.sh` : `CHANNEL` (défaut `jitpack`) ; `-Pchannel` sur les jobs `fast`
+  et `test` ; `verifyChannel` ajouté aux deux.
+* Aucun test modifié, aucune publication, aucun secret.
+
+== Preuves
+
+* `./gradlew verifyChannel -Pchannel=jitpack` → BUILD SUCCESSFUL (conventions
+  `0.0.18` résolues via le shim).
+* CI `Full Tests` **`43656044520` VERTE** (11 jobs, commit `fe2e472`).
+* `CHANNEL=central` reste inopérant : markers conventions `0.0.18` non publiés
+  Central/Portal (US-7, après 2026-12-01).
+
+== Reste US-5
+
+* 18 dépôts publics (capsule et slider faits) + cas `bakery` (plateforme
+  `education.cccp:workspace-bom` dans un build JitPack).
