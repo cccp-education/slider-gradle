@@ -8,12 +8,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT/slider-plugin"
 
 job="${1:-}"
+# GBL-014 — publication channel (jitpack default until the Sonatype reset).
+channel="${CHANNEL:-jitpack}"
 case "$job" in
   fast)
-    ./gradlew test --no-daemon --console=plain
+    ./gradlew test verifyChannel -Pchannel="$channel" --no-daemon --console=plain
     ;;
   test)
-    ./gradlew test ktlintCheck --no-daemon --console=plain
+    ./gradlew test ktlintCheck verifyChannel -Pchannel="$channel" --no-daemon --console=plain
     ;;
   *)
     printf 'unsupported job for slider-gradle: %s\n' "${job:-<none>}" >&2
