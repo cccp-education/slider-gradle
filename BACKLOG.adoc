@@ -1243,3 +1243,10 @@ sans préfixe `v`, JitPack en résolution de dépendances (racine + sous-build).
 CI `Full Tests` verte `43469751420` / `43463712106`. Aucun item backlog
 nouveau : la suite est de la **maintenance**. Rapport
 `slider-plugin/.agents/sessions/080-cnv-17-jitpack-channel.adoc`.
+
+== GBL-014 — canal de publication dual
+
+* **US-5 ✅ S-083** : settings conditionnels (racine + plugin), shim
+  conventions `0.0.18`, `ci/run.sh -Pchannel` + `verifyChannel`.
+* `Full Tests` `43656044520` verte (commit `fe2e472`).
+* Rapport `slider-plugin/.agents/sessions/083-gbl-014-5-channel.adoc`.
